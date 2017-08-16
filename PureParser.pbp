@@ -8,12 +8,17 @@
   <section name="data">
     <explorer view="C:\Users\Андреич\Desktop\PureBasic 5.40 LTS Windows x86 x64 Portable\Examples\" pattern="0"/>
     <log show="1"/>
-    <lastopen date="2017-08-16 14:20" user="Андреич" host="DESKTOP"/>
+    <lastopen date="2017-08-16 20:30" user="Андреич" host="DESKTOP"/>
   </section>
-  <section name="files"/>
+  <section name="files">
+    <file name="PureParser.pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="32dce1096a0ec443a0e9964ef8be0232"/>
+    </file>
+  </section>
   <section name="targets">
     <target name="PureParser" enabled="1" default="1">
-      <inputfile value=""/>
+      <inputfile value="PureParser.pb"/>
       <outputfile value=""/>
       <options unicode="1" xpskin="1" debug="1"/>
     </target>
