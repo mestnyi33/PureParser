@@ -20,6 +20,9 @@ Structure ParsePBGadget
   Param2.S
   Param3.S
   Flag.i
+  
+  FuncClass$
+  Font.i
 EndStructure
 
 CompilerIf #PB_Compiler_IsMainFile
@@ -33,258 +36,258 @@ CompilerIf #PB_Compiler_IsMainFile
   EndEnumeration
   
   Procedure PB_Flag_Window(Flag$) ;Ok
-  Protected i
-  Protected Flag 
-  For i = 0 To CountString(Flag$,"|")
-    Select Trim(StringField(Flag$,i+1,"|"))
-      Case "#PB_Window_BorderLess"     : Flag = Flag | #PB_Window_BorderLess
-      Case "#PB_Window_WindowCentered" : Flag = Flag | #PB_Window_FrameCoordinate
-      Case "#PB_Window_WindowCentered" : Flag = Flag | #PB_Window_InnerCoordinate
-      Case "#PB_Window_Invisible"      : Flag = Flag | #PB_Window_Invisible
-      Case "#PB_Window_Maximize"       : Flag = Flag | #PB_Window_Maximize
-      Case "#PB_Window_MaximizeGadget" : Flag = Flag | #PB_Window_MaximizeGadget
-      Case "#PB_Window_Minimize"       : Flag = Flag | #PB_Window_Minimize
-      Case "#PB_Window_MinimizeGadget" : Flag = Flag | #PB_Window_MinimizeGadget
-      Case "#PB_Window_NoActivate"     : Flag = Flag | #PB_Window_NoActivate
-      Case "#PB_Window_NoGadgets"      : Flag = Flag | #PB_Window_NoGadgets
-      Case "#PB_Window_Normal"         : Flag = Flag | #PB_Window_Normal
-      Case "#PB_Window_ScreenCentered" : Flag = Flag | #PB_Window_ScreenCentered
-      Case "#PB_Window_SizeGadget"     : Flag = Flag | #PB_Window_SizeGadget
-      Case "#PB_Window_SystemMenu"     : Flag = Flag | #PB_Window_SystemMenu
-      Case "#PB_Window_TitleBar"       : Flag = Flag | #PB_Window_TitleBar
-      Case "#PB_Window_Tool"           : Flag = Flag | #PB_Window_Tool
-      Case "#PB_Window_WindowCentered" : Flag = Flag | #PB_Window_WindowCentered
+    Protected i
+    Protected Flag 
+    For i = 0 To CountString(Flag$,"|")
+      Select Trim(StringField(Flag$,i+1,"|"))
+        Case "#PB_Window_BorderLess"     : Flag = Flag | #PB_Window_BorderLess
+        Case "#PB_Window_WindowCentered" : Flag = Flag | #PB_Window_FrameCoordinate
+        Case "#PB_Window_WindowCentered" : Flag = Flag | #PB_Window_InnerCoordinate
+        Case "#PB_Window_Invisible"      : Flag = Flag | #PB_Window_Invisible
+        Case "#PB_Window_Maximize"       : Flag = Flag | #PB_Window_Maximize
+        Case "#PB_Window_MaximizeGadget" : Flag = Flag | #PB_Window_MaximizeGadget
+        Case "#PB_Window_Minimize"       : Flag = Flag | #PB_Window_Minimize
+        Case "#PB_Window_MinimizeGadget" : Flag = Flag | #PB_Window_MinimizeGadget
+        Case "#PB_Window_NoActivate"     : Flag = Flag | #PB_Window_NoActivate
+        Case "#PB_Window_NoGadgets"      : Flag = Flag | #PB_Window_NoGadgets
+        Case "#PB_Window_Normal"         : Flag = Flag | #PB_Window_Normal
+        Case "#PB_Window_ScreenCentered" : Flag = Flag | #PB_Window_ScreenCentered
+        Case "#PB_Window_SizeGadget"     : Flag = Flag | #PB_Window_SizeGadget
+        Case "#PB_Window_SystemMenu"     : Flag = Flag | #PB_Window_SystemMenu
+        Case "#PB_Window_TitleBar"       : Flag = Flag | #PB_Window_TitleBar
+        Case "#PB_Window_Tool"           : Flag = Flag | #PB_Window_Tool
+        Case "#PB_Window_WindowCentered" : Flag = Flag | #PB_Window_WindowCentered
+      EndSelect
+    Next
+    ProcedureReturn Flag
+  EndProcedure 
+  
+  Procedure PB_Flag_Button(Flag$) ;Ok
+    Protected i
+    Protected Flag 
+    For i = 0 To CountString(Flag$,"|")
+      Select Trim(StringField(Flag$,i+1,"|"))
+        Case "#PB_Button_Default"      : Flag = Flag | #PB_Button_Default
+        Case "#PB_Button_Image"        : Flag = Flag | #PB_Button_Image
+        Case "#PB_Button_Left"         : Flag = Flag | #PB_Button_Left
+        Case "#PB_Button_MultiLine"    : Flag = Flag | #PB_Button_MultiLine
+        Case "#PB_Button_PressedImage" : Flag = Flag | #PB_Button_PressedImage
+        Case "#PB_Button_Right"        : Flag = Flag | #PB_Button_Right
+        Case "#PB_Button_Toggle"       : Flag = Flag | #PB_Button_Toggle
+      EndSelect
+    Next
+    ProcedureReturn Flag
+  EndProcedure 
+  
+  Procedure PB_Flag_String(Flag$) ;Ok
+    Protected i
+    Protected Flag 
+    For i = 0 To CountString(Flag$,"|")
+      Select Trim(StringField(Flag$,i+1,"|"))
+        Case "#PB_String_AutoComplete"  : Flag = Flag | #PB_String_AutoComplete
+        Case "#PB_String_AutoInsert"    : Flag = Flag | #PB_String_AutoInsert
+        Case "#PB_String_BorderLess"    : Flag = Flag | #PB_String_BorderLess
+        Case "#PB_String_CaseSensitive" : Flag = Flag | #PB_String_CaseSensitive
+        Case "#PB_String_Equal"         : Flag = Flag | #PB_String_Equal
+        Case "#PB_String_Greater"       : Flag = Flag | #PB_String_Greater
+        Case "#PB_String_InPlace"       : Flag = Flag | #PB_String_InPlace
+        Case "#PB_String_Lower"         : Flag = Flag | #PB_String_Lower
+        Case "#PB_String_LowerCase"     : Flag = Flag | #PB_String_LowerCase
+        Case "#PB_String_MaximumLength" : Flag = Flag | #PB_String_MaximumLength
+        Case "#PB_String_NoCase"        : Flag = Flag | #PB_String_NoCase
+        Case "#PB_String_NoZero"        : Flag = Flag | #PB_String_NoZero
+        Case "#PB_String_Numeric"       : Flag = Flag | #PB_String_Numeric
+        Case "#PB_String_Password"      : Flag = Flag | #PB_String_Password
+        Case "#PB_String_ReadOnly"      : Flag = Flag | #PB_String_ReadOnly
+        Case "#PB_String_UpperCase"     : Flag = Flag | #PB_String_UpperCase
+      EndSelect
+    Next
+    ProcedureReturn Flag
+  EndProcedure 
+  
+  Procedure PB_Flag_Text(Flag$) ;Ok
+    Protected i
+    Protected Flag 
+    For i = 0 To CountString(Flag$,"|")
+      Select Trim(StringField(Flag$,i+1,"|"))
+        Case "#PB_Text_Border"  : Flag = Flag | #PB_Text_Border
+        Case "#PB_Text_Center"  : Flag = Flag | #PB_Text_Center
+        Case "#PB_Text_Right"   : Flag = Flag | #PB_Text_Right
+      EndSelect
+    Next
+    ProcedureReturn Flag
+  EndProcedure 
+  
+  Procedure PB_Flag_CheckBox(Flag$) ;Ok
+    Protected i
+    Protected Flag 
+    For i = 0 To CountString(Flag$,"|")
+      Select Trim(StringField(Flag$,i+1,"|"))
+        Case "#PB_CheckBox_Center"     : Flag = Flag | #PB_CheckBox_Center
+        Case "#PB_Checkbox_Checked"    : Flag = Flag | #PB_Checkbox_Checked
+        Case "#PB_Checkbox_Inbetween"  : Flag = Flag | #PB_Checkbox_Inbetween
+        Case "#PB_CheckBox_Right"      : Flag = Flag | #PB_CheckBox_Right
+        Case "#PB_CheckBox_ThreeState" : Flag = Flag | #PB_CheckBox_ThreeState
+        Case "#PB_Checkbox_Unchecked"  : Flag = Flag | #PB_Checkbox_Unchecked
+      EndSelect
+    Next
+    ProcedureReturn Flag
+  EndProcedure 
+  
+  Procedure PB_Flag_Option(Flag$) ;
+    Protected i
+    Protected Flag 
+    For i = 0 To CountString(Flag$,"|")
+      Select Trim(StringField(Flag$,i+1,"|"))
+          
+      EndSelect
+    Next
+    ProcedureReturn Flag
+  EndProcedure 
+  
+  Procedure PB_Flag_ListView(Flag$) ;Ok
+    Protected i
+    Protected Flag 
+    For i = 0 To CountString(Flag$,"|")
+      Select Trim(StringField(Flag$,i+1,"|"))
+        Case "#PB_ListView_ClickSelect" : Flag = Flag | #PB_ListView_ClickSelect
+        Case "#PB_ListView_MultiSelect" : Flag = Flag | #PB_ListView_MultiSelect
+      EndSelect
+    Next
+    ProcedureReturn Flag
+  EndProcedure 
+  
+  Procedure PB_Flag_Frame(Flag$) ;Ok
+    Protected i
+    Protected Flag 
+    For i = 0 To CountString(Flag$,"|")
+      Select Trim(StringField(Flag$,i+1,"|"))
+        Case "#PB_Frame_Double" : Flag = Flag | #PB_Frame_Double
+        Case "#PB_Frame_Flat"   : Flag = Flag | #PB_Frame_Flat
+        Case "#PB_Frame_Single" : Flag = Flag | #PB_Frame_Single
+      EndSelect
+    Next
+    ProcedureReturn Flag
+  EndProcedure 
+  
+  Procedure PB_Flag_ComboBox(Flag$) ;Ok
+    Protected i
+    Protected Flag 
+    For i = 0 To CountString(Flag$,"|")
+      Select Trim(StringField(Flag$,i+1,"|"))
+        Case "#PB_ComboBox_Editable"  : Flag = Flag | #PB_ComboBox_Editable
+        Case "#PB_ComboBox_Image"     : Flag = Flag | #PB_ComboBox_Image
+        Case "#PB_ComboBox_LowerCase" : Flag = Flag | #PB_ComboBox_LowerCase
+        Case "#PB_ComboBox_UpperCase" : Flag = Flag | #PB_ComboBox_UpperCase
+      EndSelect
+    Next
+    ProcedureReturn Flag
+  EndProcedure 
+  
+  Procedure PB_Flag_Image(Flag$) ;Ok
+    Protected i
+    Protected Flag 
+    For i = 0 To CountString(Flag$,"|")
+      Select Trim(StringField(Flag$,i+1,"|"))
+        Case "#PB_Image_Border"         : Flag = Flag | #PB_Image_Border
+        Case "#PB_Image_DisplayFormat"  : Flag = Flag | #PB_Image_DisplayFormat
+        Case "#PB_Image_FloydSteinberg" : Flag = Flag | #PB_Image_FloydSteinberg
+        Case "#PB_Image_InternalDepth"  : Flag = Flag | #PB_Image_InternalDepth
+        Case "#PB_Image_OriginalDepth"  : Flag = Flag | #PB_Image_OriginalDepth
+        Case "#PB_Image_Raised"         : Flag = Flag | #PB_Image_Raised
+        Case "#PB_Image_Raw"            : Flag = Flag | #PB_Image_Raw
+        Case "#PB_Image_Smooth"         : Flag = Flag | #PB_Image_Smooth
+        Case "#PB_Image_Transparent"    : Flag = Flag | #PB_Image_Transparent
+      EndSelect
+    Next
+    ProcedureReturn Flag
+  EndProcedure 
+  
+  Procedure PB_Flag(Type$,Flag$)
+    Protected Flag 
+    Select Trim(Type$)
+      Case "OpenWindow"          : Flag = PB_Flag_Window   (Flag$) ; Ok
+      Case "ButtonGadget"        : Flag = PB_Flag_Button   (Flag$) ; Ok 
+      Case "StringGadget"        : Flag = PB_Flag_String   (Flag$) ; Ok 
+      Case "TextGadget"          : Flag = PB_Flag_Text     (Flag$) ; Ok
+      Case "CheckBoxGadget"      : Flag = PB_Flag_CheckBox (Flag$) ; Ok
+      Case "OptionGadget"        : Flag = PB_Flag_Option   (Flag$) ; Ok
+      Case "ListViewGadget"      : Flag = PB_Flag_ListView (Flag$) ; Ok
+      Case "FrameGadget"         : Flag = PB_Flag_Frame    (Flag$) ; Ok
+      Case "ComboBoxGadget"      : Flag = PB_Flag_ComboBox (Flag$) ; Ok
+      Case "ImageGadget"         : Flag = PB_Flag_Image    (Flag$) ; Ok
+      Case "HyperLinkGadget"     : Flag = PB_Flag_Button(Flag$) 
+      Case "ContainerGadget"     : Flag = PB_Flag_Button(Flag$) 
+      Case "ListIconGadget"      : Flag = PB_Flag_Button(Flag$) 
+      Case "IPAddressGadget"     : Flag = PB_Flag_Button(Flag$) 
+      Case "ProgressBarGadget"   : Flag = PB_Flag_Button(Flag$) 
+      Case "ScrollBarGadget"     : Flag = PB_Flag_Button(Flag$) 
+      Case "ScrollAreaGadget"    : Flag = PB_Flag_Button(Flag$)  
+      Case "TrackBarGadget"      : Flag = PB_Flag_Button(Flag$) 
+      Case "WebGadget"           : Flag = PB_Flag_Button(Flag$) 
+      Case "ButtonImageGadget"   : Flag = PB_Flag_Button(Flag$) 
+      Case "CalendarGadget"      : Flag = PB_Flag_Button(Flag$) 
+      Case "DateGadget"          : Flag = PB_Flag_Button(Flag$) 
+      Case "EditorGadget"        : Flag = PB_Flag_Button(Flag$) 
+      Case "ExplorerListGadget"  : Flag = PB_Flag_Button(Flag$) 
+      Case "ExplorerTreeGadget"  : Flag = PB_Flag_Button(Flag$) 
+      Case "ExplorerComboGadget" : Flag = PB_Flag_Button(Flag$) 
+      Case "SpinGadget"          : Flag = PB_Flag_Button(Flag$) 
+      Case "TreeGadget"          : Flag = PB_Flag_Button(Flag$) 
+      Case "PanelGadget"         : Flag = PB_Flag_Button(Flag$)  
+      Case "SplitterGadget"      : Flag = PB_Flag_Button(Flag$) 
+      Case "MDIGadget"           : Flag = PB_Flag_Button(Flag$)  
+      Case "ScintillaGadget"     : Flag = PB_Flag_Button(Flag$) 
+      Case "ShortcutGadget"      : Flag = PB_Flag_Button(Flag$) 
+      Case "CanvasGadget"        : Flag = PB_Flag_Button(Flag$) 
     EndSelect
-  Next
-  ProcedureReturn Flag
-EndProcedure 
-
-Procedure PB_Flag_Button(Flag$) ;Ok
-  Protected i
-  Protected Flag 
-  For i = 0 To CountString(Flag$,"|")
-    Select Trim(StringField(Flag$,i+1,"|"))
-      Case "#PB_Button_Default"      : Flag = Flag | #PB_Button_Default
-      Case "#PB_Button_Image"        : Flag = Flag | #PB_Button_Image
-      Case "#PB_Button_Left"         : Flag = Flag | #PB_Button_Left
-      Case "#PB_Button_MultiLine"    : Flag = Flag | #PB_Button_MultiLine
-      Case "#PB_Button_PressedImage" : Flag = Flag | #PB_Button_PressedImage
-      Case "#PB_Button_Right"        : Flag = Flag | #PB_Button_Right
-      Case "#PB_Button_Toggle"       : Flag = Flag | #PB_Button_Toggle
-    EndSelect
-  Next
-  ProcedureReturn Flag
-EndProcedure 
-
-Procedure PB_Flag_String(Flag$) ;Ok
-  Protected i
-  Protected Flag 
-  For i = 0 To CountString(Flag$,"|")
-    Select Trim(StringField(Flag$,i+1,"|"))
-      Case "#PB_String_AutoComplete"  : Flag = Flag | #PB_String_AutoComplete
-      Case "#PB_String_AutoInsert"    : Flag = Flag | #PB_String_AutoInsert
-      Case "#PB_String_BorderLess"    : Flag = Flag | #PB_String_BorderLess
-      Case "#PB_String_CaseSensitive" : Flag = Flag | #PB_String_CaseSensitive
-      Case "#PB_String_Equal"         : Flag = Flag | #PB_String_Equal
-      Case "#PB_String_Greater"       : Flag = Flag | #PB_String_Greater
-      Case "#PB_String_InPlace"       : Flag = Flag | #PB_String_InPlace
-      Case "#PB_String_Lower"         : Flag = Flag | #PB_String_Lower
-      Case "#PB_String_LowerCase"     : Flag = Flag | #PB_String_LowerCase
-      Case "#PB_String_MaximumLength" : Flag = Flag | #PB_String_MaximumLength
-      Case "#PB_String_NoCase"        : Flag = Flag | #PB_String_NoCase
-      Case "#PB_String_NoZero"        : Flag = Flag | #PB_String_NoZero
-      Case "#PB_String_Numeric"       : Flag = Flag | #PB_String_Numeric
-      Case "#PB_String_Password"      : Flag = Flag | #PB_String_Password
-      Case "#PB_String_ReadOnly"      : Flag = Flag | #PB_String_ReadOnly
-      Case "#PB_String_UpperCase"     : Flag = Flag | #PB_String_UpperCase
-    EndSelect
-  Next
-  ProcedureReturn Flag
-EndProcedure 
-
-Procedure PB_Flag_Text(Flag$) ;Ok
-  Protected i
-  Protected Flag 
-  For i = 0 To CountString(Flag$,"|")
-    Select Trim(StringField(Flag$,i+1,"|"))
-      Case "#PB_Text_Border"  : Flag = Flag | #PB_Text_Border
-      Case "#PB_Text_Center"  : Flag = Flag | #PB_Text_Center
-      Case "#PB_Text_Right"   : Flag = Flag | #PB_Text_Right
-    EndSelect
-  Next
-  ProcedureReturn Flag
-EndProcedure 
-
-Procedure PB_Flag_CheckBox(Flag$) ;Ok
-  Protected i
-  Protected Flag 
-  For i = 0 To CountString(Flag$,"|")
-    Select Trim(StringField(Flag$,i+1,"|"))
-      Case "#PB_CheckBox_Center"     : Flag = Flag | #PB_CheckBox_Center
-      Case "#PB_Checkbox_Checked"    : Flag = Flag | #PB_Checkbox_Checked
-      Case "#PB_Checkbox_Inbetween"  : Flag = Flag | #PB_Checkbox_Inbetween
-      Case "#PB_CheckBox_Right"      : Flag = Flag | #PB_CheckBox_Right
-      Case "#PB_CheckBox_ThreeState" : Flag = Flag | #PB_CheckBox_ThreeState
-      Case "#PB_Checkbox_Unchecked"  : Flag = Flag | #PB_Checkbox_Unchecked
-    EndSelect
-  Next
-  ProcedureReturn Flag
-EndProcedure 
-
-Procedure PB_Flag_Option(Flag$) ;
-  Protected i
-  Protected Flag 
-  For i = 0 To CountString(Flag$,"|")
-    Select Trim(StringField(Flag$,i+1,"|"))
-        
-    EndSelect
-  Next
-  ProcedureReturn Flag
-EndProcedure 
-
-Procedure PB_Flag_ListView(Flag$) ;Ok
-  Protected i
-  Protected Flag 
-  For i = 0 To CountString(Flag$,"|")
-    Select Trim(StringField(Flag$,i+1,"|"))
-      Case "#PB_ListView_ClickSelect" : Flag = Flag | #PB_ListView_ClickSelect
-      Case "#PB_ListView_MultiSelect" : Flag = Flag | #PB_ListView_MultiSelect
-    EndSelect
-  Next
-  ProcedureReturn Flag
-EndProcedure 
-
-Procedure PB_Flag_Frame(Flag$) ;Ok
-  Protected i
-  Protected Flag 
-  For i = 0 To CountString(Flag$,"|")
-    Select Trim(StringField(Flag$,i+1,"|"))
-      Case "#PB_Frame_Double" : Flag = Flag | #PB_Frame_Double
-      Case "#PB_Frame_Flat"   : Flag = Flag | #PB_Frame_Flat
-      Case "#PB_Frame_Single" : Flag = Flag | #PB_Frame_Single
-    EndSelect
-  Next
-  ProcedureReturn Flag
-EndProcedure 
-
-Procedure PB_Flag_ComboBox(Flag$) ;Ok
-  Protected i
-  Protected Flag 
-  For i = 0 To CountString(Flag$,"|")
-    Select Trim(StringField(Flag$,i+1,"|"))
-      Case "#PB_ComboBox_Editable"  : Flag = Flag | #PB_ComboBox_Editable
-      Case "#PB_ComboBox_Image"     : Flag = Flag | #PB_ComboBox_Image
-      Case "#PB_ComboBox_LowerCase" : Flag = Flag | #PB_ComboBox_LowerCase
-      Case "#PB_ComboBox_UpperCase" : Flag = Flag | #PB_ComboBox_UpperCase
-    EndSelect
-  Next
-  ProcedureReturn Flag
-EndProcedure 
-
-Procedure PB_Flag_Image(Flag$) ;Ok
-  Protected i
-  Protected Flag 
-  For i = 0 To CountString(Flag$,"|")
-    Select Trim(StringField(Flag$,i+1,"|"))
-      Case "#PB_Image_Border"         : Flag = Flag | #PB_Image_Border
-      Case "#PB_Image_DisplayFormat"  : Flag = Flag | #PB_Image_DisplayFormat
-      Case "#PB_Image_FloydSteinberg" : Flag = Flag | #PB_Image_FloydSteinberg
-      Case "#PB_Image_InternalDepth"  : Flag = Flag | #PB_Image_InternalDepth
-      Case "#PB_Image_OriginalDepth"  : Flag = Flag | #PB_Image_OriginalDepth
-      Case "#PB_Image_Raised"         : Flag = Flag | #PB_Image_Raised
-      Case "#PB_Image_Raw"            : Flag = Flag | #PB_Image_Raw
-      Case "#PB_Image_Smooth"         : Flag = Flag | #PB_Image_Smooth
-      Case "#PB_Image_Transparent"    : Flag = Flag | #PB_Image_Transparent
-    EndSelect
-  Next
-  ProcedureReturn Flag
-EndProcedure 
-
-Procedure PB_Flag(Type$,Flag$)
-  Protected Flag 
-  Select Trim(Type$)
-    Case "OpenWindow"          : Flag = PB_Flag_Window   (Flag$) ; Ok
-    Case "ButtonGadget"        : Flag = PB_Flag_Button   (Flag$) ; Ok 
-    Case "StringGadget"        : Flag = PB_Flag_String   (Flag$) ; Ok 
-    Case "TextGadget"          : Flag = PB_Flag_Text     (Flag$) ; Ok
-    Case "CheckBoxGadget"      : Flag = PB_Flag_CheckBox (Flag$) ; Ok
-    Case "OptionGadget"        : Flag = PB_Flag_Option   (Flag$) ; Ok
-    Case "ListViewGadget"      : Flag = PB_Flag_ListView (Flag$) ; Ok
-    Case "FrameGadget"         : Flag = PB_Flag_Frame    (Flag$) ; Ok
-    Case "ComboBoxGadget"      : Flag = PB_Flag_ComboBox (Flag$) ; Ok
-    Case "ImageGadget"         : Flag = PB_Flag_Image    (Flag$) ; Ok
-    Case "HyperLinkGadget"     : Flag = PB_Flag_Button(Flag$) 
-    Case "ContainerGadget"     : Flag = PB_Flag_Button(Flag$) 
-    Case "ListIconGadget"      : Flag = PB_Flag_Button(Flag$) 
-    Case "IPAddressGadget"     : Flag = PB_Flag_Button(Flag$) 
-    Case "ProgressBarGadget"   : Flag = PB_Flag_Button(Flag$) 
-    Case "ScrollBarGadget"     : Flag = PB_Flag_Button(Flag$) 
-    Case "ScrollAreaGadget"    : Flag = PB_Flag_Button(Flag$)  
-    Case "TrackBarGadget"      : Flag = PB_Flag_Button(Flag$) 
-    Case "WebGadget"           : Flag = PB_Flag_Button(Flag$) 
-    Case "ButtonImageGadget"   : Flag = PB_Flag_Button(Flag$) 
-    Case "CalendarGadget"      : Flag = PB_Flag_Button(Flag$) 
-    Case "DateGadget"          : Flag = PB_Flag_Button(Flag$) 
-    Case "EditorGadget"        : Flag = PB_Flag_Button(Flag$) 
-    Case "ExplorerListGadget"  : Flag = PB_Flag_Button(Flag$) 
-    Case "ExplorerTreeGadget"  : Flag = PB_Flag_Button(Flag$) 
-    Case "ExplorerComboGadget" : Flag = PB_Flag_Button(Flag$) 
-    Case "SpinGadget"          : Flag = PB_Flag_Button(Flag$) 
-    Case "TreeGadget"          : Flag = PB_Flag_Button(Flag$) 
-    Case "PanelGadget"         : Flag = PB_Flag_Button(Flag$)  
-    Case "SplitterGadget"      : Flag = PB_Flag_Button(Flag$) 
-    Case "MDIGadget"           : Flag = PB_Flag_Button(Flag$)  
-    Case "ScintillaGadget"     : Flag = PB_Flag_Button(Flag$) 
-    Case "ShortcutGadget"      : Flag = PB_Flag_Button(Flag$) 
-    Case "CanvasGadget"        : Flag = PB_Flag_Button(Flag$) 
-  EndSelect
-  ProcedureReturn Flag
-EndProcedure 
-
-
-Procedure TypePBGadget(Class.S) ;Returns gadget type from gadget name
-    Enumeration - 7             ; Type
-      #__Type_Message           ; -7
-      #__Type_PopupMenu         ; -6
-      #__Type_Desktop           ; -5
-      #__Type_StatusBar         ; -4
-      #__Type_Menu              ; -3 "Menu"
-      #__Type_Toolbar           ; -2 "Toolbar"
-      #__Type_Window            ; -1 "Window"
-      #__Type_Unknown           ; 0 "Create"
-      #__Type_Button            ; 1 "Button"
-      #__Type_String            ; 2 "String"
-      #__Type_Text              ; 3 "Text"
-      #__Type_CheckBox          ; 4 "CheckBox"
-      #__Type_Option            ; 5 "Option"
-      #__Type_ListView          ; 6 "ListView"
-      #__Type_Frame             ; 7 "Frame"
-      #__Type_ComboBox          ; 8 "ComboBox"
-      #__Type_Image             ; 9 "Image"
-      #__Type_HyperLink         ; 10 "HyperLink"
-      #__Type_Container         ; 11 "Container"
-      #__Type_ListIcon          ; 12 "ListIcon"
-      #__Type_IPAddress         ; 13 "IPAddress"
-      #__Type_ProgressBar       ; 14 "ProgressBar"
-      #__Type_ScrollBar         ; 15 "ScrollBar"
-      #__Type_ScrollArea        ; 16 "ScrollArea"
-      #__Type_TrackBar          ; 17 "TrackBar"
-      #__Type_Web               ; 18 "Web"
-      #__Type_ButtonImage       ; 19 "ButtonImage"
-      #__Type_Calendar          ; 20 "Calendar"
-      #__Type_Date              ; 21 "Date"
-      #__Type_Editor            ; 22 "Editor"
-      #__Type_ExplorerList      ; 23 "ExplorerList"
-      #__Type_ExplorerTree      ; 24 "ExplorerTree"
-      #__Type_ExplorerCombo     ; 25 "ExplorerCombo"
-      #__Type_Spin              ; 26 "Spin"
-      #__Type_Tree              ; 27 "Tree"
-      #__Type_Panel             ; 28 "Panel"
-      #__Type_Splitter          ; 29 "Splitter"
-      #__Type_MDI               ; 30
-      #__Type_Scintilla         ; 31 "Scintilla"
-      #__Type_Shortcut          ; 32 "Shortcut"
-      #__Type_Canvas            ; 33 "Canvas"
+    ProcedureReturn Flag
+  EndProcedure 
+  
+  
+  Procedure TypePBGadget(Class.S) ;Returns gadget type from gadget name
+    Enumeration - 7               ; Type
+      #__Type_Message             ; -7
+      #__Type_PopupMenu           ; -6
+      #__Type_Desktop             ; -5
+      #__Type_StatusBar           ; -4
+      #__Type_Menu                ; -3 "Menu"
+      #__Type_Toolbar             ; -2 "Toolbar"
+      #__Type_Window              ; -1 "Window"
+      #__Type_Unknown             ; 0 "Create"
+      #__Type_Button              ; 1 "Button"
+      #__Type_String              ; 2 "String"
+      #__Type_Text                ; 3 "Text"
+      #__Type_CheckBox            ; 4 "CheckBox"
+      #__Type_Option              ; 5 "Option"
+      #__Type_ListView            ; 6 "ListView"
+      #__Type_Frame               ; 7 "Frame"
+      #__Type_ComboBox            ; 8 "ComboBox"
+      #__Type_Image               ; 9 "Image"
+      #__Type_HyperLink           ; 10 "HyperLink"
+      #__Type_Container           ; 11 "Container"
+      #__Type_ListIcon            ; 12 "ListIcon"
+      #__Type_IPAddress           ; 13 "IPAddress"
+      #__Type_ProgressBar         ; 14 "ProgressBar"
+      #__Type_ScrollBar           ; 15 "ScrollBar"
+      #__Type_ScrollArea          ; 16 "ScrollArea"
+      #__Type_TrackBar            ; 17 "TrackBar"
+      #__Type_Web                 ; 18 "Web"
+      #__Type_ButtonImage         ; 19 "ButtonImage"
+      #__Type_Calendar            ; 20 "Calendar"
+      #__Type_Date                ; 21 "Date"
+      #__Type_Editor              ; 22 "Editor"
+      #__Type_ExplorerList        ; 23 "ExplorerList"
+      #__Type_ExplorerTree        ; 24 "ExplorerTree"
+      #__Type_ExplorerCombo       ; 25 "ExplorerCombo"
+      #__Type_Spin                ; 26 "Spin"
+      #__Type_Tree                ; 27 "Tree"
+      #__Type_Panel               ; 28 "Panel"
+      #__Type_Splitter            ; 29 "Splitter"
+      #__Type_MDI                 ; 30
+      #__Type_Scintilla           ; 31 "Scintilla"
+      #__Type_Shortcut            ; 32 "Shortcut"
+      #__Type_Canvas              ; 33 "Canvas"
       
       #__Type_ImageButton    ; 34 "ImageButton"
       #__Type_Properties     ; 35 "Properties"
@@ -342,12 +345,26 @@ Procedure TypePBGadget(Class.S) ;Returns gadget type from gadget name
     ProcedureReturn #False
   EndProcedure
   
+  Procedure SetPBFunction(*This.ParsePBGadget)
+    
+    With *This
+      Select \FuncClass$
+        Case "SetGadgetFont"
+          If IsFont(\Font)
+            SetGadgetFont(\ID, FontID(\Font))
+          EndIf
+          
+      EndSelect
+    EndWith
+    
+  EndProcedure
+  
   Procedure CreatePBGadget(*This.ParsePBGadget)
     
     With *This
       Select \Type
         Case #__Type_Window
-          OpenWindow(-1, \X,\Y,\Width,\Height, \Caption$, \Flag)
+          OpenWindow(-1, \X,\Y,\Width,\Height, \Caption$, \Flag|#PB_Window_SizeGadget)
         Case #__Type_Button
           ButtonGadget(-1, \X,\Y,\Width,\Height, \Caption$, \Flag)
         Case #__Type_String
@@ -359,6 +376,12 @@ Procedure TypePBGadget(Class.S) ;Returns gadget type from gadget name
       EndSelect
     EndWith
     
+  EndProcedure
+  
+  Procedure FindVar(File, *File, Length, String$)
+    Protected result = 300 ; default
+    
+    ProcedureReturn result
   EndProcedure
   
   
@@ -407,12 +430,11 @@ Procedure TypePBGadget(Class.S) ;Returns gadget type from gadget name
                       Protected *This.ParsePBGadget 
                       *This = AllocateStructure(ParsePBGadget)
                       *This\Type = TypePBGadget(FunctionName$)
-                              
+                      
                       If ExamineRegularExpression(#RegEx_FindArguments, FunctionArgs$)
                         While NextRegularExpressionMatch(#RegEx_FindArguments)
                           Count + 1
                           Args$ = RegularExpressionMatchString(#RegEx_FindArguments)
-                          
                           
                           If Count > 5
                             Select FunctionName$
@@ -468,19 +490,40 @@ Procedure TypePBGadget(Class.S) ;Returns gadget type from gadget name
                             Select ii
                               Case 1
                               Case 2
-                                \X = Val(Args$)
+                                Select Asc(Trim(Args$))
+                                  Case '0' To '9'
+                                    \X = Val(Args$)
+                                  Default
+                                    \X = FindVar(#File, *File, Length, Trim(Args$))
+                                EndSelect
+                                
                               Case 3
-                                \Y = Val(Args$)
+                                Select Asc(Trim(Args$))
+                                  Case '0' To '9'
+                                    \Y = Val(Args$)
+                                  Default
+                                    \Y = FindVar(#File, *File, Length, Trim(Args$))
+                                EndSelect
                               Case 4
-                                \Width = Val(Args$)
+                                Select Asc(Trim(Args$))
+                                  Case '0' To '9'
+                                    \Width = Val(Args$)
+                                  Default
+                                    \Width = FindVar(#File, *File, Length, Trim(Args$))
+                                EndSelect
                               Case 5
-                                \Height = Val(Args$)
+                                Select Asc(Trim(Args$))
+                                  Case '0' To '9'
+                                    \Height = Val(Args$)
+                                  Default
+                                    \Height = FindVar(#File, *File, Length, Trim(Args$))
+                                EndSelect
                               Case 6
                                 \Caption$ = Args$
                                 
                               Case 10
                                 \Flag = PB_Flag(FunctionName$, Args$)
-                              
+                                
                             EndSelect
                           EndWith
                           
@@ -488,7 +531,7 @@ Procedure TypePBGadget(Class.S) ;Returns gadget type from gadget name
                       EndIf
                       
                       CallFunctionFast(@CreatePBGadget(), *This)
-                        
+                      
                       AddGadgetItem(Editor_2, -1, Texts)
                       Texts = ""
                       
