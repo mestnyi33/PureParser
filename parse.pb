@@ -33,6 +33,8 @@ CompilerIf #PB_Compiler_IsMainFile
     #RegEx_FindFunction
     #RegEx_FindArguments
     #Regex_FindProcedure
+    #RegEx_FindVar
+    #Regex_FindBrackets
   EndEnumeration
   
   Procedure PB_Flag_Window(Flag$) ;Ok
@@ -378,8 +380,36 @@ CompilerIf #PB_Compiler_IsMainFile
     
   EndProcedure
   
-  Procedure FindVar(File, *File, Length, String$)
+  Procedure FindVar(File, *File, Length, Format, StrToFind$)
     Protected result = 300 ; default
+    Protected Line, FindWindow, Function$, FunctionName$, FunctionArgs$
+    Protected Create_Reg_Flag = #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll    
+    
+    If *File 
+      ;FileSeek(File, Loc(File), #PB_Absolute)
+      ReadData(File, *File, Length)
+      Protected String$ = PeekS(*File, Length, Format)
+      
+      If CreateRegularExpression(#RegEx_FindVar, "(\s*?"+StrToFind$+"\s*?=\s*?)(\d+)", Create_Reg_Flag)
+        
+        If ExamineRegularExpression(#RegEx_FindVar, String$)
+          While NextRegularExpressionMatch(#RegEx_FindVar)
+            result = Val(RegularExpressionGroup(#RegEx_FindVar,2))
+;             Debug result
+;             Debug RegularExpressionMatchLength(#RegEx_FindVar)
+;             Debug RegularExpressionMatchPosition(#RegEx_FindVar)
+;             Debug RegularExpressionMatchString(#RegEx_FindVar)
+          Wend
+        EndIf
+      EndIf
+    
+      ;Debug "Position: " + Str(Loc(File))      ; отобразим текущую позицию указателя файла
+      ;       FileSeek(File, 0, #PB_Absolute)
+      ;       While Eof(File) = 0 ;:Line +1
+      ;         Debug ReadString(File);, Format)
+      ;         
+      ;       Wend                          
+    EndIf
     
     ProcedureReturn result
   EndProcedure
@@ -414,7 +444,7 @@ CompilerIf #PB_Compiler_IsMainFile
                   
                   
                   Select FunctionName$
-                    Case "OpenWindow",
+                    Case "OpenWindow", ; FindString(FunctionName$, "Gadget"),-1,#PB_String_NoCase) ;
                          "ButtonGadget","StringGadget","TextGadget","CheckBoxGadget",
                          "OptionGadget","ListViewGadget","FrameGadget","ComboBoxGadget",
                          "ImageGadget","HyperLinkGadget","ContainerGadget","ListIconGadget",
@@ -494,7 +524,7 @@ CompilerIf #PB_Compiler_IsMainFile
                                   Case '0' To '9'
                                     \X = Val(Args$)
                                   Default
-                                    \X = FindVar(#File, *File, Length, Trim(Args$))
+                                    \X = FindVar(#File, *File, Length, Format, Trim(Args$))
                                 EndSelect
                                 
                               Case 3
@@ -502,21 +532,21 @@ CompilerIf #PB_Compiler_IsMainFile
                                   Case '0' To '9'
                                     \Y = Val(Args$)
                                   Default
-                                    \Y = FindVar(#File, *File, Length, Trim(Args$))
+                                    \Y = FindVar(#File, *File, Length, Format, Trim(Args$))
                                 EndSelect
                               Case 4
                                 Select Asc(Trim(Args$))
                                   Case '0' To '9'
                                     \Width = Val(Args$)
                                   Default
-                                    \Width = FindVar(#File, *File, Length, Trim(Args$))
+                                    \Width = FindVar(#File, *File, Length, Format, Trim(Args$))
                                 EndSelect
                               Case 5
                                 Select Asc(Trim(Args$))
                                   Case '0' To '9'
                                     \Height = Val(Args$)
                                   Default
-                                    \Height = FindVar(#File, *File, Length, Trim(Args$))
+                                    \Height = FindVar(#File, *File, Length, Format, Trim(Args$))
                                 EndSelect
                               Case 6
                                 \Caption$ = Args$
