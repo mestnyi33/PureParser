@@ -33,13 +33,20 @@ Structure ParsePBGadget
   Param3$
   Flag$
   
+  Position.i
+  Length.i
+  
   Class$
   FuncClass$
   Font.i
+  File$
+  Function$
 EndStructure
 
 Global NewList ParsePBGadget.ParsePBGadget() 
-  
+Global *This.ParsePBGadget = AllocateStructure(ParsePBGadget)
+
+
 CompilerIf #PB_Compiler_IsMainFile
   #File=0
   #Window=0
@@ -49,8 +56,6 @@ CompilerIf #PB_Compiler_IsMainFile
     #RegEx_FindArguments
     #Regex_FindProcedure
     #RegEx_FindVar
-    #RegEx_FindVar1
-    #Regex_FindBrackets
   EndEnumeration
   
   Procedure PB_Flag(Flag$) ; Ok
@@ -297,15 +302,27 @@ CompilerIf #PB_Compiler_IsMainFile
       ForEach ParsePBGadget()
         If ParsePBGadget()\ID$ = \ID$
           ParsePBGadget()\ID = \ID
-;           ParsePBGadget()\X = \X
-;           ParsePBGadget()\Y = \Y
-;           ParsePBGadget()\Width = \Width
-;           ParsePBGadget()\Height = \Height
-;           ParsePBGadget()\Caption$ = \Caption$
-;           ParsePBGadget()\Flag = \Flag
-;           ParsePBGadget()\Param1 = \Param1
-;           ParsePBGadget()\Param2 = \Param2
-;           ParsePBGadget()\Param3 = \Param3
+          ParsePBGadget()\X = \X
+          ParsePBGadget()\Y = \Y
+          ParsePBGadget()\Width = \Width
+          ParsePBGadget()\Height = \Height
+          ParsePBGadget()\Caption$ = \Caption$
+          ParsePBGadget()\Param1 = \Param1
+          ParsePBGadget()\Param2 = \Param2
+          ParsePBGadget()\Param3 = \Param3
+          ParsePBGadget()\Flag = \Flag
+          
+          ParsePBGadget()\X$ = \X$
+          ParsePBGadget()\Y$ = \Y$
+          ParsePBGadget()\Width$ = \Width$
+          ParsePBGadget()\Height$ = \Height$
+          ParsePBGadget()\Param1$ = \Param1$
+          ParsePBGadget()\Param2$ = \Param2$
+          ParsePBGadget()\Param3$ = \Param3$
+          ParsePBGadget()\Flag$ = \Flag$
+          
+          ParsePBGadget()\Position = \Position
+          ParsePBGadget()\Length = \Length
         EndIf
       Next
     EndWith
@@ -313,8 +330,8 @@ CompilerIf #PB_Compiler_IsMainFile
     ProcedureReturn Result
   EndProcedure
   
-  Procedure FindVar(File, *File, Length, Format, StrToFind$)
-    Protected result = 300 ; default
+  Procedure$ FindVar(File, *File, Length, Format, StrToFind$)
+    Protected result$
     Protected Line, FindWindow, Function$, FunctionName$, FunctionArgs$
     Protected Create_Reg_Flag = #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll    
     
@@ -327,7 +344,7 @@ CompilerIf #PB_Compiler_IsMainFile
         
         If ExamineRegularExpression(#RegEx_FindVar, String$)
           While NextRegularExpressionMatch(#RegEx_FindVar)
-            result = Val(RegularExpressionGroup(#RegEx_FindVar,2))
+            result$ = RegularExpressionGroup(#RegEx_FindVar,2)
             ;             Debug result
             ;             Debug RegularExpressionMatchLength(#RegEx_FindVar)
             ;             Debug RegularExpressionMatchPosition(#RegEx_FindVar)
@@ -344,51 +361,16 @@ CompilerIf #PB_Compiler_IsMainFile
       ;       Wend                          
     EndIf
     
-    ProcedureReturn result
-  EndProcedure
-  
-  
-  Procedure FindVar1(File, *File, Length, Format, StrToFind$)
-    Protected result =- 1 ; default
-    Protected Line, FindWindow, Function$, FunctionName$, FunctionArgs$
-    Protected Create_Reg_Flag = #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll    
-    
-    If *File 
-      ;FileSeek(File, Loc(File), #PB_Absolute)
-      ReadData(File, *File, Length)
-      Protected String$ = PeekS(*File, Length, Format)
-      
-      If CreateRegularExpression(#RegEx_FindVar1, "(\s*?"+StrToFind$+"\s*?=\s*?)(\d+)", Create_Reg_Flag)
-        
-        If ExamineRegularExpression(#RegEx_FindVar1, String$)
-          While NextRegularExpressionMatch(#RegEx_FindVar1)
-            result = Val(RegularExpressionGroup(#RegEx_FindVar1,2))
-            Debug result
-            Debug RegularExpressionMatchLength(#RegEx_FindVar1)
-            Debug RegularExpressionMatchPosition(#RegEx_FindVar1)
-            Debug RegularExpressionMatchString(#RegEx_FindVar1)
-          Wend
-        EndIf
-      EndIf
-      
-      ;Debug "Position: " + Str(Loc(File))      ; отобразим текущую позицию указателя файла
-      ;       FileSeek(File, 0, #PB_Absolute)
-      ;       While Eof(File) = 0 ;:Line +1
-      ;         Debug ReadString(File);, Format)
-      ;         
-      ;       Wend                          
-    EndIf
-    
-    ProcedureReturn result
+    ProcedureReturn result$
   EndProcedure
   
   
   Procedure.S ParsePBFile(FileName.s)
-    Protected i,result.S, Texts.S, Text.S, Find.S, String.S, Position, Args$, Count
+    Protected i,result.S, Texts.S, Text.S, Find.S, String.S, Position, Args$, Count, Index
     
     If ReadFile(#File, FileName)
       Protected Create_Reg_Flag = #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll    
-      Protected Line, FindWindow, Function$, FunctionName$, FunctionArgs$
+      Protected Line, FindWindow, FunctionArgs$
       Protected Format=ReadStringFormat(#File)
       Protected Length = Lof(#File) 
       Protected *File = AllocateMemory(Length)
@@ -402,131 +384,132 @@ CompilerIf #PB_Compiler_IsMainFile
           
           If ExamineRegularExpression(#Regex_FindProcedure, PeekS(*File, Length, Format))
             While NextRegularExpressionMatch(#Regex_FindProcedure)
-              Function$=RegularExpressionMatchString(#Regex_FindProcedure)
+              *This\File$=RegularExpressionMatchString(#Regex_FindProcedure)
               
-              If ExamineRegularExpression(#RegEx_FindFunction, Function$)
+              If ExamineRegularExpression(#RegEx_FindFunction, *This\File$)
                 While NextRegularExpressionMatch(#RegEx_FindFunction)
-                  ; Debug RegularExpressionMatchString(#RegEx_FindFunction)
-                  FunctionName$=RegularExpressionGroup(#RegEx_FindFunction, 1)
-                  FunctionArgs$=RegularExpressionGroup(#RegEx_FindFunction, 2)
-                  
-                  
-                  Select FunctionName$
-                    Case "OpenWindow", ; FindString(FunctionName$, "Gadget"),-1,#PB_String_NoCase) ;
-                         "ButtonGadget","StringGadget","TextGadget","CheckBoxGadget",
-                         "OptionGadget","ListViewGadget","FrameGadget","ComboBoxGadget",
-                         "ImageGadget","HyperLinkGadget","ContainerGadget","ListIconGadget",
-                         "IPAddressGadget","ProgressBarGadget","ScrollBarGadget","ScrollAreaGadget",
-                         "TrackBarGadget","WebGadget","ButtonImageGadget","CalendarGadget",
-                         "DateGadget","EditorGadget","ExplorerListGadget","ExplorerTreeGadget",
-                         "ExplorerComboGadget","SpinGadget","TreeGadget","PanelGadget",
-                         "SplitterGadget","MDIGadget","ScintillaGadget","ShortcutGadget","CanvasGadget"
-                      
-                      Count = 0
-                      Texts =  Chr(10)+ FunctionName$
-                      
-                      Protected *This.ParsePBGadget 
-                      *This = AllocateStructure(ParsePBGadget)
-                      *This\Type = PB_Type(FunctionName$)
-                      *This\Type$ = FunctionName$
-                      
-                      If ExamineRegularExpression(#RegEx_FindArguments, FunctionArgs$)
-                        While NextRegularExpressionMatch(#RegEx_FindArguments)
-                          Count + 1
-                          Args$ = RegularExpressionMatchString(#RegEx_FindArguments)
-                          
-                          If Count > 5
-                            Select FunctionName$
-                              Case "OpenGLGadget","EditorGadget","CanvasGadget","ComboBoxGadget","ContainerGadget","ListViewGadget","TreeGadget"
-                                Select Count 
-                                  Case 6
-                                    i = 4 ;Texts + #LF$ + #LF$ + #LF$ + #LF$
-                                EndSelect
+                  With *This
+                    \Type$=RegularExpressionGroup(#RegEx_FindFunction, 1)
+                    FunctionArgs$=RegularExpressionGroup(#RegEx_FindFunction, 2)
+                    \Type = PB_Type(\Type$)
+                    
+                    Select \Type$
+                      Case "OpenWindow", ; FindString(\Type$, "Gadget"),-1,#PB_String_NoCase) ;
+                           "ButtonGadget","StringGadget","TextGadget","CheckBoxGadget",
+                           "OptionGadget","ListViewGadget","FrameGadget","ComboBoxGadget",
+                           "ImageGadget","HyperLinkGadget","ContainerGadget","ListIconGadget",
+                           "IPAddressGadget","ProgressBarGadget","ScrollBarGadget","ScrollAreaGadget",
+                           "TrackBarGadget","WebGadget","ButtonImageGadget","CalendarGadget",
+                           "DateGadget","EditorGadget","ExplorerListGadget","ExplorerTreeGadget",
+                           "ExplorerComboGadget","SpinGadget","TreeGadget","PanelGadget",
+                           "SplitterGadget","MDIGadget","ScintillaGadget","ShortcutGadget","CanvasGadget"
+                        
+                        \Position = RegularExpressionMatchPosition(#RegEx_FindFunction)  ; Loc(#File)
+                        \Length = RegularExpressionMatchLength(#RegEx_FindFunction)  ; Lof(#File)
+;                         Debug "Position - "+\Position
+;                         Debug "Length - "+\Length
+                        Count = 0
+                        Texts =  Chr(10)+ \Type$
+                        
+                        AddElement(ParsePBGadget()) 
+                        ParsePBGadget()\Type$ = \Type$
+                        ParsePBGadget()\Function$ = RegularExpressionMatchString(#RegEx_FindFunction)
                                 
-                              Case "ScrollBarGadget","ScrollAreaGadget","ScintillaGadget"
-                                Select Count 
-                                  Case 6
-                                    i=1 ;Texts + #LF$
-                                EndSelect
-                                
-                              Case "TrackBarGadget","SpinGadget","SplitterGadget","ProgressBarGadget"
-                                Select Count 
-                                  Case 6,8
-                                    i=1 ;Texts + #LF$
-                                EndSelect
-                                
-                              Case "CalendarGadget","ButtonImageGadget","ImageGadget"
-                                Select Count 
-                                  Case 6
-                                    i=1 ;Texts + #LF$
-                                  Case 7
-                                    i=2 ;Texts + #LF$ + #LF$
-                                EndSelect
-                                
-                              Case "OpenWindow",
-                                   "ButtonGadget","StringGadget","TextGadget","CheckBoxGadget","FrameGadget",
-                                   "ExplorerListGadget","ExplorerTreeGadget","ExplorerComboGadget"
-                                Select Count 
-                                  Case 7
-                                    i=3 ; Texts + #LF$ + #LF$ + #LF$
-                                EndSelect
-                                
-                              Case "HyperLinkGadget","DateGadget","ListIconGadget"
-                                Select Count 
-                                  Case 8
-                                    i=2 ; Texts + #LF$ + #LF$
-                                EndSelect
-                                
-                            EndSelect
-                          EndIf
-                          
-                          Protected ii : For ii=1 To i : Texts + #LF$ : Next 
-                          i=Count+i
-                          ii=i 
-                          i=0
-                          Texts + #LF$ + Args$
-                          
-                          ii = CountString(Texts,#LF$)-1
-                          
-                          With *This
+                        If ExamineRegularExpression(#RegEx_FindArguments, FunctionArgs$)
+                          While NextRegularExpressionMatch(#RegEx_FindArguments)
+                            Count + 1
+                            Args$ = RegularExpressionMatchString(#RegEx_FindArguments)
+                            
+                            If (Count>5)
+                              Select \Type$
+                                Case "OpenGLGadget","EditorGadget","CanvasGadget","ComboBoxGadget","ContainerGadget","ListViewGadget","TreeGadget"
+                                  Select Count 
+                                    Case 6
+                                      i = 4 ;Texts + #LF$ + #LF$ + #LF$ + #LF$
+                                  EndSelect
+                                  
+                                Case "ScrollBarGadget","ScrollAreaGadget","ScintillaGadget"
+                                  Select Count 
+                                    Case 6
+                                      i=1 ;Texts + #LF$
+                                  EndSelect
+                                  
+                                Case "TrackBarGadget","SpinGadget","SplitterGadget","ProgressBarGadget"
+                                  Select Count 
+                                    Case 6,8
+                                      i=1 ;Texts + #LF$
+                                  EndSelect
+                                  
+                                Case "CalendarGadget","ButtonImageGadget","ImageGadget"
+                                  Select Count 
+                                    Case 6
+                                      i=1 ;Texts + #LF$
+                                    Case 7
+                                      i=2 ;Texts + #LF$ + #LF$
+                                  EndSelect
+                                  
+                                Case "OpenWindow",
+                                     "ButtonGadget","StringGadget","TextGadget","CheckBoxGadget","FrameGadget",
+                                     "ExplorerListGadget","ExplorerTreeGadget","ExplorerComboGadget"
+                                  Select Count 
+                                    Case 7
+                                      i=3 ; Texts + #LF$ + #LF$ + #LF$
+                                  EndSelect
+                                  
+                                Case "HyperLinkGadget","DateGadget","ListIconGadget"
+                                  Select Count 
+                                    Case 8
+                                      i=2 ; Texts + #LF$ + #LF$
+                                  EndSelect
+                                  
+                              EndSelect
+                            EndIf
+                            
+                            Protected ii : For ii=1 To i : Texts + #LF$ : Next 
+                            i=Count+i
+                            ii=i 
+                            i=0
+                            Texts + #LF$ + Args$
+                            
+                            ii = CountString(Texts,#LF$)-1
                             
                             Select ii
                               Case 1
-                                AddElement(ParsePBGadget()) 
                                 \ID$ = Trim(Args$)
                                 ParsePBGadget()\ID$ = \ID$
-                              Case 2
+                                
+                              Case 2 : \X$ = Trim(Args$)
                                 Select Asc(Trim(Args$))
                                   Case '0' To '9'
                                     \X = Val(Args$)
                                   Default
-                                    \X = FindVar(#File, *File, Length, Format, Trim(Args$))
+                                    \X = Val(FindVar(#File, *File, Length, Format, Trim(Args$)))
                                 EndSelect
-                              Case 3
+                              Case 3 : \Y$ = Trim(Args$)
                                 Select Asc(Trim(Args$))
                                   Case '0' To '9'
                                     \Y = Val(Args$)
                                   Default
-                                    \Y = FindVar(#File, *File, Length, Format, Trim(Args$))
+                                    \Y = Val(FindVar(#File, *File, Length, Format, Trim(Args$)))
                                 EndSelect
-                              Case 4
+                              Case 4 : \Width$ = Trim(Args$)
                                 Select Asc(Trim(Args$))
                                   Case '0' To '9'
                                     \Width = Val(Args$)
                                   Default
-                                    \Width = FindVar(#File, *File, Length, Format, Trim(Args$))
+                                    \Width = Val(FindVar(#File, *File, Length, Format, Trim(Args$)))
                                 EndSelect
-                              Case 5
+                              Case 5 : \Height$ = Trim(Args$)
                                 Select Asc(Trim(Args$))
                                   Case '0' To '9'
                                     \Height = Val(Args$)
                                   Default
-                                    \Height = FindVar(#File, *File, Length, Format, Trim(Args$))
+                                    \Height = Val(FindVar(#File, *File, Length, Format, Trim(Args$)))
                                 EndSelect
                               Case 6
                                 \Caption$ = Trim(Trim(Args$), Chr(34))
                                 
-                              Case 7
+                              Case 7 : \Param1$ = Trim(Args$)
                                 Select Asc(Trim(Args$))
                                   Case '0' To '9'
                                     \Param1 = Val(Args$)
@@ -543,7 +526,7 @@ CompilerIf #PB_Compiler_IsMainFile
                                     EndSelect
                                 EndSelect
                                 
-                              Case 8
+                              Case 8 : \Param2$ = Trim(Args$)
                                 Select Asc(Trim(Args$))
                                   Case '0' To '9'
                                     \Param2 = Val(Args$)
@@ -560,29 +543,82 @@ CompilerIf #PB_Compiler_IsMainFile
                                     EndSelect
                                 EndSelect
                                 
-                              Case 9
+                              Case 9 : \Param3$ = Trim(Args$)
                                 \Param3 = Val(Args$)
                                 
-                              Case 10
+                              Case 10 : \Flag$ = Trim(Args$)
                                 \Flag = PB_Flag(Args$)
+                                If Not \Flag
+                                  Select Asc(\Flag$)
+                                    Case '0' To '9'
+                                    Default
+                                      \Flag = PB_Flag(FindVar(#File, *File, Length, Format, Trim(Args$)))
+                                  EndSelect
+                                EndIf
+                            EndSelect
+                            
+                          Wend
+                        EndIf
+                        
+                        CallFunctionFast(@CreatePBGadget(), *This)
+                        
+                        AddGadgetItem(Editor_2, -1, Texts)
+                        Texts = ""
+                        
+                      Default
+                        Text = RegularExpressionMatchString(#RegEx_FindFunction)
+                        ;Debug \Function$
+                        
+                        If ExamineRegularExpression(#RegEx_FindArguments, FunctionArgs$)
+                          Index=0
+                          While NextRegularExpressionMatch(#RegEx_FindArguments)
+                            Index+1
+                            Protected Args1$ = RegularExpressionMatchString(#RegEx_FindArguments)
+                            
+                            Select \Type$
+                              Case "LoadFont"
+                                ;Debug Args1$
+                                Protected ID$,FontName$,FontHeight,FontStyle
+                                Select Index
+                                  Case 1
+                                    ID$ = Args1$
+                                  Case 2
+                                    FontName$ = Args1$
+                                  Case 3
+                                    FontHeight = Val(Args1$)
+                                  Case 4
+                                    Select Args1$
+                                      Case "#PB_Font_Bold"
+                                        FontStyle = #PB_Font_Bold
+                                    EndSelect
+                                EndSelect
+                                
+                              Case "SetGadgetFont"
+                                PushListPosition(ParsePBGadget())
+                                ForEach ParsePBGadget()
+                                  If ParsePBGadget()\ID$ = Trim(Args1$)
+                                    If IsFont(\Font)
+                                      SetGadgetFont(ParsePBGadget()\ID, FontID(\Font))
+                                    EndIf
+                                  EndIf
+                                Next
+                                PopListPosition(ParsePBGadget())
                                 
                             EndSelect
-                          EndWith
+                            
+                          Wend
                           
-                        Wend
-                      EndIf
-                      
-                      CallFunctionFast(@CreatePBGadget(), *This)
-                      
-                      AddGadgetItem(Editor_2, -1, Texts)
-                      Texts = ""
-                      
-                    Default
-                      Text = RegularExpressionMatchString(#RegEx_FindFunction)
-                      ;Debug Text
-                      
-                  EndSelect
-                  
+                          If ID$
+                            \Font = LoadFont(#PB_Any,FontName$,FontHeight,FontStyle)
+                          EndIf
+                          
+                        EndIf
+                        
+                        
+                        
+                    EndSelect
+                    
+                  EndWith
                 Wend
                 
               EndIf
@@ -596,7 +632,7 @@ CompilerIf #PB_Compiler_IsMainFile
       CloseFile(#File)
     EndIf
     
-    Debug result
+    ;Debug result
     ProcedureReturn result.S
   EndProcedure
   ;-
@@ -639,13 +675,24 @@ CompilerIf #PB_Compiler_IsMainFile
         File$ = SaveFileRequester(Title$,File$,Pattern$,Pattern)
         If File$
           Protected a
-          If CreateFile(0, File$)         ; we create a new text file...
-            For a=1 To 10
-              If a =  5
-                WriteStringN(0, "Line "+Str(a))  ; we write 10 lines (each with 'end of line' character)
-              EndIf
-            Next
+          If OpenFile(0, File$)         ; we create a new text file...
+;             For a=1 To 10
+;               If a =  5
+;                 WriteStringN(0, "Line "+Str(a))  ; we write 10 lines (each with 'end of line' character)
+;               EndIf
+;             Next
             
+            PushListPosition(ParsePBGadget())
+            ;SortStructuredList(ParsePBGadget(), #PB_Sort_Descending, OffsetOf(ParsePBGadget\Position), TypeOf(ParsePBGadget\Position)) ; Сортировка
+            ForEach ParsePBGadget()
+              FileSeek(0, ParsePBGadget()\Position)
+              WriteStringN(0, ParsePBGadget()\Function$, #PB_UTF8)  ; we write 10 lines (each with 'end of line' character)
+                
+                ;If ParsePBGadget()\ID$ = Trim(Args$)
+              ;Debug ParsePBGadget()\Function$
+              ;EndIf
+            Next
+            PopListPosition(ParsePBGadget())
             
             CloseFile(0)                       ; close the previously opened file and store the written data this way
           Else
