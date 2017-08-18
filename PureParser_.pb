@@ -1,4 +1,5 @@
-﻿;- Абстрактные представления
+﻿EnableExplicit
+;- Абстрактные представления
 
 ; Здесь собраны структурные представления о строении формы
 
@@ -20,7 +21,7 @@ Procedure AddObject(ObjectType.s, ParentID, Position, Length, Content$)         
   Static ObjectID
   
   Shared Object()
-  *Element.Object=AddElement(Object())
+  Protected *Element.Object=AddElement(Object())
   If *Element : ObjectID+1
     With *Element
       \ObjectID   = ObjectID
@@ -31,11 +32,46 @@ Procedure AddObject(ObjectType.s, ParentID, Position, Length, Content$)         
       \Content    = Content$
     EndWith
     
-    Result=ObjectID
+    Protected Result=ObjectID
   EndIf
   
   ProcedureReturn Result
 EndProcedure
+
+#ObjectType_OpenWindow="OpenWindow"
+#ObjectType_ButtonGadget="ButtonGadget"
+#ObjectType_ButtonImageGadget="ButtonImageGadget"
+#ObjectType_CalendarGadget="CalendarGadget"
+#ObjectType_CanvasGadget="CanvasGadget"
+#ObjectType_CheckBoxGadget="CheckBoxGadget"
+#ObjectType_ComboBoxGadget="ComboBoxGadget"
+#ObjectType_ContainerGadget="ContainerGadget"
+#ObjectType_DateGadget="DateGadget"
+#ObjectType_EditorGadget="EditorGadget"
+#ObjectType_ExplorerComboGadget="ExplorerComboGadget"
+#ObjectType_ExplorerListGadget="ExplorerListGadget"
+#ObjectType_ExplorerTreeGadget="ExplorerTreeGadget"
+#ObjectType_FrameGadget="FrameGadget"
+#ObjectType_HyperLinkGadget="HyperLinkGadget"
+#ObjectType_IPAddressGadget="IPAddressGadget"
+#ObjectType_ImageGadget="ImageGadget"
+#ObjectType_ListIconGadget="ListIconGadget"
+#ObjectType_ListViewGadget="ListViewGadget"
+#ObjectType_MDIGadget="MDIGadget"
+#ObjectType_OpenGLGadget="OpenGLGadget"
+#ObjectType_OptionGadget="OptionGadget"
+#ObjectType_PanelGadget="PanelGadget"
+#ObjectType_ProgressBarGadget="ProgressBarGadget"
+#ObjectType_ScrollAreaGadget="ScrollAreaGadget"
+#ObjectType_ScrollBarGadget="ScrollBarGadget"
+#ObjectType_ShortcutGadget="ShortcutGadget"
+#ObjectType_SpinGadget="SpinGadget"
+#ObjectType_SplitterGadget="SplitterGadget"
+#ObjectType_StringGadget="StringGadget"
+#ObjectType_TextGadget="TextGadget"
+#ObjectType_TrackBarGadget="TrackBarGadget"
+#ObjectType_TreeGadget="TreeGadget"
+#ObjectType_WebGadget="WebGadget"
 
 
 ; После того как все списки заполнены, можно переходить к их визуальному представлению в редакторе
@@ -86,42 +122,7 @@ EndProcedure
 
 ; Обработчики
 
-CurrentParent=0
-
-#ObjectType_OpenWindow="OpenWindow"
-#ObjectType_ButtonGadget="ButtonGadget"
-#ObjectType_ButtonImageGadget="ButtonImageGadget"
-#ObjectType_CalendarGadget="CalendarGadget"
-#ObjectType_CanvasGadget="CanvasGadget"
-#ObjectType_CheckBoxGadget="CheckBoxGadget"
-#ObjectType_ComboBoxGadget="ComboBoxGadget"
-#ObjectType_ContainerGadget="ContainerGadget"
-#ObjectType_DateGadget="DateGadget"
-#ObjectType_EditorGadget="EditorGadget"
-#ObjectType_ExplorerComboGadget="ExplorerComboGadget"
-#ObjectType_ExplorerListGadget="ExplorerListGadget"
-#ObjectType_ExplorerTreeGadget="ExplorerTreeGadget"
-#ObjectType_FrameGadget="FrameGadget"
-#ObjectType_HyperLinkGadget="HyperLinkGadget"
-#ObjectType_IPAddressGadget="IPAddressGadget"
-#ObjectType_ImageGadget="ImageGadget"
-#ObjectType_ListIconGadget="ListIconGadget"
-#ObjectType_ListViewGadget="ListViewGadget"
-#ObjectType_MDIGadget="MDIGadget"
-#ObjectType_OpenGLGadget="OpenGLGadget"
-#ObjectType_OptionGadget="OptionGadget"
-#ObjectType_PanelGadget="PanelGadget"
-#ObjectType_ProgressBarGadget="ProgressBarGadget"
-#ObjectType_ScrollAreaGadget="ScrollAreaGadget"
-#ObjectType_ScrollBarGadget="ScrollBarGadget"
-#ObjectType_ShortcutGadget="ShortcutGadget"
-#ObjectType_SpinGadget="SpinGadget"
-#ObjectType_SplitterGadget="SplitterGadget"
-#ObjectType_StringGadget="StringGadget"
-#ObjectType_TextGadget="TextGadget"
-#ObjectType_TrackBarGadget="TrackBarGadget"
-#ObjectType_TreeGadget="TreeGadget"
-#ObjectType_WebGadget="WebGadget"
+Global CurrentParent=0
 
 Procedure Parser(Position, Length, Content$)
   Shared CurrentParent
@@ -247,7 +248,7 @@ ParserElement()\Parser=@Parser()
 ; Формально, отсюда программа начинает своё выполнение
 
 
-FilePath$=ProgramParameter() ; Путь к файлу.
+Define FilePath$=ProgramParameter() ; Путь к файлу.
 CompilerIf #PB_Compiler_Debugger
   If Not Len(FilePath$)
     FilePath$=OpenFileRequester("Выберите файл с описанием окон", "", "Файлы PureBasic (*.pb;*.pbf)|*.pb;*.pbf|Все файлы|*", 0)
@@ -262,11 +263,11 @@ EndEnumeration
 
 If ReadFile(#File, FilePath$)
   
-  Format=ReadStringFormat(#File)
-  ByteLength = Lof(#File)
-  *File = AllocateMemory(ByteLength)
+  Define Format=ReadStringFormat(#File)
+  Define ByteLength = Lof(#File)
+  Define *File = AllocateMemory(ByteLength)
   If *File : ReadData(#File, *File, ByteLength)
-    FileContent$=PeekS(*File, ByteLength, Format)
+    Define FileContent$=PeekS(*File, ByteLength, Format)
     FreeMemory(*File)
   EndIf
   
@@ -275,16 +276,16 @@ If ReadFile(#File, FilePath$)
   If ExamineRegularExpression(#Regex_FindProcedure, FileContent$)
     While NextRegularExpressionMatch(#Regex_FindProcedure)
       
-      Function$=RegularExpressionMatchString(#Regex_FindProcedure)
+      Define Function$=RegularExpressionMatchString(#Regex_FindProcedure)
       
       If ExamineRegularExpression(#RegEx_FindFunction, Function$)
         While NextRegularExpressionMatch(#RegEx_FindFunction)
           
-          Content$=RegularExpressionMatchString(#RegEx_FindFunction)
-          Position=(RegularExpressionMatchPosition(#Regex_FindProcedure)-1)+(RegularExpressionMatchPosition(#RegEx_FindFunction)-1)
-          Length=RegularExpressionMatchLength(#Regex_FindProcedure)
+          Define Content$=RegularExpressionMatchString(#RegEx_FindFunction)
+          Define Position=(RegularExpressionMatchPosition(#Regex_FindProcedure)-1)+(RegularExpressionMatchPosition(#RegEx_FindFunction)-1)
+          Define Length=RegularExpressionMatchLength(#Regex_FindProcedure)
           
-          ObjectType$=RegularExpressionGroup(#RegEx_FindFunction, 1)
+          Define ObjectType$=RegularExpressionGroup(#RegEx_FindFunction, 1)
           
           
           ParseObject(ObjectType$, Position, Length, Content$)
