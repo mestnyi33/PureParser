@@ -16,9 +16,9 @@ Structure ParsePBGadget
   Width.i
   Height.i
   Caption$
-  Param1.S
-  Param2.S
-  Param3.S
+  Param1.i
+  Param2.i
+  Param3.i
   Flag.i
   
   FuncClass$
@@ -37,217 +37,86 @@ CompilerIf #PB_Compiler_IsMainFile
     #Regex_FindBrackets
   EndEnumeration
   
-  Procedure PB_Flag_Window(Flag$) ;Ok
+  Procedure PB_Flag(Flag$) ; Ok
     Protected i
     Protected Flag 
     For i = 0 To CountString(Flag$,"|")
-      Select Trim(StringField(Flag$,i+1,"|"))
-        Case "#PB_Window_BorderLess"     : Flag = Flag | #PB_Window_BorderLess
-        Case "#PB_Window_WindowCentered" : Flag = Flag | #PB_Window_FrameCoordinate
-        Case "#PB_Window_WindowCentered" : Flag = Flag | #PB_Window_InnerCoordinate
-        Case "#PB_Window_Invisible"      : Flag = Flag | #PB_Window_Invisible
-        Case "#PB_Window_Maximize"       : Flag = Flag | #PB_Window_Maximize
-        Case "#PB_Window_MaximizeGadget" : Flag = Flag | #PB_Window_MaximizeGadget
-        Case "#PB_Window_Minimize"       : Flag = Flag | #PB_Window_Minimize
-        Case "#PB_Window_MinimizeGadget" : Flag = Flag | #PB_Window_MinimizeGadget
-        Case "#PB_Window_NoActivate"     : Flag = Flag | #PB_Window_NoActivate
-        Case "#PB_Window_NoGadgets"      : Flag = Flag | #PB_Window_NoGadgets
-        Case "#PB_Window_Normal"         : Flag = Flag | #PB_Window_Normal
-        Case "#PB_Window_ScreenCentered" : Flag = Flag | #PB_Window_ScreenCentered
-        Case "#PB_Window_SizeGadget"     : Flag = Flag | #PB_Window_SizeGadget
-        Case "#PB_Window_SystemMenu"     : Flag = Flag | #PB_Window_SystemMenu
-        Case "#PB_Window_TitleBar"       : Flag = Flag | #PB_Window_TitleBar
-        Case "#PB_Window_Tool"           : Flag = Flag | #PB_Window_Tool
-        Case "#PB_Window_WindowCentered" : Flag = Flag | #PB_Window_WindowCentered
+      Select Trim(StringField(Flag$,(i+1),"|"))
+          ; window
+        Case "#PB_Window_BorderLess"              : Flag = Flag | #PB_Window_BorderLess
+        Case "#PB_Window_Invisible"               : Flag = Flag | #PB_Window_Invisible
+        Case "#PB_Window_Maximize"                : Flag = Flag | #PB_Window_Maximize
+        Case "#PB_Window_Minimize"                : Flag = Flag | #PB_Window_Minimize
+        Case "#PB_Window_MaximizeGadget"          : Flag = Flag | #PB_Window_MaximizeGadget
+        Case "#PB_Window_MinimizeGadget"          : Flag = Flag | #PB_Window_MinimizeGadget
+        Case "#PB_Window_NoActivate"              : Flag = Flag | #PB_Window_NoActivate
+        Case "#PB_Window_NoGadgets"               : Flag = Flag | #PB_Window_NoGadgets
+        Case "#PB_Window_SizeGadget"              : Flag = Flag | #PB_Window_SizeGadget
+        Case "#PB_Window_SystemMenu"              : Flag = Flag | #PB_Window_SystemMenu
+        Case "#PB_Window_TitleBar"                : Flag = Flag | #PB_Window_TitleBar
+        Case "#PB_Window_Tool"                    : Flag = Flag | #PB_Window_Tool
+        Case "#PB_Window_ScreenCentered"          : Flag = Flag | #PB_Window_ScreenCentered
+        Case "#PB_Window_WindowCentered"          : Flag = Flag | #PB_Window_WindowCentered
+          ; button  
+        Case "#PB_Button_Default"                 : Flag = Flag | #PB_Button_Default
+        Case "#PB_Button_Left"                    : Flag = Flag | #PB_Button_Left
+        Case "#PB_Button_MultiLine"               : Flag = Flag | #PB_Button_MultiLine
+        Case "#PB_Button_Right"                   : Flag = Flag | #PB_Button_Right
+        Case "#PB_Button_Toggle"                  : Flag = Flag | #PB_Button_Toggle
+          ; buttonimage 
+        Case "#PB_Button_Image"                   : Flag = Flag | #PB_Button_Image
+        Case "#PB_Button_PressedImage"            : Flag = Flag | #PB_Button_PressedImage
+          ; string
+        Case "#PB_String_BorderLess"              : Flag = Flag | #PB_String_BorderLess
+        Case "#PB_String_LowerCase"               : Flag = Flag | #PB_String_LowerCase
+        Case "#PB_String_MaximumLength"           : Flag = Flag | #PB_String_MaximumLength
+        Case "#PB_String_Numeric"                 : Flag = Flag | #PB_String_Numeric
+        Case "#PB_String_Password"                : Flag = Flag | #PB_String_Password
+        Case "#PB_String_ReadOnly"                : Flag = Flag | #PB_String_ReadOnly
+        Case "#PB_String_UpperCase"               : Flag = Flag | #PB_String_UpperCase
+          ; text
+        Case "#PB_Text_Border"                    : Flag = Flag | #PB_Text_Border
+        Case "#PB_Text_Center"                    : Flag = Flag | #PB_Text_Center
+        Case "#PB_Text_Right"                     : Flag = Flag | #PB_Text_Right
+          ; checkbox
+        Case "#PB_CheckBox_Center"                : Flag = Flag | #PB_CheckBox_Center
+        Case "#PB_CheckBox_Right"                 : Flag = Flag | #PB_CheckBox_Right
+        Case "#PB_CheckBox_ThreeState"            : Flag = Flag | #PB_CheckBox_ThreeState
+          ; listicon
+        Case "#PB_ListIcon_AlwaysShowSelection"   : Flag = Flag | #PB_ListIcon_AlwaysShowSelection
+        Case "#PB_ListIcon_CheckBoxes"            : Flag = Flag | #PB_ListIcon_CheckBoxes
+        Case "#PB_ListIcon_ColumnWidth"           : Flag = Flag | #PB_ListIcon_ColumnWidth
+        Case "#PB_ListIcon_DisplayMode"           : Flag = Flag | #PB_ListIcon_DisplayMode
+        Case "#PB_ListIcon_GridLines"             : Flag = Flag | #PB_ListIcon_GridLines
+        Case "#PB_ListIcon_FullRowSelect"         : Flag = Flag | #PB_ListIcon_FullRowSelect
+        Case "#PB_ListIcon_HeaderDragDrop"        : Flag = Flag | #PB_ListIcon_HeaderDragDrop
+        Case "#PB_ListIcon_LargeIcon"             : Flag = Flag | #PB_ListIcon_LargeIcon
+        Case "#PB_ListIcon_List"                  : Flag = Flag | #PB_ListIcon_List
+        Case "#PB_ListIcon_MultiSelect"           : Flag = Flag | #PB_ListIcon_MultiSelect
+        Case "#PB_ListIcon_Report"                : Flag = Flag | #PB_ListIcon_Report
+        Case "#PB_ListIcon_SmallIcon"             : Flag = Flag | #PB_ListIcon_SmallIcon
+        Case "#PB_ListIcon_ThreeState"            : Flag = Flag | #PB_ListIcon_ThreeState
+          ; listview
+        Case "#PB_ListView_ClickSelect"           : Flag = Flag | #PB_ListView_ClickSelect
+        Case "#PB_ListView_MultiSelect"           : Flag = Flag | #PB_ListView_MultiSelect
+          ; frame
+        Case "#PB_Frame_Double"                   : Flag = Flag | #PB_Frame_Double
+        Case "#PB_Frame_Flat"                     : Flag = Flag | #PB_Frame_Flat
+        Case "#PB_Frame_Single"                   : Flag = Flag | #PB_Frame_Single
+          ; combobox
+        Case "#PB_ComboBox_Editable"              : Flag = Flag | #PB_ComboBox_Editable
+        Case "#PB_ComboBox_Image"                 : Flag = Flag | #PB_ComboBox_Image
+        Case "#PB_ComboBox_LowerCase"             : Flag = Flag | #PB_ComboBox_LowerCase
+        Case "#PB_ComboBox_UpperCase"             : Flag = Flag | #PB_ComboBox_UpperCase
+          ; image 
+        Case "#PB_Image_Border"                   : Flag = Flag | #PB_Image_Border
+        Case "#PB_Image_Raised"                   : Flag = Flag | #PB_Image_Raised
       EndSelect
     Next
     ProcedureReturn Flag
   EndProcedure 
   
-  Procedure PB_Flag_Button(Flag$) ;Ok
-    Protected i
-    Protected Flag 
-    For i = 0 To CountString(Flag$,"|")
-      Select Trim(StringField(Flag$,i+1,"|"))
-        Case "#PB_Button_Default"      : Flag = Flag | #PB_Button_Default
-        Case "#PB_Button_Image"        : Flag = Flag | #PB_Button_Image
-        Case "#PB_Button_Left"         : Flag = Flag | #PB_Button_Left
-        Case "#PB_Button_MultiLine"    : Flag = Flag | #PB_Button_MultiLine
-        Case "#PB_Button_PressedImage" : Flag = Flag | #PB_Button_PressedImage
-        Case "#PB_Button_Right"        : Flag = Flag | #PB_Button_Right
-        Case "#PB_Button_Toggle"       : Flag = Flag | #PB_Button_Toggle
-      EndSelect
-    Next
-    ProcedureReturn Flag
-  EndProcedure 
-  
-  Procedure PB_Flag_String(Flag$) ;Ok
-    Protected i
-    Protected Flag 
-    For i = 0 To CountString(Flag$,"|")
-      Select Trim(StringField(Flag$,i+1,"|"))
-        Case "#PB_String_AutoComplete"  : Flag = Flag | #PB_String_AutoComplete
-        Case "#PB_String_AutoInsert"    : Flag = Flag | #PB_String_AutoInsert
-        Case "#PB_String_BorderLess"    : Flag = Flag | #PB_String_BorderLess
-        Case "#PB_String_CaseSensitive" : Flag = Flag | #PB_String_CaseSensitive
-        Case "#PB_String_Equal"         : Flag = Flag | #PB_String_Equal
-        Case "#PB_String_Greater"       : Flag = Flag | #PB_String_Greater
-        Case "#PB_String_InPlace"       : Flag = Flag | #PB_String_InPlace
-        Case "#PB_String_Lower"         : Flag = Flag | #PB_String_Lower
-        Case "#PB_String_LowerCase"     : Flag = Flag | #PB_String_LowerCase
-        Case "#PB_String_MaximumLength" : Flag = Flag | #PB_String_MaximumLength
-        Case "#PB_String_NoCase"        : Flag = Flag | #PB_String_NoCase
-        Case "#PB_String_NoZero"        : Flag = Flag | #PB_String_NoZero
-        Case "#PB_String_Numeric"       : Flag = Flag | #PB_String_Numeric
-        Case "#PB_String_Password"      : Flag = Flag | #PB_String_Password
-        Case "#PB_String_ReadOnly"      : Flag = Flag | #PB_String_ReadOnly
-        Case "#PB_String_UpperCase"     : Flag = Flag | #PB_String_UpperCase
-      EndSelect
-    Next
-    ProcedureReturn Flag
-  EndProcedure 
-  
-  Procedure PB_Flag_Text(Flag$) ;Ok
-    Protected i
-    Protected Flag 
-    For i = 0 To CountString(Flag$,"|")
-      Select Trim(StringField(Flag$,i+1,"|"))
-        Case "#PB_Text_Border"  : Flag = Flag | #PB_Text_Border
-        Case "#PB_Text_Center"  : Flag = Flag | #PB_Text_Center
-        Case "#PB_Text_Right"   : Flag = Flag | #PB_Text_Right
-      EndSelect
-    Next
-    ProcedureReturn Flag
-  EndProcedure 
-  
-  Procedure PB_Flag_CheckBox(Flag$) ;Ok
-    Protected i
-    Protected Flag 
-    For i = 0 To CountString(Flag$,"|")
-      Select Trim(StringField(Flag$,i+1,"|"))
-        Case "#PB_CheckBox_Center"     : Flag = Flag | #PB_CheckBox_Center
-        Case "#PB_Checkbox_Checked"    : Flag = Flag | #PB_Checkbox_Checked
-        Case "#PB_Checkbox_Inbetween"  : Flag = Flag | #PB_Checkbox_Inbetween
-        Case "#PB_CheckBox_Right"      : Flag = Flag | #PB_CheckBox_Right
-        Case "#PB_CheckBox_ThreeState" : Flag = Flag | #PB_CheckBox_ThreeState
-        Case "#PB_Checkbox_Unchecked"  : Flag = Flag | #PB_Checkbox_Unchecked
-      EndSelect
-    Next
-    ProcedureReturn Flag
-  EndProcedure 
-  
-  Procedure PB_Flag_Option(Flag$) ;
-    Protected i
-    Protected Flag 
-    For i = 0 To CountString(Flag$,"|")
-      Select Trim(StringField(Flag$,i+1,"|"))
-          
-      EndSelect
-    Next
-    ProcedureReturn Flag
-  EndProcedure 
-  
-  Procedure PB_Flag_ListView(Flag$) ;Ok
-    Protected i
-    Protected Flag 
-    For i = 0 To CountString(Flag$,"|")
-      Select Trim(StringField(Flag$,i+1,"|"))
-        Case "#PB_ListView_ClickSelect" : Flag = Flag | #PB_ListView_ClickSelect
-        Case "#PB_ListView_MultiSelect" : Flag = Flag | #PB_ListView_MultiSelect
-      EndSelect
-    Next
-    ProcedureReturn Flag
-  EndProcedure 
-  
-  Procedure PB_Flag_Frame(Flag$) ;Ok
-    Protected i
-    Protected Flag 
-    For i = 0 To CountString(Flag$,"|")
-      Select Trim(StringField(Flag$,i+1,"|"))
-        Case "#PB_Frame_Double" : Flag = Flag | #PB_Frame_Double
-        Case "#PB_Frame_Flat"   : Flag = Flag | #PB_Frame_Flat
-        Case "#PB_Frame_Single" : Flag = Flag | #PB_Frame_Single
-      EndSelect
-    Next
-    ProcedureReturn Flag
-  EndProcedure 
-  
-  Procedure PB_Flag_ComboBox(Flag$) ;Ok
-    Protected i
-    Protected Flag 
-    For i = 0 To CountString(Flag$,"|")
-      Select Trim(StringField(Flag$,i+1,"|"))
-        Case "#PB_ComboBox_Editable"  : Flag = Flag | #PB_ComboBox_Editable
-        Case "#PB_ComboBox_Image"     : Flag = Flag | #PB_ComboBox_Image
-        Case "#PB_ComboBox_LowerCase" : Flag = Flag | #PB_ComboBox_LowerCase
-        Case "#PB_ComboBox_UpperCase" : Flag = Flag | #PB_ComboBox_UpperCase
-      EndSelect
-    Next
-    ProcedureReturn Flag
-  EndProcedure 
-  
-  Procedure PB_Flag_Image(Flag$) ;Ok
-    Protected i
-    Protected Flag 
-    For i = 0 To CountString(Flag$,"|")
-      Select Trim(StringField(Flag$,i+1,"|"))
-        Case "#PB_Image_Border"         : Flag = Flag | #PB_Image_Border
-        Case "#PB_Image_DisplayFormat"  : Flag = Flag | #PB_Image_DisplayFormat
-        Case "#PB_Image_FloydSteinberg" : Flag = Flag | #PB_Image_FloydSteinberg
-        Case "#PB_Image_InternalDepth"  : Flag = Flag | #PB_Image_InternalDepth
-        Case "#PB_Image_OriginalDepth"  : Flag = Flag | #PB_Image_OriginalDepth
-        Case "#PB_Image_Raised"         : Flag = Flag | #PB_Image_Raised
-        Case "#PB_Image_Raw"            : Flag = Flag | #PB_Image_Raw
-        Case "#PB_Image_Smooth"         : Flag = Flag | #PB_Image_Smooth
-        Case "#PB_Image_Transparent"    : Flag = Flag | #PB_Image_Transparent
-      EndSelect
-    Next
-    ProcedureReturn Flag
-  EndProcedure 
-  
-  Procedure PB_Flag(Type$,Flag$)
-    Protected Flag 
-    Select Trim(Type$)
-      Case "OpenWindow"          : Flag = PB_Flag_Window   (Flag$) ; Ok
-      Case "ButtonGadget"        : Flag = PB_Flag_Button   (Flag$) ; Ok 
-      Case "StringGadget"        : Flag = PB_Flag_String   (Flag$) ; Ok 
-      Case "TextGadget"          : Flag = PB_Flag_Text     (Flag$) ; Ok
-      Case "CheckBoxGadget"      : Flag = PB_Flag_CheckBox (Flag$) ; Ok
-      Case "OptionGadget"        : Flag = PB_Flag_Option   (Flag$) ; Ok
-      Case "ListViewGadget"      : Flag = PB_Flag_ListView (Flag$) ; Ok
-      Case "FrameGadget"         : Flag = PB_Flag_Frame    (Flag$) ; Ok
-      Case "ComboBoxGadget"      : Flag = PB_Flag_ComboBox (Flag$) ; Ok
-      Case "ImageGadget"         : Flag = PB_Flag_Image    (Flag$) ; Ok
-      Case "HyperLinkGadget"     : Flag = PB_Flag_Button(Flag$) 
-      Case "ContainerGadget"     : Flag = PB_Flag_Button(Flag$) 
-      Case "ListIconGadget"      : Flag = PB_Flag_Button(Flag$) 
-      Case "IPAddressGadget"     : Flag = PB_Flag_Button(Flag$) 
-      Case "ProgressBarGadget"   : Flag = PB_Flag_Button(Flag$) 
-      Case "ScrollBarGadget"     : Flag = PB_Flag_Button(Flag$) 
-      Case "ScrollAreaGadget"    : Flag = PB_Flag_Button(Flag$)  
-      Case "TrackBarGadget"      : Flag = PB_Flag_Button(Flag$) 
-      Case "WebGadget"           : Flag = PB_Flag_Button(Flag$) 
-      Case "ButtonImageGadget"   : Flag = PB_Flag_Button(Flag$) 
-      Case "CalendarGadget"      : Flag = PB_Flag_Button(Flag$) 
-      Case "DateGadget"          : Flag = PB_Flag_Button(Flag$) 
-      Case "EditorGadget"        : Flag = PB_Flag_Button(Flag$) 
-      Case "ExplorerListGadget"  : Flag = PB_Flag_Button(Flag$) 
-      Case "ExplorerTreeGadget"  : Flag = PB_Flag_Button(Flag$) 
-      Case "ExplorerComboGadget" : Flag = PB_Flag_Button(Flag$) 
-      Case "SpinGadget"          : Flag = PB_Flag_Button(Flag$) 
-      Case "TreeGadget"          : Flag = PB_Flag_Button(Flag$) 
-      Case "PanelGadget"         : Flag = PB_Flag_Button(Flag$)  
-      Case "SplitterGadget"      : Flag = PB_Flag_Button(Flag$) 
-      Case "MDIGadget"           : Flag = PB_Flag_Button(Flag$)  
-      Case "ScintillaGadget"     : Flag = PB_Flag_Button(Flag$) 
-      Case "ShortcutGadget"      : Flag = PB_Flag_Button(Flag$) 
-      Case "CanvasGadget"        : Flag = PB_Flag_Button(Flag$) 
-    EndSelect
-    ProcedureReturn Flag
-  EndProcedure 
-  
-  
-  Procedure TypePBGadget(Class.S) ;Returns gadget type from gadget name
+  Procedure PB_Type(Class$) ; Ok
     Enumeration - 7               ; Type
       #__Type_Message             ; -7
       #__Type_PopupMenu           ; -6
@@ -302,46 +171,45 @@ CompilerIf #PB_Compiler_IsMainFile
       
     EndEnumeration
     
-    
-    If     FindString(Class.S, LCase("Desktop")       ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Desktop
-    ElseIf FindString(Class.S, LCase("PopupMenu")     ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_PopupMenu
-    ElseIf FindString(Class.S, LCase("Toolbar")       ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Toolbar
-    ElseIf FindString(Class.S, LCase("Menu")          ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Menu
-    ElseIf FindString(Class.S, LCase("Status")        ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_StatusBar
-    ElseIf FindString(Class.S, LCase("Window")        ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Window
-    ElseIf FindString(Class.S, LCase("ButtonImage")   ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_ButtonImage
-    ElseIf FindString(Class.S, LCase("String")        ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_String
-    ElseIf FindString(Class.S, LCase("Text")          ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Text
-    ElseIf FindString(Class.S, LCase("CheckBox")      ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_CheckBox
-    ElseIf FindString(Class.S, LCase("Option")        ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Option
-    ElseIf FindString(Class.S, LCase("ListView")      ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_ListView
-    ElseIf FindString(Class.S, LCase("Frame")         ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Frame  
-    ElseIf FindString(Class.S, LCase("ComboBox")      ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_ComboBox
-    ElseIf FindString(Class.S, LCase("Image")         ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Image
-    ElseIf FindString(Class.S, LCase("HyperLink")     ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_HyperLink
-    ElseIf FindString(Class.S, LCase("Container")     ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Container
-    ElseIf FindString(Class.S, LCase("ListIcon")      ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_ListIcon
-    ElseIf FindString(Class.S, LCase("IPAddress")     ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_IPAddress
-    ElseIf FindString(Class.S, LCase("ProgressBar")   ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_ProgressBar
-    ElseIf FindString(Class.S, LCase("ScrollBar")     ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_ScrollBar
-    ElseIf FindString(Class.S, LCase("ScrollArea")    ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_ScrollArea
-    ElseIf FindString(Class.S, LCase("TrackBar")      ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_TrackBar
-    ElseIf FindString(Class.S, LCase("Web")           ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Web
-    ElseIf FindString(Class.S, LCase("Button")        ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Button
-    ElseIf FindString(Class.S, LCase("Calendar")      ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Calendar
-    ElseIf FindString(Class.S, LCase("Date")          ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Date
-    ElseIf FindString(Class.S, LCase("Editor")        ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Editor
-    ElseIf FindString(Class.S, LCase("ExplorerList")  ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_ExplorerList
-    ElseIf FindString(Class.S, LCase("ExplorerTree")  ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_ExplorerTree
-    ElseIf FindString(Class.S, LCase("ExplorerCombo") ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_ExplorerCombo
-    ElseIf FindString(Class.S, LCase("Spin")          ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Spin
-    ElseIf FindString(Class.S, LCase("Tree")          ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Tree
-    ElseIf FindString(Class.S, LCase("Panel")         ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Panel
-    ElseIf FindString(Class.S, LCase("Splitter")      ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Splitter
-    ElseIf FindString(Class.S, LCase("MDI")           ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_MDI
-    ElseIf FindString(Class.S, LCase("Scintilla")     ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Scintilla
-    ElseIf FindString(Class.S, LCase("Shortcut")      ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Shortcut
-    ElseIf FindString(Class.S, LCase("Canvas")        ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Canvas
+    If     FindString(Class$, LCase("Desktop")       ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Desktop
+    ElseIf FindString(Class$, LCase("PopupMenu")     ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_PopupMenu
+    ElseIf FindString(Class$, LCase("Toolbar")       ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Toolbar
+    ElseIf FindString(Class$, LCase("Menu")          ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Menu
+    ElseIf FindString(Class$, LCase("Status")        ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_StatusBar
+    ElseIf FindString(Class$, LCase("Window")        ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Window
+    ElseIf FindString(Class$, LCase("ButtonImage")   ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_ButtonImage
+    ElseIf FindString(Class$, LCase("String")        ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_String
+    ElseIf FindString(Class$, LCase("Text")          ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Text
+    ElseIf FindString(Class$, LCase("CheckBox")      ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_CheckBox
+    ElseIf FindString(Class$, LCase("Option")        ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Option
+    ElseIf FindString(Class$, LCase("ListView")      ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_ListView
+    ElseIf FindString(Class$, LCase("Frame")         ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Frame  
+    ElseIf FindString(Class$, LCase("ComboBox")      ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_ComboBox
+    ElseIf FindString(Class$, LCase("Image")         ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Image
+    ElseIf FindString(Class$, LCase("HyperLink")     ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_HyperLink
+    ElseIf FindString(Class$, LCase("Container")     ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Container
+    ElseIf FindString(Class$, LCase("ListIcon")      ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_ListIcon
+    ElseIf FindString(Class$, LCase("IPAddress")     ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_IPAddress
+    ElseIf FindString(Class$, LCase("ProgressBar")   ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_ProgressBar
+    ElseIf FindString(Class$, LCase("ScrollBar")     ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_ScrollBar
+    ElseIf FindString(Class$, LCase("ScrollArea")    ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_ScrollArea
+    ElseIf FindString(Class$, LCase("TrackBar")      ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_TrackBar
+    ElseIf FindString(Class$, LCase("Web")           ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Web
+    ElseIf FindString(Class$, LCase("Button")        ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Button
+    ElseIf FindString(Class$, LCase("Calendar")      ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Calendar
+    ElseIf FindString(Class$, LCase("Date")          ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Date
+    ElseIf FindString(Class$, LCase("Editor")        ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Editor
+    ElseIf FindString(Class$, LCase("ExplorerList")  ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_ExplorerList
+    ElseIf FindString(Class$, LCase("ExplorerTree")  ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_ExplorerTree
+    ElseIf FindString(Class$, LCase("ExplorerCombo") ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_ExplorerCombo
+    ElseIf FindString(Class$, LCase("Spin")          ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Spin
+    ElseIf FindString(Class$, LCase("Tree")          ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Tree
+    ElseIf FindString(Class$, LCase("Panel")         ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Panel
+    ElseIf FindString(Class$, LCase("Splitter")      ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Splitter
+    ElseIf FindString(Class$, LCase("MDI")           ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_MDI
+    ElseIf FindString(Class$, LCase("Scintilla")     ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Scintilla
+    ElseIf FindString(Class$, LCase("Shortcut")      ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Shortcut
+    ElseIf FindString(Class$, LCase("Canvas")        ,-1,#PB_String_NoCase) :ProcedureReturn #__Type_Canvas
     EndIf
     
     ProcedureReturn #False
@@ -362,19 +230,18 @@ CompilerIf #PB_Compiler_IsMainFile
   EndProcedure
   
   Procedure CreatePBGadget(*This.ParsePBGadget)
+    Protected Title$
     
     With *This
+      Title$=Trim(Trim(\Caption$), Chr(34))
       Select \Type
-        Case #__Type_Window
-          OpenWindow(-1, \X,\Y,\Width,\Height, \Caption$, \Flag|#PB_Window_SizeGadget)
-        Case #__Type_Button
-          ButtonGadget(-1, \X,\Y,\Width,\Height, \Caption$, \Flag)
-        Case #__Type_String
-          StringGadget(-1, \X,\Y,\Width,\Height, \Caption$, \Flag)
-        Case #__Type_Text
-          TextGadget(-1, \X,\Y,\Width,\Height, \Caption$, \Flag)
-        Case #__Type_CheckBox
-          CheckBoxGadget(-1, \X,\Y,\Width,\Height, \Caption$, \Flag)
+        Case #__Type_Window        : OpenWindow(#PB_Any, \X,\Y,\Width,\Height, Title$, \Flag|#PB_Window_SizeGadget)
+        Case #__Type_Text          : TextGadget(#PB_Any, \X,\Y,\Width,\Height, Title$, \Flag)
+        Case #__Type_Button        : ButtonGadget(#PB_Any, \X,\Y,\Width,\Height, Title$, \Flag)
+        Case #__Type_String        : StringGadget(#PB_Any, \X,\Y,\Width,\Height, Title$, \Flag)
+        Case #__Type_CheckBox      : CheckBoxGadget(#PB_Any, \X,\Y,\Width,\Height, Title$, \Flag)
+        Case #__Type_ListIcon      : ListIconGadget(#PB_Any, \X,\Y,\Width,\Height, Title$, \Param1, \Flag)
+        Case #__Type_ListView      : ListViewGadget(#PB_Any, \X,\Y,\Width,\Height, \Flag)
       EndSelect
     EndWith
     
@@ -459,7 +326,7 @@ CompilerIf #PB_Compiler_IsMainFile
                       
                       Protected *This.ParsePBGadget 
                       *This = AllocateStructure(ParsePBGadget)
-                      *This\Type = TypePBGadget(FunctionName$)
+                      *This\Type = PB_Type(FunctionName$)
                       
                       If ExamineRegularExpression(#RegEx_FindArguments, FunctionArgs$)
                         While NextRegularExpressionMatch(#RegEx_FindArguments)
@@ -480,7 +347,7 @@ CompilerIf #PB_Compiler_IsMainFile
                                     i=1 ;Texts + #LF$
                                 EndSelect
                                 
-                              Case "TrackBarGadget","SpinGadget","SplitterGadget","ProgressBarGadget","ListIconGadget"
+                              Case "TrackBarGadget","SpinGadget","SplitterGadget","ProgressBarGadget"
                                 Select Count 
                                   Case 6,8
                                     i=1 ;Texts + #LF$
@@ -502,7 +369,7 @@ CompilerIf #PB_Compiler_IsMainFile
                                     i=3 ; Texts + #LF$ + #LF$ + #LF$
                                 EndSelect
                                 
-                              Case "HyperLinkGadget","DateGadget";,"ListIconGadget"
+                              Case "HyperLinkGadget","DateGadget","ListIconGadget"
                                 Select Count 
                                   Case 8
                                     i=2 ; Texts + #LF$ + #LF$
@@ -526,7 +393,6 @@ CompilerIf #PB_Compiler_IsMainFile
                                   Default
                                     \X = FindVar(#File, *File, Length, Format, Trim(Args$))
                                 EndSelect
-                                
                               Case 3
                                 Select Asc(Trim(Args$))
                                   Case '0' To '9'
@@ -551,8 +417,13 @@ CompilerIf #PB_Compiler_IsMainFile
                               Case 6
                                 \Caption$ = Args$
                                 
+                              Case 7
+                                \Param1 = Val(Args$)
+                              Case 8
+                              Case 9
+                                
                               Case 10
-                                \Flag = PB_Flag(FunctionName$, Args$)
+                                \Flag = PB_Flag(Args$)
                                 
                             EndSelect
                           EndWith
