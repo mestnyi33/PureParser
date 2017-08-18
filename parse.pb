@@ -239,18 +239,18 @@ CompilerIf #PB_Compiler_IsMainFile
   Procedure SetPBFunction(*This.ParsePBGadget)
     
     With *This
-      Select \Type$
-        Case "SetGadgetFont"
-          PushListPosition(ParsePBGadget())
-          ForEach ParsePBGadget()
+      PushListPosition(ParsePBGadget())
+      ForEach ParsePBGadget()
+        Select \Type$
+          Case "SetGadgetFont"
             If ParsePBGadget()\ID$ = Trim(\ID$)
               If IsFont(\Font)
                 SetGadgetFont(ParsePBGadget()\ID, FontID(\Font))
               EndIf
             EndIf
-          Next
-          PopListPosition(ParsePBGadget())
-      EndSelect
+        EndSelect
+      Next
+      PopListPosition(ParsePBGadget())
     EndWith
     
   EndProcedure
@@ -676,18 +676,13 @@ CompilerIf #PB_Compiler_IsMainFile
         If File$
           Protected a
           If OpenFile(0, File$)         ; we create a new text file...
-;             For a=1 To 10
-;               If a =  5
-;                 WriteStringN(0, "Line "+Str(a))  ; we write 10 lines (each with 'end of line' character)
-;               EndIf
-;             Next
             
             PushListPosition(ParsePBGadget())
             ;SortStructuredList(ParsePBGadget(), #PB_Sort_Descending, OffsetOf(ParsePBGadget\Position), TypeOf(ParsePBGadget\Position)) ; Сортировка
             ForEach ParsePBGadget()
               FileSeek(0, ParsePBGadget()\Position)
-              WriteStringN(0, ParsePBGadget()\Function$, #PB_UTF8)  ; we write 10 lines (each with 'end of line' character)
-                
+              WriteString(0, ParsePBGadget()\Function$, #PB_UTF8) 
+              
                 ;If ParsePBGadget()\ID$ = Trim(Args$)
               ;Debug ParsePBGadget()\Function$
               ;EndIf

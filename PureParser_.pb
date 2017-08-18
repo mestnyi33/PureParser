@@ -14,30 +14,6 @@ Structure Object      ; Объектами будут все функции ко
                       ; Редактор будет работать только с этой строкой. Именно эта строка в момент сохранения будет записана в исходный файл на место Position/Length
 EndStructure
 
-NewList Object.Object()       ; Список объектов
-
-
-Procedure AddObject(ObjectType.s, ParentID, Position, Length, Content$)                           ; Процедура добавляет новый объект
-  Static ObjectID
-  
-  Shared Object()
-  Protected *Element.Object=AddElement(Object())
-  If *Element : ObjectID+1
-    With *Element
-      \ObjectID   = ObjectID
-      \ParentID   = ParentID
-      \ObjectType = ObjectType
-      \Position   = Position
-      \Length     = Length
-      \Content    = Content$
-    EndWith
-    
-    Protected Result=ObjectID
-  EndIf
-  
-  ProcedureReturn Result
-EndProcedure
-
 #ObjectType_OpenWindow="OpenWindow"
 #ObjectType_ButtonGadget="ButtonGadget"
 #ObjectType_ButtonImageGadget="ButtonImageGadget"
@@ -74,11 +50,30 @@ EndProcedure
 #ObjectType_WebGadget="WebGadget"
 
 
+Global NewList Object.Object()       ; Список объектов
+
+Procedure AddObject(ObjectType.s, ParentID, Position, Length, Content$)                           ; Процедура добавляет новый объект
+  Static ObjectID
+  
+  Shared Object()
+  Protected *Element.Object=AddElement(Object())
+  If *Element : ObjectID+1
+    With *Element
+      \ObjectID   = ObjectID
+      \ParentID   = ParentID
+      \ObjectType = ObjectType
+      \Position   = Position
+      \Length     = Length
+      \Content    = Content$
+    EndWith
+    
+    Protected Result=ObjectID
+  EndIf
+  
+  ProcedureReturn Result
+EndProcedure
+
 ; После того как все списки заполнены, можно переходить к их визуальному представлению в редакторе
-
-
-
-
 
 ;- Парсинг
 
@@ -129,6 +124,12 @@ Procedure Parser(Position, Length, Content$)
   
   Select MapKey(ParserElement())
     Case #ObjectType_OpenWindow
+      CurrentParent = AddObject(MapKey(ParserElement()), CurrentParent, Position, Length, Content$)
+    Case #ObjectType_ContainerGadget
+      CurrentParent = AddObject(MapKey(ParserElement()), CurrentParent, Position, Length, Content$)
+    Case #ObjectType_ScrollAreaGadget
+      CurrentParent = AddObject(MapKey(ParserElement()), CurrentParent, Position, Length, Content$)
+    Case #ObjectType_PanelGadget
       CurrentParent = AddObject(MapKey(ParserElement()), CurrentParent, Position, Length, Content$)
     Default
       AddObject(MapKey(ParserElement()), CurrentParent, Position, Length, Content$)
