@@ -375,23 +375,24 @@ CompilerIf #PB_Compiler_IsMainFile
     
     If ReadFile(#File, FileName)
       Protected Create_Reg_Flag = #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll    
-      Protected Line, FindWindow, FunctionArgs$
+      Protected Line, FindWindow, Function$, FunctionArgs$
       Protected Format=ReadStringFormat(#File)
       Protected Length = Lof(#File) 
       Protected *File = AllocateMemory(Length)
       
       If *File 
         ReadData(#File, *File, Length)
-        
-        If CreateRegularExpression(#Regex_FindProcedure, "Procedure.*?EndProcedure", Create_Reg_Flag) And
+        *This\File$ = PeekS(*File, Length, Format)
+          
+        If CreateRegularExpression(#Regex_FindProcedure, "[^;]Procedure.*?EndProcedure", Create_Reg_Flag) And
            CreateRegularExpression(#RegEx_FindFunction, "(\w+)\s*\((.*?)\)(?=\s*($|:))", Create_Reg_Flag) And
            CreateRegularExpression(#RegEx_FindArguments, "[^,]+", Create_Reg_Flag)
           
-          If ExamineRegularExpression(#Regex_FindProcedure, PeekS(*File, Length, Format))
+          If ExamineRegularExpression(#Regex_FindProcedure, *This\File$)
             While NextRegularExpressionMatch(#Regex_FindProcedure)
-              *This\File$=RegularExpressionMatchString(#Regex_FindProcedure)
+              Function$=RegularExpressionMatchString(#Regex_FindProcedure)
               
-              If ExamineRegularExpression(#RegEx_FindFunction, *This\File$)
+              If ExamineRegularExpression(#RegEx_FindFunction, Function$)
                 While NextRegularExpressionMatch(#RegEx_FindFunction)
                   With *This
                     \Type$=RegularExpressionGroup(#RegEx_FindFunction, 1)
@@ -409,10 +410,10 @@ CompilerIf #PB_Compiler_IsMainFile
                            "ExplorerComboGadget","SpinGadget","TreeGadget","PanelGadget",
                            "SplitterGadget","MDIGadget","ScintillaGadget","ShortcutGadget","CanvasGadget"
                         
-                        \Position = RegularExpressionMatchPosition(#RegEx_FindFunction)  ; Loc(#File)
-                        \Length = RegularExpressionMatchLength(#RegEx_FindFunction)  ; Lof(#File)
-;                         Debug "Position - "+\Position
-;                         Debug "Length - "+\Length
+                        \Position = RegularExpressionMatchPosition(#Regex_FindProcedure)+RegularExpressionMatchPosition(#RegEx_FindFunction) -2 
+                        \Length = RegularExpressionMatchLength(#RegEx_FindFunction)
+                        Debug "Position - "+\Position
+                        Debug "Length - "+\Length
                         Count = 0
                         Texts =  Chr(10)+ \Type$
                         
@@ -674,18 +675,20 @@ CompilerIf #PB_Compiler_IsMainFile
         
         File$ = SaveFileRequester(Title$,File$,Pattern$,Pattern)
         If File$
-          Protected a
           If OpenFile(0, File$)         ; we create a new text file...
             
             PushListPosition(ParsePBGadget())
             ;SortStructuredList(ParsePBGadget(), #PB_Sort_Descending, OffsetOf(ParsePBGadget\Position), TypeOf(ParsePBGadget\Position)) ; Сортировка
+            ;WriteStringFormat(0,#PB_Unicode)
+            WriteString(0, *This\File$, #PB_UTF8) ; 
+            
+            Protected len, add$ ;= " ; ADD" 
+            
             ForEach ParsePBGadget()
-              FileSeek(0, ParsePBGadget()\Position)
-              WriteString(0, ParsePBGadget()\Function$, #PB_UTF8) 
+              FileSeek(0, ParsePBGadget()\Position-len, #PB_Absolute)
+              len = StringByteLength(add$)
+              WriteStringN(0, ParsePBGadget()\Function$+add$, #PB_UTF8) ; 
               
-                ;If ParsePBGadget()\ID$ = Trim(Args$)
-              ;Debug ParsePBGadget()\Function$
-              ;EndIf
             Next
             PopListPosition(ParsePBGadget())
             
