@@ -16,13 +16,23 @@ Structure ParsePBGadget
   Y.i
   Width.i
   Height.i
-  Caption$
   Param1.i
   Param2.i
   Param3.i
   Flag.i
   
-  ID$
+  ID$ 
+  Type$
+  X$ 
+  Y$
+  Width$
+  Height$
+  Caption$
+  Param1$
+  Param2$
+  Param3$
+  Flag$
+  
   Class$
   FuncClass$
   Font.i
@@ -236,62 +246,71 @@ CompilerIf #PB_Compiler_IsMainFile
   EndProcedure
   
   Procedure CreatePBGadget(*This.ParsePBGadget)
-    Protected Object=-1, ObjectID
+    Protected Result
     
     With *This
-      Select \Class$
-        Case "OpenWindow"          : ObjectID = OpenWindow          (Object, \X,\Y,\Width,\Height, \Caption$,\Flag|#PB_Window_SizeGadget) 
-        Case "ButtonGadget"        : ObjectID = ButtonGadget        (Object, \X,\Y,\Width,\Height, \Caption$,\Flag)
-        Case "StringGadget"        : ObjectID = StringGadget        (Object, \X,\Y,\Width,\Height, \Caption$,\Flag)
-        Case "TextGadget"          : ObjectID = TextGadget          (Object, \X,\Y,\Width,\Height, \Caption$,\Flag)
-        Case "CheckBoxGadget"      : ObjectID = CheckBoxGadget      (Object, \X,\Y,\Width,\Height, \Caption$,\Flag)
-        Case "OptionGadget"        : ObjectID = OptionGadget        (Object, \X,\Y,\Width,\Height, \Caption$)
-        Case "ListViewGadget"      : ObjectID = ListViewGadget      (Object, \X,\Y,\Width,\Height, \Flag)
-        Case "FrameGadget"         : ObjectID = FrameGadget         (Object, \X,\Y,\Width,\Height, \Caption$,\Flag)
-        Case "ComboBoxGadget"      : ObjectID = ComboBoxGadget      (Object, \X,\Y,\Width,\Height, \Flag)
-        Case "ImageGadget"         : ObjectID = ImageGadget         (Object, \X,\Y,\Width,\Height, \Param1,\Flag)
-        Case "HyperLinkGadget"     : ObjectID = HyperLinkGadget     (Object, \X,\Y,\Width,\Height, \Caption$,\Param1,\Flag)
-        Case "ContainerGadget"     : ObjectID = ContainerGadget     (Object, \X,\Y,\Width,\Height, \Flag)
-        Case "ListIconGadget"      : ObjectID = ListIconGadget      (Object, \X,\Y,\Width,\Height, \Caption$, \Param1, \Flag)
-        Case "IPAddressGadget"     : ObjectID = IPAddressGadget     (Object, \X,\Y,\Width,\Height)
-        Case "ProgressBarGadget"   : ObjectID = ProgressBarGadget   (Object, \X,\Y,\Width,\Height, \Param1, \Param2, \Flag)
-        Case "ScrollBarGadget"     : ObjectID = ScrollBarGadget     (Object, \X,\Y,\Width,\Height, \Param1, \Param2, \Param3, \Flag)
-        Case "ScrollAreaGadget"    : ObjectID = ScrollAreaGadget    (Object, \X,\Y,\Width,\Height, \Param1, \Param2, \Param3, \Flag) 
-        Case "TrackBarGadget"      : ObjectID = TrackBarGadget      (Object, \X,\Y,\Width,\Height, \Param1, \Param2, \Flag)
-        Case "WebGadget"           : ObjectID = WebGadget           (Object, \X,\Y,\Width,\Height, \Caption$)
-        Case "ButtonImageGadget"   : ObjectID = ButtonImageGadget   (Object, \X,\Y,\Width,\Height, \Param1, \Flag)
-        Case "CalendarGadget"      : ObjectID = CalendarGadget      (Object, \X,\Y,\Width,\Height, \Param1, \Flag)
-        Case "DateGadget"          : ObjectID = DateGadget          (Object, \X,\Y,\Width,\Height, \Caption$, \Param1, \Flag)
-        Case "EditorGadget"        : ObjectID = EditorGadget        (Object, \X,\Y,\Width,\Height, \Flag)
-        Case "ExplorerListGadget"  : ObjectID = ExplorerListGadget  (Object, \X,\Y,\Width,\Height, \Caption$, \Flag)
-        Case "ExplorerTreeGadget"  : ObjectID = ExplorerTreeGadget  (Object, \X,\Y,\Width,\Height, \Caption$, \Flag)
-        Case "ExplorerComboGadget" : ObjectID = ExplorerComboGadget (Object, \X,\Y,\Width,\Height, \Caption$, \Flag)
-        Case "SpinGadget"          : ObjectID = SpinGadget          (Object, \X,\Y,\Width,\Height, \Param1, \Param2, \Flag)
-        Case "TreeGadget"          : ObjectID = TreeGadget          (Object, \X,\Y,\Width,\Height, \Flag)
-        Case "PanelGadget"         : ObjectID = PanelGadget         (Object, \X,\Y,\Width,\Height) 
+      Select \Type$
+        Case "OpenWindow"          : \ID = OpenWindow          (#PB_Any, \X,\Y,\Width,\Height, \Caption$,\Flag|#PB_Window_SizeGadget) 
+        Case "ButtonGadget"        : \ID = ButtonGadget        (#PB_Any, \X,\Y,\Width,\Height, \Caption$,\Flag)
+        Case "StringGadget"        : \ID = StringGadget        (#PB_Any, \X,\Y,\Width,\Height, \Caption$,\Flag)
+        Case "TextGadget"          : \ID = TextGadget          (#PB_Any, \X,\Y,\Width,\Height, \Caption$,\Flag)
+        Case "CheckBoxGadget"      : \ID = CheckBoxGadget      (#PB_Any, \X,\Y,\Width,\Height, \Caption$,\Flag)
+        Case "OptionGadget"        : \ID = OptionGadget        (#PB_Any, \X,\Y,\Width,\Height, \Caption$)
+        Case "ListViewGadget"      : \ID = ListViewGadget      (#PB_Any, \X,\Y,\Width,\Height, \Flag)
+        Case "FrameGadget"         : \ID = FrameGadget         (#PB_Any, \X,\Y,\Width,\Height, \Caption$,\Flag)
+        Case "ComboBoxGadget"      : \ID = ComboBoxGadget      (#PB_Any, \X,\Y,\Width,\Height, \Flag)
+        Case "ImageGadget"         : \ID = ImageGadget         (#PB_Any, \X,\Y,\Width,\Height, \Param1,\Flag)
+        Case "HyperLinkGadget"     : \ID = HyperLinkGadget     (#PB_Any, \X,\Y,\Width,\Height, \Caption$,\Param1,\Flag)
+        Case "ContainerGadget"     : \ID = ContainerGadget     (#PB_Any, \X,\Y,\Width,\Height, \Flag)
+        Case "ListIconGadget"      : \ID = ListIconGadget      (#PB_Any, \X,\Y,\Width,\Height, \Caption$, \Param1, \Flag)
+        Case "IPAddressGadget"     : \ID = IPAddressGadget     (#PB_Any, \X,\Y,\Width,\Height)
+        Case "ProgressBarGadget"   : \ID = ProgressBarGadget   (#PB_Any, \X,\Y,\Width,\Height, \Param1, \Param2, \Flag)
+        Case "ScrollBarGadget"     : \ID = ScrollBarGadget     (#PB_Any, \X,\Y,\Width,\Height, \Param1, \Param2, \Param3, \Flag)
+        Case "ScrollAreaGadget"    : \ID = ScrollAreaGadget    (#PB_Any, \X,\Y,\Width,\Height, \Param1, \Param2, \Param3, \Flag) 
+        Case "TrackBarGadget"      : \ID = TrackBarGadget      (#PB_Any, \X,\Y,\Width,\Height, \Param1, \Param2, \Flag)
+        Case "WebGadget"           : \ID = WebGadget           (#PB_Any, \X,\Y,\Width,\Height, \Caption$)
+        Case "ButtonImageGadget"   : \ID = ButtonImageGadget   (#PB_Any, \X,\Y,\Width,\Height, \Param1, \Flag)
+        Case "CalendarGadget"      : \ID = CalendarGadget      (#PB_Any, \X,\Y,\Width,\Height, \Param1, \Flag)
+        Case "DateGadget"          : \ID = DateGadget          (#PB_Any, \X,\Y,\Width,\Height, \Caption$, \Param1, \Flag)
+        Case "EditorGadget"        : \ID = EditorGadget        (#PB_Any, \X,\Y,\Width,\Height, \Flag)
+        Case "ExplorerListGadget"  : \ID = ExplorerListGadget  (#PB_Any, \X,\Y,\Width,\Height, \Caption$, \Flag)
+        Case "ExplorerTreeGadget"  : \ID = ExplorerTreeGadget  (#PB_Any, \X,\Y,\Width,\Height, \Caption$, \Flag)
+        Case "ExplorerComboGadget" : \ID = ExplorerComboGadget (#PB_Any, \X,\Y,\Width,\Height, \Caption$, \Flag)
+        Case "SpinGadget"          : \ID = SpinGadget          (#PB_Any, \X,\Y,\Width,\Height, \Param1, \Param2, \Flag)
+        Case "TreeGadget"          : \ID = TreeGadget          (#PB_Any, \X,\Y,\Width,\Height, \Flag)
+        Case "PanelGadget"         : \ID = PanelGadget         (#PB_Any, \X,\Y,\Width,\Height) 
         Case "SplitterGadget"      
-          Debug "Param1 "+\Param1
-          Debug "Param2 "+\Param2
+          Debug "Splitter FirstGadget "+\Param1
+          Debug "Splitter SecondGadget "+\Param2
           If IsGadget(\Param1) And IsGadget(\Param2)
-            ObjectID = SplitterGadget      (Object, \X,\Y,\Width,\Height, \Param1, \Param2, \Flag)
+            \ID = SplitterGadget      (#PB_Any, \X,\Y,\Width,\Height, \Param1, \Param2, \Flag)
           EndIf
         Case "MDIGadget"          
           CompilerIf #PB_Compiler_OS = #PB_OS_Windows
-            ObjectID = MDIGadget           (Object, \X,\Y,\Width,\Height, \Param1, \Param2, \Flag) 
+            \ID = MDIGadget           (#PB_Any, \X,\Y,\Width,\Height, \Param1, \Param2, \Flag) 
           CompilerEndIf
-        Case "ScintillaGadget"     : ObjectID = ScintillaGadget     (Object, \X,\Y,\Width,\Height, \Param1)
-        Case "ShortcutGadget"      : ObjectID = ShortcutGadget      (Object, \X,\Y,\Width,\Height, \Param1)
-        Case "CanvasGadget"        : ObjectID = CanvasGadget        (Object, \X,\Y,\Width,\Height, \Flag)
+        Case "ScintillaGadget"     : \ID = ScintillaGadget     (#PB_Any, \X,\Y,\Width,\Height, \Param1)
+        Case "ShortcutGadget"      : \ID = ShortcutGadget      (#PB_Any, \X,\Y,\Width,\Height, \Param1)
+        Case "CanvasGadget"        : \ID = CanvasGadget        (#PB_Any, \X,\Y,\Width,\Height, \Flag)
       EndSelect
       
       ForEach ParsePBGadget()
         If ParsePBGadget()\ID$ = \ID$
-          ParsePBGadget()\ID = ObjectID
+          ParsePBGadget()\ID = \ID
+;           ParsePBGadget()\X = \X
+;           ParsePBGadget()\Y = \Y
+;           ParsePBGadget()\Width = \Width
+;           ParsePBGadget()\Height = \Height
+;           ParsePBGadget()\Caption$ = \Caption$
+;           ParsePBGadget()\Flag = \Flag
+;           ParsePBGadget()\Param1 = \Param1
+;           ParsePBGadget()\Param2 = \Param2
+;           ParsePBGadget()\Param3 = \Param3
         EndIf
       Next
     EndWith
     
-    ProcedureReturn ObjectID
+    ProcedureReturn Result
   EndProcedure
   
   Procedure FindVar(File, *File, Length, Format, StrToFind$)
@@ -409,7 +428,7 @@ CompilerIf #PB_Compiler_IsMainFile
                       Protected *This.ParsePBGadget 
                       *This = AllocateStructure(ParsePBGadget)
                       *This\Type = PB_Type(FunctionName$)
-                      *This\Class$ = FunctionName$
+                      *This\Type$ = FunctionName$
                       
                       If ExamineRegularExpression(#RegEx_FindArguments, FunctionArgs$)
                         While NextRegularExpressionMatch(#RegEx_FindArguments)
@@ -470,10 +489,12 @@ CompilerIf #PB_Compiler_IsMainFile
                           ii = CountString(Texts,#LF$)-1
                           
                           With *This
+                            
                             Select ii
                               Case 1
-                                AddElement(ParsePBGadget()) : ParsePBGadget()\ID$ = Trim(Args$)
+                                AddElement(ParsePBGadget()) 
                                 \ID$ = Trim(Args$)
+                                ParsePBGadget()\ID$ = \ID$
                               Case 2
                                 Select Asc(Trim(Args$))
                                   Case '0' To '9'
@@ -506,22 +527,20 @@ CompilerIf #PB_Compiler_IsMainFile
                                 \Caption$ = Trim(Trim(Args$), Chr(34))
                                 
                               Case 7
-;                                 Select \Class$
-;                                   Case "SplitterGadget"      
-;                                     Debug "7 Args$ "+Args$
-;                                 EndSelect
-                                
                                 Select Asc(Trim(Args$))
                                   Case '0' To '9'
                                     \Param1 = Val(Args$)
                                   Default
-                                    PushListPosition(ParsePBGadget())
-                                    ForEach ParsePBGadget()
-                                      If ParsePBGadget()\ID$ = Trim(Args$)
-                                        \Param1 = ParsePBGadget()\ID
-                                      EndIf
-                                    Next
-                                    PopListPosition(ParsePBGadget())
+                                    Select \Type$
+                                      Case "SplitterGadget"      
+                                        PushListPosition(ParsePBGadget())
+                                        ForEach ParsePBGadget()
+                                          If ParsePBGadget()\ID$ = Trim(Args$)
+                                            \Param1 = ParsePBGadget()\ID
+                                          EndIf
+                                        Next
+                                        PopListPosition(ParsePBGadget())
+                                    EndSelect
                                 EndSelect
                                 
                               Case 8
@@ -529,13 +548,16 @@ CompilerIf #PB_Compiler_IsMainFile
                                   Case '0' To '9'
                                     \Param2 = Val(Args$)
                                   Default
-                                    PushListPosition(ParsePBGadget())
-                                    ForEach ParsePBGadget()
-                                      If ParsePBGadget()\ID$ = Trim(Args$)
-                                        \Param2 = ParsePBGadget()\ID
-                                      EndIf
-                                    Next
-                                    PopListPosition(ParsePBGadget())
+                                    Select \Type$
+                                      Case "SplitterGadget"      
+                                        PushListPosition(ParsePBGadget())
+                                        ForEach ParsePBGadget()
+                                          If ParsePBGadget()\ID$ = Trim(Args$)
+                                            \Param2 = ParsePBGadget()\ID
+                                          EndIf
+                                        Next
+                                        PopListPosition(ParsePBGadget())
+                                    EndSelect
                                 EndSelect
                                 
                               Case 9
