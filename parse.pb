@@ -8,6 +8,7 @@ Global Window_0
 
 Global Editor_0, Editor_1, Editor_2, Check,Open,Run,Save
 
+
 Structure ParsePBGadget
   ID.i 
   Type.i
@@ -21,10 +22,14 @@ Structure ParsePBGadget
   Param3.i
   Flag.i
   
+  ID$
+  Class$
   FuncClass$
   Font.i
 EndStructure
 
+Global NewList ParsePBGadget.ParsePBGadget() 
+  
 CompilerIf #PB_Compiler_IsMainFile
   #File=0
   #Window=0
@@ -34,6 +39,7 @@ CompilerIf #PB_Compiler_IsMainFile
     #RegEx_FindArguments
     #Regex_FindProcedure
     #RegEx_FindVar
+    #RegEx_FindVar1
     #Regex_FindBrackets
   EndEnumeration
   
@@ -117,48 +123,48 @@ CompilerIf #PB_Compiler_IsMainFile
   EndProcedure 
   
   Procedure PB_Type(Class$) ; Ok
-    Enumeration - 7               ; Type
-      #__Type_Message             ; -7
-      #__Type_PopupMenu           ; -6
-      #__Type_Desktop             ; -5
-      #__Type_StatusBar           ; -4
-      #__Type_Menu                ; -3 "Menu"
-      #__Type_Toolbar             ; -2 "Toolbar"
-      #__Type_Window              ; -1 "Window"
-      #__Type_Unknown             ; 0 "Create"
-      #__Type_Button              ; 1 "Button"
-      #__Type_String              ; 2 "String"
-      #__Type_Text                ; 3 "Text"
-      #__Type_CheckBox            ; 4 "CheckBox"
-      #__Type_Option              ; 5 "Option"
-      #__Type_ListView            ; 6 "ListView"
-      #__Type_Frame               ; 7 "Frame"
-      #__Type_ComboBox            ; 8 "ComboBox"
-      #__Type_Image               ; 9 "Image"
-      #__Type_HyperLink           ; 10 "HyperLink"
-      #__Type_Container           ; 11 "Container"
-      #__Type_ListIcon            ; 12 "ListIcon"
-      #__Type_IPAddress           ; 13 "IPAddress"
-      #__Type_ProgressBar         ; 14 "ProgressBar"
-      #__Type_ScrollBar           ; 15 "ScrollBar"
-      #__Type_ScrollArea          ; 16 "ScrollArea"
-      #__Type_TrackBar            ; 17 "TrackBar"
-      #__Type_Web                 ; 18 "Web"
-      #__Type_ButtonImage         ; 19 "ButtonImage"
-      #__Type_Calendar            ; 20 "Calendar"
-      #__Type_Date                ; 21 "Date"
-      #__Type_Editor              ; 22 "Editor"
-      #__Type_ExplorerList        ; 23 "ExplorerList"
-      #__Type_ExplorerTree        ; 24 "ExplorerTree"
-      #__Type_ExplorerCombo       ; 25 "ExplorerCombo"
-      #__Type_Spin                ; 26 "Spin"
-      #__Type_Tree                ; 27 "Tree"
-      #__Type_Panel               ; 28 "Panel"
-      #__Type_Splitter            ; 29 "Splitter"
-      #__Type_MDI                 ; 30
-      #__Type_Scintilla           ; 31 "Scintilla"
-      #__Type_Shortcut            ; 32 "Shortcut"
-      #__Type_Canvas              ; 33 "Canvas"
+    Enumeration - 7         ; Type
+      #__Type_Message       ; -7
+      #__Type_PopupMenu     ; -6
+      #__Type_Desktop       ; -5
+      #__Type_StatusBar     ; -4
+      #__Type_Menu          ; -3 "Menu"
+      #__Type_Toolbar       ; -2 "Toolbar"
+      #__Type_Window        ; -1 "Window"
+      #__Type_Unknown       ; 0 "Create"
+      #__Type_Button        ; 1 "Button"
+      #__Type_String        ; 2 "String"
+      #__Type_Text          ; 3 "Text"
+      #__Type_CheckBox      ; 4 "CheckBox"
+      #__Type_Option        ; 5 "Option"
+      #__Type_ListView      ; 6 "ListView"
+      #__Type_Frame         ; 7 "Frame"
+      #__Type_ComboBox      ; 8 "ComboBox"
+      #__Type_Image         ; 9 "Image"
+      #__Type_HyperLink     ; 10 "HyperLink"
+      #__Type_Container     ; 11 "Container"
+      #__Type_ListIcon      ; 12 "ListIcon"
+      #__Type_IPAddress     ; 13 "IPAddress"
+      #__Type_ProgressBar   ; 14 "ProgressBar"
+      #__Type_ScrollBar     ; 15 "ScrollBar"
+      #__Type_ScrollArea    ; 16 "ScrollArea"
+      #__Type_TrackBar      ; 17 "TrackBar"
+      #__Type_Web           ; 18 "Web"
+      #__Type_ButtonImage   ; 19 "ButtonImage"
+      #__Type_Calendar      ; 20 "Calendar"
+      #__Type_Date          ; 21 "Date"
+      #__Type_Editor        ; 22 "Editor"
+      #__Type_ExplorerList  ; 23 "ExplorerList"
+      #__Type_ExplorerTree  ; 24 "ExplorerTree"
+      #__Type_ExplorerCombo ; 25 "ExplorerCombo"
+      #__Type_Spin          ; 26 "Spin"
+      #__Type_Tree          ; 27 "Tree"
+      #__Type_Panel         ; 28 "Panel"
+      #__Type_Splitter      ; 29 "Splitter"
+      #__Type_MDI           ; 30
+      #__Type_Scintilla     ; 31 "Scintilla"
+      #__Type_Shortcut      ; 32 "Shortcut"
+      #__Type_Canvas        ; 33 "Canvas"
       
       #__Type_ImageButton    ; 34 "ImageButton"
       #__Type_Properties     ; 35 "Properties"
@@ -230,21 +236,62 @@ CompilerIf #PB_Compiler_IsMainFile
   EndProcedure
   
   Procedure CreatePBGadget(*This.ParsePBGadget)
-    Protected Title$
+    Protected Object=-1, ObjectID
     
     With *This
-      Title$=Trim(Trim(\Caption$), Chr(34))
-      Select \Type
-        Case #__Type_Window        : OpenWindow(#PB_Any, \X,\Y,\Width,\Height, Title$, \Flag|#PB_Window_SizeGadget)
-        Case #__Type_Text          : TextGadget(#PB_Any, \X,\Y,\Width,\Height, Title$, \Flag)
-        Case #__Type_Button        : ButtonGadget(#PB_Any, \X,\Y,\Width,\Height, Title$, \Flag)
-        Case #__Type_String        : StringGadget(#PB_Any, \X,\Y,\Width,\Height, Title$, \Flag)
-        Case #__Type_CheckBox      : CheckBoxGadget(#PB_Any, \X,\Y,\Width,\Height, Title$, \Flag)
-        Case #__Type_ListIcon      : ListIconGadget(#PB_Any, \X,\Y,\Width,\Height, Title$, \Param1, \Flag)
-        Case #__Type_ListView      : ListViewGadget(#PB_Any, \X,\Y,\Width,\Height, \Flag)
+      Select \Class$
+        Case "OpenWindow"          : ObjectID = OpenWindow          (Object, \X,\Y,\Width,\Height, \Caption$,\Flag|#PB_Window_SizeGadget) 
+        Case "ButtonGadget"        : ObjectID = ButtonGadget        (Object, \X,\Y,\Width,\Height, \Caption$,\Flag)
+        Case "StringGadget"        : ObjectID = StringGadget        (Object, \X,\Y,\Width,\Height, \Caption$,\Flag)
+        Case "TextGadget"          : ObjectID = TextGadget          (Object, \X,\Y,\Width,\Height, \Caption$,\Flag)
+        Case "CheckBoxGadget"      : ObjectID = CheckBoxGadget      (Object, \X,\Y,\Width,\Height, \Caption$,\Flag)
+        Case "OptionGadget"        : ObjectID = OptionGadget        (Object, \X,\Y,\Width,\Height, \Caption$)
+        Case "ListViewGadget"      : ObjectID = ListViewGadget      (Object, \X,\Y,\Width,\Height, \Flag)
+        Case "FrameGadget"         : ObjectID = FrameGadget         (Object, \X,\Y,\Width,\Height, \Caption$,\Flag)
+        Case "ComboBoxGadget"      : ObjectID = ComboBoxGadget      (Object, \X,\Y,\Width,\Height, \Flag)
+        Case "ImageGadget"         : ObjectID = ImageGadget         (Object, \X,\Y,\Width,\Height, \Param1,\Flag)
+        Case "HyperLinkGadget"     : ObjectID = HyperLinkGadget     (Object, \X,\Y,\Width,\Height, \Caption$,\Param1,\Flag)
+        Case "ContainerGadget"     : ObjectID = ContainerGadget     (Object, \X,\Y,\Width,\Height, \Flag)
+        Case "ListIconGadget"      : ObjectID = ListIconGadget      (Object, \X,\Y,\Width,\Height, \Caption$, \Param1, \Flag)
+        Case "IPAddressGadget"     : ObjectID = IPAddressGadget     (Object, \X,\Y,\Width,\Height)
+        Case "ProgressBarGadget"   : ObjectID = ProgressBarGadget   (Object, \X,\Y,\Width,\Height, \Param1, \Param2, \Flag)
+        Case "ScrollBarGadget"     : ObjectID = ScrollBarGadget     (Object, \X,\Y,\Width,\Height, \Param1, \Param2, \Param3, \Flag)
+        Case "ScrollAreaGadget"    : ObjectID = ScrollAreaGadget    (Object, \X,\Y,\Width,\Height, \Param1, \Param2, \Param3, \Flag) 
+        Case "TrackBarGadget"      : ObjectID = TrackBarGadget      (Object, \X,\Y,\Width,\Height, \Param1, \Param2, \Flag)
+        Case "WebGadget"           : ObjectID = WebGadget           (Object, \X,\Y,\Width,\Height, \Caption$)
+        Case "ButtonImageGadget"   : ObjectID = ButtonImageGadget   (Object, \X,\Y,\Width,\Height, \Param1, \Flag)
+        Case "CalendarGadget"      : ObjectID = CalendarGadget      (Object, \X,\Y,\Width,\Height, \Param1, \Flag)
+        Case "DateGadget"          : ObjectID = DateGadget          (Object, \X,\Y,\Width,\Height, \Caption$, \Param1, \Flag)
+        Case "EditorGadget"        : ObjectID = EditorGadget        (Object, \X,\Y,\Width,\Height, \Flag)
+        Case "ExplorerListGadget"  : ObjectID = ExplorerListGadget  (Object, \X,\Y,\Width,\Height, \Caption$, \Flag)
+        Case "ExplorerTreeGadget"  : ObjectID = ExplorerTreeGadget  (Object, \X,\Y,\Width,\Height, \Caption$, \Flag)
+        Case "ExplorerComboGadget" : ObjectID = ExplorerComboGadget (Object, \X,\Y,\Width,\Height, \Caption$, \Flag)
+        Case "SpinGadget"          : ObjectID = SpinGadget          (Object, \X,\Y,\Width,\Height, \Param1, \Param2, \Flag)
+        Case "TreeGadget"          : ObjectID = TreeGadget          (Object, \X,\Y,\Width,\Height, \Flag)
+        Case "PanelGadget"         : ObjectID = PanelGadget         (Object, \X,\Y,\Width,\Height) 
+        Case "SplitterGadget"      
+          Debug "Param1 "+\Param1
+          Debug "Param2 "+\Param2
+          If IsGadget(\Param1) And IsGadget(\Param2)
+            ObjectID = SplitterGadget      (Object, \X,\Y,\Width,\Height, \Param1, \Param2, \Flag)
+          EndIf
+        Case "MDIGadget"          
+          CompilerIf #PB_Compiler_OS = #PB_OS_Windows
+            ObjectID = MDIGadget           (Object, \X,\Y,\Width,\Height, \Param1, \Param2, \Flag) 
+          CompilerEndIf
+        Case "ScintillaGadget"     : ObjectID = ScintillaGadget     (Object, \X,\Y,\Width,\Height, \Param1)
+        Case "ShortcutGadget"      : ObjectID = ShortcutGadget      (Object, \X,\Y,\Width,\Height, \Param1)
+        Case "CanvasGadget"        : ObjectID = CanvasGadget        (Object, \X,\Y,\Width,\Height, \Flag)
       EndSelect
+      
+      ForEach ParsePBGadget()
+        If ParsePBGadget()\ID$ = \ID$
+          ParsePBGadget()\ID = ObjectID
+        EndIf
+      Next
     EndWith
     
+    ProcedureReturn ObjectID
   EndProcedure
   
   Procedure FindVar(File, *File, Length, Format, StrToFind$)
@@ -262,14 +309,49 @@ CompilerIf #PB_Compiler_IsMainFile
         If ExamineRegularExpression(#RegEx_FindVar, String$)
           While NextRegularExpressionMatch(#RegEx_FindVar)
             result = Val(RegularExpressionGroup(#RegEx_FindVar,2))
-;             Debug result
-;             Debug RegularExpressionMatchLength(#RegEx_FindVar)
-;             Debug RegularExpressionMatchPosition(#RegEx_FindVar)
-;             Debug RegularExpressionMatchString(#RegEx_FindVar)
+            ;             Debug result
+            ;             Debug RegularExpressionMatchLength(#RegEx_FindVar)
+            ;             Debug RegularExpressionMatchPosition(#RegEx_FindVar)
+            ;             Debug RegularExpressionMatchString(#RegEx_FindVar)
           Wend
         EndIf
       EndIf
+      
+      ;Debug "Position: " + Str(Loc(File))      ; отобразим текущую позицию указателя файла
+      ;       FileSeek(File, 0, #PB_Absolute)
+      ;       While Eof(File) = 0 ;:Line +1
+      ;         Debug ReadString(File);, Format)
+      ;         
+      ;       Wend                          
+    EndIf
     
+    ProcedureReturn result
+  EndProcedure
+  
+  
+  Procedure FindVar1(File, *File, Length, Format, StrToFind$)
+    Protected result =- 1 ; default
+    Protected Line, FindWindow, Function$, FunctionName$, FunctionArgs$
+    Protected Create_Reg_Flag = #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll    
+    
+    If *File 
+      ;FileSeek(File, Loc(File), #PB_Absolute)
+      ReadData(File, *File, Length)
+      Protected String$ = PeekS(*File, Length, Format)
+      
+      If CreateRegularExpression(#RegEx_FindVar1, "(\s*?"+StrToFind$+"\s*?=\s*?)(\d+)", Create_Reg_Flag)
+        
+        If ExamineRegularExpression(#RegEx_FindVar1, String$)
+          While NextRegularExpressionMatch(#RegEx_FindVar1)
+            result = Val(RegularExpressionGroup(#RegEx_FindVar1,2))
+            Debug result
+            Debug RegularExpressionMatchLength(#RegEx_FindVar1)
+            Debug RegularExpressionMatchPosition(#RegEx_FindVar1)
+            Debug RegularExpressionMatchString(#RegEx_FindVar1)
+          Wend
+        EndIf
+      EndIf
+      
       ;Debug "Position: " + Str(Loc(File))      ; отобразим текущую позицию указателя файла
       ;       FileSeek(File, 0, #PB_Absolute)
       ;       While Eof(File) = 0 ;:Line +1
@@ -327,6 +409,7 @@ CompilerIf #PB_Compiler_IsMainFile
                       Protected *This.ParsePBGadget 
                       *This = AllocateStructure(ParsePBGadget)
                       *This\Type = PB_Type(FunctionName$)
+                      *This\Class$ = FunctionName$
                       
                       If ExamineRegularExpression(#RegEx_FindArguments, FunctionArgs$)
                         While NextRegularExpressionMatch(#RegEx_FindArguments)
@@ -379,13 +462,18 @@ CompilerIf #PB_Compiler_IsMainFile
                           EndIf
                           
                           Protected ii : For ii=1 To i : Texts + #LF$ : Next 
-                          i=Count+ii-1
-                          ii=i : i=0
+                          i=Count+i
+                          ii=i 
+                          i=0
                           Texts + #LF$ + Args$
+                          
+                          ii = CountString(Texts,#LF$)-1
                           
                           With *This
                             Select ii
                               Case 1
+                                AddElement(ParsePBGadget()) : ParsePBGadget()\ID$ = Trim(Args$)
+                                \ID$ = Trim(Args$)
                               Case 2
                                 Select Asc(Trim(Args$))
                                   Case '0' To '9'
@@ -415,12 +503,43 @@ CompilerIf #PB_Compiler_IsMainFile
                                     \Height = FindVar(#File, *File, Length, Format, Trim(Args$))
                                 EndSelect
                               Case 6
-                                \Caption$ = Args$
+                                \Caption$ = Trim(Trim(Args$), Chr(34))
                                 
                               Case 7
-                                \Param1 = Val(Args$)
+;                                 Select \Class$
+;                                   Case "SplitterGadget"      
+;                                     Debug "7 Args$ "+Args$
+;                                 EndSelect
+                                
+                                Select Asc(Trim(Args$))
+                                  Case '0' To '9'
+                                    \Param1 = Val(Args$)
+                                  Default
+                                    PushListPosition(ParsePBGadget())
+                                    ForEach ParsePBGadget()
+                                      If ParsePBGadget()\ID$ = Trim(Args$)
+                                        \Param1 = ParsePBGadget()\ID
+                                      EndIf
+                                    Next
+                                    PopListPosition(ParsePBGadget())
+                                EndSelect
+                                
                               Case 8
+                                Select Asc(Trim(Args$))
+                                  Case '0' To '9'
+                                    \Param2 = Val(Args$)
+                                  Default
+                                    PushListPosition(ParsePBGadget())
+                                    ForEach ParsePBGadget()
+                                      If ParsePBGadget()\ID$ = Trim(Args$)
+                                        \Param2 = ParsePBGadget()\ID
+                                      EndIf
+                                    Next
+                                    PopListPosition(ParsePBGadget())
+                                EndSelect
+                                
                               Case 9
+                                \Param3 = Val(Args$)
                                 
                               Case 10
                                 \Flag = PB_Flag(Args$)
