@@ -63,7 +63,6 @@ CreateRegularExpression(#RegEx_FindFunction, "(\w+)\s*\((.*?)\)", #PB_RegularExp
 CreateRegularExpression(#RegEx_FindFields, "[^,]+", #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll)
 
 
-
 ; Обработка функций
 
 
@@ -83,16 +82,30 @@ EndProcedure
 
 
 
-
 ; Обработчики
 
-CurrentParent=0
+
+
+NewList CurrentParent()
+
+Procedure GetCurrentParent()
+  Shared CurrentParent()
+  LastElement(CurrentParent())
+  ProcedureReturn CurrentParent()
+EndProcedure
+
+
+
 
 #ObjectType_OpenWindow="OpenWindow"
 Procedure Parser_OpenWindow(Position, Length, Content$)
-  Shared CurrentParent
+  Shared CurrentParent()
   
-  CurrentParent=AddObject(#ObjectType_OpenWindow, ParentID, Position, Length, Content$)
+  ClearList(CurrentParent())
+  AddElement(CurrentParent())
+  
+  
+  CurrentParent()=AddObject(#ObjectType_OpenWindow, ParentID, Position, Length, Content$)
   
 EndProcedure
 AddMapElement(ParserElement(), #ObjectType_OpenWindow)
@@ -100,7 +113,7 @@ ParserElement()\Parser=@Parser_OpenWindow()
 
 #ObjectType_ButtonGadget="ButtonGadget"
 Procedure Parser_ButtonGadget(Position, Length, Content$)
-  Shared CurrentParent
+  CurrentParent=GetCurrentParent()
 
   AddObject(#ObjectType_ButtonGadget, CurrentParent, Position, Length, Content$)
   
@@ -108,6 +121,44 @@ EndProcedure
 AddMapElement(ParserElement(), #ObjectType_ButtonGadget)
 ParserElement()\Parser=@Parser_ButtonGadget()
 
+
+#ObjectType_ContainerGadget="ContainerGadget"
+Procedure Parser_ContainerGadget(Position, Length, Content$)
+  CurrentParent=GetCurrentParent()
+  
+  Shared CurrentParent()
+  AddElement(CurrentParent())
+  
+  
+  CurrentParent()=AddObject(#ObjectType_ContainerGadget, CurrentParent, Position, Length, Content$)
+  
+EndProcedure
+AddMapElement(ParserElement(), #ObjectType_ContainerGadget)
+ParserElement()\Parser=@Parser_ContainerGadget()
+
+
+#ObjectType_CloseGadgetList=""
+Procedure Parser_CloseGadgetList(Position, Length, Content$)
+  CurrentParent=GetCurrentParent()
+  
+  Shared CurrentParent()
+  LastElement(CurrentParent())
+  DeleteElement(CurrentParent())
+
+  AddObject(#ObjectType_CloseGadgetList, CurrentParent, Position, Length, Content$)
+  
+EndProcedure
+AddMapElement(ParserElement(), #ObjectType_CloseGadgetList)
+ParserElement()\Parser=@Parser_CloseGadgetList()
+
+
+
+
+
+
+
+
+;{
 #ObjectType_ButtonImageGadget="ButtonImageGadget"
 Procedure Parser_ButtonImageGadget(Position, Length, Content$)
   Shared CurrentParent
@@ -158,15 +209,7 @@ EndProcedure
 AddMapElement(ParserElement(), #ObjectType_ComboBoxGadget)
 ParserElement()\Parser=@Parser_ComboBoxGadget()
 
-#ObjectType_ContainerGadget="ContainerGadget"
-Procedure Parser_ContainerGadget(Position, Length, Content$)
-  Shared CurrentParent
 
-  AddObject(#ObjectType_ContainerGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
-AddMapElement(ParserElement(), #ObjectType_ContainerGadget)
-ParserElement()\Parser=@Parser_ContainerGadget()
 
 #ObjectType_DateGadget="DateGadget"
 Procedure Parser_DateGadget(Position, Length, Content$)
@@ -428,8 +471,7 @@ EndProcedure
 AddMapElement(ParserElement(), #ObjectType_WebGadget)
 ParserElement()\Parser=@Parser_WebGadget()
 
-
-
+;}
 
 
 
@@ -496,8 +538,8 @@ ForEach Object()
   Debug Str(Object()\ObjectID)+")"+Chr(9)+Object()\ObjectType+Chr(9)+"Parent{"+Object()\ParentID+"} "+Chr(9)+Object()\Content
 Next
 ; IDE Options = PureBasic 5.40 LTS (Windows - x86)
-; CursorPosition = 495
-; FirstLine = 437
-; Folding = -------
+; CursorPosition = 144
+; FirstLine = 97
+; Folding = -D-----
 ; EnableUnicode
 ; EnableXP
