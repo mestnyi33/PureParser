@@ -239,12 +239,17 @@ CompilerIf #PB_Compiler_IsMainFile
   Procedure SetPBFunction(*This.ParsePBGadget)
     
     With *This
-      Select \FuncClass$
+      Select \Type$
         Case "SetGadgetFont"
-          If IsFont(\Font)
-            SetGadgetFont(\ID, FontID(\Font))
-          EndIf
-          
+          PushListPosition(ParsePBGadget())
+          ForEach ParsePBGadget()
+            If ParsePBGadget()\ID$ = Trim(\ID$)
+              If IsFont(\Font)
+                SetGadgetFont(ParsePBGadget()\ID, FontID(\Font))
+              EndIf
+            EndIf
+          Next
+          PopListPosition(ParsePBGadget())
       EndSelect
     EndWith
     
@@ -575,13 +580,16 @@ CompilerIf #PB_Compiler_IsMainFile
                             Index+1
                             Protected Args1$ = RegularExpressionMatchString(#RegEx_FindArguments)
                             
+                            Select Index
+                              Case 1
+                                \ID$ = Trim(Args1$)
+                            EndSelect
+                            
                             Select \Type$
                               Case "LoadFont"
-                                ;Debug Args1$
                                 Protected ID$,FontName$,FontHeight,FontStyle
+                                
                                 Select Index
-                                  Case 1
-                                    ID$ = Args1$
                                   Case 2
                                     FontName$ = Args1$
                                   Case 3
@@ -594,21 +602,13 @@ CompilerIf #PB_Compiler_IsMainFile
                                 EndSelect
                                 
                               Case "SetGadgetFont"
-                                PushListPosition(ParsePBGadget())
-                                ForEach ParsePBGadget()
-                                  If ParsePBGadget()\ID$ = Trim(Args1$)
-                                    If IsFont(\Font)
-                                      SetGadgetFont(ParsePBGadget()\ID, FontID(\Font))
-                                    EndIf
-                                  EndIf
-                                Next
-                                PopListPosition(ParsePBGadget())
+                                SetPBFunction(*This)
                                 
                             EndSelect
                             
                           Wend
                           
-                          If ID$
+                          If FontName$
                             \Font = LoadFont(#PB_Any,FontName$,FontHeight,FontStyle)
                           EndIf
                           
