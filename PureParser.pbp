@@ -8,18 +8,20 @@
   <section name="data">
     <explorer view="C:\Users\Андреич\Desktop\PureBasic 5.40 LTS Windows x86 x64 Portable\Examples\" pattern="0"/>
     <log show="1"/>
-    <lastopen date="2017-08-18 18:04" user="Андреич" host="DESKTOP"/>
+    <lastopen date="2017-08-19 09:45" user="Андреич" host="DESKTOP"/>
   </section>
   <section name="files">
     <file name="PureParser.pb">
       <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
-      <fingerprint md5="9832e8764b88d288b98dabfa8a3892eb"/>
+      <fingerprint md5="233e927bd6a79292b23bf47f4b24f936"/>
     </file>
   </section>
   <section name="targets">
     <target name="PureParser" enabled="1" default="1">
       <inputfile value="PureParser.pb"/>
       <outputfile value=""/>
+      <commandline value="&quot;Контейнеры.pbf&quot;"/>
+      <directory value="Test\"/>
       <options unicode="1" xpskin="1" debug="1"/>
     </target>
   </section>

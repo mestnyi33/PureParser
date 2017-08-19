@@ -97,6 +97,9 @@ EndProcedure
 
 
 
+
+
+
 #ObjectType_OpenWindow="OpenWindow"
 Procedure Parser_OpenWindow(Position, Length, Content$)
   Shared CurrentParent()
@@ -111,15 +114,19 @@ EndProcedure
 AddMapElement(ParserElement(), #ObjectType_OpenWindow)
 ParserElement()\Parser=@Parser_OpenWindow()
 
-#ObjectType_ButtonGadget="ButtonGadget"
-Procedure Parser_ButtonGadget(Position, Length, Content$)
-  CurrentParent=GetCurrentParent()
 
-  AddObject(#ObjectType_ButtonGadget, CurrentParent, Position, Length, Content$)
+
+
+Procedure Parser_SimpleGadget(Position, Length, Content$)
+  CurrentParent=GetCurrentParent()
+  Shared ParserElement()
   
+  AddObject(MapKey(ParserElement()), CurrentParent, Position, Length, Content$)
 EndProcedure
-AddMapElement(ParserElement(), #ObjectType_ButtonGadget)
-ParserElement()\Parser=@Parser_ButtonGadget()
+
+
+
+
 
 
 #ObjectType_ContainerGadget="ContainerGadget"
@@ -137,7 +144,7 @@ AddMapElement(ParserElement(), #ObjectType_ContainerGadget)
 ParserElement()\Parser=@Parser_ContainerGadget()
 
 
-#ObjectType_CloseGadgetList=""
+#ObjectType_CloseGadgetList="CloseGadgetList"
 Procedure Parser_CloseGadgetList(Position, Length, Content$)
   CurrentParent=GetCurrentParent()
   
@@ -153,223 +160,101 @@ ParserElement()\Parser=@Parser_CloseGadgetList()
 
 
 
-
-
-
-
-
 ;{
-#ObjectType_ButtonImageGadget="ButtonImageGadget"
-Procedure Parser_ButtonImageGadget(Position, Length, Content$)
-  Shared CurrentParent
 
-  AddObject(#ObjectType_ButtonImageGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
+#ObjectType_ButtonGadget="ButtonGadget"
+AddMapElement(ParserElement(), #ObjectType_ButtonGadget)
+ParserElement()\Parser=@Parser_SimpleGadget()
+
+
+#ObjectType_ButtonImageGadget="ButtonImageGadget"
 AddMapElement(ParserElement(), #ObjectType_ButtonImageGadget)
-ParserElement()\Parser=@Parser_ButtonImageGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_CalendarGadget="CalendarGadget"
-Procedure Parser_CalendarGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_CalendarGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_CalendarGadget)
-ParserElement()\Parser=@Parser_CalendarGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_CanvasGadget="CanvasGadget"
-Procedure Parser_CanvasGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_CanvasGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_CanvasGadget)
-ParserElement()\Parser=@Parser_CanvasGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_CheckBoxGadget="CheckBoxGadget"
-Procedure Parser_CheckBoxGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_CheckBoxGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_CheckBoxGadget)
-ParserElement()\Parser=@Parser_CheckBoxGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_ComboBoxGadget="ComboBoxGadget"
-Procedure Parser_ComboBoxGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_ComboBoxGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_ComboBoxGadget)
-ParserElement()\Parser=@Parser_ComboBoxGadget()
-
-
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_DateGadget="DateGadget"
-Procedure Parser_DateGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_DateGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_DateGadget)
-ParserElement()\Parser=@Parser_DateGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_EditorGadget="EditorGadget"
-Procedure Parser_EditorGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_EditorGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_EditorGadget)
-ParserElement()\Parser=@Parser_EditorGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_ExplorerComboGadget="ExplorerComboGadget"
-Procedure Parser_ExplorerComboGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_ExplorerComboGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_ExplorerComboGadget)
-ParserElement()\Parser=@Parser_ExplorerComboGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_ExplorerListGadget="ExplorerListGadget"
-Procedure Parser_ExplorerListGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_ExplorerListGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_ExplorerListGadget)
-ParserElement()\Parser=@Parser_ExplorerListGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_ExplorerTreeGadget="ExplorerTreeGadget"
-Procedure Parser_ExplorerTreeGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_ExplorerTreeGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_ExplorerTreeGadget)
-ParserElement()\Parser=@Parser_ExplorerTreeGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_FrameGadget="FrameGadget"
-Procedure Parser_FrameGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_FrameGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_FrameGadget)
-ParserElement()\Parser=@Parser_FrameGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_HyperLinkGadget="HyperLinkGadget"
-Procedure Parser_HyperLinkGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_HyperLinkGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_HyperLinkGadget)
-ParserElement()\Parser=@Parser_HyperLinkGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_IPAddressGadget="IPAddressGadget"
-Procedure Parser_IPAddressGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_IPAddressGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_IPAddressGadget)
-ParserElement()\Parser=@Parser_IPAddressGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_ImageGadget="ImageGadget"
-Procedure Parser_ImageGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_ImageGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_ImageGadget)
-ParserElement()\Parser=@Parser_ImageGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_ListIconGadget="ListIconGadget"
-Procedure Parser_ListIconGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_ListIconGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_ListIconGadget)
-ParserElement()\Parser=@Parser_ListIconGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_ListViewGadget="ListViewGadget"
-Procedure Parser_ListViewGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_ListViewGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_ListViewGadget)
-ParserElement()\Parser=@Parser_ListViewGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_MDIGadget="MDIGadget"
-Procedure Parser_MDIGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_MDIGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_MDIGadget)
-ParserElement()\Parser=@Parser_MDIGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_OpenGLGadget="OpenGLGadget"
-Procedure Parser_OpenGLGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_OpenGLGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_OpenGLGadget)
-ParserElement()\Parser=@Parser_OpenGLGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_OptionGadget="OptionGadget"
-Procedure Parser_OptionGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_OptionGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_OptionGadget)
-ParserElement()\Parser=@Parser_OptionGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_PanelGadget="PanelGadget"
-Procedure Parser_PanelGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_PanelGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_PanelGadget)
-ParserElement()\Parser=@Parser_PanelGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_ProgressBarGadget="ProgressBarGadget"
-Procedure Parser_ProgressBarGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_ProgressBarGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_ProgressBarGadget)
-ParserElement()\Parser=@Parser_ProgressBarGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
+
+
+
+
+
 
 #ObjectType_ScrollAreaGadget="ScrollAreaGadget"
 Procedure Parser_ScrollAreaGadget(Position, Length, Content$)
@@ -381,35 +266,26 @@ EndProcedure
 AddMapElement(ParserElement(), #ObjectType_ScrollAreaGadget)
 ParserElement()\Parser=@Parser_ScrollAreaGadget()
 
-#ObjectType_ScrollBarGadget="ScrollBarGadget"
-Procedure Parser_ScrollBarGadget(Position, Length, Content$)
-  Shared CurrentParent
 
-  AddObject(#ObjectType_ScrollBarGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
+
+
+
+
+#ObjectType_ScrollBarGadget="ScrollBarGadget"
 AddMapElement(ParserElement(), #ObjectType_ScrollBarGadget)
-ParserElement()\Parser=@Parser_ScrollBarGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_ShortcutGadget="ShortcutGadget"
-Procedure Parser_ShortcutGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_ShortcutGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_ShortcutGadget)
-ParserElement()\Parser=@Parser_ShortcutGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_SpinGadget="SpinGadget"
-Procedure Parser_SpinGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_SpinGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_SpinGadget)
-ParserElement()\Parser=@Parser_SpinGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
+
+
+
+
 
 #ObjectType_SplitterGadget="SplitterGadget"
 Procedure Parser_SplitterGadget(Position, Length, Content$)
@@ -421,55 +297,29 @@ EndProcedure
 AddMapElement(ParserElement(), #ObjectType_SplitterGadget)
 ParserElement()\Parser=@Parser_SplitterGadget()
 
-#ObjectType_StringGadget="StringGadget"
-Procedure Parser_StringGadget(Position, Length, Content$)
-  Shared CurrentParent
 
-  AddObject(#ObjectType_StringGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
+
+
+
+#ObjectType_StringGadget="StringGadget"
 AddMapElement(ParserElement(), #ObjectType_StringGadget)
-ParserElement()\Parser=@Parser_StringGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_TextGadget="TextGadget"
-Procedure Parser_TextGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_TextGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_TextGadget)
-ParserElement()\Parser=@Parser_TextGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_TrackBarGadget="TrackBarGadget"
-Procedure Parser_TrackBarGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_TrackBarGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_TrackBarGadget)
-ParserElement()\Parser=@Parser_TrackBarGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_TreeGadget="TreeGadget"
-Procedure Parser_TreeGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_TreeGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_TreeGadget)
-ParserElement()\Parser=@Parser_TreeGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 #ObjectType_WebGadget="WebGadget"
-Procedure Parser_WebGadget(Position, Length, Content$)
-  Shared CurrentParent
-
-  AddObject(#ObjectType_WebGadget, CurrentParent, Position, Length, Content$)
-  
-EndProcedure
 AddMapElement(ParserElement(), #ObjectType_WebGadget)
-ParserElement()\Parser=@Parser_WebGadget()
+ParserElement()\Parser=@Parser_SimpleGadget()
 
 ;}
 
@@ -494,6 +344,7 @@ Enumeration File
 EndEnumeration
 
 If ReadFile(#File, FilePath$)
+  Debug "Открывается файл: "+FilePath$
   
   Format=ReadStringFormat(#File)
   ByteLength = Lof(#File)
@@ -538,8 +389,8 @@ ForEach Object()
   Debug Str(Object()\ObjectID)+")"+Chr(9)+Object()\ObjectType+Chr(9)+"Parent{"+Object()\ParentID+"} "+Chr(9)+Object()\Content
 Next
 ; IDE Options = PureBasic 5.40 LTS (Windows - x86)
-; CursorPosition = 144
-; FirstLine = 97
-; Folding = -D-----
+; CursorPosition = 146
+; FirstLine = 111
+; Folding = --
 ; EnableUnicode
 ; EnableXP
