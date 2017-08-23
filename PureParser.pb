@@ -64,8 +64,6 @@ CreateRegularExpression(#RegEx_FindFields, "[^,]+", #PB_RegularExpression_NoCase
 
 
 ; Обработка функций
-
-
 Prototype Parser(Position, Length, Content$)
 Structure ParserElement
   Parser.Parser
@@ -93,6 +91,15 @@ Procedure GetCurrentParent()
   LastElement(CurrentParent())
   ProcedureReturn CurrentParent()
 EndProcedure
+
+
+
+
+
+
+
+
+
 
 
 
@@ -129,6 +136,10 @@ EndProcedure
 
 
 
+
+
+
+
 #ObjectType_ContainerGadget="ContainerGadget"
 Procedure Parser_ContainerGadget(Position, Length, Content$)
   CurrentParent=GetCurrentParent()
@@ -136,12 +147,20 @@ Procedure Parser_ContainerGadget(Position, Length, Content$)
   Shared CurrentParent()
   AddElement(CurrentParent())
   
-  
   CurrentParent()=AddObject(#ObjectType_ContainerGadget, CurrentParent, Position, Length, Content$)
-  
 EndProcedure
 AddMapElement(ParserElement(), #ObjectType_ContainerGadget)
 ParserElement()\Parser=@Parser_ContainerGadget()
+
+
+
+
+
+
+
+
+
+
 
 
 #ObjectType_CloseGadgetList="CloseGadgetList"
@@ -256,11 +275,16 @@ ParserElement()\Parser=@Parser_SimpleGadget()
 
 
 
+
+
 #ObjectType_ScrollAreaGadget="ScrollAreaGadget"
 Procedure Parser_ScrollAreaGadget(Position, Length, Content$)
   Shared CurrentParent
-
-  AddObject(#ObjectType_ScrollAreaGadget, CurrentParent, Position, Length, Content$)
+  
+  Shared CurrentParent()
+  AddElement(CurrentParent())
+  
+  CurrentParent()=AddObject(#ObjectType_ScrollAreaGadget, CurrentParent, Position, Length, Content$)
   
 EndProcedure
 AddMapElement(ParserElement(), #ObjectType_ScrollAreaGadget)
@@ -389,8 +413,8 @@ ForEach Object()
   Debug Str(Object()\ObjectID)+")"+Chr(9)+Object()\ObjectType+Chr(9)+"Parent{"+Object()\ParentID+"} "+Chr(9)+Object()\Content
 Next
 ; IDE Options = PureBasic 5.40 LTS (Windows - x86)
-; CursorPosition = 146
-; FirstLine = 111
+; CursorPosition = 140
+; FirstLine = 75
 ; Folding = --
 ; EnableUnicode
 ; EnableXP
