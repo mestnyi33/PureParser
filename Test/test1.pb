@@ -16,19 +16,27 @@ Enumeration FormGadget
   #FrmHaubtfensterEnde
 EndEnumeration
 
-EnumerOpenWindow(#FrmHaubtFenster, x, y, width, height, "Haubtfenster", #PB_Window_SystemMenu | #PB_Window_ScreenCentered)er_0ButtonGadget(#FrmHauptfensterInfo, 20, 10, 100, 25, "Info", #PB_Button_Right | #PB_Button_Left))
+Enumeration FormFont
+  #Font_FrmHaubtFenster_0
+  #Font_FrmHaubtFenster_1
+EndEnumeration
+
+LoadFont(#Font_FrmHaubtFenster_0,"Consolas", 16, #PB_Font_Bold)
+LoadFont(#Font_FrmHaubtFenster_1,"Consolas", 14, #PB_Font_Bold)
 
 Declare FrmHauptfensterInfo(EventType)
-Declare FrmHaubtfensterEnde(EveButtonGadget(#FrmHaubtfensterEnde, 150, 10, 100, 25, "Ende") = 270, Height = 45)
-  OpenWindow(#FrmHaubtFenster, X, Y, Width, Height, "Haubtfenster", #PB_Window_SystemMenu | #PB_Window_ScreenCentered)
+Declare FrmHaubtfensterEnde(EventType)
+
+Procedure OpenFrmHaubtFenster(x = 0, y = 0, width = 270, height = 45)
+  OpenWindow(#FrmHaubtFenster, x, y, width, height, "Haubtfenster", #PB_Window_SystemMenu | #PB_Window_ScreenCentered)
   ButtonGadget(#FrmHauptfensterInfo, 20, 10, 100, 25, "Info", #PB_Button_Right | #PB_Button_Left)
   SetGadgetFont(#FrmHauptfensterInfo, FontID(#Font_FrmHaubtFenster_0))
   ButtonGadget(#FrmHaubtfensterEnde, 150, 10, 100, 25, "Ende")
   SetGadgetFont(#FrmHaubtfensterEnde, FontID(#Font_FrmHaubtFenster_1))
 EndProcedure
 
-Procedure FrmHaubtFenster_Events(Event)
-  Select Event
+Procedure FrmHaubtFenster_Events(event)
+  Select event
     Case #PB_Event_CloseWindow
       ProcedureReturn #False
 
