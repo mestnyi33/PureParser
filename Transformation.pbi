@@ -1,4 +1,5 @@
 ﻿;- Include: Transformation
+; http://www.purebasic.fr/english/viewtopic.php?f=12&t=64700
 
 DeclareModule Transformation
   
@@ -131,7 +132,7 @@ Module Transformation
           Selected = #False
         Case #PB_EventType_MouseMove
           If Selected
-            X = WindowMouseX(GetActiveWindow())-OffsetX
+            X = DesktopMouseX()-(GadgetX(\Gadget, #PB_Gadget_ScreenCoordinate)-GadgetX(\Gadget, #PB_Gadget_WindowCoordinate))-OffsetX
             Y = WindowMouseY(GetActiveWindow())-OffsetY
             
             ; gadget resize

@@ -423,8 +423,8 @@ CompilerIf #PB_Compiler_IsMainFile
                         
                         \Position = RegularExpressionMatchPosition(#Regex_FindProcedure)+RegularExpressionMatchPosition(#RegEx_FindFunction) -2 
                         \Length = RegularExpressionMatchLength(#RegEx_FindFunction)
-                        Debug "Position - "+\Position
-                        Debug "Length - "+\Length
+;                         Debug "Position - "+\Position
+;                         Debug "Length - "+\Length
                         Count = 0
                         Texts =  Chr(10)+ \Type$
                         
@@ -594,9 +594,9 @@ CompilerIf #PB_Compiler_IsMainFile
                         
                       Default
                         Text = RegularExpressionMatchString(#RegEx_FindFunction)
-                        ;Debug \Function$
-                        
-                        If ExamineRegularExpression(#RegEx_FindArguments, FunctionArgs$)
+                        ;Debug \Type$
+                            
+                        If ExamineRegularExpression(#RegEx_FindArguments, \Args$)
                           Index=0
                           While NextRegularExpressionMatch(#RegEx_FindArguments)
                             Index+1
