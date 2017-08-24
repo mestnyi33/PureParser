@@ -263,7 +263,7 @@ CompilerIf #PB_Compiler_IsMainFile
     
   EndProcedure
   
-  Procedure CreatePBGadget(*This.ParsePBGadget)
+  Procedure CreatePBObject(*This.ParsePBGadget)
     Protected Result
     
     With *This
@@ -338,13 +338,58 @@ CompilerIf #PB_Compiler_IsMainFile
           ParsePBGadget()\Length = \Length
         EndIf
       Next
-    
+      
       If IsGadget(\ID)
         Transformation::Enable(\ID)
       EndIf
     EndWith
     
     ProcedureReturn Result
+  EndProcedure
+  
+  Procedure$ SavePBObject(*This.ParsePBGadget)
+    Protected Result$
+    
+    With *This
+      Select \Type$
+        Case "OpenWindow"          : Result$ = "OpenWindow          ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "ButtonGadget"        : Result$ = "ButtonGadget        ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "StringGadget"        : Result$ = "StringGadget        ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "TextGadget"          : Result$ = "TextGadget          ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "CheckBoxGadget"      : Result$ = "CheckBoxGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "OptionGadget"        : Result$ = "OptionGadget        ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)
+        Case "ListViewGadget"      : Result$ = "ListViewGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$                                                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "FrameGadget"         : Result$ = "FrameGadget         ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "ComboBoxGadget"      : Result$ = "ComboBoxGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$                                                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "ImageGadget"         : Result$ = "ImageGadget         ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$                                                                 : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "HyperLinkGadget"     : Result$ = "HyperLinkGadget     ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)+", "+\Param1$                                  : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "ContainerGadget"     : Result$ = "ContainerGadget     ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$                                                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "ListIconGadget"      : Result$ = "ListIconGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)+", "+\Param1$                                  : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "IPAddressGadget"     : Result$ = "IPAddressGadget     ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$
+        Case "ProgressBarGadget"   : Result$ = "ProgressBarGadget   ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$+", "+\Param2$                                                   : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "ScrollBarGadget"     : Result$ = "ScrollBarGadget     ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$+", "+\Param2$+", "+\Param3$                                     : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "ScrollAreaGadget"    : Result$ = "ScrollAreaGadget    ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$+", "+\Param2$    : If \Param3$ : Result$ +", "+\Param3$ : EndIf : If \Flag$ : Result$ +", "+\Flag$ : EndIf 
+        Case "TrackBarGadget"      : Result$ = "TrackBarGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$+", "+\Param2$                                                   : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "WebGadget"           : Result$ = "WebGadget           ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)
+        Case "ButtonImageGadget"   : Result$ = "ButtonImageGadget   ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$                                                                 : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "CalendarGadget"      : Result$ = "CalendarGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$                                 : If \Param1$ : Result$ +", "+\Param1$ : EndIf : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "DateGadget"          : Result$ = "DateGadget          ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34) : If \Param1$ : Result$ +", "+\Param1$ : EndIf : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "EditorGadget"        : Result$ = "EditorGadget        ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$                                                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "ExplorerListGadget"  : Result$ = "ExplorerListGadget  ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "ExplorerTreeGadget"  : Result$ = "ExplorerTreeGadget  ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "ExplorerComboGadget" : Result$ = "ExplorerComboGadget ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "SpinGadget"          : Result$ = "SpinGadget          ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$+", "+\Param2$                                                   : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "TreeGadget"          : Result$ = "TreeGadget          ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$                                                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "PanelGadget"         : Result$ = "PanelGadget         ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$ 
+        Case "SplitterGadget"      : Result$ = "SplitterGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$+", "+\Param2$                                                   : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+        Case "MDIGadget"           : Result$ = "MDIGadget           ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$+", "+\Param2$                                                   : If \Flag$ : Result$ +", "+\Flag$ : EndIf 
+        Case "ScintillaGadget"     : Result$ = "ScintillaGadget     ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$
+        Case "ShortcutGadget"      : Result$ = "ShortcutGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$
+        Case "CanvasGadget"        : Result$ = "CanvasGadget        ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$                                                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+      EndSelect
+    EndWith
+    
+    ProcedureReturn Result$+")"
   EndProcedure
   
   Procedure$ FindVar(File, *File, Length, Format, StrToFind$)
@@ -395,7 +440,7 @@ CompilerIf #PB_Compiler_IsMainFile
       If *File 
         ReadData(#File, *File, Length)
         *This\File$ = PeekS(*File, Length, Format)
-          
+        
         If CreateRegularExpression(#Regex_FindProcedure, "[^;]Procedure.*?EndProcedure", Create_Reg_Flag) And
            CreateRegularExpression(#RegEx_FindFunction, "(\w+)\s*\((.*?)\)(?=\s*($|:))", Create_Reg_Flag) And
            CreateRegularExpression(#RegEx_FindArguments, "[^,]+", Create_Reg_Flag)
@@ -424,15 +469,15 @@ CompilerIf #PB_Compiler_IsMainFile
                         
                         \Position = RegularExpressionMatchPosition(#Regex_FindProcedure)+RegularExpressionMatchPosition(#RegEx_FindFunction) -2 
                         \Length = RegularExpressionMatchLength(#RegEx_FindFunction)
-;                         Debug "Position - "+\Position
-;                         Debug "Length - "+\Length
+                        ;                         Debug "Position - "+\Position
+                        ;                         Debug "Length - "+\Length
                         Count = 0
                         Texts =  Chr(10)+ \Type$
                         
                         AddElement(ParsePBGadget()) 
                         ParsePBGadget()\Type$ = \Type$
                         ParsePBGadget()\Function$ = RegularExpressionMatchString(#RegEx_FindFunction)
-                                
+                        
                         If ExamineRegularExpression(#RegEx_FindArguments, \Args$)
                           While NextRegularExpressionMatch(#RegEx_FindArguments)
                             Count + 1
@@ -578,7 +623,7 @@ CompilerIf #PB_Compiler_IsMainFile
                           Wend
                         EndIf
                         
-                        CallFunctionFast(@CreatePBGadget(), *This)
+                        CallFunctionFast(@CreatePBObject(), *This)
                         
                         \Flag = 0
                         \Param1 = 0
@@ -589,14 +634,14 @@ CompilerIf #PB_Compiler_IsMainFile
                         \Param2$ = ""
                         \Param3$ = ""
                         \Caption$ = ""
-                         
+                        
                         AddGadgetItem(Editor_2, -1, Texts)
                         Texts = ""
                         
                       Default
                         Text = RegularExpressionMatchString(#RegEx_FindFunction)
                         ;Debug \Type$
-                            
+                        
                         If ExamineRegularExpression(#RegEx_FindArguments, \Args$)
                           Index=0
                           While NextRegularExpressionMatch(#RegEx_FindArguments)
@@ -658,6 +703,7 @@ CompilerIf #PB_Compiler_IsMainFile
     ;Debug result
     ProcedureReturn result.S
   EndProcedure
+  
   ;-
   Procedure Window_0_Event_Gadget()
     Static Time
@@ -688,49 +734,57 @@ CompilerIf #PB_Compiler_IsMainFile
         ;-RunEvent
       Case Run  
         Protected Object, len, add$ ;= " ; ADD" 
-         Protected Space$, StringtoAdd$ = "999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"
-         Protected Length 
-         
+        Protected Space$, StringtoAdd$ = "999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"
+        Protected Length 
+        
         ;PokeS(@*This\File$, "999", 2)
-          len = 0
+        len = 0
+        
+        PushListPosition(ParsePBGadget())
+        ForEach ParsePBGadget()
           
-          PushListPosition(ParsePBGadget())
-          ForEach ParsePBGadget()
-               
-            If Enumerate::StartWindow( )
-              While Enumerate::NextWindow( @Object )
-                If ParsePBGadget()\ID = Object
-                  StringtoAdd$ = ParsePBGadget()\Type$+"("+ParsePBGadget()\ID$+", "+WindowX(Object)+", "+WindowY(Object)+", "+WindowWidth(Object)+", "+WindowHeight(Object)+", "+Chr(34)+GetWindowTitle(Object)+Chr(34)+")"
-                EndIf
-              Wend
-              Enumerate::AbortWindow() 
-            EndIf
-            
-            If Enumerate::StartGadget( )
-              While Enumerate::NextGadget( @Object )
-                If ParsePBGadget()\ID = Object
-                  StringtoAdd$ = ParsePBGadget()\Type$+"("+ParsePBGadget()\ID$+", "+GadgetX(Object)+", "+GadgetY(Object)+", "+GadgetWidth(Object)+", "+GadgetHeight(Object)+", "+Chr(34)+GetGadgetText(Object)+Chr(34)+")"
-                EndIf
-              Wend
-              Enumerate::AbortGadget() 
-            EndIf
-            
-            Length = Len(StringtoAdd$)
-            
-            If Length>ParsePBGadget()\Length
-              *This\File$ = InsertString(*This\File$, Space(Length), ParsePBGadget()\Position+ParsePBGadget()\Length+len+1)
-              len + Length
-            Else
-              Space$ = Space(ParsePBGadget()\Length-Length)
-            EndIf
-            
-            ReplaceString(*This\File$, ParsePBGadget()\Function$, StringtoAdd$+Space$, #PB_String_InPlace, ParsePBGadget()\Position, 1)
-          Next
-          PopListPosition(ParsePBGadget())
+          If Enumerate::StartWindow( )
+            While Enumerate::NextWindow( @Object )
+              If ParsePBGadget()\ID = Object
+                ParsePBGadget()\X$ = Str(WindowX(Object))
+                ParsePBGadget()\Y$ = Str(WindowY(Object))
+                ParsePBGadget()\Width$ = Str(WindowWidth(Object))
+                ParsePBGadget()\Height$ = Str(WindowHeight(Object))
+             EndIf
+            Wend
+            Enumerate::AbortWindow() 
+          EndIf
           
-          Debug *This\File$
+          If Enumerate::StartGadget( )
+            While Enumerate::NextGadget( @Object )
+              If ParsePBGadget()\ID = Object
+                ParsePBGadget()\X$ = Str(GadgetX(Object))
+                ParsePBGadget()\Y$ = Str(GadgetY(Object))
+                ParsePBGadget()\Width$ = Str(GadgetWidth(Object))
+                ParsePBGadget()\Height$ = Str(GadgetHeight(Object))
+              EndIf
+            Wend
+            Enumerate::AbortGadget() 
+          EndIf
           
-            
+          StringtoAdd$ = SavePBObject(ParsePBGadget())
+          
+          Length = Len(StringtoAdd$)
+          
+          If Length>ParsePBGadget()\Length
+            *This\File$ = InsertString(*This\File$, Space(Length), ParsePBGadget()\Position+ParsePBGadget()\Length+len+1)
+            len + Length
+          Else
+            Space$ = Space(ParsePBGadget()\Length-Length)
+          EndIf
+          
+          ReplaceString(*This\File$, ParsePBGadget()\Function$, StringtoAdd$+Space$, #PB_String_InPlace, ParsePBGadget()\Position, 1)
+        Next
+        PopListPosition(ParsePBGadget())
+        
+        Debug *This\File$
+        
+        
         ;-SaveEvent
       Case Save  
         Title$="test1.pb/save"
@@ -742,7 +796,7 @@ CompilerIf #PB_Compiler_IsMainFile
         If File$
           If OpenFile(0, File$)         ; we create a new text file...
             
-;             PushListPosition(ParsePBGadget())
+            ;             PushListPosition(ParsePBGadget())
             ;SortStructuredList(ParsePBGadget(), #PB_Sort_Descending, OffsetOf(ParsePBGadget\Position), TypeOf(ParsePBGadget\Position)) ; Сортировка
             ;WriteStringFormat(0,#PB_Unicode)
             WriteString(0, *This\File$, #PB_UTF8) ; 
@@ -751,18 +805,18 @@ CompilerIf #PB_Compiler_IsMainFile
             
             
             
-             
             
             
             
-                        
-;             ForEach ParsePBGadget()
-;               FileSeek(0, ParsePBGadget()\Position-len, #PB_Absolute)
-;               len = StringByteLength(add$)
-;               WriteStringN(0, ParsePBGadget()\Function$+add$, #PB_UTF8) ; 
-;               
-;             Next
-;             PopListPosition(ParsePBGadget())
+            
+            
+            ;             ForEach ParsePBGadget()
+            ;               FileSeek(0, ParsePBGadget()\Position-len, #PB_Absolute)
+            ;               len = StringByteLength(add$)
+            ;               WriteStringN(0, ParsePBGadget()\Function$+add$, #PB_UTF8) ; 
+            ;               
+            ;             Next
+            ;             PopListPosition(ParsePBGadget())
             
             CloseFile(0)                       ; close the previously opened file and store the written data this way
           Else

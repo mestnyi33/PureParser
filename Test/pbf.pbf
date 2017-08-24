@@ -19,16 +19,16 @@ Enumeration FormGadget
 EndEnumeration
 
 
-Procedure OpenWindow_0(x = 0, y = 0, width = 520, height = 335)
-  OpenWindow(#Window_0, x, y, width, height, "Test", #PB_Window_SystemMenu)
+Procedure OpenWindow_0(X = 0, Y = 0, Width = 520, Height = 335)
+  OpenWindow(#Window_0, X, Y, Width, Height, "Test", #PB_Window_SystemMenu)
   ButtonGadget(#Button_0, 370, 300, 145, 30, "Close")
   StringGadget(#String_0, 5, 5, 380, 25, "Find_String")
-  ButtonGadget(#Button_1, 390, 5, 125, 25, "Find")
+  ButtonGadget(#Button_1, 390, 5, 125, 25, "Find", #PB_Button_Right)
   ListViewGadget(#ListView_0, 5, 35, 510, 260)
 EndProcedure
 
-Procedure Window_0_Events(event)
-  Select event
+Procedure Window_0_Events(Event)
+  Select Event
     Case #PB_Event_CloseWindow
       ProcedureReturn #False
 

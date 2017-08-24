@@ -1,4 +1,4 @@
-﻿; Form Designer for Purebasic - 5.60
+; Form Designer for Purebasic - 5.60
 ; Warning: this file uses a strict syntax, if you edit it, make sure to respect the Form Designer limitation or it won't be opened again.
 
 ;
@@ -28,10 +28,10 @@ Declare FrmHauptfensterInfo(EventType)
 Declare FrmHaubtfensterEnde(EventType)
 
 Procedure OpenFrmHaubtFenster(x = 0, y = 0, width = 270, height = 45)
-  OpenWindow(#FrmHaubtFenster, x, y, width, height, "Haubtfenster", #PB_Window_SystemMenu | #PB_Window_ScreenCentered)
-  ButtonGadget(#FrmHauptfensterInfo, 20, 10, 100, 25, "Info", #PB_Button_Right | #PB_Button_Left)
+  OpenWindow(#FrmHaubtFenster, 630, 390, 270, 88, "Haubtfenster")                                                     
+  ButtonGadget(#FrmHauptfensterInfo, 4, 5, 259, 36, "Info")                                      
   SetGadgetFont(#FrmHauptfensterInfo, FontID(#Font_FrmHaubtFenster_0))
-  ButtonGadget(#FrmHaubtfensterEnde, 150, 10, 100, 25, "Ende")
+  ButtonGadget(#FrmHaubtfensterEnde, 4, 48, 257, 33, "Ende")  
   SetGadgetFont(#FrmHaubtfensterEnde, FontID(#Font_FrmHaubtFenster_1))
 EndProcedure
 
@@ -54,4 +54,6 @@ Procedure FrmHaubtFenster_Events(event)
   EndSelect
   ProcedureReturn #True
 EndProcedure
+
+
 
