@@ -28,10 +28,10 @@ Declare FrmHauptfensterInfo(EventType)
 Declare FrmHaubtfensterEnde(EventType)
 
 Procedure OpenFrmHaubtFenster(x = 0, y = 0, width = 270, height = 45)
-  OpenWindow(#FrmHaubtFenster, x, y, width, height, "Haubtfenster", #PB_Window_SystemMenu | #PB_Window_ScreenCentered)
-  ButtonGadget(#FrmHauptfensterInfo, 20, 10, 100, 25, "Info", #PB_Button_Right | #PB_Button_Left)
+  OpenWindow(#FrmHaubtFenster, 630, 390, 270, 172, "Haubtfenster")                                                    
+  ButtonGadget(#FrmHauptfensterInfo, 20, 10, 100, 25, "Info")                                    
   SetGadgetFont(#FrmHauptfensterInfo, FontID(#Font_FrmHaubtFenster_0))
-  ButtonGadget(#FrmHaubtfensterEnde, 150, 10, 100, 25, "Ende")
+  ButtonGadget(#FrmHaubtfensterEnde, 158, 139, 100, 25, "Ende")                                                            
   SetGadgetFont(#FrmHaubtfensterEnde, FontID(#Font_FrmHaubtFenster_1))
 EndProcedure
 

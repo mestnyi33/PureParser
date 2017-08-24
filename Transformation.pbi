@@ -2,25 +2,25 @@
 ; http://www.purebasic.fr/english/viewtopic.php?f=12&t=64700
 
 DeclareModule Transformation
+  EnableExplicit
   
   EnumerationBinary 1
-    #Anchors_Position
-    #Anchors_Horizontally
-    #Anchors_Vertically
+    #Transformation_Position
+    #Transformation_Horizontally
+    #Transformation_Vertically
   EndEnumeration
   
-  #Anchors_Size = #Anchors_Horizontally|#Anchors_Vertically
-  #Anchors_All  = #Anchors_Position|#Anchors_Horizontally|#Anchors_Vertically
+  #Transformation_Size = #Transformation_Horizontally|#Transformation_Vertically
+  #Transformation_All  = #Transformation_Position|#Transformation_Horizontally|#Transformation_Vertically
   
+  Declare Is(Gadget.i)
   Declare Disable(Gadget.i)
-  Declare Enable(Gadget.i, Flags.i=#Anchors_All, Grid.i=1)
+  Declare Enable(Gadget.i, Flags.i=#Transformation_All, Grid.i=1)
   
 EndDeclareModule
 
 Module Transformation
-  EnableExplicit
-  
-  Structure AnChor
+  Structure Transformation
     Gadget.i
     ID.i[10]
     Grid.i
@@ -32,7 +32,7 @@ Module Transformation
     ID.i[10]
   EndStructure
   
-  Global NewList AnChor.AnChor()
+  Global NewList AnChor.Transformation()
   
   CompilerIf #PB_Compiler_OS = #PB_OS_Windows
     Procedure GadgetsClipCallBack( GadgetID, lParam )
@@ -94,8 +94,8 @@ Module Transformation
     CompilerEndIf
   EndProcedure
   
-  Macro MoveAnchors(This)
-    ; anchors resize
+  Macro MoveTransformation(This)
+    ; Transformation resize
     If This\ID[1] : ResizeGadget(This\ID[1], GadgetX(This\Gadget)-This\Size+This\Pos, GadgetY(This\Gadget)+GadgetHeight(This\Gadget)-This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
     If This\ID[2] : ResizeGadget(This\ID[2], GadgetX(This\Gadget)+(GadgetWidth(This\Gadget)-This\Size)/2, GadgetY(This\Gadget)+GadgetHeight(This\Gadget)-This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
     If This\ID[3] : ResizeGadget(This\ID[3], GadgetX(This\Gadget)+GadgetWidth(This\Gadget)-This\Pos, GadgetY(This\Gadget)+GadgetHeight(This\Gadget)-This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
@@ -107,6 +107,16 @@ Module Transformation
     If This\ID[9] : ResizeGadget(This\ID[9], GadgetX(This\Gadget)+GadgetWidth(This\Gadget)-This\Pos, GadgetY(This\Gadget)-This\Size+This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
   EndMacro
   
+  Procedure Is(Gadget.i)
+    If ListSize(AnChor()) 
+      ForEach AnChor()
+        If AnChor() = GetGadgetData(Gadget)
+          ProcedureReturn #True
+        EndIf
+      Next
+    EndIf
+  EndProcedure
+  
   Procedure.i GridMatch(Value.i, Grid.i, Max.i=$7FFFFFFF)
     Value = Round((Value/Grid), #PB_Round_Nearest) * Grid
     If (Value>Max) : Value=Max : EndIf
@@ -115,7 +125,7 @@ Module Transformation
   
   Procedure Callback()
     Static Selected.i, X.i, Y.i, OffsetX.i, OffsetY.i, GadgetX0.i, GadgetX1.i, GadgetY0.i, GadgetY1.i
-    Protected *Anchor.AnChor = GetGadgetData(EventGadget())
+    Protected *Anchor.Transformation = GetGadgetData(EventGadget())
     
     With *Anchor
       Select EventType()
@@ -128,12 +138,13 @@ Module Transformation
           OffsetX = GetGadgetAttribute(EventGadget(), #PB_Canvas_MouseX)
           OffsetY = GetGadgetAttribute(EventGadget(), #PB_Canvas_MouseY)
           
+          
         Case #PB_EventType_LeftButtonUp
           Selected = #False
         Case #PB_EventType_MouseMove
           If Selected
             X = DesktopMouseX()-(GadgetX(\Gadget, #PB_Gadget_ScreenCoordinate)-GadgetX(\Gadget, #PB_Gadget_WindowCoordinate))-OffsetX
-            Y = WindowMouseY(GetActiveWindow())-OffsetY
+            Y = DesktopMouseY()-(GadgetY(\Gadget, #PB_Gadget_ScreenCoordinate)-GadgetY(\Gadget, #PB_Gadget_WindowCoordinate))-OffsetY
             
             ; gadget resize
             Select EventGadget()
@@ -141,14 +152,14 @@ Module Transformation
               Case \ID[2] : ResizeGadget(\Gadget, #PB_Ignore, #PB_Ignore, #PB_Ignore, GridMatch(Y, \Grid)-GadgetY0)
               Case \ID[3] : ResizeGadget(\Gadget, #PB_Ignore, #PB_Ignore, GridMatch(X, \Grid)-GadgetX0, GridMatch(Y, \Grid)-GadgetY0)
               Case \ID[4] : ResizeGadget(\Gadget, GridMatch(X+\Size, \Grid, GadgetX1), #PB_Ignore, GadgetX1-GridMatch(X+\Size, \Grid, GadgetX1), #PB_Ignore)
-              Case \ID[5] : ResizeGadget(\Gadget, GridMatch(X-\Size, \Grid), GridMatch(Y+\Size, \Grid), #PB_Ignore, #PB_Ignore)
+              Case \ID[5] : ResizeGadget(\Gadget, GridMatch(X-\Size, \Grid), GridMatch(Y+\Size-\Pos, \Grid), #PB_Ignore, #PB_Ignore)
               Case \ID[6] : ResizeGadget(\Gadget, #PB_Ignore, #PB_Ignore, GridMatch(X, \Grid)-GadgetX0, #PB_Ignore)
               Case \ID[7] : ResizeGadget(\Gadget, GridMatch(X+\Size, \Grid, GadgetX1), GridMatch(Y+\Size, \Grid, GadgetY1), GadgetX1-GridMatch(X+\Size, \Grid, GadgetX1), GadgetY1-GridMatch(Y+\Size, \Grid, GadgetY1))
               Case \ID[8] : ResizeGadget(\Gadget, #PB_Ignore, GridMatch(Y+\Size, \Grid, GadgetY1), #PB_Ignore, GadgetY1-GridMatch(Y+\Size, \Grid, GadgetY1))
               Case \ID[9] : ResizeGadget(\Gadget, #PB_Ignore, GridMatch(Y+\Size, \Grid, GadgetY1), GridMatch(X, \Grid)-GadgetX0, GadgetY1-GridMatch(Y+\Size, \Grid, GadgetY1))
             EndSelect
             
-            MoveAnchors(*Anchor)
+            MoveTransformation(*Anchor)
           EndIf
       EndSelect
     EndWith
@@ -173,9 +184,9 @@ Module Transformation
     
   EndProcedure
   
-  Procedure Enable(Gadget.i, Flags.i=#Anchors_All, Grid.i=1)
+  Procedure Enable(Gadget.i, Flags.i=#Transformation_All, Grid.i=1)
     Protected ID.i, I.i
-    Protected *Anchor.AnChor
+    Protected *Anchor.Transformation
     Protected *Cursors.DataBuffer = ?Cursors
     Protected *Flags.DataBuffer = ?Flags
     
@@ -209,7 +220,7 @@ Module Transformation
       EndIf
     Next
     
-    MoveAnchors(*Anchor)
+    MoveTransformation(*Anchor)
     
     ClipGadgets(GadgetID(ID))
     
@@ -219,8 +230,8 @@ Module Transformation
       Data.i #PB_Cursor_Arrows, #PB_Cursor_LeftRight, #PB_Cursor_LeftUpRightDown, #PB_Cursor_UpDown, #PB_Cursor_LeftDownRightUp
       
       Flags:
-      Data.i 0, #Anchors_Size, #Anchors_Vertically, #Anchors_Size, #Anchors_Horizontally
-      Data.i #Anchors_Position, #Anchors_Horizontally, #Anchors_Size, #Anchors_Vertically, #Anchors_Size
+      Data.i 0, #Transformation_Size, #Transformation_Vertically, #Transformation_Size, #Transformation_Horizontally
+      Data.i #Transformation_Position, #Transformation_Horizontally, #Transformation_Size, #Transformation_Vertically, #Transformation_Size
     EndDataSection
   EndProcedure
   
@@ -239,15 +250,18 @@ CompilerIf #PB_Compiler_IsMainFile
     #ButtonGadget
     #TrackBarGadget
     #SpinGadget
+    #CanvasGadget
   EndEnumeration
   
   OpenWindow(#Window, 0, 0, 600, 400, "WindowTitle", #PB_Window_MinimizeGadget|#PB_Window_ScreenCentered)
   EditorGadget(#EditorGadget, 50, 100, 200, 50, #PB_Editor_WordWrap) : SetGadgetText(#EditorGadget, "Grumpy wizards make toxic brew for the evil Queen and Jack.")
   ButtonGadget(#ButtonGadget, 50, 250, 200, 25, "Hallo Welt!", #PB_Button_MultiLine)
   TrackBarGadget(#TrackBarGadget, 350, 100, 200, 25, 0, 100) : SetGadgetState(#TrackBarGadget, 70)
-  SpinGadget(#SpinGadget, 350, 250, 200, 25, 0, 100, #PB_Spin_Numeric) : SetGadgetState(#SpinGadget, 70)
+  SpinGadget(#SpinGadget, 350, 180, 200, 25, 0, 100, #PB_Spin_Numeric) : SetGadgetState(#SpinGadget, 70)
+  CanvasGadget(#CanvasGadget, 350, 250, 200, 25)
   
   ButtonGadget(#Transformation, 20, 20, 150, 25, "Enable Transformation", #PB_Button_Toggle)
+  SetGadgetData(#CanvasGadget, 999)
   
   Repeat
     
@@ -257,6 +271,11 @@ CompilerIf #PB_Compiler_IsMainFile
         End
         
       Case #PB_Event_Gadget
+        Select EventType()
+          Case #PB_EventType_LeftClick
+            Debug "Is anchor "+Is(EventGadget())
+        EndSelect
+        
         Select EventGadget()
           Case #Transformation
             Select GetGadgetState(#Transformation)
@@ -266,12 +285,14 @@ CompilerIf #PB_Compiler_IsMainFile
                 Disable(#ButtonGadget)
                 Disable(#TrackBarGadget)
                 Disable(#SpinGadget)
+                Disable(#CanvasGadget)
               Case #True
                 SetGadgetText(#Transformation, "Disable Transformation")
-                Enable(#EditorGadget, #Anchors_All, 5)
-                Enable(#ButtonGadget, #Anchors_All)
-                Enable(#TrackBarGadget, #Anchors_Position|#Anchors_Horizontally)
-                Enable(#SpinGadget, #Anchors_Position)
+                Enable(#EditorGadget, #Transformation_All, 5)
+                Enable(#ButtonGadget, #Transformation_All)
+                Enable(#TrackBarGadget, #Transformation_Position|#Transformation_Horizontally)
+                Enable(#SpinGadget, #Transformation_Position)
+                Enable(#CanvasGadget, #Transformation_All)
             EndSelect
         EndSelect
         

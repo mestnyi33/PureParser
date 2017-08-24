@@ -2,6 +2,7 @@
 ; Различать где нашел
 ; то есть внутри процедури или где то еще
 ;-
+XIncludeFile "Enumeration.pbi"
 XIncludeFile "Transformation.pbi"
 
 
@@ -686,17 +687,35 @@ CompilerIf #PB_Compiler_IsMainFile
         
         ;-RunEvent
       Case Run  
-        Protected len, add$ ;= " ; ADD" 
+        Protected Object, len, add$ ;= " ; ADD" 
          Protected Space$, StringtoAdd$ = "999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"
-          Protected Length = Len(ParsePBGadget()\Function$)
-               
+         Protected Length 
+         
         ;PokeS(@*This\File$, "999", 2)
           len = 0
           
           PushListPosition(ParsePBGadget())
           ForEach ParsePBGadget()
-            Length = Len(ParsePBGadget()\FunctionNew$)
                
+            If Enumerate::StartWindow( )
+              While Enumerate::NextWindow( @Object )
+                If ParsePBGadget()\ID = Object
+                  StringtoAdd$ = ParsePBGadget()\Type$+"("+ParsePBGadget()\ID$+", "+WindowX(Object)+", "+WindowY(Object)+", "+WindowWidth(Object)+", "+WindowHeight(Object)+", "+Chr(34)+GetWindowTitle(Object)+Chr(34)+")"
+                EndIf
+              Wend
+              Enumerate::AbortWindow() 
+            EndIf
+            
+            If Enumerate::StartGadget( )
+              While Enumerate::NextGadget( @Object )
+                If ParsePBGadget()\ID = Object
+                  StringtoAdd$ = ParsePBGadget()\Type$+"("+ParsePBGadget()\ID$+", "+GadgetX(Object)+", "+GadgetY(Object)+", "+GadgetWidth(Object)+", "+GadgetHeight(Object)+", "+Chr(34)+GetGadgetText(Object)+Chr(34)+")"
+                EndIf
+              Wend
+              Enumerate::AbortGadget() 
+            EndIf
+            
+            Length = Len(StringtoAdd$)
             
             If Length>ParsePBGadget()\Length
               *This\File$ = InsertString(*This\File$, Space(Length), ParsePBGadget()\Position+ParsePBGadget()\Length+len+1)
@@ -705,85 +724,13 @@ CompilerIf #PB_Compiler_IsMainFile
               Space$ = Space(ParsePBGadget()\Length-Length)
             EndIf
             
-            ReplaceString(*This\File$, ParsePBGadget()\Function$, ParsePBGadget()\FunctionNew$+Space$, #PB_String_InPlace, ParsePBGadget()\Position, 1)
+            ReplaceString(*This\File$, ParsePBGadget()\Function$, StringtoAdd$+Space$, #PB_String_InPlace, ParsePBGadget()\Position, 1)
           Next
           PopListPosition(ParsePBGadget())
           
           Debug *This\File$
           
-        
-        
-;         With *This
-;           If ExamineRegularExpression(#RegEx_FindFunction, \File$)
-;             While NextRegularExpressionMatch(#RegEx_FindFunction)
-;                 \Type$=RegularExpressionGroup(#RegEx_FindFunction, 1)
-;                Select \Type$
-;                       Case "OpenWindow", ; FindString(\Type$, "Gadget"),-1,#PB_String_NoCase) ;
-;                            "ButtonGadget","StringGadget","TextGadget","CheckBoxGadget",
-;                            "OptionGadget","ListViewGadget","FrameGadget","ComboBoxGadget",
-;                            "ImageGadget","HyperLinkGadget","ContainerGadget","ListIconGadget",
-;                            "IPAddressGadget","ProgressBarGadget","ScrollBarGadget","ScrollAreaGadget",
-;                            "TrackBarGadget","WebGadget","ButtonImageGadget","CalendarGadget",
-;                            "DateGadget","EditorGadget","ExplorerListGadget","ExplorerTreeGadget",
-;                            "ExplorerComboGadget","SpinGadget","TreeGadget","PanelGadget",
-;                            "SplitterGadget","MDIGadget","ScintillaGadget","ShortcutGadget","CanvasGadget"
-;                         
-;                         \Args$=RegularExpressionGroup(#RegEx_FindFunction, 2)
-;               ;\Type = PB_Type(\Type$)
-;               
-; ;               \Position = RegularExpressionMatchPosition(#Regex_FindProcedure)+RegularExpressionMatchPosition(#RegEx_FindFunction) -2 
-; ;               \Length = RegularExpressionMatchLength(#RegEx_FindFunction)
-; ;               Debug "Position - "+\Position
-; ;               Debug "Length - "+\Length
-;               If ExamineRegularExpression(#RegEx_FindArguments, \Args$)
-;                 While NextRegularExpressionMatch(#RegEx_FindArguments)
-;                  ;Count + 1
-;                  Protected  Args$ = Trim(RegularExpressionMatchString(#RegEx_FindArguments))
-;                  
-;                  PushListPosition(ParsePBGadget())
-;                  ForEach ParsePBGadget()
-; ;                    Debug "arg "+Args$
-; ;                    Debug ParsePBGadget()\Width$
-;                    If Args$ = ParsePBGadget()\Width$
-;                     ; Debug 8888888
-;                      \Args$ = ReplaceRegularExpression(#RegEx_FindArguments, RegularExpressionGroup(#RegEx_FindFunction, 2), ParsePBGadget()\ID$+", "+ParsePBGadget()\X$+", "+ParsePBGadget()\Y$+", "+ParsePBGadget()\Width$+", "+ParsePBGadget()\Height$+", "+ParsePBGadget()\Caption$+", "+ParsePBGadget()\Param1$+", "+ParsePBGadget()\Param2$+", "+ParsePBGadget()\Param3$+", "+ParsePBGadget()\Flag$)
-;                      Break
-;                    EndIf   
-;                  Next
-;                  PopListPosition(ParsePBGadget())
-;                  
-;                  
-;                Wend
-;               EndIf
-;               EndSelect
-;             Wend
-;             
-;           EndIf
-;          
-;           If ExamineRegularExpression(#RegEx_FindFunction, \File$)
-;             While NextRegularExpressionMatch(#RegEx_FindFunction)
-;               \Type$=RegularExpressionGroup(#RegEx_FindFunction, 1)
-;               Select \Type$
-;                 Case "OpenWindow", ; FindString(\Type$, "Gadget"),-1,#PB_String_NoCase) ;
-;                      "ButtonGadget","StringGadget","TextGadget","CheckBoxGadget",
-;                      "OptionGadget","ListViewGadget","FrameGadget","ComboBoxGadget",
-;                      "ImageGadget","HyperLinkGadget","ContainerGadget","ListIconGadget",
-;                      "IPAddressGadget","ProgressBarGadget","ScrollBarGadget","ScrollAreaGadget",
-;                      "TrackBarGadget","WebGadget","ButtonImageGadget","CalendarGadget",
-;                      "DateGadget","EditorGadget","ExplorerListGadget","ExplorerTreeGadget",
-;                      "ExplorerComboGadget","SpinGadget","TreeGadget","PanelGadget",
-;                      "SplitterGadget","MDIGadget","ScintillaGadget","ShortcutGadget","CanvasGadget"
-;                   
-;                   ;\Args$=RegularExpressionGroup(#RegEx_FindFunction, 2)
-;                   Debug \Type$+" "+\Args$
-;                   
-;               EndSelect
-;             Wend
-;             
-;           EndIf
-;           
-;         EndWith
-              
+            
         ;-SaveEvent
       Case Save  
         Title$="test1.pb/save"
@@ -795,7 +742,7 @@ CompilerIf #PB_Compiler_IsMainFile
         If File$
           If OpenFile(0, File$)         ; we create a new text file...
             
-            PushListPosition(ParsePBGadget())
+;             PushListPosition(ParsePBGadget())
             ;SortStructuredList(ParsePBGadget(), #PB_Sort_Descending, OffsetOf(ParsePBGadget\Position), TypeOf(ParsePBGadget\Position)) ; Сортировка
             ;WriteStringFormat(0,#PB_Unicode)
             WriteString(0, *This\File$, #PB_UTF8) ; 
@@ -815,7 +762,7 @@ CompilerIf #PB_Compiler_IsMainFile
 ;               WriteStringN(0, ParsePBGadget()\Function$+add$, #PB_UTF8) ; 
 ;               
 ;             Next
-            PopListPosition(ParsePBGadget())
+;             PopListPosition(ParsePBGadget())
             
             CloseFile(0)                       ; close the previously opened file and store the written data this way
           Else
