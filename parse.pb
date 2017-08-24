@@ -2,6 +2,9 @@
 ; Различать где нашел
 ; то есть внутри процедури или где то еще
 ;-
+XIncludeFile "Transformation.pbi"
+
+
 EnableExplicit
 
 Global Window_0
@@ -42,6 +45,7 @@ Structure ParsePBGadget
   Font.i
   File$
   Function$
+  FunctionNew$
 EndStructure
 
 Global NewList ParsePBGadget.ParsePBGadget() 
@@ -333,6 +337,10 @@ CompilerIf #PB_Compiler_IsMainFile
           ParsePBGadget()\Length = \Length
         EndIf
       Next
+    
+      If IsGadget(\ID)
+        Transformation::Enable(\ID)
+      EndIf
     EndWith
     
     ProcedureReturn Result
@@ -679,22 +687,30 @@ CompilerIf #PB_Compiler_IsMainFile
         ;-RunEvent
       Case Run  
         Protected len, add$ ;= " ; ADD" 
-         Protected StringtoAdd$ = "999999999999999"
+         Protected Space$, StringtoAdd$ = "999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"
+          Protected Length = Len(ParsePBGadget()\Function$)
                
         ;PokeS(@*This\File$, "999", 2)
-        len = 0
-        PushListPosition(ParsePBGadget())
-        ForEach ParsePBGadget()
-          ;If Val(ParsePBGadget()\Width$)
-            *This\File$ = InsertString(*This\File$, Space(Len(StringtoAdd$)), ParsePBGadget()\Position+Len(ParsePBGadget()\Function$)+len+1)
-            len + Len(StringtoAdd$)
-            ReplaceString(*This\File$, ParsePBGadget()\Function$, ParsePBGadget()\Function$+StringtoAdd$, #PB_String_InPlace, ParsePBGadget()\Position, 1)
-          ;EndIf
-        Next
-        PopListPosition(ParsePBGadget())
-        
-        Debug *This\File$
-              
+          len = 0
+          
+          PushListPosition(ParsePBGadget())
+          ForEach ParsePBGadget()
+            Length = Len(ParsePBGadget()\FunctionNew$)
+               
+            
+            If Length>ParsePBGadget()\Length
+              *This\File$ = InsertString(*This\File$, Space(Length), ParsePBGadget()\Position+ParsePBGadget()\Length+len+1)
+              len + Length
+            Else
+              Space$ = Space(ParsePBGadget()\Length-Length)
+            EndIf
+            
+            ReplaceString(*This\File$, ParsePBGadget()\Function$, ParsePBGadget()\FunctionNew$+Space$, #PB_String_InPlace, ParsePBGadget()\Position, 1)
+          Next
+          PopListPosition(ParsePBGadget())
+          
+          Debug *This\File$
+          
         
         
 ;         With *This
