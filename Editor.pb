@@ -395,14 +395,14 @@ CompilerIf #PB_Compiler_IsMainFile
   Procedure$ FindVar(File, *File, Length, Format, StrToFind$)
     Protected result$
     Protected Line, FindWindow, Function$, FunctionName$, FunctionArgs$
-    Protected Create_Reg_Flag = #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll    
+    Protected Flags_RegEx = #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll    
     
     If *File 
       ;FileSeek(File, Loc(File), #PB_Absolute)
       ReadData(File, *File, Length)
       Protected String$ = PeekS(*File, Length, Format)
       
-      If CreateRegularExpression(#RegEx_FindVar, "(\s*?"+StrToFind$+"\s*?=\s*?)(\d+)", Create_Reg_Flag)
+      If CreateRegularExpression(#RegEx_FindVar, "(\s*?"+StrToFind$+"\s*?=\s*?)(\d+)", Flags_RegEx)
         
         If ExamineRegularExpression(#RegEx_FindVar, String$)
           While NextRegularExpressionMatch(#RegEx_FindVar)
@@ -427,26 +427,30 @@ CompilerIf #PB_Compiler_IsMainFile
   EndProcedure
   
   
-  Procedure.S ParsePBFile(FileName.s)
-    Protected i,result.S, Texts.S, Text.S, Find.S, String.S, Position, Args$, Count, Index
+  Procedure.S ParsePBFile(FileName.s) ; Процедура открытия и парсинга файла
     
-    If ReadFile(#File, FileName)
-      Protected Create_Reg_Flag = #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll    
-      Protected Line, FindWindow, Function$, FunctionArgs$
-      Protected Format=ReadStringFormat(#File)
+    If ReadFile(#File, FileName) 
+      Protected Format = ReadStringFormat(#File)
       Protected Length = Lof(#File) 
-      Protected *File = AllocateMemory(Length)
+
       
-      If *File 
+      Protected *File = AllocateMemory(Length)
+      If *File
         ReadData(#File, *File, Length)
         *This\File$ = PeekS(*File, Length, Format)
+        ; Теперь всё содержимое файла находится в виде строки внутри *This\File$
         
-        If CreateRegularExpression(#Regex_FindProcedure, "[^;]Procedure.*?EndProcedure", Create_Reg_Flag) And
-           CreateRegularExpression(#RegEx_FindFunction, "(\w+)\s*\((.*?)\)(?=\s*($|:))", Create_Reg_Flag) And
-           CreateRegularExpression(#RegEx_FindArguments, "[^,]+", Create_Reg_Flag)
+        Protected i,result.S, Texts.S, Text.S, Find.S, String.S, Position, Args$, Count, Index
+        
+        Protected Flags_RegEx = #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll
+        If CreateRegularExpression(#Regex_FindProcedure, "[^;]Procedure.*?EndProcedure", Flags_RegEx) And
+           CreateRegularExpression(#RegEx_FindFunction, "(\w+)\s*\((.*?)\)(?=\s*($|:))", Flags_RegEx) And
+           CreateRegularExpression(#RegEx_FindArguments, "[^,]+", Flags_RegEx)
           
           If ExamineRegularExpression(#Regex_FindProcedure, *This\File$)
             While NextRegularExpressionMatch(#Regex_FindProcedure)
+              
+              Protected Function$
               Function$=RegularExpressionMatchString(#Regex_FindProcedure)
               
               If ExamineRegularExpression(#RegEx_FindFunction, Function$)
@@ -695,8 +699,9 @@ CompilerIf #PB_Compiler_IsMainFile
           EndIf
           
         EndIf
+        
+        FreeMemory(*File) ; Освобождение памяти после использования
       EndIf
-      
       CloseFile(#File)
     EndIf
     
@@ -714,18 +719,18 @@ CompilerIf #PB_Compiler_IsMainFile
       Case Open
         Time = ElapsedMilliseconds()
         ;{ 
-        Title$="Open PureBasic project"
-        File$ = "test1.pb"
-        Pattern$ = "PureBasic (*.pb*)|*.pb*"
-        Pattern = 0
-        
-        File$ = OpenFileRequester(Title$,File$,Pattern$,Pattern)
-        If File$
-          ClearGadgetItems(Editor_2)
-          Load$ = ParsePBFile(File$)
-          ClearGadgetItems(Editor_0)
-          AddGadgetItem(Editor_0,-1,Load$)
-        EndIf 
+          Title$="Open PureBasic project"
+          File$ = "test1.pb"
+          Pattern$ = "PureBasic (*.pb*)|*.pb*"
+          Pattern = 0
+          
+          File$ = OpenFileRequester(Title$,File$,Pattern$,Pattern)
+          If File$
+            ClearGadgetItems(Editor_2)
+            Load$ = ParsePBFile(File$)
+            ClearGadgetItems(Editor_0)
+            AddGadgetItem(Editor_0,-1,Load$)
+          EndIf 
         ;}
         Time = ElapsedMilliseconds() - Time
         
@@ -750,7 +755,7 @@ CompilerIf #PB_Compiler_IsMainFile
                 ParsePBGadget()\Y$ = Str(WindowY(Object))
                 ParsePBGadget()\Width$ = Str(WindowWidth(Object))
                 ParsePBGadget()\Height$ = Str(WindowHeight(Object))
-             EndIf
+              EndIf
             Wend
             Enumerate::AbortWindow() 
           EndIf
@@ -917,15 +922,30 @@ CompilerIf #PB_Compiler_IsMainFile
     ProcedureReturn Window_0
   EndProcedure
   
+  
+  
+  
+  
+  
+  
+  
+  
   ;-
   Window_0 = Window_0_Open()
   
   ;Define File$ = "CFE_Read_Test(const).pbf"
   ;Define File$ = "CFE_Read_Test(variab).pbf"
-  Define File$=OpenFileRequester("Выберите файл с описанием окон", "", "Все файлы|*", 0)
+  
+  
+  Define File$=ProgramParameter() ; Путь к файлу.
+  If Not Len(File$)
+    File$=OpenFileRequester("Выберите файл с описанием окон", "", "Файлы PureBasic (*.pb;*.pbf)|*.pb;*.pbf|Все файлы|*", 0)
+  EndIf
+
   If File$
     ClearGadgetItems(Editor_2)
     Define Load$ = ParsePBFile(File$)
+    
     ClearGadgetItems(Editor_0)
     AddGadgetItem(Editor_0,-1,Load$)
   EndIf 
@@ -937,10 +957,15 @@ CompilerIf #PB_Compiler_IsMainFile
     EndSelect
   Wend
   
+  
   End 
+  
+  
+  
 CompilerEndIf
 ; IDE Options = PureBasic 5.40 LTS (Windows - x86)
-; CursorPosition = 940
+; CursorPosition = 702
+; FirstLine = 663
 ; Folding = --
 ; EnableUnicode
 ; EnableXP

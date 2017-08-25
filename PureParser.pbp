@@ -8,12 +8,12 @@
   <section name="data">
     <explorer view="C:\Users\Андреич\Desktop\PureBasic 5.40 LTS Windows x86 x64 Portable\Examples\" pattern="0"/>
     <log show="1"/>
-    <lastopen date="2017-08-25 13:08" user="Андреич" host="DESKTOP"/>
+    <lastopen date="2017-08-25 14:35" user="Андреич" host="DESKTOP"/>
   </section>
   <section name="files">
     <file name="Editor.pb">
       <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
-      <fingerprint md5="1341a7eb3d8966a798eb159a45382012"/>
+      <fingerprint md5="a7f899331f7456e7ac3dca12f046fbf4"/>
     </file>
   </section>
   <section name="targets">
