@@ -4,6 +4,7 @@
 ;-
 XIncludeFile "Enumeration.pbi"
 XIncludeFile "Transformation.pbi"
+XIncludeFile "Property.pbi"
 
 
 EnableExplicit
@@ -263,7 +264,7 @@ CompilerIf #PB_Compiler_IsMainFile
     
   EndProcedure
   
-  Procedure CreatePBObject(*This.ParsePBGadget)
+  Procedure OpenPBObject(*This.ParsePBGadget)
     Protected Result
     
     With *This
@@ -340,7 +341,7 @@ CompilerIf #PB_Compiler_IsMainFile
       Next
       
       If IsGadget(\ID)
-        Transformation::Enable(\ID)
+        Transformation::Enable(\ID, 5)
       EndIf
     EndWith
     
@@ -623,7 +624,7 @@ CompilerIf #PB_Compiler_IsMainFile
                           Wend
                         EndIf
                         
-                        CallFunctionFast(@CreatePBObject(), *This)
+                        CallFunctionFast(@OpenPBObject(), *This)
                         
                         \Flag = 0
                         \Param1 = 0
@@ -698,6 +699,8 @@ CompilerIf #PB_Compiler_IsMainFile
       EndIf
       
       CloseFile(#File)
+      
+      Property_Window_Show( )
     EndIf
     
     ;Debug result
@@ -779,6 +782,8 @@ CompilerIf #PB_Compiler_IsMainFile
           EndIf
           
           ReplaceString(*This\File$, ParsePBGadget()\Function$, StringtoAdd$+Space$, #PB_String_InPlace, ParsePBGadget()\Position, 1)
+          ParsePBGadget()\Function$ = StringtoAdd$+Space$
+          ParsePBGadget()\Length = Len(StringtoAdd$+Space$)
         Next
         PopListPosition(ParsePBGadget())
         

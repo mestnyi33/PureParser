@@ -4,18 +4,22 @@
 DeclareModule Transformation
   EnableExplicit
   
+  #Arrows = 9
+  
   EnumerationBinary 1
-    #Transformation_Position
-    #Transformation_Horizontally
-    #Transformation_Vertically
+    #Anchor_Position
+    #Anchor_Horizontally
+    #Anchor_Vertically
   EndEnumeration
   
-  #Transformation_Size = #Transformation_Horizontally|#Transformation_Vertically
-  #Transformation_All  = #Transformation_Position|#Transformation_Horizontally|#Transformation_Vertically
+  #Anchor_Size = #Anchor_Horizontally|#Anchor_Vertically
+  #Anchor_All  = #Anchor_Position|#Anchor_Horizontally|#Anchor_Vertically
   
   Declare Is(Gadget.i)
+  Declare Gadget()
+  Declare Update(Gadget.i)
   Declare Disable(Gadget.i)
-  Declare Enable(Gadget.i, Flags.i=#Transformation_All, Grid.i=1)
+  Declare Enable(Gadget.i, Grid.i=1, Flags.i=#Anchor_All)
   
 EndDeclareModule
 
@@ -32,6 +36,7 @@ Module Transformation
     ID.i[10]
   EndStructure
   
+  Global ActiveGadget =- 1
   Global NewList AnChor.Transformation()
   
   CompilerIf #PB_Compiler_OS = #PB_OS_Windows
@@ -90,28 +95,48 @@ Module Transformation
   
   Procedure ClipGadgets( WindowID )
     CompilerIf #PB_Compiler_OS = #PB_OS_Windows
-      EnumChildWindows_( GetAncestor_( WindowID, #GA_ROOT ), @GadgetsClipCallBack(), 0 )
+      WindowID = GetAncestor_( WindowID, #GA_ROOT )
+      SetWindowLongPtr_( WindowID, #GWL_STYLE, GetWindowLongPtr_( WindowID, #GWL_STYLE )|#WS_CLIPCHILDREN )
+      EnumChildWindows_( WindowID, @GadgetsClipCallBack(), 0 )
     CompilerEndIf
   EndProcedure
   
   Macro MoveTransformation(This)
     ; Transformation resize
-    If This\ID[1] : ResizeGadget(This\ID[1], GadgetX(This\Gadget)-This\Size+This\Pos, GadgetY(This\Gadget)+GadgetHeight(This\Gadget)-This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
-    If This\ID[2] : ResizeGadget(This\ID[2], GadgetX(This\Gadget)+(GadgetWidth(This\Gadget)-This\Size)/2, GadgetY(This\Gadget)+GadgetHeight(This\Gadget)-This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
-    If This\ID[3] : ResizeGadget(This\ID[3], GadgetX(This\Gadget)+GadgetWidth(This\Gadget)-This\Pos, GadgetY(This\Gadget)+GadgetHeight(This\Gadget)-This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
-    If This\ID[4] : ResizeGadget(This\ID[4], GadgetX(This\Gadget)-This\Size+This\Pos, GadgetY(This\Gadget)+(GadgetHeight(This\Gadget)-This\Size)/2, #PB_Ignore, #PB_Ignore) : EndIf
-    If This\ID[5] : ResizeGadget(This\ID[5], GadgetX(This\Gadget)+This\Size, GadgetY(This\Gadget)-This\Size+This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
-    If This\ID[6] : ResizeGadget(This\ID[6], GadgetX(This\Gadget)+GadgetWidth(This\Gadget)-This\Pos, GadgetY(This\Gadget)+(GadgetHeight(This\Gadget)-This\Size)/2, #PB_Ignore, #PB_Ignore) : EndIf
-    If This\ID[7] : ResizeGadget(This\ID[7], GadgetX(This\Gadget)-This\Size+This\Pos, GadgetY(This\Gadget)-This\Size+This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
-    If This\ID[8] : ResizeGadget(This\ID[8], GadgetX(This\Gadget)+(GadgetWidth(This\Gadget)-This\Size)/2, GadgetY(This\Gadget)-This\Size+This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
-    If This\ID[9] : ResizeGadget(This\ID[9], GadgetX(This\Gadget)+GadgetWidth(This\Gadget)-This\Pos, GadgetY(This\Gadget)-This\Size+This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
+    If This\ID[1] : ResizeGadget(This\ID[1], GadgetX(This\Gadget)-This\Size+This\Pos, GadgetY(This\Gadget)+(GadgetHeight(This\Gadget)-This\Size)/2, #PB_Ignore, #PB_Ignore) : EndIf
+    If This\ID[2] : ResizeGadget(This\ID[2], GadgetX(This\Gadget)+(GadgetWidth(This\Gadget)-This\Size)/2, GadgetY(This\Gadget)-This\Size+This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
+    If This\ID[3] : ResizeGadget(This\ID[3], GadgetX(This\Gadget)+GadgetWidth(This\Gadget)-This\Pos, GadgetY(This\Gadget)+(GadgetHeight(This\Gadget)-This\Size)/2, #PB_Ignore, #PB_Ignore) : EndIf
+    If This\ID[4] : ResizeGadget(This\ID[4], GadgetX(This\Gadget)+(GadgetWidth(This\Gadget)-This\Size)/2, GadgetY(This\Gadget)+GadgetHeight(This\Gadget)-This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
+    If This\ID[5] : ResizeGadget(This\ID[5], GadgetX(This\Gadget)-This\Size+This\Pos, GadgetY(This\Gadget)-This\Size+This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
+    If This\ID[6] : ResizeGadget(This\ID[6], GadgetX(This\Gadget)+GadgetWidth(This\Gadget)-This\Pos, GadgetY(This\Gadget)-This\Size+This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
+    If This\ID[7] : ResizeGadget(This\ID[7], GadgetX(This\Gadget)+GadgetWidth(This\Gadget)-This\Pos, GadgetY(This\Gadget)+GadgetHeight(This\Gadget)-This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
+    If This\ID[8] : ResizeGadget(This\ID[8], GadgetX(This\Gadget)-This\Size+This\Pos, GadgetY(This\Gadget)+GadgetHeight(This\Gadget)-This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
+    If This\ID[#Arrows] : ResizeGadget(This\ID[#Arrows], GadgetX(This\Gadget)+This\Size, GadgetY(This\Gadget)-This\Size+This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
   EndMacro
   
+  Procedure Gadget()
+    ProcedureReturn ActiveGadget
+  EndProcedure
+  
+  Procedure Update(Gadget)
+    ForEach AnChor()
+      If AnChor()\Gadget = Gadget
+        MoveTransformation(AnChor())
+      EndIf
+    Next
+  EndProcedure
+  
   Procedure Is(Gadget.i)
+    Protected I
+    
     If ListSize(AnChor()) 
       ForEach AnChor()
         If AnChor() = GetGadgetData(Gadget)
-          ProcedureReturn #True
+         For I = 1 To 9
+            If AnChor()\ID[I] = Gadget
+              ProcedureReturn I
+            EndIf
+          Next
         EndIf
       Next
     EndIf
@@ -137,7 +162,7 @@ Module Transformation
           GadgetY1 = GadgetY0 + GadgetHeight(\Gadget)
           OffsetX = GetGadgetAttribute(EventGadget(), #PB_Canvas_MouseX)
           OffsetY = GetGadgetAttribute(EventGadget(), #PB_Canvas_MouseY)
-          
+          ActiveGadget = \Gadget
           
         Case #PB_EventType_LeftButtonUp
           Selected = #False
@@ -148,18 +173,22 @@ Module Transformation
             
             ; gadget resize
             Select EventGadget()
-              Case \ID[1] : ResizeGadget(\Gadget, GridMatch(X+\Size, \Grid, GadgetX1), #PB_Ignore, GadgetX1-GridMatch(X+\Size, \Grid, GadgetX1), GridMatch(Y, \Grid)-GadgetY0)
-              Case \ID[2] : ResizeGadget(\Gadget, #PB_Ignore, #PB_Ignore, #PB_Ignore, GridMatch(Y, \Grid)-GadgetY0)
-              Case \ID[3] : ResizeGadget(\Gadget, #PB_Ignore, #PB_Ignore, GridMatch(X, \Grid)-GadgetX0, GridMatch(Y, \Grid)-GadgetY0)
-              Case \ID[4] : ResizeGadget(\Gadget, GridMatch(X+\Size, \Grid, GadgetX1), #PB_Ignore, GadgetX1-GridMatch(X+\Size, \Grid, GadgetX1), #PB_Ignore)
-              Case \ID[5] : ResizeGadget(\Gadget, GridMatch(X-\Size, \Grid), GridMatch(Y+\Size-\Pos, \Grid), #PB_Ignore, #PB_Ignore)
-              Case \ID[6] : ResizeGadget(\Gadget, #PB_Ignore, #PB_Ignore, GridMatch(X, \Grid)-GadgetX0, #PB_Ignore)
-              Case \ID[7] : ResizeGadget(\Gadget, GridMatch(X+\Size, \Grid, GadgetX1), GridMatch(Y+\Size, \Grid, GadgetY1), GadgetX1-GridMatch(X+\Size, \Grid, GadgetX1), GadgetY1-GridMatch(Y+\Size, \Grid, GadgetY1))
-              Case \ID[8] : ResizeGadget(\Gadget, #PB_Ignore, GridMatch(Y+\Size, \Grid, GadgetY1), #PB_Ignore, GadgetY1-GridMatch(Y+\Size, \Grid, GadgetY1))
-              Case \ID[9] : ResizeGadget(\Gadget, #PB_Ignore, GridMatch(Y+\Size, \Grid, GadgetY1), GridMatch(X, \Grid)-GadgetX0, GadgetY1-GridMatch(Y+\Size, \Grid, GadgetY1))
+              Case \ID[1] : ResizeGadget(\Gadget, GridMatch(X+(\Size-\Pos), \Grid, GadgetX1), #PB_Ignore, GadgetX1-GridMatch(X+(\Size-\Pos), \Grid, GadgetX1), #PB_Ignore)
+              Case \ID[2] : ResizeGadget(\Gadget, #PB_Ignore, GridMatch(Y+(\Size-\Pos), \Grid, GadgetY1), #PB_Ignore, GadgetY1-GridMatch(Y+(\Size-\Pos), \Grid, GadgetY1))
+              Case \ID[3] : ResizeGadget(\Gadget, #PB_Ignore, #PB_Ignore, GridMatch(X+(\Size-\Pos), \Grid)-GadgetX0, #PB_Ignore)
+              Case \ID[4] : ResizeGadget(\Gadget, #PB_Ignore, #PB_Ignore, #PB_Ignore, GridMatch(Y+(\Size-\Pos), \Grid)-GadgetY0)
+              Case \ID[5] : ResizeGadget(\Gadget, GridMatch(X+(\Size-\Pos), \Grid, GadgetX1), GridMatch(Y+(\Size-\Pos), \Grid, GadgetY1), GadgetX1-GridMatch(X+(\Size-\Pos), \Grid, GadgetX1), GadgetY1-GridMatch(Y+(\Size-\Pos), \Grid, GadgetY1))
+              Case \ID[6] : ResizeGadget(\Gadget, #PB_Ignore, GridMatch(Y+(\Size-\Pos), \Grid, GadgetY1), GridMatch(X+(\Size-\Pos), \Grid)-GadgetX0, GadgetY1-GridMatch(Y+(\Size-\Pos), \Grid, GadgetY1))
+              Case \ID[7] : ResizeGadget(\Gadget, #PB_Ignore, #PB_Ignore, GridMatch(X+(\Size-\Pos), \Grid)-GadgetX0, GridMatch(Y+(\Size-\Pos), \Grid)-GadgetY0)
+              Case \ID[8] : ResizeGadget(\Gadget, GridMatch(X+(\Size-\Pos), \Grid, GadgetX1), #PB_Ignore, GadgetX1-GridMatch(X+(\Size-\Pos), \Grid, GadgetX1), GridMatch(Y+(\Size-\Pos), \Grid)-GadgetY0)
+              Case \ID[#Arrows] : ResizeGadget(\Gadget, GridMatch(X-\Size, \Grid), GridMatch(Y+(\Size-\Pos), \Grid), #PB_Ignore, #PB_Ignore)
             EndSelect
             
             MoveTransformation(*Anchor)
+            
+            CompilerIf #PB_Compiler_OS = #PB_OS_Windows
+              UpdateWindow_(WindowID(GetActiveWindow()))
+            CompilerEndIf 
           EndIf
       EndSelect
     EndWith
@@ -184,54 +213,76 @@ Module Transformation
     
   EndProcedure
   
-  Procedure Enable(Gadget.i, Flags.i=#Transformation_All, Grid.i=1)
+  Procedure Enable(Gadget.i, Grid.i=1, Flags.i=#Anchor_All)
     Protected ID.i, I.i
     Protected *Anchor.Transformation
     Protected *Cursors.DataBuffer = ?Cursors
     Protected *Flags.DataBuffer = ?Flags
-    
+      
     Disable(Gadget)
     
     *Anchor = AddElement(AnChor())
-    *Anchor\Gadget = Gadget
-    *Anchor\Grid = Grid
-    *Anchor\Pos = 3
-    *AnChor\Size = 5
-        
-    For I = 1 To 9
-      If Flags & *Flags\ID[I] = *Flags\ID[I]
-        If I=5
-          ID = CanvasGadget(#PB_Any, 0,0, *Anchor\Size*2, *Anchor\Size)
-        Else
-          ID = CanvasGadget(#PB_Any, 0,0, *Anchor\Size, *Anchor\Size)
-        EndIf
-        
-        *Anchor\ID[I] = ID
-        SetGadgetData(ID, *Anchor)
-        SetGadgetAttribute(ID, #PB_Canvas_Cursor, *Cursors\ID[I])
-        
-        If StartDrawing(CanvasOutput(ID))
-          Box(0, 0, OutputWidth(), OutputHeight(), $000000)
-          Box(1, 1, OutputWidth()-2, OutputHeight()-2, $FFFFFF)
-          StopDrawing()
-        EndIf
-        
-        BindGadgetEvent(ID, @Callback())
-      EndIf
-    Next
     
-    MoveTransformation(*Anchor)
-    
-    ClipGadgets(GadgetID(ID))
+    With *AnChor
+      \Gadget = Gadget
+      \Grid = Grid
+      \Pos = 3
+      \Size = 5
+      
+      For I = 1 To 9
+        If Flags & *Flags\ID[I] = *Flags\ID[I]
+          If (I=#Arrows)
+            ID = CanvasGadget(#PB_Any, 0,0, \Size*2, \Size) 
+          Else
+            ID = CanvasGadget(#PB_Any, 0,0, \Size, \Size)
+          EndIf
+          
+          \ID[I] = ID
+          SetGadgetData(ID, *Anchor)
+          SetGadgetAttribute(ID, #PB_Canvas_Cursor, *Cursors\ID[I])
+          
+          If StartDrawing(CanvasOutput(ID))
+            Box(0, 0, OutputWidth(), OutputHeight(), $000000)
+            Box(1, 1, OutputWidth()-2, OutputHeight()-2, $FFFFFF)
+            StopDrawing()
+          EndIf
+          
+          BindGadgetEvent(ID, @Callback())
+        EndIf
+      Next
+      
+      MoveTransformation(*Anchor)
+      ClipGadgets(UseGadgetList(0))
+      
+      CompilerIf #PB_Compiler_OS = #PB_OS_Windows
+        UpdateWindow_(UseGadgetList(0))
+      CompilerEndIf 
+    EndWith
     
     DataSection
       Cursors:
-      Data.i 0, #PB_Cursor_LeftDownRightUp, #PB_Cursor_UpDown, #PB_Cursor_LeftUpRightDown, #PB_Cursor_LeftRight
-      Data.i #PB_Cursor_Arrows, #PB_Cursor_LeftRight, #PB_Cursor_LeftUpRightDown, #PB_Cursor_UpDown, #PB_Cursor_LeftDownRightUp
+      Data.i 0
+      Data.i #PB_Cursor_LeftRight
+      Data.i #PB_Cursor_UpDown
+      Data.i #PB_Cursor_LeftRight
+      Data.i #PB_Cursor_UpDown
+      Data.i #PB_Cursor_LeftUpRightDown
+      Data.i #PB_Cursor_LeftDownRightUp
+      Data.i #PB_Cursor_LeftUpRightDown
+      Data.i #PB_Cursor_LeftDownRightUp
+      Data.i #PB_Cursor_Arrows
       
       Flags:
-      Data.i 0, #Transformation_Size, #Transformation_Vertically, #Transformation_Size, #Transformation_Horizontally
-      Data.i #Transformation_Position, #Transformation_Horizontally, #Transformation_Size, #Transformation_Vertically, #Transformation_Size
+      Data.i 0
+      Data.i #Anchor_Horizontally
+      Data.i #Anchor_Vertically
+      Data.i #Anchor_Horizontally
+      Data.i #Anchor_Vertically
+      Data.i #Anchor_Size
+      Data.i #Anchor_Size
+      Data.i #Anchor_Size
+      Data.i #Anchor_Size
+      Data.i #Anchor_Position
     EndDataSection
   EndProcedure
   
@@ -253,6 +304,8 @@ CompilerIf #PB_Compiler_IsMainFile
     #CanvasGadget
   EndEnumeration
   
+  Global Gadget =- 1
+  
   OpenWindow(#Window, 0, 0, 600, 400, "WindowTitle", #PB_Window_MinimizeGadget|#PB_Window_ScreenCentered)
   EditorGadget(#EditorGadget, 50, 100, 200, 50, #PB_Editor_WordWrap) : SetGadgetText(#EditorGadget, "Grumpy wizards make toxic brew for the evil Queen and Jack.")
   ButtonGadget(#ButtonGadget, 50, 250, 200, 25, "Hallo Welt!", #PB_Button_MultiLine)
@@ -263,6 +316,7 @@ CompilerIf #PB_Compiler_IsMainFile
   ButtonGadget(#Transformation, 20, 20, 150, 25, "Enable Transformation", #PB_Button_Toggle)
   SetGadgetData(#CanvasGadget, 999)
   
+  
   Repeat
     
     Select WaitWindowEvent()
@@ -270,10 +324,24 @@ CompilerIf #PB_Compiler_IsMainFile
       Case #PB_Event_CloseWindow
         End
         
+      Case #PB_Event_Repaint
+        
       Case #PB_Event_Gadget
         Select EventType()
-          Case #PB_EventType_LeftClick
-            Debug "Is anchor "+Is(EventGadget())
+          Case #PB_EventType_LeftButtonDown
+            Debug "Is anchor "+Is(EventGadget())+" "+Gadget()
+            Gadget = EventGadget()
+            Define OffsetX = GetGadgetAttribute(EventGadget(), #PB_Canvas_MouseX)
+            Define OffsetY = GetGadgetAttribute(EventGadget(), #PB_Canvas_MouseY)
+          Case #PB_EventType_LeftButtonUp
+            Gadget =- 1
+          Case #PB_EventType_MouseMove
+            If IsGadget(Gadget) And Not Is(Gadget)
+              Define X = DesktopMouseX()-(GadgetX(Gadget, #PB_Gadget_ScreenCoordinate)-GadgetX(Gadget, #PB_Gadget_WindowCoordinate))-OffsetX
+              Define Y = DesktopMouseY()-(GadgetY(Gadget, #PB_Gadget_ScreenCoordinate)-GadgetY(Gadget, #PB_Gadget_WindowCoordinate))-OffsetY
+              ResizeGadget(Gadget,X,Y,#PB_Ignore,#PB_Ignore)
+              Update(Gadget)
+            EndIf               
         EndSelect
         
         Select EventGadget()
@@ -288,11 +356,11 @@ CompilerIf #PB_Compiler_IsMainFile
                 Disable(#CanvasGadget)
               Case #True
                 SetGadgetText(#Transformation, "Disable Transformation")
-                Enable(#EditorGadget, #Transformation_All, 5)
-                Enable(#ButtonGadget, #Transformation_All)
-                Enable(#TrackBarGadget, #Transformation_Position|#Transformation_Horizontally)
-                Enable(#SpinGadget, #Transformation_Position)
-                Enable(#CanvasGadget, #Transformation_All)
+                Enable(#EditorGadget, 5, #Anchor_All)
+                Enable(#ButtonGadget, 1, #Anchor_All)
+                Enable(#TrackBarGadget, 1, #Anchor_Position|#Anchor_Horizontally)
+                Enable(#SpinGadget, 1, #Anchor_Position)
+                Enable(#CanvasGadget, 1, #Anchor_All)
             EndSelect
         EndSelect
         
