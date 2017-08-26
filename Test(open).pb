@@ -1,6 +1,8 @@
 ﻿EnableExplicit
 
-Procedure OpenPB(Type$, X=0,Y=0,Width=0,Height=0, Flag=0, Caption$="", Param1=0, Param2=0, Param3=0)
+XIncludeFile "Transformation.pbi"
+
+Procedure OpenPBObject(Type$, X=0,Y=0,Width=0,Height=0, Flag=0, Caption$="", Param1=0, Param2=0, Param3=0)
   Protected ID
   Static ParentID, Parent
   
@@ -35,8 +37,6 @@ Procedure OpenPB(Type$, X=0,Y=0,Width=0,Height=0, Flag=0, Caption$="", Param1=0,
     Case "TreeGadget"          : ID = TreeGadget          (#PB_Any, X,Y,Width,Height, Flag)
     Case "PanelGadget"         : ID = PanelGadget         (#PB_Any, X,Y,Width,Height) 
     Case "SplitterGadget"      
-      Debug "Splitter FirstGadget "+Param1
-      Debug "Splitter SecondGadget "+Param2
       If IsGadget(Param1) And IsGadget(Param2)
         ID = SplitterGadget      (#PB_Any, X,Y,Width,Height, Param1, Param2, Flag)
       EndIf
@@ -50,7 +50,10 @@ Procedure OpenPB(Type$, X=0,Y=0,Width=0,Height=0, Flag=0, Caption$="", Param1=0,
       
     Case "CloseGadgetList"     : CloseGadgetList()
     Case "UseGadgetList"       : UseGadgetList( ParentID )
-    Case "AddGadgetItem"       : AddGadgetItem( Parent, #PB_Any, Caption$, Param1, Flag)
+    Case "AddGadgetItem"       
+;       Debug GadgetType(Parent)
+;       OpenGadgetList( Parent, Param1 )
+      AddGadgetItem( Parent, #PB_Any, Caption$, Param1, Flag)
     Case "OpenGadgetList"      : OpenGadgetList( Parent, Param1 )
   EndSelect
   
@@ -63,26 +66,37 @@ Procedure OpenPB(Type$, X=0,Y=0,Width=0,Height=0, Flag=0, Caption$="", Param1=0,
       ParentID = GadgetID(ID)
   EndSelect
   
+  If IsGadget(ID)
+    ;OpenGadgetList(Parent)
+    Transformation::Enable(ID, 5)
+    ;CloseGadgetList()
+  EndIf
+  
   ProcedureReturn ID
 EndProcedure
 
-Define Window_0 = OpenPB("OpenWindow", 0, 0, 310, 325, #PB_Window_SystemMenu)
-OpenPB("ContainerGadget", 10, 50, 290, 265, #PB_Container_Flat)
-OpenPB("ButtonGadget", 10, 10, 85, 35, 0, "Button")
-OpenPB("ContainerGadget", 10, 55, 265, 200, #PB_Container_Single)
-OpenPB("StringGadget", 10, 10, 150, 35)
-OpenPB("PanelGadget", 10, 55, 245, 140)
-OpenPB("AddGadgetItem", 0,0,0,0,0, "Item_0")
-OpenPB("AddGadgetItem", 0,0,0,0,0, "Item_1");, ImageID(img))
-OpenPB("ButtonGadget", -10, 10, 85, 35, 0, "Button")
-OpenPB("CloseGadgetList")
-OpenPB("CloseGadgetList")
-OpenPB("ButtonGadget", 190, 10, 85, 35, 0, "Button")
-OpenPB("CloseGadgetList")
-OpenPB("ButtonGadget", 110, 10, 85, 35, 0, "Button")
+UsePNGImageDecoder()
+LoadImage(0, #PB_Compiler_Home + "examples/sources/Data/world.png")
 
-OpenPB("OpenGadgetList", 0,0,0,0,0, "", 0)
-OpenPB("ButtonGadget", -10, 30, 85, 35, 0, "Button")
+Define Window_0 = OpenPBObject("OpenWindow", 0, 0, 310, 325, #PB_Window_SystemMenu)
+OpenPBObject("ContainerGadget", 10, 50, 290, 265, #PB_Container_Flat)
+OpenPBObject("ButtonGadget", 10, 10, 85, 35, 0, "Button")
+OpenPBObject("ContainerGadget", 10, 55, 265, 200, #PB_Container_Single)
+OpenPBObject("StringGadget", 10, 10, 150, 35)
+OpenPBObject("PanelGadget", 10, 55, 245, 140)
+OpenPBObject("AddGadgetItem", 0,0,0,0,0, "Item_0")
+OpenPBObject("AddGadgetItem", 0,0,0,0,0, "Item_1", ImageID(0))
+OpenPBObject("ButtonGadget", -10, 10, 85, 35, 0, "Button")
+OpenPBObject("CloseGadgetList")
+OpenPBObject("CloseGadgetList")
+OpenPBObject("ButtonGadget", 190, 10, 85, 35, 0, "Button")
+OpenPBObject("CloseGadgetList")
+
+OpenPBObject("OpenGadgetList", 0,0,0,0,0, "", 0)
+OpenPBObject("ButtonGadget", -10, 30, 85, 35, 0, "Button")
+OpenPBObject("CloseGadgetList")
+
+OpenPBObject("ButtonGadget", 110, 10, 85, 35, 0, "Button")
 
 While IsWindow( Window_0 )
   Select WaitWindowEvent()

@@ -249,22 +249,6 @@ Module Transformation
       \Pos = 3
       \Size = 6
       
-      CompilerIf #PB_Compiler_OS = #PB_OS_Windows
-        Static open 
-        Protected ParentID = GetParent_(GadgetID(Gadget))
-        Protected Parent = GetProp_( ParentID, "PB_ID" )
-        If ( IsGadget( Parent ) And GadgetID( Parent ) = ParentID )
-          OpenGadgetList(Parent)
-          open=1
-        Else
-          If open
-            CloseGadgetList()
-            open=0
-          EndIf
-          UseGadgetList(ParentID) ; WindowID(GetActiveWindow()))
-        EndIf
-      CompilerEndIf 
-    
       For I = 1 To 9
         If Flags & *Flags\ID[I] = *Flags\ID[I]
           If (I=#Arrows)
@@ -411,12 +395,16 @@ CompilerIf #PB_Compiler_IsMainFile
               Case #True
                 SetGadgetText(#Transformation, "Disable Transformation")
                 Enable(#EditorGadget, 5, #Anchor_All)
-                Enable(#ButtonGadget, 1, #Anchor_All)
+                OpenGadgetList(#ContainerGadget2)
+                  Enable(#ButtonGadget, 1, #Anchor_All)
+                CloseGadgetList()
                 Enable(#TrackBarGadget, 1, #Anchor_Position|#Anchor_Horizontally)
                 Enable(#SpinGadget, 1, #Anchor_Position)
                 Enable(#CanvasGadget, 1, #Anchor_All)
                 Enable(#ContainerGadget, 1, #Anchor_All)
-                Enable(#ContainerGadget2, 10, #Anchor_All)
+                OpenGadgetList(#ContainerGadget)
+                  Enable(#ContainerGadget2, 10, #Anchor_All)
+                CloseGadgetList()
             EndSelect
         EndSelect
         
