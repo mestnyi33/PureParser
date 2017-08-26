@@ -4,7 +4,7 @@ XIncludeFile "Transformation.pbi"
 
 Procedure OpenPBObject(Type$, X=0,Y=0,Width=0,Height=0, Flag=0, Caption$="", Param1=0, Param2=0, Param3=0)
   Protected ID
-  Static ParentID, Parent
+  Static Open=-1, ParentID, Parent=-1
   
   Select Type$
     Case "OpenWindow"          : ID = OpenWindow          (#PB_Any, X,Y,Width,Height, Caption$, Flag|#PB_Window_SizeGadget) 
@@ -59,17 +59,33 @@ Procedure OpenPBObject(Type$, X=0,Y=0,Width=0,Height=0, Flag=0, Caption$="", Par
   
   Select Type$
     Case "OpenWindow"          
+      Open = Parent
       Parent = ID
       ParentID = WindowID(ID)
     Case "ContainerGadget", "ScrollAreaGadget", "PanelGadget"
+      Open = Parent
       Parent = ID
       ParentID = GadgetID(ID)
   EndSelect
   
   If IsGadget(ID)
-    ;OpenGadgetList(Parent)
+    If IsWindow(Open)
+      CloseGadgetList()
+      UseGadgetList(WindowID(Open))
+    EndIf
+    If IsGadget(Open)
+      OpenGadgetList(Open)
+      Open = 0
+    EndIf
     Transformation::Enable(ID, 5)
-    ;CloseGadgetList()
+    If IsWindow(Open)
+      OpenGadgetList(Parent)
+      Open =- 1
+    EndIf
+    If Open = 0
+      CloseGadgetList()
+      Open =- 1
+    EndIf
   EndIf
   
   ProcedureReturn ID

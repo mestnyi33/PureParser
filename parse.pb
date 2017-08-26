@@ -333,24 +333,6 @@ CompilerIf #PB_Compiler_IsMainFile
   Procedure OpenPBObject(*This.ParsePBGadget)
     Protected Result
     
-    
-;     CompilerIf #PB_Compiler_OS = #PB_OS_Windows
-;         Static open 
-;         Protected ParentID = GetParent_(GadgetID(Gadget))
-;         Protected Parent = GetProp_( ParentID, "PB_ID" )
-;         If ( IsGadget( Parent ) And GadgetID( Parent ) = ParentID )
-;           OpenGadgetList(Parent)
-;           open=1
-;         Else
-;           If open
-;             CloseGadgetList()
-;             open=0
-;           EndIf
-;           UseGadgetList(ParentID) ; WindowID(GetActiveWindow()))
-;         EndIf
-;       CompilerEndIf 
-    
-      
     With *This
       Select \Type$
         Case "OpenWindow"          : \ID = OpenWindow          (#PB_Any, \X,\Y,\Width,\Height, \Caption$, \Flag|#PB_Window_SizeGadget) 
@@ -397,24 +379,38 @@ CompilerIf #PB_Compiler_IsMainFile
         Case "CanvasGadget"        : \ID = CanvasGadget        (#PB_Any, \X,\Y,\Width,\Height, \Flag)
       EndSelect
       
-;       Static open
-;       Select \Type$
-;         Case "OpenWindow"          
-;           \Parent = \ID
-;           \ParentID = WindowID(\ID)
-;         Case "ContainerGadget", "ScrollAreaGadget", "PanelGadget"
-; ;           If open
-; ;             CloseGadgetList()
-; ;             open = 0
-; ;           EndIf
-;           \Parent = \ID
-;           \ParentID = GadgetID(\ID)
-; ;           UseGadgetList(GetParent_(\ParentID))
-; ;           OpenGadgetList(\ID)
-; ;           open=1
-;         Default
-;          SetParent_(GadgetID(\ID), \ParentID) 
-;       EndSelect
+      Static Open =- 1
+      
+      Select \Type$
+        Case "OpenWindow"          
+          Open = \Parent
+          \Parent = \ID
+          \ParentID = WindowID(\ID)
+        Case "ContainerGadget", "ScrollAreaGadget", "PanelGadget"
+          Open = \Parent
+          \Parent = \ID
+          \ParentID = GadgetID(\ID)
+      EndSelect
+      
+      If IsGadget(\ID)
+        If IsWindow(Open)
+          CloseGadgetList()
+          UseGadgetList(WindowID(Open))
+        EndIf
+        If IsGadget(Open)
+          OpenGadgetList(Open)
+          Open = 0
+        EndIf
+        Transformation::Enable(\ID, 5)
+        If IsWindow(Open)
+          OpenGadgetList(\Parent)
+          Open =- 1
+        EndIf
+        If Open = 0
+          CloseGadgetList()
+          Open =- 1
+        EndIf
+      EndIf
       
       ForEach ParsePBGadget()
         If ParsePBGadget()\ID$ = \ID$
@@ -443,9 +439,6 @@ CompilerIf #PB_Compiler_IsMainFile
         EndIf
       Next
       
-      If IsGadget(\ID)
-        Transformation::Enable(\ID, 5)
-      EndIf
     EndWith
     
     ProcedureReturn Result
