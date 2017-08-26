@@ -67,9 +67,8 @@ CompilerIf #PB_Compiler_IsMainFile
   Procedure PB_Flag(Flag$) ; Ok
     Protected i
     Protected Flag 
-    ;ProcedureReturn Flag
+    
     For i = 0 To CountString(Flag$,"|")
-      Debug Trim(StringField(Flag$,(i+1),"|"))
       Select Trim(StringField(Flag$,(i+1),"|"))
           ; window
         Case "#PB_Window_BorderLess"              : Flag = Flag | #PB_Window_BorderLess
@@ -86,15 +85,15 @@ CompilerIf #PB_Compiler_IsMainFile
         Case "#PB_Window_Tool"                    : Flag = Flag | #PB_Window_Tool
         Case "#PB_Window_ScreenCentered"          : Flag = Flag | #PB_Window_ScreenCentered
         Case "#PB_Window_WindowCentered"          : Flag = Flag | #PB_Window_WindowCentered
+        ; buttonimage 
+        Case "#PB_Button_Image"                   : Flag = Flag | #PB_Button_Image
+        Case "#PB_Button_PressedImage"            : Flag = Flag | #PB_Button_PressedImage
           ; button  
         Case "#PB_Button_Default"                 : Flag = Flag | #PB_Button_Default
         Case "#PB_Button_Left"                    : Flag = Flag | #PB_Button_Left
         Case "#PB_Button_MultiLine"               : Flag = Flag | #PB_Button_MultiLine
         Case "#PB_Button_Right"                   : Flag = Flag | #PB_Button_Right
         Case "#PB_Button_Toggle"                  : Flag = Flag | #PB_Button_Toggle
-          ; buttonimage 
-        Case "#PB_Button_Image"                   : Flag = Flag | #PB_Button_Image
-        Case "#PB_Button_PressedImage"            : Flag = Flag | #PB_Button_PressedImage
           ; string
         Case "#PB_String_BorderLess"              : Flag = Flag | #PB_String_BorderLess
         Case "#PB_String_LowerCase"               : Flag = Flag | #PB_String_LowerCase
@@ -107,24 +106,12 @@ CompilerIf #PB_Compiler_IsMainFile
         Case "#PB_Text_Border"                    : Flag = Flag | #PB_Text_Border
         Case "#PB_Text_Center"                    : Flag = Flag | #PB_Text_Center
         Case "#PB_Text_Right"                     : Flag = Flag | #PB_Text_Right
+          ; option
+          
           ; checkbox
         Case "#PB_CheckBox_Center"                : Flag = Flag | #PB_CheckBox_Center
         Case "#PB_CheckBox_Right"                 : Flag = Flag | #PB_CheckBox_Right
         Case "#PB_CheckBox_ThreeState"            : Flag = Flag | #PB_CheckBox_ThreeState
-          ; listicon
-        Case "#PB_ListIcon_AlwaysShowSelection"   : Flag = Flag | #PB_ListIcon_AlwaysShowSelection
-        Case "#PB_ListIcon_CheckBoxes"            : Flag = Flag | #PB_ListIcon_CheckBoxes
-        Case "#PB_ListIcon_ColumnWidth"           : Flag = Flag | #PB_ListIcon_ColumnWidth
-        Case "#PB_ListIcon_DisplayMode"           : Flag = Flag | #PB_ListIcon_DisplayMode
-        Case "#PB_ListIcon_GridLines"             : Flag = Flag | #PB_ListIcon_GridLines
-        Case "#PB_ListIcon_FullRowSelect"         : Flag = Flag | #PB_ListIcon_FullRowSelect
-        Case "#PB_ListIcon_HeaderDragDrop"        : Flag = Flag | #PB_ListIcon_HeaderDragDrop
-        Case "#PB_ListIcon_LargeIcon"             : Flag = Flag | #PB_ListIcon_LargeIcon
-        Case "#PB_ListIcon_List"                  : Flag = Flag | #PB_ListIcon_List
-        Case "#PB_ListIcon_MultiSelect"           : Flag = Flag | #PB_ListIcon_MultiSelect
-        Case "#PB_ListIcon_Report"                : Flag = Flag | #PB_ListIcon_Report
-        Case "#PB_ListIcon_SmallIcon"             : Flag = Flag | #PB_ListIcon_SmallIcon
-        Case "#PB_ListIcon_ThreeState"            : Flag = Flag | #PB_ListIcon_ThreeState
           ; listview
         Case "#PB_ListView_ClickSelect"           : Flag = Flag | #PB_ListView_ClickSelect
         Case "#PB_ListView_MultiSelect"           : Flag = Flag | #PB_ListView_MultiSelect
@@ -140,6 +127,143 @@ CompilerIf #PB_Compiler_IsMainFile
           ; image 
         Case "#PB_Image_Border"                   : Flag = Flag | #PB_Image_Border
         Case "#PB_Image_Raised"                   : Flag = Flag | #PB_Image_Raised
+          ; hyperlink 
+        Case "#PB_HyperLink_Underline"            : Flag = Flag | #PB_HyperLink_Underline
+          ; container 
+        Case "#PB_Container_BorderLess"           : Flag = Flag | #PB_Container_BorderLess
+        Case "#PB_Container_Double"               : Flag = Flag | #PB_Container_Double
+        Case "#PB_Container_Flat"                 : Flag = Flag | #PB_Container_Flat
+        Case "#PB_Container_Raised"               : Flag = Flag | #PB_Container_Raised
+        Case "#PB_Container_Single"               : Flag = Flag | #PB_Container_Single
+          ; listicon
+        Case "#PB_ListIcon_AlwaysShowSelection"   : Flag = Flag | #PB_ListIcon_AlwaysShowSelection
+        Case "#PB_ListIcon_CheckBoxes"            : Flag = Flag | #PB_ListIcon_CheckBoxes
+        Case "#PB_ListIcon_ColumnWidth"           : Flag = Flag | #PB_ListIcon_ColumnWidth
+        Case "#PB_ListIcon_DisplayMode"           : Flag = Flag | #PB_ListIcon_DisplayMode
+        Case "#PB_ListIcon_GridLines"             : Flag = Flag | #PB_ListIcon_GridLines
+        Case "#PB_ListIcon_FullRowSelect"         : Flag = Flag | #PB_ListIcon_FullRowSelect
+        Case "#PB_ListIcon_HeaderDragDrop"        : Flag = Flag | #PB_ListIcon_HeaderDragDrop
+        Case "#PB_ListIcon_LargeIcon"             : Flag = Flag | #PB_ListIcon_LargeIcon
+        Case "#PB_ListIcon_List"                  : Flag = Flag | #PB_ListIcon_List
+        Case "#PB_ListIcon_MultiSelect"           : Flag = Flag | #PB_ListIcon_MultiSelect
+        Case "#PB_ListIcon_Report"                : Flag = Flag | #PB_ListIcon_Report
+        Case "#PB_ListIcon_SmallIcon"             : Flag = Flag | #PB_ListIcon_SmallIcon
+        Case "#PB_ListIcon_ThreeState"            : Flag = Flag | #PB_ListIcon_ThreeState
+          ; ipaddress
+          ; progressbar 
+        Case "#PB_ProgressBar_Smooth"             : Flag = Flag | #PB_ProgressBar_Smooth
+        Case "#PB_ProgressBar_Vertical"           : Flag = Flag | #PB_ProgressBar_Vertical
+          ;         Case "#PB_ProgressBar_Maximum"            : Flag = Flag | #PB_ProgressBar_Maximum
+          ;         Case "#PB_ProgressBar_Minimum"            : Flag = Flag | #PB_ProgressBar_Minimum
+          ;         Case "#PB_ProgressBar_Unknown"            : Flag = Flag | #PB_ProgressBar_Unknown
+          ; scrollbar 
+        Case "#PB_ScrollBar_Vertical"             : Flag = Flag | #PB_ScrollBar_Vertical
+          ;         Case "#PB_ScrollBar_Maximum"              : Flag = Flag | #PB_ScrollBar_Maximum
+          ;         Case "#PB_ScrollBar_Minimum"              : Flag = Flag | #PB_ScrollBar_Minimum
+          ;         Case "#PB_ScrollBar_PageLength"           : Flag = Flag | #PB_ScrollBar_PageLength
+          ; scrollarea 
+        Case "#PB_ScrollArea_BorderLess"          : Flag = Flag | #PB_ScrollArea_BorderLess
+        Case "#PB_ScrollArea_Center"              : Flag = Flag | #PB_ScrollArea_Center
+        Case "#PB_ScrollArea_Flat"                : Flag = Flag | #PB_ScrollArea_Flat
+        Case "#PB_ScrollArea_Raised"              : Flag = Flag | #PB_ScrollArea_Raised
+        Case "#PB_ScrollArea_Single"              : Flag = Flag | #PB_ScrollArea_Single
+          ;         Case "#PB_ScrollArea_InnerHeight"         : Flag = Flag | #PB_ScrollArea_InnerHeight
+          ;         Case "#PB_ScrollArea_InnerWidth"          : Flag = Flag | #PB_ScrollArea_InnerWidth
+          ;         Case "#PB_ScrollArea_ScrollStep"          : Flag = Flag | #PB_ScrollArea_ScrollStep
+          ;         Case "#PB_ScrollArea_X"                   : Flag = Flag | #PB_ScrollArea_X
+          ;         Case "#PB_ScrollArea_Y"                   : Flag = Flag | #PB_ScrollArea_Y
+          ; trackbar
+        Case "#PB_TrackBar_Ticks"                 : Flag = Flag | #PB_TrackBar_Ticks
+        Case "#PB_TrackBar_Vertical"              : Flag = Flag | #PB_TrackBar_Vertical
+          ;         Case "#PB_TrackBar_Maximum"               : Flag = Flag | #PB_TrackBar_Maximum
+          ;         Case "#PB_TrackBar_Minimum"               : Flag = Flag | #PB_TrackBar_Minimum
+          ; web
+          ;         Case "#PB_Web_Back"                       : Flag = Flag | #PB_Web_Back
+          ;         Case "#PB_Web_BlockPopupMenu"             : Flag = Flag | #PB_Web_BlockPopupMenu
+          ;         Case "#PB_Web_BlockPopups"                : Flag = Flag | #PB_Web_BlockPopups
+          ;         Case "#PB_Web_Busy"                       : Flag = Flag | #PB_Web_Busy
+          ;         Case "#PB_Web_Forward"                    : Flag = Flag | #PB_Web_Forward
+          ;         Case "#PB_Web_HtmlCode"                   : Flag = Flag | #PB_Web_HtmlCode
+          ;         Case "#PB_Web_NavigationCallback"         : Flag = Flag | #PB_Web_NavigationCallback
+          ;         Case "#PB_Web_PageTitle"                  : Flag = Flag | #PB_Web_PageTitle
+          ;         Case "#PB_Web_Progress"                   : Flag = Flag | #PB_Web_Progress
+          ;         Case "#PB_Web_ProgressMax"                : Flag = Flag | #PB_Web_ProgressMax
+          ;         Case "#PB_Web_Refresh"                    : Flag = Flag | #PB_Web_Refresh
+          ;         Case "#PB_Web_ScrollX"                    : Flag = Flag | #PB_Web_ScrollX
+          ;         Case "#PB_Web_ScrollY"                    : Flag = Flag | #PB_Web_ScrollY
+          ;         Case "#PB_Web_SelectedText"               : Flag = Flag | #PB_Web_SelectedText
+          ;         Case "#PB_Web_StatusMessage"              : Flag = Flag | #PB_Web_StatusMessage
+          ;         Case "#PB_Web_Stop"                       : Flag = Flag | #PB_Web_Stop
+          
+          ; calendar
+        Case "#PB_Calendar_Borderless"            : Flag = Flag | #PB_Calendar_Borderless
+          ;         Case "#PB_Calendar_Bold"                  : Flag = Flag | #PB_Calendar_Bold
+          ;         Case "#PB_Calendar_Maximum"               : Flag = Flag | #PB_Calendar_Maximum
+          ;         Case "#PB_Calendar_Minimum"               : Flag = Flag | #PB_Calendar_Minimum
+          ;         Case "#PB_Calendar_Normal"                : Flag = Flag | #PB_Calendar_Normal
+          ; date
+        Case "#PB_Date_CheckBox"                  : Flag = Flag | #PB_Date_CheckBox
+        Case "#PB_Date_UpDown"                    : Flag = Flag | #PB_Date_UpDown
+          ;         Case "#PB_Date_Accessed"                  : Flag = Flag | #PB_Date_Accessed
+          ;         Case "#PB_Date_Calendar"                  : Flag = Flag | #PB_Date_Calendar
+          ;         Case "#PB_Date_Created"                   : Flag = Flag | #PB_Date_Created
+          ;         Case "#PB_Date_Day"                       : Flag = Flag | #PB_Date_Day
+          ;         Case "#PB_Date_Hour"                      : Flag = Flag | #PB_Date_Hour
+          ;         Case "#PB_Date_Maximum"                   : Flag = Flag | #PB_Date_Maximum
+          ;         Case "#PB_Date_Minimum"                   : Flag = Flag | #PB_Date_Minimum
+          ;         Case "#PB_Date_Minute"                    : Flag = Flag | #PB_Date_Minute
+          ;         Case "#PB_Date_Modified"                  : Flag = Flag | #PB_Date_Modified
+          ;         Case "#PB_Date_Month"                     : Flag = Flag | #PB_Date_Month
+          ;         Case "#PB_Date_Second"                    : Flag = Flag | #PB_Date_Second
+          ;         Case "#PB_Date_Week"                      : Flag = Flag | #PB_Date_Week
+          ;         Case "#PB_Date_Year"                      : Flag = Flag | #PB_Date_Year
+          ; editor
+        Case "#PB_Editor_ReadOnly"                 : Flag = Flag | #PB_Editor_ReadOnly
+        Case "#PB_Editor_WordWrap"                 : Flag = Flag | #PB_Editor_WordWrap
+          ; explorerlist
+          ; explorertree
+          ; explorercombo
+          ;         Case "#PB_Explorer_Type"                   : Flag = Flag | #PB_Explorer_Type
+          ; spin
+          Case "#PB_Explorer_Type"                   : Flag = Flag | #PB_Spin_Numeric
+          Case "#PB_Explorer_Type"                   : Flag = Flag | #PB_Spin_ReadOnly
+            ;           Case "#PB_Explorer_Type"                   : Flag = Flag | #PB_Spin_Maximum
+            ;           Case "#PB_Explorer_Type"                   : Flag = Flag | #PB_Spin_Minimum
+        ; tree
+          Case "#PB_Tree_AlwaysShowSelection"        : Flag = Flag | #PB_Tree_AlwaysShowSelection
+          Case "#PB_Tree_CheckBoxes"                 : Flag = Flag | #PB_Tree_CheckBoxes
+          Case "#PB_Tree_NoButtons"                  : Flag = Flag | #PB_Tree_NoButtons
+          Case "#PB_Tree_NoLines"                    : Flag = Flag | #PB_Tree_NoLines
+          Case "#PB_Tree_ThreeState"                 : Flag = Flag | #PB_Tree_ThreeState
+            ;           Case "#PB_Tree_Checked"                    : Flag = Flag | #PB_Tree_Checked
+            ;           Case "#PB_Tree_Collapsed"                  : Flag = Flag | #PB_Tree_Collapsed
+            ;           Case "#PB_Tree_Expanded"                   : Flag = Flag | #PB_Tree_Expanded
+            ;           Case "#PB_Tree_Inbetween"                  : Flag = Flag | #PB_Tree_Inbetween
+            ;           Case "#PB_Tree_Selected"                   : Flag = Flag | #PB_Tree_Selected
+            ;           Case "#PB_Tree_SubLevel"                   : Flag = Flag | #PB_Tree_SubLevel
+            ; panel
+            ; splitter
+          Case "#PB_Splitter_Separator"               : Flag = Flag | #PB_Splitter_Separator
+          Case "#PB_Splitter_Vertical"                : Flag = Flag | #PB_Splitter_Vertical
+          Case "#PB_Splitter_FirstFixed"              : Flag = Flag | #PB_Splitter_FirstFixed
+          Case "#PB_Splitter_SecondFixed"             : Flag = Flag | #PB_Splitter_SecondFixed
+            ;           Case "#PB_Splitter_FirstGadget"             : Flag = Flag | #PB_Splitter_FirstGadget
+            ;           Case "#PB_Splitter_FirstMinimumSize"        : Flag = Flag | #PB_Splitter_FirstMinimumSize
+            ;           Case "#PB_Splitter_SecondGadget"            : Flag = Flag | #PB_Splitter_SecondGadget
+            ;           Case "#PB_Splitter_SecondMinimumSize"       : Flag = Flag | #PB_Splitter_SecondMinimumSize
+            ; mdi
+          Case "#PB_MDI_AutoSize"                     : Flag = Flag | #PB_MDI_AutoSize
+          Case "#PB_MDI_BorderLess"                   : Flag = Flag | #PB_MDI_BorderLess
+          Case "#PB_MDI_NoScrollBars"                 : Flag = Flag | #PB_MDI_NoScrollBars
+            ; scintilla
+            ; shortcut
+            ; canvas
+          Case "#PB_Canvas_Border"                    : Flag = Flag | #PB_Canvas_Border
+          Case "#PB_Canvas_ClipMouse"                 : Flag = Flag | #PB_Canvas_ClipMouse
+          Case "#PB_Canvas_Container"                 : Flag = Flag | #PB_Canvas_Container
+          Case "#PB_Canvas_DrawFocus"                 : Flag = Flag | #PB_Canvas_DrawFocus
+          Case "#PB_Canvas_Keyboard"                  : Flag = Flag | #PB_Canvas_Keyboard
+            
       EndSelect
     Next
     ProcedureReturn Flag
@@ -352,40 +476,40 @@ CompilerIf #PB_Compiler_IsMainFile
     
     With *This
       Select \Type$
-        Case "OpenWindow"          : Result$ = "OpenWindow          ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
-        Case "ButtonGadget"        : Result$ = "ButtonGadget        ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
-        Case "StringGadget"        : Result$ = "StringGadget        ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
-        Case "TextGadget"          : Result$ = "TextGadget          ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
-        Case "CheckBoxGadget"      : Result$ = "CheckBoxGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "OpenWindow"          : Result$ = "OpenWindow          ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "ButtonGadget"        : Result$ = "ButtonGadget        ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "StringGadget"        : Result$ = "StringGadget        ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "TextGadget"          : Result$ = "TextGadget          ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "CheckBoxGadget"      : Result$ = "CheckBoxGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
         Case "OptionGadget"        : Result$ = "OptionGadget        ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)
-        Case "ListViewGadget"      : Result$ = "ListViewGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$                                                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
-        Case "FrameGadget"         : Result$ = "FrameGadget         ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
-        Case "ComboBoxGadget"      : Result$ = "ComboBoxGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$                                                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
-        Case "ImageGadget"         : Result$ = "ImageGadget         ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$                                                                 : If \Flag$ : Result$ +", "+\Flag$ : EndIf
-        Case "HyperLinkGadget"     : Result$ = "HyperLinkGadget     ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)+", "+\Param1$                                  : If \Flag$ : Result$ +", "+\Flag$ : EndIf
-        Case "ContainerGadget"     : Result$ = "ContainerGadget     ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$                                                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
-        Case "ListIconGadget"      : Result$ = "ListIconGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)+", "+\Param1$                                  : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "ListViewGadget"      : Result$ = "ListViewGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$                                                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "FrameGadget"         : Result$ = "FrameGadget         ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "ComboBoxGadget"      : Result$ = "ComboBoxGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$                                                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "ImageGadget"         : Result$ = "ImageGadget         ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$                                                                 : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "HyperLinkGadget"     : Result$ = "HyperLinkGadget     ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)+", "+\Param1$                                  : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "ContainerGadget"     : Result$ = "ContainerGadget     ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$                                                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "ListIconGadget"      : Result$ = "ListIconGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)+", "+\Param1$                                  : If \Flag$ : Result$ +", "+\Flag$ : EndIf
         Case "IPAddressGadget"     : Result$ = "IPAddressGadget     ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$
-        Case "ProgressBarGadget"   : Result$ = "ProgressBarGadget   ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$+", "+\Param2$                                                   : If \Flag$ : Result$ +", "+\Flag$ : EndIf
-        Case "ScrollBarGadget"     : Result$ = "ScrollBarGadget     ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$+", "+\Param2$+", "+\Param3$                                     : If \Flag$ : Result$ +", "+\Flag$ : EndIf
-        Case "ScrollAreaGadget"    : Result$ = "ScrollAreaGadget    ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$+", "+\Param2$    : If \Param3$ : Result$ +", "+\Param3$ : EndIf : If \Flag$ : Result$ +", "+\Flag$ : EndIf 
-        Case "TrackBarGadget"      : Result$ = "TrackBarGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$+", "+\Param2$                                                   : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "ProgressBarGadget"   : Result$ = "ProgressBarGadget   ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$+", "+\Param2$                                                   : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "ScrollBarGadget"     : Result$ = "ScrollBarGadget     ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$+", "+\Param2$+", "+\Param3$                                     : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "ScrollAreaGadget"    : Result$ = "ScrollAreaGadget    ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$+", "+\Param2$    : If \Param3$ : Result$ +", "+\Param3$ : EndIf : If \Flag$ : Result$ +", "+\Flag$ : EndIf 
+          Case "TrackBarGadget"      : Result$ = "TrackBarGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$+", "+\Param2$                                                   : If \Flag$ : Result$ +", "+\Flag$ : EndIf
         Case "WebGadget"           : Result$ = "WebGadget           ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)
-        Case "ButtonImageGadget"   : Result$ = "ButtonImageGadget   ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$                                                                 : If \Flag$ : Result$ +", "+\Flag$ : EndIf
-        Case "CalendarGadget"      : Result$ = "CalendarGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$                                 : If \Param1$ : Result$ +", "+\Param1$ : EndIf : If \Flag$ : Result$ +", "+\Flag$ : EndIf
-        Case "DateGadget"          : Result$ = "DateGadget          ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34) : If \Param1$ : Result$ +", "+\Param1$ : EndIf : If \Flag$ : Result$ +", "+\Flag$ : EndIf
-        Case "EditorGadget"        : Result$ = "EditorGadget        ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$                                                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
-        Case "ExplorerListGadget"  : Result$ = "ExplorerListGadget  ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
-        Case "ExplorerTreeGadget"  : Result$ = "ExplorerTreeGadget  ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
-        Case "ExplorerComboGadget" : Result$ = "ExplorerComboGadget ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
-        Case "SpinGadget"          : Result$ = "SpinGadget          ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$+", "+\Param2$                                                   : If \Flag$ : Result$ +", "+\Flag$ : EndIf
-        Case "TreeGadget"          : Result$ = "TreeGadget          ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$                                                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "ButtonImageGadget"   : Result$ = "ButtonImageGadget   ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$                                                                 : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "CalendarGadget"      : Result$ = "CalendarGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$                                 : If \Param1$ : Result$ +", "+\Param1$ : EndIf : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "DateGadget"          : Result$ = "DateGadget          ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34) : If \Param1$ : Result$ +", "+\Param1$ : EndIf : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "EditorGadget"        : Result$ = "EditorGadget        ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$                                                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "ExplorerListGadget"  : Result$ = "ExplorerListGadget  ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "ExplorerTreeGadget"  : Result$ = "ExplorerTreeGadget  ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "ExplorerComboGadget" : Result$ = "ExplorerComboGadget ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ Chr(34)+\Caption$+Chr(34)                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "SpinGadget"          : Result$ = "SpinGadget          ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$+", "+\Param2$                                                   : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "TreeGadget"          : Result$ = "TreeGadget          ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$                                                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
         Case "PanelGadget"         : Result$ = "PanelGadget         ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$ 
-        Case "SplitterGadget"      : Result$ = "SplitterGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$+", "+\Param2$                                                   : If \Flag$ : Result$ +", "+\Flag$ : EndIf
-        Case "MDIGadget"           : Result$ = "MDIGadget           ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$+", "+\Param2$                                                   : If \Flag$ : Result$ +", "+\Flag$ : EndIf 
+          Case "SplitterGadget"      : Result$ = "SplitterGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$+", "+\Param2$                                                   : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "MDIGadget"           : Result$ = "MDIGadget           ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$+", "+\Param2$                                                   : If \Flag$ : Result$ +", "+\Flag$ : EndIf 
         Case "ScintillaGadget"     : Result$ = "ScintillaGadget     ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$
         Case "ShortcutGadget"      : Result$ = "ShortcutGadget      ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$+", "+ \Param1$
-        Case "CanvasGadget"        : Result$ = "CanvasGadget        ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$                                                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
+          Case "CanvasGadget"        : Result$ = "CanvasGadget        ("+\ID$+", "+\X$+", "+\Y$+", "+\Width$+", "+\Height$                                                                                : If \Flag$ : Result$ +", "+\Flag$ : EndIf
       EndSelect
     EndWith
     
@@ -432,7 +556,7 @@ CompilerIf #PB_Compiler_IsMainFile
     If ReadFile(#File, FileName) 
       Protected Format = ReadStringFormat(#File)
       Protected Length = Lof(#File) 
-
+      
       
       Protected *File = AllocateMemory(Length)
       If *File
@@ -719,18 +843,18 @@ CompilerIf #PB_Compiler_IsMainFile
       Case Open
         Time = ElapsedMilliseconds()
         ;{ 
-          Title$="Open PureBasic project"
-          File$ = "test1.pb"
-          Pattern$ = "PureBasic (*.pb*)|*.pb*"
-          Pattern = 0
-          
-          File$ = OpenFileRequester(Title$,File$,Pattern$,Pattern)
-          If File$
-            ClearGadgetItems(Editor_2)
-            Load$ = ParsePBFile(File$)
-            ClearGadgetItems(Editor_0)
-            AddGadgetItem(Editor_0,-1,Load$)
-          EndIf 
+        Title$="Open PureBasic project"
+        File$ = "test1.pb"
+        Pattern$ = "PureBasic (*.pb*)|*.pb*"
+        Pattern = 0
+        
+        File$ = OpenFileRequester(Title$,File$,Pattern$,Pattern)
+        If File$
+          ClearGadgetItems(Editor_2)
+          Load$ = ParsePBFile(File$)
+          ClearGadgetItems(Editor_0)
+          AddGadgetItem(Editor_0,-1,Load$)
+        EndIf 
         ;}
         Time = ElapsedMilliseconds() - Time
         
@@ -941,7 +1065,7 @@ CompilerIf #PB_Compiler_IsMainFile
   If Not Len(File$)
     File$=OpenFileRequester("Выберите файл с описанием окон", "", "Файлы PureBasic (*.pb;*.pbf)|*.pb;*.pbf|Все файлы|*", 0)
   EndIf
-
+  
   If File$
     ClearGadgetItems(Editor_2)
     Define Load$ = ParsePBFile(File$)

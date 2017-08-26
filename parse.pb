@@ -71,9 +71,8 @@ CompilerIf #PB_Compiler_IsMainFile
   Procedure PB_Flag(Flag$) ; Ok
     Protected i
     Protected Flag 
-    
+    ;ProcedureReturn Flag
     For i = 0 To CountString(Flag$,"|")
-      Debug Trim(StringField(Flag$,(i+1),"|"))
       Select Trim(StringField(Flag$,(i+1),"|"))
           ; window
         Case "#PB_Window_BorderLess"              : Flag = Flag | #PB_Window_BorderLess
@@ -90,7 +89,7 @@ CompilerIf #PB_Compiler_IsMainFile
         Case "#PB_Window_Tool"                    : Flag = Flag | #PB_Window_Tool
         Case "#PB_Window_ScreenCentered"          : Flag = Flag | #PB_Window_ScreenCentered
         Case "#PB_Window_WindowCentered"          : Flag = Flag | #PB_Window_WindowCentered
-        ; buttonimage 
+          ; buttonimage 
         Case "#PB_Button_Image"                   : Flag = Flag | #PB_Button_Image
         Case "#PB_Button_PressedImage"            : Flag = Flag | #PB_Button_PressedImage
           ; button  
@@ -112,7 +111,6 @@ CompilerIf #PB_Compiler_IsMainFile
         Case "#PB_Text_Center"                    : Flag = Flag | #PB_Text_Center
         Case "#PB_Text_Right"                     : Flag = Flag | #PB_Text_Right
           ; option
-          
           ; checkbox
         Case "#PB_CheckBox_Center"                : Flag = Flag | #PB_CheckBox_Center
         Case "#PB_CheckBox_Right"                 : Flag = Flag | #PB_CheckBox_Right
@@ -158,117 +156,57 @@ CompilerIf #PB_Compiler_IsMainFile
           ; progressbar 
         Case "#PB_ProgressBar_Smooth"             : Flag = Flag | #PB_ProgressBar_Smooth
         Case "#PB_ProgressBar_Vertical"           : Flag = Flag | #PB_ProgressBar_Vertical
-          ;         Case "#PB_ProgressBar_Maximum"            : Flag = Flag | #PB_ProgressBar_Maximum
-          ;         Case "#PB_ProgressBar_Minimum"            : Flag = Flag | #PB_ProgressBar_Minimum
-          ;         Case "#PB_ProgressBar_Unknown"            : Flag = Flag | #PB_ProgressBar_Unknown
           ; scrollbar 
         Case "#PB_ScrollBar_Vertical"             : Flag = Flag | #PB_ScrollBar_Vertical
-          ;         Case "#PB_ScrollBar_Maximum"              : Flag = Flag | #PB_ScrollBar_Maximum
-          ;         Case "#PB_ScrollBar_Minimum"              : Flag = Flag | #PB_ScrollBar_Minimum
-          ;         Case "#PB_ScrollBar_PageLength"           : Flag = Flag | #PB_ScrollBar_PageLength
           ; scrollarea 
         Case "#PB_ScrollArea_BorderLess"          : Flag = Flag | #PB_ScrollArea_BorderLess
         Case "#PB_ScrollArea_Center"              : Flag = Flag | #PB_ScrollArea_Center
         Case "#PB_ScrollArea_Flat"                : Flag = Flag | #PB_ScrollArea_Flat
         Case "#PB_ScrollArea_Raised"              : Flag = Flag | #PB_ScrollArea_Raised
         Case "#PB_ScrollArea_Single"              : Flag = Flag | #PB_ScrollArea_Single
-          ;         Case "#PB_ScrollArea_InnerHeight"         : Flag = Flag | #PB_ScrollArea_InnerHeight
-          ;         Case "#PB_ScrollArea_InnerWidth"          : Flag = Flag | #PB_ScrollArea_InnerWidth
-          ;         Case "#PB_ScrollArea_ScrollStep"          : Flag = Flag | #PB_ScrollArea_ScrollStep
-          ;         Case "#PB_ScrollArea_X"                   : Flag = Flag | #PB_ScrollArea_X
-          ;         Case "#PB_ScrollArea_Y"                   : Flag = Flag | #PB_ScrollArea_Y
           ; trackbar
         Case "#PB_TrackBar_Ticks"                 : Flag = Flag | #PB_TrackBar_Ticks
         Case "#PB_TrackBar_Vertical"              : Flag = Flag | #PB_TrackBar_Vertical
-          ;         Case "#PB_TrackBar_Maximum"               : Flag = Flag | #PB_TrackBar_Maximum
-          ;         Case "#PB_TrackBar_Minimum"               : Flag = Flag | #PB_TrackBar_Minimum
           ; web
-          ;         Case "#PB_Web_Back"                       : Flag = Flag | #PB_Web_Back
-          ;         Case "#PB_Web_BlockPopupMenu"             : Flag = Flag | #PB_Web_BlockPopupMenu
-          ;         Case "#PB_Web_BlockPopups"                : Flag = Flag | #PB_Web_BlockPopups
-          ;         Case "#PB_Web_Busy"                       : Flag = Flag | #PB_Web_Busy
-          ;         Case "#PB_Web_Forward"                    : Flag = Flag | #PB_Web_Forward
-          ;         Case "#PB_Web_HtmlCode"                   : Flag = Flag | #PB_Web_HtmlCode
-          ;         Case "#PB_Web_NavigationCallback"         : Flag = Flag | #PB_Web_NavigationCallback
-          ;         Case "#PB_Web_PageTitle"                  : Flag = Flag | #PB_Web_PageTitle
-          ;         Case "#PB_Web_Progress"                   : Flag = Flag | #PB_Web_Progress
-          ;         Case "#PB_Web_ProgressMax"                : Flag = Flag | #PB_Web_ProgressMax
-          ;         Case "#PB_Web_Refresh"                    : Flag = Flag | #PB_Web_Refresh
-          ;         Case "#PB_Web_ScrollX"                    : Flag = Flag | #PB_Web_ScrollX
-          ;         Case "#PB_Web_ScrollY"                    : Flag = Flag | #PB_Web_ScrollY
-          ;         Case "#PB_Web_SelectedText"               : Flag = Flag | #PB_Web_SelectedText
-          ;         Case "#PB_Web_StatusMessage"              : Flag = Flag | #PB_Web_StatusMessage
-          ;         Case "#PB_Web_Stop"                       : Flag = Flag | #PB_Web_Stop
-          
           ; calendar
         Case "#PB_Calendar_Borderless"            : Flag = Flag | #PB_Calendar_Borderless
-          ;         Case "#PB_Calendar_Bold"                  : Flag = Flag | #PB_Calendar_Bold
-          ;         Case "#PB_Calendar_Maximum"               : Flag = Flag | #PB_Calendar_Maximum
-          ;         Case "#PB_Calendar_Minimum"               : Flag = Flag | #PB_Calendar_Minimum
-          ;         Case "#PB_Calendar_Normal"                : Flag = Flag | #PB_Calendar_Normal
           ; date
         Case "#PB_Date_CheckBox"                  : Flag = Flag | #PB_Date_CheckBox
         Case "#PB_Date_UpDown"                    : Flag = Flag | #PB_Date_UpDown
-          ;         Case "#PB_Date_Accessed"                  : Flag = Flag | #PB_Date_Accessed
-          ;         Case "#PB_Date_Calendar"                  : Flag = Flag | #PB_Date_Calendar
-          ;         Case "#PB_Date_Created"                   : Flag = Flag | #PB_Date_Created
-          ;         Case "#PB_Date_Day"                       : Flag = Flag | #PB_Date_Day
-          ;         Case "#PB_Date_Hour"                      : Flag = Flag | #PB_Date_Hour
-          ;         Case "#PB_Date_Maximum"                   : Flag = Flag | #PB_Date_Maximum
-          ;         Case "#PB_Date_Minimum"                   : Flag = Flag | #PB_Date_Minimum
-          ;         Case "#PB_Date_Minute"                    : Flag = Flag | #PB_Date_Minute
-          ;         Case "#PB_Date_Modified"                  : Flag = Flag | #PB_Date_Modified
-          ;         Case "#PB_Date_Month"                     : Flag = Flag | #PB_Date_Month
-          ;         Case "#PB_Date_Second"                    : Flag = Flag | #PB_Date_Second
-          ;         Case "#PB_Date_Week"                      : Flag = Flag | #PB_Date_Week
-          ;         Case "#PB_Date_Year"                      : Flag = Flag | #PB_Date_Year
           ; editor
-        Case "#PB_Editor_ReadOnly"                 : Flag = Flag | #PB_Editor_ReadOnly
-        Case "#PB_Editor_WordWrap"                 : Flag = Flag | #PB_Editor_WordWrap
+        Case "#PB_Editor_ReadOnly"                : Flag = Flag | #PB_Editor_ReadOnly
+        Case "#PB_Editor_WordWrap"                : Flag = Flag | #PB_Editor_WordWrap
           ; explorerlist
           ; explorertree
           ; explorercombo
           ;         Case "#PB_Explorer_Type"                   : Flag = Flag | #PB_Explorer_Type
           ; spin
-          Case "#PB_Explorer_Type"                   : Flag = Flag | #PB_Spin_Numeric
-          Case "#PB_Explorer_Type"                   : Flag = Flag | #PB_Spin_ReadOnly
-            ;           Case "#PB_Explorer_Type"                   : Flag = Flag | #PB_Spin_Maximum
-            ;           Case "#PB_Explorer_Type"                   : Flag = Flag | #PB_Spin_Minimum
-        ; tree
-          Case "#PB_Tree_AlwaysShowSelection"        : Flag = Flag | #PB_Tree_AlwaysShowSelection
-          Case "#PB_Tree_CheckBoxes"                 : Flag = Flag | #PB_Tree_CheckBoxes
-          Case "#PB_Tree_NoButtons"                  : Flag = Flag | #PB_Tree_NoButtons
-          Case "#PB_Tree_NoLines"                    : Flag = Flag | #PB_Tree_NoLines
-          Case "#PB_Tree_ThreeState"                 : Flag = Flag | #PB_Tree_ThreeState
-            ;           Case "#PB_Tree_Checked"                    : Flag = Flag | #PB_Tree_Checked
-            ;           Case "#PB_Tree_Collapsed"                  : Flag = Flag | #PB_Tree_Collapsed
-            ;           Case "#PB_Tree_Expanded"                   : Flag = Flag | #PB_Tree_Expanded
-            ;           Case "#PB_Tree_Inbetween"                  : Flag = Flag | #PB_Tree_Inbetween
-            ;           Case "#PB_Tree_Selected"                   : Flag = Flag | #PB_Tree_Selected
-            ;           Case "#PB_Tree_SubLevel"                   : Flag = Flag | #PB_Tree_SubLevel
-            ; panel
-            ; splitter
-          Case "#PB_Splitter_Separator"               : Flag = Flag | #PB_Splitter_Separator
-          Case "#PB_Splitter_Vertical"                : Flag = Flag | #PB_Splitter_Vertical
-          Case "#PB_Splitter_FirstFixed"              : Flag = Flag | #PB_Splitter_FirstFixed
-          Case "#PB_Splitter_SecondFixed"             : Flag = Flag | #PB_Splitter_SecondFixed
-            ;           Case "#PB_Splitter_FirstGadget"             : Flag = Flag | #PB_Splitter_FirstGadget
-            ;           Case "#PB_Splitter_FirstMinimumSize"        : Flag = Flag | #PB_Splitter_FirstMinimumSize
-            ;           Case "#PB_Splitter_SecondGadget"            : Flag = Flag | #PB_Splitter_SecondGadget
-            ;           Case "#PB_Splitter_SecondMinimumSize"       : Flag = Flag | #PB_Splitter_SecondMinimumSize
-            ; mdi
-          Case "#PB_MDI_AutoSize"                     : Flag = Flag | #PB_MDI_AutoSize
-          Case "#PB_MDI_BorderLess"                   : Flag = Flag | #PB_MDI_BorderLess
-          Case "#PB_MDI_NoScrollBars"                 : Flag = Flag | #PB_MDI_NoScrollBars
-            ; scintilla
-            ; shortcut
-            ; canvas
-          Case "#PB_Canvas_Border"                    : Flag = Flag | #PB_Canvas_Border
-          Case "#PB_Canvas_ClipMouse"                 : Flag = Flag | #PB_Canvas_ClipMouse
-          Case "#PB_Canvas_Container"                 : Flag = Flag | #PB_Canvas_Container
-          Case "#PB_Canvas_DrawFocus"                 : Flag = Flag | #PB_Canvas_DrawFocus
-          Case "#PB_Canvas_Keyboard"                  : Flag = Flag | #PB_Canvas_Keyboard
-            
+        Case "#PB_Explorer_Type"                  : Flag = Flag | #PB_Spin_Numeric
+        Case "#PB_Explorer_Type"                  : Flag = Flag | #PB_Spin_ReadOnly
+          ; tree
+        Case "#PB_Tree_AlwaysShowSelection"       : Flag = Flag | #PB_Tree_AlwaysShowSelection
+        Case "#PB_Tree_CheckBoxes"                : Flag = Flag | #PB_Tree_CheckBoxes
+        Case "#PB_Tree_NoButtons"                 : Flag = Flag | #PB_Tree_NoButtons
+        Case "#PB_Tree_NoLines"                   : Flag = Flag | #PB_Tree_NoLines
+        Case "#PB_Tree_ThreeState"                : Flag = Flag | #PB_Tree_ThreeState
+          ; panel
+          ; splitter
+        Case "#PB_Splitter_Separator"             : Flag = Flag | #PB_Splitter_Separator
+        Case "#PB_Splitter_Vertical"              : Flag = Flag | #PB_Splitter_Vertical
+        Case "#PB_Splitter_FirstFixed"            : Flag = Flag | #PB_Splitter_FirstFixed
+        Case "#PB_Splitter_SecondFixed"           : Flag = Flag | #PB_Splitter_SecondFixed
+          ; mdi
+        Case "#PB_MDI_AutoSize"                   : Flag = Flag | #PB_MDI_AutoSize
+        Case "#PB_MDI_BorderLess"                 : Flag = Flag | #PB_MDI_BorderLess
+        Case "#PB_MDI_NoScrollBars"               : Flag = Flag | #PB_MDI_NoScrollBars
+          ; scintilla
+          ; shortcut
+          ; canvas
+        Case "#PB_Canvas_Border"                  : Flag = Flag | #PB_Canvas_Border
+        Case "#PB_Canvas_ClipMouse"               : Flag = Flag | #PB_Canvas_ClipMouse
+        Case "#PB_Canvas_Container"               : Flag = Flag | #PB_Canvas_Container
+        Case "#PB_Canvas_DrawFocus"               : Flag = Flag | #PB_Canvas_DrawFocus
+        Case "#PB_Canvas_Keyboard"                : Flag = Flag | #PB_Canvas_Keyboard
       EndSelect
     Next
     ProcedureReturn Flag
@@ -426,8 +364,7 @@ CompilerIf #PB_Compiler_IsMainFile
         Case "ComboBoxGadget"      : \ID = ComboBoxGadget      (#PB_Any, \X,\Y,\Width,\Height, \Flag)
         Case "ImageGadget"         : \ID = ImageGadget         (#PB_Any, \X,\Y,\Width,\Height, \Param1,\Flag)
         Case "HyperLinkGadget"     : \ID = HyperLinkGadget     (#PB_Any, \X,\Y,\Width,\Height, \Caption$,\Param1,\Flag)
-        Case "ContainerGadget"     : \ID = ContainerGadget     (#PB_Any, \X,\Y,\Width,\Height, \Flag) : CloseGadgetList()
-          ;Debug \Flag$
+        Case "ContainerGadget"     : \ID = ContainerGadget     (#PB_Any, \X,\Y,\Width,\Height, \Flag)
         Case "ListIconGadget"      : \ID = ListIconGadget      (#PB_Any, \X,\Y,\Width,\Height, \Caption$, \Param1, \Flag)
         Case "IPAddressGadget"     : \ID = IPAddressGadget     (#PB_Any, \X,\Y,\Width,\Height)
         Case "ProgressBarGadget"   : \ID = ProgressBarGadget   (#PB_Any, \X,\Y,\Width,\Height, \Param1, \Param2, \Flag)
@@ -460,24 +397,24 @@ CompilerIf #PB_Compiler_IsMainFile
         Case "CanvasGadget"        : \ID = CanvasGadget        (#PB_Any, \X,\Y,\Width,\Height, \Flag)
       EndSelect
       
-      Static open
-      Select \Type$
-        Case "OpenWindow"          
-          \Parent = \ID
-          \ParentID = WindowID(\ID)
-        Case "ContainerGadget", "ScrollAreaGadget", "PanelGadget"
-;           If open
-;             CloseGadgetList()
-;             open = 0
-;           EndIf
-          \Parent = \ID
-          \ParentID = GadgetID(\ID)
-;           UseGadgetList(GetParent_(\ParentID))
-;           OpenGadgetList(\ID)
-;           open=1
-        Default
-         SetParent_(GadgetID(\ID), \ParentID) 
-      EndSelect
+;       Static open
+;       Select \Type$
+;         Case "OpenWindow"          
+;           \Parent = \ID
+;           \ParentID = WindowID(\ID)
+;         Case "ContainerGadget", "ScrollAreaGadget", "PanelGadget"
+; ;           If open
+; ;             CloseGadgetList()
+; ;             open = 0
+; ;           EndIf
+;           \Parent = \ID
+;           \ParentID = GadgetID(\ID)
+; ;           UseGadgetList(GetParent_(\ParentID))
+; ;           OpenGadgetList(\ID)
+; ;           open=1
+;         Default
+;          SetParent_(GadgetID(\ID), \ParentID) 
+;       EndSelect
       
       ForEach ParsePBGadget()
         If ParsePBGadget()\ID$ = \ID$

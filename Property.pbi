@@ -442,9 +442,10 @@ EndProcedure
 
 ;- Property_Event
 Procedure Property_Activate_Event()
-  Protected Gadget = Transformation::Gadget() ;  Form::ActiveGadget()
-  Protected Window =-1 ;  Form::ActiveWindow()
-  If IsGadget( Gadget ); And Gadget::IsPBContainer( Gadget )
+  Protected Gadget = Transformation::Object() ;  Form::ActiveGadget()
+  Protected Window = Gadget ; -1 ;  Form::ActiveWindow()
+  
+  If IsGadget( Gadget )
     SetGadgetText( #Property_Method_Enum, Str( Gadget ))
     SetGadgetState( #Property_Method_X, GadgetX( Gadget ))
     SetGadgetState( #Property_Method_Y, GadgetY( Gadget ))
@@ -484,8 +485,8 @@ Procedure Property_Size_Event( )
 EndProcedure 
 
 Procedure Property_Gadget_Event( )
-  Protected Gadget = Transformation::Gadget() ;  Form::ActiveGadget()
-  Protected Window =-1 ;  Form::ActiveWindow()
+  Protected Gadget = Transformation::Object() ;  Form::ActiveGadget()
+  Protected Window = Gadget ; -1 ;  Form::ActiveWindow()
   Protected Steps, Change
   ;   If IsGadget(Gadget)
   ;     Steps = Point::GetGadgetPointSize(Gadget)

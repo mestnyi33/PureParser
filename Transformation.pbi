@@ -16,7 +16,7 @@ DeclareModule Transformation
   #Anchor_All  = #Anchor_Position|#Anchor_Horizontally|#Anchor_Vertically
   
   Declare Is(Gadget.i)
-  Declare Gadget()
+  Declare Object()
   Declare Update(Gadget.i)
   Declare Disable(Gadget.i)
   Declare Enable(Gadget.i, Grid.i=1, Flags.i=#Anchor_All)
@@ -36,7 +36,7 @@ Module Transformation
     ID.i[10]
   EndStructure
   
-  Global ActiveGadget =- 1
+  Global ActivateObject =- 1
   Global NewList AnChor.Transformation()
   
   CompilerIf #PB_Compiler_OS = #PB_OS_Windows
@@ -113,6 +113,7 @@ Module Transformation
     If This\ID[8] : ResizeGadget(This\ID[8], GadgetX(This\Gadget)-This\Size+This\Pos, GadgetY(This\Gadget)+GadgetHeight(This\Gadget)-This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
     If This\ID[#Arrows] : ResizeGadget(This\ID[#Arrows], GadgetX(This\Gadget)+This\Size, GadgetY(This\Gadget)-This\Size+This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
   EndMacro
+  
 ;   Macro MoveTransformation(This)
 ;     ; Transformation resize
 ;     If This\ID[1] : ResizeGadget(This\ID[1], GadgetX(This\Gadget, #PB_Gadget_WindowCoordinate)-This\Size+This\Pos, GadgetY(This\Gadget, #PB_Gadget_WindowCoordinate)+(GadgetHeight(This\Gadget)-This\Size)/2, #PB_Ignore, #PB_Ignore) : EndIf
@@ -126,8 +127,8 @@ Module Transformation
 ;     If This\ID[#Arrows] : ResizeGadget(This\ID[#Arrows], GadgetX(This\Gadget, #PB_Gadget_WindowCoordinate)+This\Size, GadgetY(This\Gadget, #PB_Gadget_WindowCoordinate)-This\Size+This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
 ;   EndMacro
   
-  Procedure Gadget()
-    ProcedureReturn ActiveGadget
+  Procedure Object()
+    ProcedureReturn ActivateObject
   EndProcedure
   
   Procedure Update(Gadget)
@@ -160,6 +161,13 @@ Module Transformation
     ProcedureReturn Value
   EndProcedure
   
+  Procedure FormCallBack()
+    Select Event()
+      Case #PB_Event_ActivateWindow, #PB_Event_LeftClick
+        ActivateObject = EventWindow()
+    EndSelect
+  EndProcedure
+  
   Procedure Callback()
     Static Selected.i, X.i, Y.i, OffsetX.i, OffsetY.i, GadgetX0.i, GadgetX1.i, GadgetY0.i, GadgetY1.i
     Protected *Anchor.Transformation = GetGadgetData(EventGadget())
@@ -174,7 +182,7 @@ Module Transformation
           GadgetY1 = GadgetY0 + GadgetHeight(\Gadget)
           OffsetX = GetGadgetAttribute(EventGadget(), #PB_Canvas_MouseX)
           OffsetY = GetGadgetAttribute(EventGadget(), #PB_Canvas_MouseY)
-          ActiveGadget = \Gadget
+          ActivateObject = \Gadget
           
         Case #PB_EventType_LeftButtonUp
           Selected = #False
@@ -282,6 +290,11 @@ Module Transformation
       MoveTransformation(*Anchor)
       ClipGadgets(UseGadgetList(0))
       
+      UnbindEvent(#PB_Event_ActivateWindow, @FormCallBack())
+      BindEvent(#PB_Event_ActivateWindow, @FormCallBack())
+      UnbindEvent(#PB_Event_LeftClick, @FormCallBack())
+      BindEvent(#PB_Event_LeftClick, @FormCallBack())
+      
       CompilerIf #PB_Compiler_OS = #PB_OS_Windows
         UpdateWindow_(UseGadgetList(0))
       CompilerEndIf 
@@ -368,7 +381,7 @@ CompilerIf #PB_Compiler_IsMainFile
       Case #PB_Event_Gadget
         Select EventType()
           Case #PB_EventType_LeftButtonDown
-            Debug "Is anchor "+Is(EventGadget())+" "+Gadget()
+            Debug "Is anchor "+Is(EventGadget())+" "+Object()
             Gadget = EventGadget()
             Define OffsetX = GetGadgetAttribute(EventGadget(), #PB_Canvas_MouseX)
             Define OffsetY = GetGadgetAttribute(EventGadget(), #PB_Canvas_MouseY)
