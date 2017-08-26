@@ -38,6 +38,9 @@ Structure ParsePBGadget
   Param3$
   Flag$
   
+  Parent.i
+  ParentID.i
+  
   Position.i
   Length.i
   
@@ -141,6 +144,13 @@ CompilerIf #PB_Compiler_IsMainFile
           ; image 
         Case "#PB_Image_Border"                   : Flag = Flag | #PB_Image_Border
         Case "#PB_Image_Raised"                   : Flag = Flag | #PB_Image_Raised
+          ; container 
+        Case "#PB_Container_BorderLess"           : Flag = Flag | #PB_Container_BorderLess
+        Case "#PB_Container_Double"               : Flag = Flag | #PB_Container_Double
+        Case "#PB_Container_Flat"                 : Flag = Flag | #PB_Container_Flat
+        Case "#PB_Container_Raised"               : Flag = Flag | #PB_Container_Raised
+        Case "#PB_Container_Single"               : Flag = Flag | #PB_Container_Single
+          
       EndSelect
     Next
     ProcedureReturn Flag
@@ -267,6 +277,24 @@ CompilerIf #PB_Compiler_IsMainFile
   Procedure OpenPBObject(*This.ParsePBGadget)
     Protected Result
     
+    
+;     CompilerIf #PB_Compiler_OS = #PB_OS_Windows
+;         Static open 
+;         Protected ParentID = GetParent_(GadgetID(Gadget))
+;         Protected Parent = GetProp_( ParentID, "PB_ID" )
+;         If ( IsGadget( Parent ) And GadgetID( Parent ) = ParentID )
+;           OpenGadgetList(Parent)
+;           open=1
+;         Else
+;           If open
+;             CloseGadgetList()
+;             open=0
+;           EndIf
+;           UseGadgetList(ParentID) ; WindowID(GetActiveWindow()))
+;         EndIf
+;       CompilerEndIf 
+    
+      
     With *This
       Select \Type$
         Case "OpenWindow"          : \ID = OpenWindow          (#PB_Any, \X,\Y,\Width,\Height, \Caption$, \Flag|#PB_Window_SizeGadget) 
@@ -280,7 +308,8 @@ CompilerIf #PB_Compiler_IsMainFile
         Case "ComboBoxGadget"      : \ID = ComboBoxGadget      (#PB_Any, \X,\Y,\Width,\Height, \Flag)
         Case "ImageGadget"         : \ID = ImageGadget         (#PB_Any, \X,\Y,\Width,\Height, \Param1,\Flag)
         Case "HyperLinkGadget"     : \ID = HyperLinkGadget     (#PB_Any, \X,\Y,\Width,\Height, \Caption$,\Param1,\Flag)
-        Case "ContainerGadget"     : \ID = ContainerGadget     (#PB_Any, \X,\Y,\Width,\Height, \Flag)
+        Case "ContainerGadget"     : \ID = ContainerGadget     (#PB_Any, \X,\Y,\Width,\Height, \Flag) : CloseGadgetList()
+          ;Debug \Flag$
         Case "ListIconGadget"      : \ID = ListIconGadget      (#PB_Any, \X,\Y,\Width,\Height, \Caption$, \Param1, \Flag)
         Case "IPAddressGadget"     : \ID = IPAddressGadget     (#PB_Any, \X,\Y,\Width,\Height)
         Case "ProgressBarGadget"   : \ID = ProgressBarGadget   (#PB_Any, \X,\Y,\Width,\Height, \Param1, \Param2, \Flag)
@@ -311,6 +340,25 @@ CompilerIf #PB_Compiler_IsMainFile
         Case "ScintillaGadget"     : \ID = ScintillaGadget     (#PB_Any, \X,\Y,\Width,\Height, \Param1)
         Case "ShortcutGadget"      : \ID = ShortcutGadget      (#PB_Any, \X,\Y,\Width,\Height, \Param1)
         Case "CanvasGadget"        : \ID = CanvasGadget        (#PB_Any, \X,\Y,\Width,\Height, \Flag)
+      EndSelect
+      
+      Static open
+      Select \Type$
+        Case "OpenWindow"          
+          \Parent = \ID
+          \ParentID = WindowID(\ID)
+        Case "ContainerGadget", "ScrollAreaGadget", "PanelGadget"
+;           If open
+;             CloseGadgetList()
+;             open = 0
+;           EndIf
+          \Parent = \ID
+          \ParentID = GadgetID(\ID)
+;           UseGadgetList(GetParent_(\ParentID))
+;           OpenGadgetList(\ID)
+;           open=1
+        Default
+         SetParent_(GadgetID(\ID), \ParentID) 
       EndSelect
       
       ForEach ParsePBGadget()
