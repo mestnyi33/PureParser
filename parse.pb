@@ -390,6 +390,10 @@ CompilerIf #PB_Compiler_IsMainFile
           Open = \Parent
           \Parent = \ID
           \ParentID = GadgetID(\ID)
+        Case "CloseGadgetList"     : CloseGadgetList()
+        Case "UseGadgetList"       : UseGadgetList( \ParentID )
+        Case "AddGadgetItem"       : AddGadgetItem( \Parent, #PB_Any, \Caption$, \Param1, \Flag)
+        Case "OpenGadgetList"      : OpenGadgetList( \Parent, \Param1 )
       EndSelect
       
       If IsGadget(\ID)

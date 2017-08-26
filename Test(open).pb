@@ -47,14 +47,6 @@ Procedure OpenPBObject(Type$, X=0,Y=0,Width=0,Height=0, Flag=0, Caption$="", Par
     Case "ScintillaGadget"     : ID = ScintillaGadget     (#PB_Any, X,Y,Width,Height, Param1)
     Case "ShortcutGadget"      : ID = ShortcutGadget      (#PB_Any, X,Y,Width,Height, Param1)
     Case "CanvasGadget"        : ID = CanvasGadget        (#PB_Any, X,Y,Width,Height, Flag)
-      
-    Case "CloseGadgetList"     : CloseGadgetList()
-    Case "UseGadgetList"       : UseGadgetList( ParentID )
-    Case "AddGadgetItem"       
-;       Debug GadgetType(Parent)
-;       OpenGadgetList( Parent, Param1 )
-      AddGadgetItem( Parent, #PB_Any, Caption$, Param1, Flag)
-    Case "OpenGadgetList"      : OpenGadgetList( Parent, Param1 )
   EndSelect
   
   Select Type$
@@ -62,10 +54,16 @@ Procedure OpenPBObject(Type$, X=0,Y=0,Width=0,Height=0, Flag=0, Caption$="", Par
       Open = Parent
       Parent = ID
       ParentID = WindowID(ID)
+      
     Case "ContainerGadget", "ScrollAreaGadget", "PanelGadget"
       Open = Parent
       Parent = ID
       ParentID = GadgetID(ID)
+      
+    Case "CloseGadgetList"     : CloseGadgetList()
+    Case "UseGadgetList"       : UseGadgetList( ParentID )
+    Case "AddGadgetItem"       : AddGadgetItem( Parent, #PB_Any, Caption$, Param1, Flag)
+    Case "OpenGadgetList"      : OpenGadgetList( Parent, Param1 )
   EndSelect
   
   If IsGadget(ID)
