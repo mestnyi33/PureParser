@@ -2,7 +2,7 @@
 
 Procedure OpenPB(Type$, X=0,Y=0,Width=0,Height=0, Flag=0, Caption$="", Param1=0, Param2=0, Param3=0)
   Protected ID
-  Static ParentID, Parent, Item =- 1
+  Static ParentID, Parent
   
   Select Type$
     Case "OpenWindow"          : ID = OpenWindow          (#PB_Any, X,Y,Width,Height, Caption$, Flag|#PB_Window_SizeGadget) 
@@ -48,10 +48,10 @@ Procedure OpenPB(Type$, X=0,Y=0,Width=0,Height=0, Flag=0, Caption$="", Param1=0,
     Case "ShortcutGadget"      : ID = ShortcutGadget      (#PB_Any, X,Y,Width,Height, Param1)
     Case "CanvasGadget"        : ID = CanvasGadget        (#PB_Any, X,Y,Width,Height, Flag)
       
-    Case "UseGadgetList"       : UseGadgetList( ParentID )
     Case "CloseGadgetList"     : CloseGadgetList()
-    Case "AddGadgetItem"       : AddGadgetItem( Parent, #PB_Any, Caption$, Param1, Flag) : Item + 1
-      Case "OpenGadgetList"      : If Item =- 1 : Item = 0 : EndIf : OpenGadgetList( Parent, Item )
+    Case "UseGadgetList"       : UseGadgetList( ParentID )
+    Case "AddGadgetItem"       : AddGadgetItem( Parent, #PB_Any, Caption$, Param1, Flag)
+    Case "OpenGadgetList"      : OpenGadgetList( Parent, Param1 )
   EndSelect
   
   Select Type$
@@ -80,6 +80,9 @@ OpenPB("CloseGadgetList")
 OpenPB("ButtonGadget", 190, 10, 85, 35, 0, "Button")
 OpenPB("CloseGadgetList")
 OpenPB("ButtonGadget", 110, 10, 85, 35, 0, "Button")
+
+OpenPB("OpenGadgetList", 0,0,0,0,0, "", 0)
+OpenPB("ButtonGadget", -10, 30, 85, 35, 0, "Button")
 
 While IsWindow( Window_0 )
   Select WaitWindowEvent()
