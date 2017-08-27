@@ -58,14 +58,16 @@ Enumeration RegularExpression
 EndEnumeration
 
 
-If Not CreateRegularExpression(#Regex_Exception, ~"(?<=\").*;.*(?=\")", #PB_RegularExpression_NoCase)
+; If Not CreateRegularExpression(#Regex_Exception, ~"(?<=\").*;.*(?=\")", #PB_RegularExpression_NoCase)
+;   Debug RegularExpressionError()
+; EndIf
+
+If Not CreateRegularExpression(#Regex_Comments, "^;.*?$", #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine)
   Debug RegularExpressionError()
 EndIf
-
-If Not CreateRegularExpression(#Regex_Comments, ~"(?<!\");(?!\").*$", #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine)
-  Debug RegularExpressionError()
-EndIf
-
+; If Not CreateRegularExpression(#Regex_Comments, ~"(?<!\");(?!\").*$", #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine)
+;   Debug RegularExpressionError()
+; EndIf
 
 
 ; CreateRegularExpression(#Regex_FindProcedure, "(?<=Procedure).*?(?=EndProcedure)", #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll)
@@ -395,30 +397,30 @@ If ReadFile(#File, FilePath$)
   Debug FileContent$
   Debug "==================================="
   
-  FileContent$=ReplaceRegularExpression(#Regex_Exception, FileContent$, "")
+;   FileContent$=ReplaceRegularExpression(#Regex_Exception, FileContent$, "")
+;   
+;   Debug "Удалены исключения ================="
+;   Debug FileContent$
+;   Debug "==================================="
   
-  Debug "Удалены исключения ================="
-  Debug FileContent$
-  Debug "==================================="
-  
-  FileContent$=ReplaceRegularExpression(#Regex_Comments, FileContent$, "")
-  
-  Debug "Файл после обработки =============="
-  Debug FileContent$
-  Debug "==================================="
-  
-  
-  CreateRegularExpression(#PP_RegEx_String, "(\w+)\s*\((.*?)\)", #PB_RegularExpression_NoCase|#PB_RegularExpression_MultiLine)
+;   FileContent$=ReplaceRegularExpression(#Regex_Comments, FileContent$, "")
+;   
+;   Debug "Файл после обработки =============="
+;   Debug FileContent$
+;   Debug "==================================="
   
   
-  If ExamineRegularExpression(#PP_RegEx_String, FileContent$)
-    While NextRegularExpressionMatch(#PP_RegEx_String)
+;   CreateRegularExpression(#PP_RegEx_String, "(\w+)\s*\((.*?)\)", #PB_RegularExpression_NoCase|#PB_RegularExpression_MultiLine)
+  
+  
+  If ExamineRegularExpression(#Regex_Comments, FileContent$)
+    While NextRegularExpressionMatch(#Regex_Comments)
       I+1
-;       Content$=RegularExpressionMatchString(#PP_RegEx_String)
+      Content$=RegularExpressionMatchString(#Regex_Comments)
 ;       Debug Str(I)+Chr(9)+Content$
       
       
-      Debug "Строка "+Str(I)+":"+Chr(9)+RegularExpressionGroup(#PP_RegEx_String, 1);+" Комментарий"+Chr(9)+RegularExpressionGroup(#PP_RegEx_String, 2)
+      Debug "Строка "+Str(I)+":"+Chr(9)+Content$;RegularExpressionGroup(#Regex_Comments, 1);+" Комментарий"+Chr(9)+RegularExpressionGroup(#Regex_Comments, 2)
       
       
 ;       Position=(RegularExpressionMatchPosition(#Regex_FindProcedure)-1)+(RegularExpressionMatchPosition(#RegEx_FindFunction)-1)
@@ -432,6 +434,28 @@ If ReadFile(#File, FilePath$)
     Wend
   EndIf
   
+  
+  
+;   If ExamineRegularExpression(#PP_RegEx_String, FileContent$)
+;     While NextRegularExpressionMatch(#PP_RegEx_String)
+;       I+1
+;       ;       Content$=RegularExpressionMatchString(#PP_RegEx_String)
+;       ;       Debug Str(I)+Chr(9)+Content$
+;       
+;       
+;       Debug "Строка "+Str(I)+":"+Chr(9)+RegularExpressionGroup(#PP_RegEx_String, 1);+" Комментарий"+Chr(9)+RegularExpressionGroup(#PP_RegEx_String, 2)
+;       
+;       
+;       ;       Position=(RegularExpressionMatchPosition(#Regex_FindProcedure)-1)+(RegularExpressionMatchPosition(#RegEx_FindFunction)-1)
+;       ;       Length=RegularExpressionMatchLength(#Regex_FindProcedure)
+;       
+;       ;       ObjectType$=RegularExpressionGroup(#RegEx_FindFunction, 1)
+;       
+;       
+;       ;       ParseObject(ObjectType$, Position, Length, Content$)
+;       
+;     Wend
+;   EndIf
   
 ;   If ExamineRegularExpression(#Regex_FindProcedure, FileContent$)
 ;     While NextRegularExpressionMatch(#Regex_FindProcedure)
@@ -466,8 +490,8 @@ ForEach Object()
   Debug Str(Object()\ObjectID)+")"+Chr(9)+Object()\ObjectType+Chr(9)+"Parent{"+Object()\ParentID+"} "+Chr(9)+Object()\Content
 Next
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 397
-; FirstLine = 105
+; CursorPosition = 422
+; FirstLine = 118
 ; Folding = 7-
 ; EnableXP
 ; CommandLine = Test\Комментарии.pb

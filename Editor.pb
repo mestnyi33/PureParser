@@ -577,9 +577,10 @@ CompilerIf #PB_Compiler_IsMainFile
         If CreateRegularExpression(#Regex_FindProcedure, "[^;]Procedure.*?EndProcedure", Flags_RegEx) And
            CreateRegularExpression(#RegEx_FindFunction, "(\w+)\s*\((.*?)\)(?=\s*($|:))", Flags_RegEx) And
            CreateRegularExpression(#RegEx_FindArguments, "[^,]+", Flags_RegEx) And
-           CreateRegularExpression(#Regex_Comments, ~"(?<!\");(?!\").*$", #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine)
-
-          *This\File$=ReplaceRegularExpression(#Regex_Comments, *This\File$, "")
+;            CreateRegularExpression(#Regex_Comments, ~"(?<!\");(?!\").*$", #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine)
+; 
+;           *This\File$=ReplaceRegularExpression(#Regex_Comments, *This\File$, "")
+;           Debug *This\File$
           
           
           If ExamineRegularExpression(#Regex_FindProcedure, *This\File$)
@@ -1103,8 +1104,8 @@ CompilerIf #PB_Compiler_IsMainFile
   
 CompilerEndIf
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 1085
-; FirstLine = 1035
+; CursorPosition = 582
+; FirstLine = 557
 ; Folding = ---
 ; EnableXP
 ; CompileSourceDirectory
