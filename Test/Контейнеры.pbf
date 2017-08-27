@@ -13,6 +13,7 @@ Procedure OpenWindow_1(x = 0, y = 0, width = 600, height = 400)
   Window_1 = OpenWindow(#PB_Any, x, y, width, height, "", #PB_Window_SystemMenu)
   Container_0 = ContainerGadget(#PB_Any, 10, 10, 275, 235)
   SetGadgetColor(Container_0, #PB_Gadget_BackColor,RGB(192,192,192))
+  ;SetGadgetColor(Container_0, #PB_Gadget_BackColor,RGB(192,192,192))
   Button_0 = ButtonGadget(#PB_Any, 5, 5, 90, 40, "")
   Button_1 = ButtonGadget(#PB_Any, 5, 50, 90, 40, "")
   Spin_0 = SpinGadget(#PB_Any, 190, 5, 80, 30, 0, 0)
@@ -53,25 +54,10 @@ Procedure OpenWindow_1(x = 0, y = 0, width = 600, height = 400)
   CloseGadgetList()
 EndProcedure
 
-Procedure Window_1_Events(event)
-  Select event
-    Case #PB_Event_CloseWindow
-      ProcedureReturn #False
 
-    Case #PB_Event_Menu
-      Select EventMenu()
-      EndSelect
-
-    Case #PB_Event_Gadget
-      Select EventGadget()
-      EndSelect
-  EndSelect
-  ProcedureReturn #True
-EndProcedure
-
-
-; IDE Options = PureBasic 5.40 LTS (Windows - x86)
-; CursorPosition = 71
+; IDE Options = PureBasic 5.60 (Windows - x86)
+; CursorPosition = 15
+; FirstLine = 5
 ; Folding = -
-; EnableUnicode
 ; EnableXP
+; CompileSourceDirectory
