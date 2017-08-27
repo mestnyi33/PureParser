@@ -379,40 +379,45 @@ CompilerIf #PB_Compiler_IsMainFile
         Case "CanvasGadget"        : \ID = CanvasGadget        (#PB_Any, \X,\Y,\Width,\Height, \Flag)
       EndSelect
       
-      Static Open =- 1
-      
       Select \Type$
         Case "OpenWindow"          
-          Open = \Parent
           \Parent = \ID
           \ParentID = WindowID(\ID)
+          
         Case "ContainerGadget", "ScrollAreaGadget", "PanelGadget"
-          Open = \Parent
+          SetGadgetData(\ID, \Parent)
           \Parent = \ID
           \ParentID = GadgetID(\ID)
-        Case "CloseGadgetList"     : CloseGadgetList()
+          
         Case "UseGadgetList"       : UseGadgetList( \ParentID )
+        Case "CloseGadgetList"     : CloseGadgetList() : \Parent = GetGadgetData(\Parent)
         Case "AddGadgetItem"       : AddGadgetItem( \Parent, #PB_Any, \Caption$, \Param1, \Flag)
         Case "OpenGadgetList"      : OpenGadgetList( \Parent, \Param1 )
       EndSelect
       
       If IsGadget(\ID)
-        If IsWindow(Open)
-          CloseGadgetList()
-          UseGadgetList(WindowID(Open))
+        Protected OpenList
+        Protected GetParent = GetGadgetData(\Parent)
+        
+        If \ID = \Parent
+          If IsWindow(GetParent)
+            CloseGadgetList() ; Bug PB
+            UseGadgetList(WindowID(GetParent))
+          EndIf
+          If IsGadget(GetParent) 
+            OpenList = OpenGadgetList(GetParent) 
+          EndIf
         EndIf
-        If IsGadget(Open)
-          OpenGadgetList(Open)
-          Open = 0
-        EndIf
+        
         Transformation::Enable(\ID, 5)
-        If IsWindow(Open)
-          OpenGadgetList(\Parent)
-          Open =- 1
-        EndIf
-        If Open = 0
-          CloseGadgetList()
-          Open =- 1
+        
+        If \ID = \Parent
+          If IsWindow(GetParent) 
+            OpenGadgetList(\ID) 
+          EndIf
+          If OpenList 
+            CloseGadgetList() 
+          EndIf
         EndIf
       EndIf
       
@@ -739,6 +744,10 @@ CompilerIf #PB_Compiler_IsMainFile
                         
                         AddGadgetItem(Editor_2, -1, Texts)
                         Texts = ""
+                        
+;                       Case "CloseGadgetList", "UseGadgetList"       : CallFunctionFast(@OpenPBObject(), *This)
+;                       Case "AddGadgetItem"       : AddGadgetItem( \Parent, #PB_Any, \Caption$, \Param1, \Flag)
+;                       Case "OpenGadgetList"      : OpenGadgetList( \Parent, \Param1 )
                         
                       Default
                         Text = RegularExpressionMatchString(#RegEx_FindFunction)
