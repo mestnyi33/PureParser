@@ -58,11 +58,15 @@ CompilerIf #PB_Compiler_IsMainFile
   #Window=0
   
   Enumeration RegularExpression
+    #Regex_Comments
     #RegEx_FindFunction
     #RegEx_FindArguments
     #Regex_FindProcedure
     #RegEx_FindVar
   EndEnumeration
+  
+
+  
   
   Procedure PB_Flag(Flag$) ; Ok
     Protected i
@@ -551,6 +555,9 @@ CompilerIf #PB_Compiler_IsMainFile
   EndProcedure
   
   
+  
+  
+  
   Procedure.S ParsePBFile(FileName.s) ; Процедура открытия и парсинга файла
     
     If ReadFile(#File, FileName) 
@@ -569,7 +576,12 @@ CompilerIf #PB_Compiler_IsMainFile
         Protected Flags_RegEx = #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll
         If CreateRegularExpression(#Regex_FindProcedure, "[^;]Procedure.*?EndProcedure", Flags_RegEx) And
            CreateRegularExpression(#RegEx_FindFunction, "(\w+)\s*\((.*?)\)(?=\s*($|:))", Flags_RegEx) And
-           CreateRegularExpression(#RegEx_FindArguments, "[^,]+", Flags_RegEx)
+           CreateRegularExpression(#RegEx_FindArguments, "[^,]+", Flags_RegEx) And
+;            CreateRegularExpression(#Regex_Comments, ~"(?<!\");(?!\").*$", #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine)
+; 
+;           *This\File$=ReplaceRegularExpression(#Regex_Comments, *This\File$, "")
+;           Debug *This\File$
+          
           
           If ExamineRegularExpression(#Regex_FindProcedure, *This\File$)
             While NextRegularExpressionMatch(#Regex_FindProcedure)
@@ -833,6 +845,10 @@ CompilerIf #PB_Compiler_IsMainFile
     ProcedureReturn result.S
   EndProcedure
   
+  
+  
+  
+  
   ;-
   Procedure Window_0_Event_Gadget()
     Static Time
@@ -925,7 +941,7 @@ CompilerIf #PB_Compiler_IsMainFile
         If File$
           If OpenFile(0, File$)         ; we create a new text file...
             
-            ;             PushListPosition(ParsePBGadget())
+            ;PushListPosition(ParsePBGadget())
             ;SortStructuredList(ParsePBGadget(), #PB_Sort_Descending, OffsetOf(ParsePBGadget\Position), TypeOf(ParsePBGadget\Position)) ; Сортировка
             ;WriteStringFormat(0,#PB_Unicode)
             WriteString(0, *This\File$, #PB_UTF8) ; 
@@ -1087,9 +1103,10 @@ CompilerIf #PB_Compiler_IsMainFile
   
   
 CompilerEndIf
-; IDE Options = PureBasic 5.40 LTS (Windows - x86)
-; CursorPosition = 702
-; FirstLine = 663
-; Folding = --
-; EnableUnicode
+; IDE Options = PureBasic 5.60 (Windows - x86)
+; CursorPosition = 582
+; FirstLine = 557
+; Folding = ---
 ; EnableXP
+; CompileSourceDirectory
+; EnableUnicode

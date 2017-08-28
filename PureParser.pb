@@ -49,13 +49,28 @@ EndProcedure
 ; Здесь собраны процедуры парсинга
 
 Enumeration RegularExpression
+  #Regex_Comments
+  #Regex_Exception
+  
   #RegEx_FindFunction
   #RegEx_FindFields
   #Regex_FindProcedure
 EndEnumeration
 
 
-CreateRegularExpression(#Regex_FindProcedure, "(?<=Procedure).*?(?=EndProcedure)", #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll)
+; If Not CreateRegularExpression(#Regex_Exception, ~"(?<=\").*;.*(?=\")", #PB_RegularExpression_NoCase)
+;   Debug RegularExpressionError()
+; EndIf
+
+If Not CreateRegularExpression(#Regex_Comments, "^;.*?$", #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine)
+  Debug RegularExpressionError()
+EndIf
+; If Not CreateRegularExpression(#Regex_Comments, ~"(?<!\");(?!\").*$", #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine)
+;   Debug RegularExpressionError()
+; EndIf
+
+
+; CreateRegularExpression(#Regex_FindProcedure, "(?<=Procedure).*?(?=EndProcedure)", #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll)
 ; CreateRegularExpression(#Regex_FindProcedure, "^\s*?Procedure.*?EndProcedure", #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll)
 
 CreateRegularExpression(#RegEx_FindFunction, "(\w+)\s*\((.*?)\)", #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll)
@@ -82,7 +97,7 @@ EndProcedure
 
 ; Обработчики
 
-
+;{
 
 NewList CurrentParent()
 
@@ -153,16 +168,6 @@ AddMapElement(ParserElement(), #ObjectType_ContainerGadget)
 ParserElement()\Parser=@Parser_ContainerGadget()
 
 
-
-
-
-
-
-
-
-
-
-
 #ObjectType_CloseGadgetList="CloseGadgetList"
 Procedure Parser_CloseGadgetList(Position, Length, Content$)
   CurrentParent=GetCurrentParent()
@@ -179,7 +184,7 @@ ParserElement()\Parser=@Parser_CloseGadgetList()
 
 
 
-;{
+
 
 #ObjectType_ButtonGadget="ButtonGadget"
 AddMapElement(ParserElement(), #ObjectType_ButtonGadget)
@@ -380,27 +385,99 @@ If ReadFile(#File, FilePath$)
   
   ; FileContent$ - Содержимое файла
   
-  If ExamineRegularExpression(#Regex_FindProcedure, FileContent$)
-    While NextRegularExpressionMatch(#Regex_FindProcedure)
+  
+  Enumeration RegularExpression
+    #PP_RegEx_String
+  EndEnumeration
+  
+  
+ 
+  
+  Debug "Файл до обработки ================="
+  Debug FileContent$
+  Debug "==================================="
+  
+;   FileContent$=ReplaceRegularExpression(#Regex_Exception, FileContent$, "")
+;   
+;   Debug "Удалены исключения ================="
+;   Debug FileContent$
+;   Debug "==================================="
+  
+;   FileContent$=ReplaceRegularExpression(#Regex_Comments, FileContent$, "")
+;   
+;   Debug "Файл после обработки =============="
+;   Debug FileContent$
+;   Debug "==================================="
+  
+  
+;   CreateRegularExpression(#PP_RegEx_String, "(\w+)\s*\((.*?)\)", #PB_RegularExpression_NoCase|#PB_RegularExpression_MultiLine)
+  
+  
+  If ExamineRegularExpression(#Regex_Comments, FileContent$)
+    While NextRegularExpressionMatch(#Regex_Comments)
+      I+1
+      Content$=RegularExpressionMatchString(#Regex_Comments)
+;       Debug Str(I)+Chr(9)+Content$
       
-      Function$=RegularExpressionMatchString(#Regex_FindProcedure)
       
-      If ExamineRegularExpression(#RegEx_FindFunction, Function$)
-        While NextRegularExpressionMatch(#RegEx_FindFunction)
-          
-          Content$=RegularExpressionMatchString(#RegEx_FindFunction)
-          Position=(RegularExpressionMatchPosition(#Regex_FindProcedure)-1)+(RegularExpressionMatchPosition(#RegEx_FindFunction)-1)
-          Length=RegularExpressionMatchLength(#Regex_FindProcedure)
-          
-          ObjectType$=RegularExpressionGroup(#RegEx_FindFunction, 1)
-          
-
-          ParseObject(ObjectType$, Position, Length, Content$)
-
-        Wend
-      EndIf
+      Debug "Строка "+Str(I)+":"+Chr(9)+Content$;RegularExpressionGroup(#Regex_Comments, 1);+" Комментарий"+Chr(9)+RegularExpressionGroup(#Regex_Comments, 2)
+      
+      
+;       Position=(RegularExpressionMatchPosition(#Regex_FindProcedure)-1)+(RegularExpressionMatchPosition(#RegEx_FindFunction)-1)
+;       Length=RegularExpressionMatchLength(#Regex_FindProcedure)
+      
+;       ObjectType$=RegularExpressionGroup(#RegEx_FindFunction, 1)
+      
+      
+;       ParseObject(ObjectType$, Position, Length, Content$)
+      
     Wend
   EndIf
+  
+  
+  
+;   If ExamineRegularExpression(#PP_RegEx_String, FileContent$)
+;     While NextRegularExpressionMatch(#PP_RegEx_String)
+;       I+1
+;       ;       Content$=RegularExpressionMatchString(#PP_RegEx_String)
+;       ;       Debug Str(I)+Chr(9)+Content$
+;       
+;       
+;       Debug "Строка "+Str(I)+":"+Chr(9)+RegularExpressionGroup(#PP_RegEx_String, 1);+" Комментарий"+Chr(9)+RegularExpressionGroup(#PP_RegEx_String, 2)
+;       
+;       
+;       ;       Position=(RegularExpressionMatchPosition(#Regex_FindProcedure)-1)+(RegularExpressionMatchPosition(#RegEx_FindFunction)-1)
+;       ;       Length=RegularExpressionMatchLength(#Regex_FindProcedure)
+;       
+;       ;       ObjectType$=RegularExpressionGroup(#RegEx_FindFunction, 1)
+;       
+;       
+;       ;       ParseObject(ObjectType$, Position, Length, Content$)
+;       
+;     Wend
+;   EndIf
+  
+;   If ExamineRegularExpression(#Regex_FindProcedure, FileContent$)
+;     While NextRegularExpressionMatch(#Regex_FindProcedure)
+;       
+;       Function$=RegularExpressionMatchString(#Regex_FindProcedure)
+;       
+;       If ExamineRegularExpression(#RegEx_FindFunction, Function$)
+;         While NextRegularExpressionMatch(#RegEx_FindFunction)
+;           
+;           Content$=RegularExpressionMatchString(#RegEx_FindFunction)
+;           Position=(RegularExpressionMatchPosition(#Regex_FindProcedure)-1)+(RegularExpressionMatchPosition(#RegEx_FindFunction)-1)
+;           Length=RegularExpressionMatchLength(#Regex_FindProcedure)
+;           
+;           ObjectType$=RegularExpressionGroup(#RegEx_FindFunction, 1)
+;           
+; 
+;           ParseObject(ObjectType$, Position, Length, Content$)
+; 
+;         Wend
+;       EndIf
+;     Wend
+;   EndIf
   
   
 EndIf
@@ -412,9 +489,11 @@ EndIf
 ForEach Object()
   Debug Str(Object()\ObjectID)+")"+Chr(9)+Object()\ObjectType+Chr(9)+"Parent{"+Object()\ParentID+"} "+Chr(9)+Object()\Content
 Next
-; IDE Options = PureBasic 5.40 LTS (Windows - x86)
-; CursorPosition = 140
-; FirstLine = 75
-; Folding = --
-; EnableUnicode
+; IDE Options = PureBasic 5.60 (Windows - x86)
+; CursorPosition = 422
+; FirstLine = 118
+; Folding = 7-
 ; EnableXP
+; CommandLine = Test\Комментарии.pb
+; CompileSourceDirectory
+; EnableUnicode
