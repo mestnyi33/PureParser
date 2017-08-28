@@ -576,7 +576,7 @@ CompilerIf #PB_Compiler_IsMainFile
         Protected Flags_RegEx = #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll
         If CreateRegularExpression(#Regex_FindProcedure, "[^;]Procedure.*?EndProcedure", Flags_RegEx) And
            CreateRegularExpression(#RegEx_FindFunction, "(\w+)\s*\((.*?)\)(?=\s*($|:))", Flags_RegEx) And
-           CreateRegularExpression(#RegEx_FindArguments, "[^,]+", Flags_RegEx) And
+           CreateRegularExpression(#RegEx_FindArguments, "[^,]+", Flags_RegEx); And
 ;            CreateRegularExpression(#Regex_Comments, ~"(?<!\");(?!\").*$", #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine)
 ; 
 ;           *This\File$=ReplaceRegularExpression(#Regex_Comments, *This\File$, "")
@@ -1104,8 +1104,8 @@ CompilerIf #PB_Compiler_IsMainFile
   
 CompilerEndIf
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 582
-; FirstLine = 557
+; CursorPosition = 578
+; FirstLine = 551
 ; Folding = ---
 ; EnableXP
 ; CompileSourceDirectory
