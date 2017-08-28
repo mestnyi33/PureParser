@@ -389,15 +389,23 @@ CompilerIf #PB_Compiler_IsMainFile
           \Parent = \ID
           \ParentID = GadgetID(\ID)
           
-        Case "UseGadgetList"       : UseGadgetList( \ParentID )
-        Case "CloseGadgetList"     : CloseGadgetList() : \Parent = GetGadgetData(\Parent)
+        Case "UseGadgetList" : UseGadgetList( \ParentID )
+        Case "CloseGadgetList"     
+          If IsGadget(\Parent)
+            CloseGadgetList() 
+            \Parent = GetGadgetData(\Parent)
+          EndIf
         Case "AddGadgetItem"       : AddGadgetItem( \Parent, #PB_Any, \Caption$, \Param1, \Flag)
         Case "OpenGadgetList"      : OpenGadgetList( \Parent, \Param1 )
       EndSelect
       
       If IsGadget(\ID)
         Protected OpenList
-        Protected GetParent = GetGadgetData(\Parent)
+        Protected GetParent
+        
+        If IsGadget(\Parent)
+          GetParent = GetGadgetData(\Parent)
+        EndIf
         
         If \ID = \Parent
           If IsWindow(GetParent)
@@ -547,22 +555,17 @@ CompilerIf #PB_Compiler_IsMainFile
         ReadData(#File, *File, Length)
         *This\File$ = PeekS(*File, Length, Format)
         
-        If CreateRegularExpression(#Regex_FindProcedure, "[^;]Procedure.*?EndProcedure", Create_Reg_Flag) And
-           CreateRegularExpression(#RegEx_FindFunction, "(\w+)\s*\((.*?)\)(?=\s*($|:))", Create_Reg_Flag) And
+        ;If CreateRegularExpression(#RegEx_FindFunction, "^\s*(\w.*?)(\w+)\s*\((.*?)\)(?=\s*($|;))", Create_Reg_Flag) And
+        If CreateRegularExpression(#RegEx_FindFunction, "(\w+)\s*\((.*?)\)(?=\s*(;|$|:))", Create_Reg_Flag) And
            CreateRegularExpression(#RegEx_FindArguments, "[^,]+", Create_Reg_Flag)
           
-          If ExamineRegularExpression(#Regex_FindProcedure, *This\File$)
-            While NextRegularExpressionMatch(#Regex_FindProcedure)
-              Function$=RegularExpressionMatchString(#Regex_FindProcedure)
-              ;Debug Function$
-              
-              If ExamineRegularExpression(#RegEx_FindFunction, Function$)
+              If ExamineRegularExpression(#RegEx_FindFunction, *This\File$)
                 While NextRegularExpressionMatch(#RegEx_FindFunction)
                   With *This
                     \Type$=RegularExpressionGroup(#RegEx_FindFunction, 1)
                     \Args$=RegularExpressionGroup(#RegEx_FindFunction, 2)
                     \Type = PB_Type(\Type$)
-                    
+                    Debug \Type$
                     Select \Type$
                       Case "OpenWindow", ; FindString(\Type$, "Gadget"),-1,#PB_String_NoCase) ;
                            "ButtonGadget","StringGadget","TextGadget","CheckBoxGadget",
@@ -574,7 +577,7 @@ CompilerIf #PB_Compiler_IsMainFile
                            "ExplorerComboGadget","SpinGadget","TreeGadget","PanelGadget",
                            "SplitterGadget","MDIGadget","ScintillaGadget","ShortcutGadget","CanvasGadget"
                         
-                        \Position = RegularExpressionMatchPosition(#Regex_FindProcedure)+RegularExpressionMatchPosition(#RegEx_FindFunction) -2 
+                        \Position = RegularExpressionMatchPosition(#RegEx_FindFunction) -2 
                         \Length = RegularExpressionMatchLength(#RegEx_FindFunction)
                         ;                         Debug "Position - "+\Position
                         ;                         Debug "Length - "+\Length
@@ -584,6 +587,7 @@ CompilerIf #PB_Compiler_IsMainFile
                         AddElement(ParsePBGadget()) 
                         ParsePBGadget()\Type$ = \Type$
                         ParsePBGadget()\Function$ = RegularExpressionMatchString(#RegEx_FindFunction)
+                        ;Debug  ParsePBGadget()\Function$
                         
                         If ExamineRegularExpression(#RegEx_FindArguments, \Args$)
                           While NextRegularExpressionMatch(#RegEx_FindArguments)
@@ -802,9 +806,7 @@ CompilerIf #PB_Compiler_IsMainFile
                 
               EndIf
               
-            Wend
-          EndIf
-          
+         
         EndIf
       EndIf
       

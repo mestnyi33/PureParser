@@ -24,16 +24,15 @@ DeclareModule Transformation
 EndDeclareModule
 
 Module Transformation
-  Structure Transformation
-    Gadget.i
+  Structure DataBuffer
     ID.i[10]
+  EndStructure
+  
+  Structure Transformation Extends DataBuffer
+    Gadget.i
     Grid.i
     Pos.i
     Size.i
-  EndStructure
-  
-  Structure DataBuffer
-    ID.i[10]
   EndStructure
   
   Global ActivateObject =- 1
@@ -394,6 +393,7 @@ CompilerIf #PB_Compiler_IsMainFile
                 Disable(#ContainerGadget2)
               Case #True
                 SetGadgetText(#Transformation, "Disable Transformation")
+                ; Enable(#Window, 5, #Anchor_Position)
                 Enable(#EditorGadget, 5, #Anchor_All)
                 OpenGadgetList(#ContainerGadget2)
                   Enable(#ButtonGadget, 1, #Anchor_All)
