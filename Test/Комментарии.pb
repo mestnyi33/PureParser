@@ -23,7 +23,7 @@ OpenWindow(8) : OpenWindow(9) : OpenWindow(10) : OpenWindow(11) ; hgjhgjhgjh
 ; Вложение
 OpenWindow(OpenWindow(OpenWindow()), OpenWindow())
 
-
+DefineWindow=OpenWindow(12)
 
 Procedure WinEndProcedure()
   OpenWindow   (20, 800, 219, 200, 300, "Window 20", #PB_Window_SizeGadget)
@@ -38,7 +38,7 @@ EndProcedure
 ; EndProcedure
 
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 18
+; CursorPosition = 23
 ; Folding = -
 ; EnableXP
 ; CompileSourceDirectory

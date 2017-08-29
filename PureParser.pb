@@ -55,9 +55,12 @@ Enumeration RegularExpression
   #RegEx_FindFunction
   #RegEx_FindFields
   #Regex_FindProcedure
+
+  #PP_RegEx_String
 EndEnumeration
 
-
+CreateRegularExpression(#Regex_Exception, ~"\".*?;.*?\"")
+CreateRegularExpression(#Regex_Comments, ";.*")
 
 CreateRegularExpression(#Regex_FindProcedure, "(?<=Procedure).*?(?=EndProcedure)", #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll)
 ; CreateRegularExpression(#Regex_FindProcedure, "^\s*?Procedure.*?EndProcedure", #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll)
@@ -376,14 +379,60 @@ If ReadFile(#File, FilePath$)
   ; FileContent$ - Содержимое файла
   
   
-  Enumeration RegularExpression
-    #PP_RegEx_String
-  EndEnumeration
   
-
+  Debug "Исходный файл"
+  Debug FileContent$
+  Debug "===================="
   
-  CreateRegularExpression(#PP_RegEx_String, "(\w+)\s*\((.*?)\)", #PB_RegularExpression_NoCase|#PB_RegularExpression_MultiLine)
-  If ExamineRegularExpression(#Regex_FindProcedure, FileContent$)
+  
+  ClearContent$=FileContent$
+  
+  If ExamineRegularExpression(#Regex_Exception, ClearContent$)
+    While NextRegularExpressionMatch(#Regex_Exception)
+      
+      Exception$=RegularExpressionMatchString(#Regex_Exception)
+      Debug Exception$
+      Position=RegularExpressionMatchPosition(#Regex_Exception)
+      Length=RegularExpressionMatchLength(#Regex_Exception)
+      
+      ClearContent$=ReplaceString(ClearContent$, Exception$, ~"\""+Space(Length-2)+~"\"", #PB_String_CaseSensitive  , Position, 1)
+      
+    Wend
+  EndIf
+  
+  If ExamineRegularExpression(#Regex_Comments, ClearContent$)
+    While NextRegularExpressionMatch(#Regex_Comments)
+      
+      Comment$=RegularExpressionMatchString(#Regex_Comments)
+      Debug Comment$
+      Position=RegularExpressionMatchPosition(#Regex_Comments)
+      Length=RegularExpressionMatchLength(#Regex_Comments)
+      
+      ClearContent$=ReplaceString(ClearContent$, Comment$, Space(Length), #PB_String_CaseSensitive  , Position, 1)
+      
+    Wend
+  EndIf
+  
+  
+  Debug "После чистки"
+  Debug ClearContent$
+  Debug "===================="
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+;   CreateRegularExpression(#PP_RegEx_String, "(\w+)\s*\((.*?)\)", #PB_RegularExpression_NoCase|#PB_RegularExpression_MultiLine)
+  If ExamineRegularExpression(#Regex_FindProcedure, ClearContent$)
     While NextRegularExpressionMatch(#Regex_FindProcedure)
       
       Function$=RegularExpressionMatchString(#Regex_FindProcedure)
@@ -414,8 +463,8 @@ ForEach Object()
   Debug Str(Object()\ObjectID)+")"+Chr(9)+Object()\ObjectType+Chr(9)+"Parent{"+Object()\ParentID+"} "+Chr(9)+Object()\Content
 Next
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 64
-; FirstLine = 6
+; CursorPosition = 403
+; FirstLine = 113
 ; Folding = 7-
 ; EnableXP
 ; CommandLine = Test\Комментарии.pb
