@@ -583,6 +583,10 @@ CompilerIf #PB_Compiler_IsMainFile
 ;           Debug *This\File$
           
           
+;           ((?:(?:[^,;]*".*")|(?:[^,;]*\(.*\))|[^,;]|(?:;.*$))+) - Для парсинга аргументов
+;             ((?:[^;]*".*")*[^;]+)(?:;.*)?$ - Для парсинга аргумента в отдельности
+          
+          
           If ExamineRegularExpression(#Regex_FindProcedure, *This\File$)
             While NextRegularExpressionMatch(#Regex_FindProcedure)
               
@@ -1104,8 +1108,8 @@ CompilerIf #PB_Compiler_IsMainFile
   
 CompilerEndIf
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 578
-; FirstLine = 551
+; CursorPosition = 585
+; FirstLine = 557
 ; Folding = ---
 ; EnableXP
 ; CompileSourceDirectory
