@@ -93,6 +93,7 @@ CompilerIf #PB_Compiler_IsMainFile
       While NextRegularExpressionMatch(#RegEx_Captions)
         Select RegularExpressionGroup(#RegEx_Captions, 1)
           Case "#PB_Compiler_Home"                                        : Result$+#PB_Compiler_Home
+          ;Case "ReadPreferenceLong("+RegularExpressionGroup(#RegEx_Captions, 3)+")"      : Result$+ReadPreferenceLong()
           Case "Chr("+RegularExpressionGroup(#RegEx_Captions, 3)+")"      : Result$+Chr(10)
           Case "Str("+RegularExpressionGroup(#RegEx_Captions, 3)+")"      : Result$+RegularExpressionGroup(#RegEx_Captions, 3)
           Case "FontID("+RegularExpressionGroup(#RegEx_Captions, 3)+")"   : Result$+RegularExpressionGroup(#RegEx_Captions, 3)
@@ -792,11 +793,34 @@ CompilerIf #PB_Compiler_IsMainFile
                                 
                               Case 2 : \X$ = Args$
                                 ParsePBGadget()\X$ = \X$
+                                
                                 Select Asc(\X$)
                                   Case '0' To '9'
                                     \X = Val(\X$)
                                   Default
+                                    Protected Param1$, Param2
+                                    
                                     \X = Val(FindVar(#File, *File, Length, Format, \X$))
+                                    
+                                    If ExamineRegularExpression(#RegEx_Captions, \X$)
+                                      While NextRegularExpressionMatch(#RegEx_Captions)
+                                        If "ReadPreferenceLong("+RegularExpressionGroup(#RegEx_Captions, 3)+")"=RegularExpressionGroup(#RegEx_Captions, 1)
+                                          If ExamineRegularExpression(#RegEx_Arguments, RegularExpressionGroup(#RegEx_Captions, 3)) : Index=0
+                                            While NextRegularExpressionMatch(#RegEx_Arguments) : Index+1
+                                              Select Index
+                                                Case 1
+                                                  Param1$ = RegularExpressionMatchString(#RegEx_Arguments)
+                                                Case 2
+                                                  Param2 = Val(RegularExpressionMatchString(#RegEx_Arguments))
+                                              EndSelect
+                                            Wend
+                                            \X = ReadPreferenceLong(Param1$, Param2)
+                                          EndIf
+                                        EndIf
+                                      Wend
+                                    EndIf
+                                    
+                                    
                                 EndSelect
                               Case 3 : \Y$ = Args$
                                 ParsePBGadget()\Y$ = \Y$
