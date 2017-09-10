@@ -2,9 +2,8 @@
 ; Различать где нашел
 ; то есть внутри процедури или где то еще
 ;-
-XIncludeFile "Enumeration.pbi"
 XIncludeFile "Transformation.pbi"
-XIncludeFile "Property.pbi"
+
 
 
 EnableExplicit
@@ -994,10 +993,7 @@ CompilerIf #PB_Compiler_IsMainFile
       EndIf
       
       CloseFile(#File)
-      Protected Property = Property_Window_Show( win ); WindowID(win))
-                                                      ;       ResizeWindow(Property, WindowX(win)+WindowWidth(win), WindowY(win), #PB_Ignore, #PB_Ignore)
-                                                      ;       SetActiveWindow(win)
-                                                      ;       SetActiveWindow(Property)
+      
     EndIf
     
     ;Debug result
@@ -1043,31 +1039,25 @@ CompilerIf #PB_Compiler_IsMainFile
         PushListPosition(ParsePBGadget())
         ForEach ParsePBGadget()
           
-          If Enumerate::StartWindow( )
-            While Enumerate::NextWindow( @Object )
-              If ParsePBGadget()\ID = Object
+          ForEach *This\Object()
+            Object = *This\Object()
+            If ParsePBGadget()\ID = Object
+              If IsWindow(Object)
                 ParsePBGadget()\X$ = Str(WindowX(Object))
                 ParsePBGadget()\Y$ = Str(WindowY(Object))
                 ParsePBGadget()\Width$ = Str(WindowWidth(Object))
                 ParsePBGadget()\Height$ = Str(WindowHeight(Object))
                 ParsePBGadget()\Caption$ = GetWindowTitle(Object)
               EndIf
-            Wend
-            Enumerate::AbortWindow() 
-          EndIf
-          
-          If Enumerate::StartGadget( )
-            While Enumerate::NextGadget( @Object )
-              If ParsePBGadget()\ID = Object
+              If IsGadget(Object)
                 ParsePBGadget()\X$ = Str(GadgetX(Object))
                 ParsePBGadget()\Y$ = Str(GadgetY(Object))
                 ParsePBGadget()\Width$ = Str(GadgetWidth(Object))
                 ParsePBGadget()\Height$ = Str(GadgetHeight(Object))
                 ParsePBGadget()\Caption$ = GetGadgetText(Object)
               EndIf
-            Wend
-            Enumerate::AbortGadget() 
-          EndIf
+            EndIf
+          Next
           
           StringtoAdd$ = SavePBObject(ParsePBGadget())
           Debug ">>> - "+StringtoAdd$
