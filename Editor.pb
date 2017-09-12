@@ -79,10 +79,38 @@ CompilerIf #PB_Compiler_IsMainFile
   Enumeration RegularExpression
     #RegEx_Function
     #RegEx_Arguments
+    #RegEx_Arguments1
     #RegEx_Captions
     #Regex_Procedure
     #RegEx_Var
   EndEnumeration
+  
+  Procedure GetVal(String$)
+    Protected Result, Index, Param1, Param2, Param3, Param1$
+    
+    With *This
+      If ExamineRegularExpression(#RegEx_Captions, String$)
+        While NextRegularExpressionMatch(#RegEx_Captions)
+          If "ReadPreferenceLong("+RegularExpressionGroup(#RegEx_Captions, 3)+")"=RegularExpressionGroup(#RegEx_Captions, 1)
+            If ExamineRegularExpression(#RegEx_Arguments1, RegularExpressionGroup(#RegEx_Captions, 3)) : Index=0
+              While NextRegularExpressionMatch(#RegEx_Arguments1) : Index+1
+                Select Index
+                  Case 1
+                    Param1$ = RegularExpressionMatchString(#RegEx_Arguments1)
+                  Case 2
+                    Param2 = Val(RegularExpressionMatchString(#RegEx_Arguments1))
+                EndSelect
+              Wend
+              Debug Param2
+              Result = ReadPreferenceLong(Param1$, Param2)
+            EndIf
+          EndIf
+        Wend
+      EndIf
+    EndWith
+    
+    ProcedureReturn Result
+  EndProcedure
   
   Procedure$ GetCaptions(String$)
     Protected Result$
@@ -670,7 +698,7 @@ CompilerIf #PB_Compiler_IsMainFile
   EndProcedure
   
   Procedure.S ParsePBFile(FileName.s)
-    Protected i,result.S, Texts.S, Text.S, Find.S, String.S, Position, Args$, Count, Index
+    Protected i,Result,result$, Texts.S, Text.S, Find.S, String.S, Position, Args$, Count, Index
     
     If ReadFile(#File, FileName)
       Protected Create_Reg_Flag = #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_Extended    
@@ -685,6 +713,7 @@ CompilerIf #PB_Compiler_IsMainFile
         
         If CreateRegularExpression(#RegEx_Function, ~"(?:((?:;|[0-9]|\\.\\s|\\.\\w\\w).*)|(?:(?:(\\w+\\(.*\\)|(?:(\\w+)(|\\.\\w)))\\s*=\\s*)|(?:(?:\\w+\\(.*\\)|(?:(\\w+)(|\\.\\w)))\\s*=\\s*(?:\\w\\s*\\(.*\\))))|(?:([A-Za-z_0-9]+)\\s*\\((\".*?\"|[^:]|.*)\\))|(?:(\\w+)(|\\.\\w))\\s)", Create_Reg_Flag) And
            CreateRegularExpression(#RegEx_Arguments, ~"((?:(?:(;).*|\".*?\"|\\((.*?)\\))|\\+.*|(?=\\s*\\+)[^,]|[^,\\s])+)", Create_Reg_Flag| #PB_RegularExpression_DotAll) And 
+           CreateRegularExpression(#RegEx_Arguments1, ~"((?:(?:(;).*|\".*?\"|\\((.*?)\\))|\\+.*|(?=\\s*\\+)[^,]|[^,\\s])+)", Create_Reg_Flag| #PB_RegularExpression_DotAll) And 
            CreateRegularExpression(#RegEx_Captions, ~"((?:\"(.*?)\"|\\((.*?)\\)|[^+\\s])+)", Create_Reg_Flag| #PB_RegularExpression_DotAll)
           
           If ExamineRegularExpression(#RegEx_Function, *This\File$)
@@ -801,22 +830,9 @@ CompilerIf #PB_Compiler_IsMainFile
                                     
                                     \X = Val(FindVar(#File, *File, Length, Format, \X$))
                                     
-                                    If ExamineRegularExpression(#RegEx_Captions, \X$)
-                                      While NextRegularExpressionMatch(#RegEx_Captions)
-                                        If "ReadPreferenceLong("+RegularExpressionGroup(#RegEx_Captions, 3)+")"=RegularExpressionGroup(#RegEx_Captions, 1)
-                                          If ExamineRegularExpression(#RegEx_Arguments, RegularExpressionGroup(#RegEx_Captions, 3)) : Index=0
-                                            While NextRegularExpressionMatch(#RegEx_Arguments) : Index+1
-                                              Select Index
-                                                Case 1
-                                                  Param1$ = RegularExpressionMatchString(#RegEx_Arguments)
-                                                Case 2
-                                                  Param2 = Val(RegularExpressionMatchString(#RegEx_Arguments))
-                                              EndSelect
-                                            Wend
-                                            \X = ReadPreferenceLong(Param1$, Param2)
-                                          EndIf
-                                        EndIf
-                                      Wend
+                                    Result = GetVal(\X$)
+                                    If Result
+                                      \X = Result
                                     EndIf
                                     
                                     
@@ -828,6 +844,12 @@ CompilerIf #PB_Compiler_IsMainFile
                                     \Y = Val(\Y$)
                                   Default
                                     \Y = Val(FindVar(#File, *File, Length, Format, \Y$))
+                                    
+                                    Result = GetVal(\Y$)
+                                    If Result
+                                      \Y = Result
+                                    EndIf
+                                    
                                 EndSelect
                               Case 4 : \Width$ = Args$
                                 ParsePBGadget()\Width$ = \Width$
@@ -836,6 +858,12 @@ CompilerIf #PB_Compiler_IsMainFile
                                     \Width = Val(\Width$)
                                   Default
                                     \Width = Val(FindVar(#File, *File, Length, Format, \Width$))
+                                    
+                                    Result = GetVal(\Width$)
+                                    If Result
+                                      \Width = Result
+                                    EndIf
+                                    
                                 EndSelect
                               Case 5 : \Height$ = Args$
                                 ParsePBGadget()\Height$ = \Height$
@@ -844,6 +872,12 @@ CompilerIf #PB_Compiler_IsMainFile
                                     \Height = Val(\Height$)
                                   Default
                                     \Height = Val(FindVar(#File, *File, Length, Format, Trim(Args$)))
+                                    
+                                    Result = GetVal(\Height$)
+                                    If Result
+                                      \Height = Result
+                                    EndIf
+                                    
                                 EndSelect
                               Case 6
                                 \Caption$ = Trim(Trim(Args$), Chr(34))
@@ -997,7 +1031,7 @@ CompilerIf #PB_Compiler_IsMainFile
     EndIf
     
     ;Debug result
-    ProcedureReturn result.S
+    ProcedureReturn result$
   EndProcedure
   
   ;-

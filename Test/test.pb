@@ -19,6 +19,7 @@ Enumeration FormGadget
   #Button_1
   #Container_1
   #String_0
+  #ListIcon_0
 EndEnumeration
 
 Enumeration FormFont
@@ -39,18 +40,16 @@ LoadFont(#Font_Button_0,"Consolas", 14, #PB_Font_Bold|#PB_Font_Italic)
 
 Global Button_1
 
-Procedure OpenWindow_0(x = 0, y = 0, width = 390, height = 400)
-  OpenWindow(#Window_0, x, y, width, height, "", #PB_Window_SystemMenu)
-  ImageGadget(#Image_0, ReadPreferenceLong("x", 105), 5, 381, 68, 0) ; ImageID(#Img_Image_0))
+Procedure OpenWindow_0(x = 0, y = 0, width = 390, height = 600)
+  OpenWindow(#Window_0, x, y, width, height, "Window", #PB_Window_SystemMenu)
+  ImageGadget(#Image_0, ReadPreferenceLong("x", 105), 5, 381, 68, 0)
   SetGadgetState(#Image_0, ImageID(#Img_Image_0))
   ImageGadget(#Image_1, 10, 265, 381, 68, ImageID(#Img_Image_1))
-  ;SetGadgetState(#Image_1, ImageID(#Img_Image_1))
   
   ContainerGadget(#Container_0, 10, 50, 290, 205, #PB_Container_Flat)
   SetGadgetColor(#Container_0, #PB_Gadget_BackColor, $77FF8A)
-  ;ButtonGadget(#Button_0, 20, 20, 155, 35, "Button_0")
-  ButtonGadget(#Button_0, ReadPreferenceLong("x", WindowWidth(#Window_0)/WindowWidth(#Window_0)+20), 20, WindowWidth(#Window_0)-(390-155), WindowHeight(#Window_0) - 180 * 2, GetWindowTitle(#Window_0) + Space( 1 ) +"("+ "Button" + "_" + Str(1)+")")
-  ;SetGadgetFont(#Button_0, FontID(#Font_Button_0))
+  ButtonGadget(#Button_0, 20, 20, 155, WindowHeight(#Window_0) - 279 * 2, "Button_0")
+  ;ButtonGadget(#Button_0, ReadPreferenceLong("x", WindowWidth(#Window_0)/WindowWidth(#Window_0)+20), 20, WindowWidth(#Window_0)-(390-155), WindowHeight(#Window_0) - 180 * 2 + 5, GetWindowTitle(#Window_0) + Space( 1 ) +"("+ "Button" + "_" + Str(1)+")")
   ContainerGadget(#Container_1, 15, 70, 260, 120, #PB_Container_Single)
   SetGadgetColor(#Container_1, #PB_Gadget_BackColor, RGB(138, 255, 119))
   StringGadget(#String_0, 10, 10, 150, 35, "String_0")
@@ -63,7 +62,16 @@ Procedure OpenWindow_0(x = 0, y = 0, width = 390, height = 400)
   CloseGadgetList()
   
   ResizeGadget(Button_1, 60, 80, #PB_Ignore, #PB_Ignore)
-  SetGadgetText(Button_1, "Move button_1")
+  SetGadgetText(Button_1, "Move "+LCase(GetWindowTitle(#Window_0)) + Space( 1 ) +"("+ "Button" + "_" + StrF(1.123,2)+")")
+  
+  ListIconGadget(#ListIcon_0, 5, 305, 250, 180, "#", 20)
+  AddGadgetColumn(#ListIcon_0, 1, "Слева1", 51)
+  AddGadgetColumn(#ListIcon_0, 2, "Слева2", 52)
+  AddGadgetColumn(#ListIcon_0, 3, "Слева3", 53)
+  AddGadgetItem(#ListIcon_0, -1, Str( 1 )+Chr  (10)+"Слева1")
+  AddGadgetItem(#ListIcon_0, -1, Str(2)+Chr(10)+"Слева2")
+  AddGadgetItem(#ListIcon_0, -1, Str(3)+Chr(10)+"Слева3")
+  
 EndProcedure
 
 Procedure Window_0_Events(Event)
