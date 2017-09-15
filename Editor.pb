@@ -43,6 +43,7 @@ Global Window_0_Menu_0_New=1,
     
 Declare Window_Event()
 Declare Window_0_Resize_Event()
+Declare Window_0_Panel_0_Resize_Event()
 
 XIncludeFile "Transformation.pbi"
 
@@ -1412,9 +1413,9 @@ Procedure OpenPBObject(*This.ParsePBGadget) ; Ok
     EndIf
     
     Select \Type$
-      Case "OpenWindow" : Parent = Result : SubLevel + 1
+      Case "OpenWindow" : Parent = Result : SubLevel = 1
       Case "UseGadgetList" : UseGadgetList( WindowID(Parent) )
-      Case "ContainerGadget", "ScrollAreaGadget", "PanelGadget" :  Parent = Result 
+      Case "ContainerGadget", "ScrollAreaGadget", "PanelGadget" :  Parent = Result : SubLevel + 1
       Case "CloseGadgetList" 
         If IsGadget(Parent) : CloseGadgetList() : Parent = \Parent(Str(Parent)) : EndIf
         
@@ -1471,9 +1472,10 @@ Procedure OpenPBObject(*This.ParsePBGadget) ; Ok
         EndIf
       EndIf
       
-      ;Debug \ID$ +" "+ Str(SubLevel) 
+      Debug \ID$ +" "+ Str(SubLevel) 
       Select GadgetType(Result)
         Case #PB_GadgetType_Container, #PB_GadgetType_Panel, #PB_GadgetType_ScrollArea
+          ParsePBGadget()\SubLevel = SubLevel-1
         Default
           ParsePBGadget()\SubLevel = SubLevel
       EndSelect
@@ -2001,25 +2003,32 @@ Procedure Window_0_Open(Flag.i=#PB_Window_SystemMenu, ParentID=0)
     SetGadgetState(Window_0_Splitter_0, 145)
     
     LoadControls()
-    ResizeGadget(Window_0_Tree_1, 0, 0, GetGadgetAttribute(Window_0_Panel_0, #PB_Panel_ItemWidth), GetGadgetAttribute(Window_0_Panel_0, #PB_Panel_ItemHeight))
-    ResizeGadget(Window_0_Properties, 0, 0, GetGadgetAttribute(Window_0_Panel_0, #PB_Panel_ItemWidth), GetGadgetAttribute(Window_0_Panel_0, #PB_Panel_ItemHeight))
+    Window_0_Panel_0_Resize_Event()
     
     BindEvent(#PB_Event_Menu, @Window_Event(), Window_0)
     BindEvent(#PB_Event_Gadget, @Window_Event(), Window_0)
     BindEvent(#PB_Event_SizeWindow, @Window_0_Resize_Event(), Window_0)
-    ;BindEvent(#PB_Event_ActivateWindow, @Window_Event(), Window_0)
+    BindEvent(#PB_Event_Gadget, @Window_0_Panel_0_Resize_Event(), Window_0, Window_0_Panel_0, #PB_EventType_Resize)
   EndIf
+  
   ProcedureReturn Window_0
 EndProcedure
 
+Procedure Window_0_Panel_0_Resize_Event()
+  Protected GadgetWidth = GetGadgetAttribute(Window_0_Panel_0, #PB_Panel_ItemWidth)
+  Protected GadgetHeight = GetGadgetAttribute(Window_0_Panel_0, #PB_Panel_ItemHeight)
+  
+  Select GetGadgetItemText(Window_0_Panel_0, GetGadgetState(Window_0_Panel_0))
+    Case "Свойства" : Properties::Size(GadgetWidth, GadgetHeight)
+    Case "Объекты"  : ResizeGadget(Window_0_Tree_1, #PB_Ignore, #PB_Ignore, GadgetWidth, GadgetHeight)
+  EndSelect
+EndProcedure
 
 Procedure Window_0_Resize_Event()
-  Protected FormWindowWidth, FormWindowHeight
-  FormWindowWidth = WindowWidth(Window_0)
-  FormWindowHeight = WindowHeight(Window_0)-MenuHeight()
-  ResizeGadget(Window_0_Splitter_0, 5, 5, FormWindowWidth - 10, FormWindowHeight - 10)
-  ResizeGadget(Window_0_Tree_1, #PB_Ignore, #PB_Ignore, GetGadgetAttribute(Window_0_Panel_0, #PB_Panel_ItemWidth), GetGadgetAttribute(Window_0_Panel_0, #PB_Panel_ItemHeight))
-  Properties::Size(GetGadgetAttribute(Window_0_Panel_0, #PB_Panel_ItemWidth), GetGadgetAttribute(Window_0_Panel_0, #PB_Panel_ItemHeight))
+  Protected WindowWidth = WindowWidth(Window_0)
+  Protected WindowHeight = WindowHeight(Window_0)-MenuHeight()
+  ResizeGadget(Window_0_Splitter_0, 5, 5, WindowWidth - 10, WindowHeight - 10)
+  Window_0_Panel_0_Resize_Event()
 EndProcedure
 
 Procedure Window_Event()
