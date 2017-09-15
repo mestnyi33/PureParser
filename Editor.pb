@@ -35,6 +35,12 @@ Global Properties_Gadget_Y
 Global Properties_Gadget_Width
 Global Properties_Gadget_Height
 
+Global Window_0_Menu_0_New=1,
+       Window_0_Menu_0_Open=2,
+       Window_0_Menu_0_Save=3,
+       Window_0_Menu_0_Save_as=4,
+       Window_0_Menu_0_Close=5
+    
 Declare Window_Event()
 Declare Window_0_Resize_Event()
 
@@ -725,7 +731,8 @@ Structure ParsePBGadget Extends Struct
   Content$            ; Содержимое. К примеру: "OpenWindow(#Butler_Window_Settings, x, y, width, height, "Настройки", #PB_Window_SystemMenu)"
   Position.i          ; Положение Content-a в исходном файле
   Length.i            ; длинна Content-a в исходном файле
-  SubLevel.i
+  
+  Map SubLevel.i()
   
 EndStructure
 
@@ -1406,7 +1413,7 @@ Procedure OpenPBObject(*This.ParsePBGadget) ; Ok
     EndIf
     
     Select \Type$
-      Case "OpenWindow" : Parent = Result
+      Case "OpenWindow" : Parent = Result : SubLevel + 1
       Case "UseGadgetList" : UseGadgetList( WindowID(Parent) )
       Case "ContainerGadget", "ScrollAreaGadget", "PanelGadget" :  Parent = Result 
       Case "CloseGadgetList" 
@@ -1470,7 +1477,7 @@ Procedure OpenPBObject(*This.ParsePBGadget) ; Ok
       Select GadgetType(Result)
         Case #PB_GadgetType_Container, #PB_GadgetType_Panel, #PB_GadgetType_ScrollArea
         Default
-          ParsePBGadget()\SubLevel = SubLevel
+          \SubLevel(\ID$) = SubLevel
       EndSelect
       
     EndIf
@@ -1874,14 +1881,16 @@ Procedure CreateObject(Type$)
     \Flag=#PB_Window_SystemMenu|#PB_Window_ScreenCentered
     
     AddElement(ParsePBGadget()) 
-    ParsePBGadget()\Type$ = \Type$
     ParsePBGadget()\ID$ = \ID$
+    ParsePBGadget()\Type$ = \Type$
     Protected Object=CallFunctionFast(@OpenPBObject(), *This)
+    
     If IsWindow(Object)
       EnableWindowDrop(Object, #PB_Drop_Text, #PB_Drag_Copy)
       BindEvent(#PB_Event_WindowDrop, @CreateObject_Events(), Object)
     EndIf
     
+    AddGadgetItem(Window_0_Tree_0, -1, \ID$, 0, \SubLevel(\ID$))
   EndWith
 EndProcedure
 
@@ -1949,20 +1958,15 @@ Procedure Window_0_Open(Flag.i=#PB_Window_SystemMenu, ParentID=0)
     
     If Window_0_Menu_0
       MenuTitle("Project")
-      MenuItem(1, "New"   +Chr(9)+"Ctrl+N")
-      MenuItem(2, "Open"   +Chr(9)+"Ctrl+O")
-      MenuItem(3, "Save"   +Chr(9)+"Ctrl+S")
-      MenuItem(4, "Save as"+Chr(9)+"Ctrl+A")
-      MenuItem(5, "Close"  +Chr(9)+"Ctrl+C")
+      MenuItem(Window_0_Menu_0_New, "New"   +Chr(9)+"Ctrl+N")
+      MenuItem(Window_0_Menu_0_Open, "Open"   +Chr(9)+"Ctrl+O")
+      MenuItem(Window_0_Menu_0_Save, "Save"   +Chr(9)+"Ctrl+S")
+      MenuItem(Window_0_Menu_0_Save_as, "Save as"+Chr(9)+"Ctrl+A")
+      MenuItem(Window_0_Menu_0_Close, "Close"  +Chr(9)+"Ctrl+C")
     EndIf
     
     Window_0_Tree_0 = TreeGadget(#PB_Any, 5, 5, 225, 145, #PB_Tree_AlwaysShowSelection)
     Window_0_Panel_0 = PanelGadget(#PB_Any, 5, 159, 225, 261)
-    AddGadgetItem(Window_0_Panel_0, -1, "Объекты")
-    Window_0_Tree_1 = TreeGadget(#PB_Any, 0, 0, 205, 180, #PB_Tree_NoLines | #PB_Tree_NoButtons)
-    EnableGadgetDrop(Window_0_Tree_1, #PB_Drop_Text, #PB_Drag_Copy)
-    LoadControls()
-    
     AddGadgetItem(Window_0_Panel_0, -1, "Свойства")
     
     Window_0_Properties = Properties::Gadget( #PB_Any, 225, 261 )
@@ -1988,19 +1992,24 @@ Procedure Window_0_Open(Flag.i=#PB_Window_SystemMenu, ParentID=0)
     Properties_Gadget_Height = Properties::AddItem( Window_0_Properties, "Height:", #PB_GadgetType_Spin )
     
     
+    AddGadgetItem(Window_0_Panel_0, -1, "Объекты")
+    Window_0_Tree_1 = TreeGadget(#PB_Any, 0, 0, 205, 180, #PB_Tree_NoLines | #PB_Tree_NoButtons)
+    EnableGadgetDrop(Window_0_Tree_1, #PB_Drop_Text, #PB_Drag_Copy)
+    
     AddGadgetItem(Window_0_Panel_0, -1, "Событие")
     CloseGadgetList()
     
     Window_0_Splitter_0 = SplitterGadget(#PB_Any, 5, 5, 230-10, 600-MenuHeight()-10, Window_0_Tree_0, Window_0_Panel_0, #PB_Splitter_FirstFixed)
     SetGadgetState(Window_0_Splitter_0, 145)
     
+    LoadControls()
     ResizeGadget(Window_0_Tree_1, 0, 0, GetGadgetAttribute(Window_0_Panel_0, #PB_Panel_ItemWidth), GetGadgetAttribute(Window_0_Panel_0, #PB_Panel_ItemHeight))
     ResizeGadget(Window_0_Properties, 0, 0, GetGadgetAttribute(Window_0_Panel_0, #PB_Panel_ItemWidth), GetGadgetAttribute(Window_0_Panel_0, #PB_Panel_ItemHeight))
     
     BindEvent(#PB_Event_Menu, @Window_Event(), Window_0)
     BindEvent(#PB_Event_Gadget, @Window_Event(), Window_0)
     BindEvent(#PB_Event_SizeWindow, @Window_0_Resize_Event(), Window_0)
-    BindEvent(#PB_Event_ActivateWindow, @Window_Event(), Window_0)
+    ;BindEvent(#PB_Event_ActivateWindow, @Window_Event(), Window_0)
   EndIf
   ProcedureReturn Window_0
 EndProcedure
@@ -2017,31 +2026,27 @@ EndProcedure
 
 Procedure Window_Event()
   Select Event()
-    Case #PB_Event_ActivateWindow
     Case #PB_Event_Gadget
       Select EventGadget()
         Case Window_0_Tree_0
           Select EventType()
-            Case #PB_EventType_Change           ; Текущий элемент изменен.
-;               Debug GetGadgetText(EventGadget())
-;               Debug *This\Object(GetGadgetText(EventGadget()))
+            Case #PB_EventType_Change      
               Properties::UpdateProperties(*This\Object(GetGadgetText(EventGadget())))
           EndSelect
           
         Case Window_0_Tree_1
           Select EventType()
             Case #PB_EventType_DragStart
-              Protected Model$ = GetGadgetItemText(EventGadget(), GetGadgetState(EventGadget()))
-              DragText(Model$)
+              DragText(GetGadgetItemText(EventGadget(), GetGadgetState(EventGadget())))
           EndSelect
       EndSelect
       
     Case #PB_Event_Menu
       Select EventMenu()
-        Case 1
+        Case Window_0_Menu_0_New
           CreateObject("Window")
           
-        Case 2
+        Case Window_0_Menu_0_Open
           Define File$=OpenFileRequester("Выберите файл с описанием окон", "", "Все файлы|*", 0)
           If File$
             Define Load$ = ParsePBFile(File$)
@@ -2059,7 +2064,7 @@ Procedure Window_Event()
               EndIf
               
               ;If IsWindow(Object) Or IsContainer
-                AddGadgetItem (Window_0_Tree_0, -1, ParsePBGadget()\ID$, 0, ParsePBGadget()\SubLevel)
+                AddGadgetItem (Window_0_Tree_0, -1, ParsePBGadget()\ID$, 0, *This\SubLevel(ParsePBGadget()\ID$))
                 ;SubItem + 1
 ;               EndIf
 ;               If IsGadget(Object)
