@@ -1840,6 +1840,51 @@ EndProcedure
 
 
 ;-
+Macro ULCase(String)
+  InsertString(UCase(Left(String,1)), LCase(Right(String,Len(String)-1)), 2)
+EndMacro
+
+Declare CreateObject(Type$)
+
+Procedure CreateObject_Events()
+  Select Event()
+    Case #PB_Event_WindowDrop
+      CreateObject(ReplaceString(EventDropText(), "gadget", ""))
+  EndSelect
+EndProcedure
+
+Procedure CreateObject(Type$)
+  With *This
+    \ID$= Type$
+    
+    Select Type$
+      Case "Window" 
+        \Type$ = "OpenWindow"
+        \Width=200
+        \Height=100
+      Case "Menu", "ToolBar"
+        \Type$ = Type$
+      Default
+        \Type$=ULCase(Type$) + "Gadget"
+        \Width=80
+        \Height=40
+    EndSelect
+    
+    \Caption$=\ID$
+    \Flag=#PB_Window_SystemMenu|#PB_Window_ScreenCentered
+    
+    AddElement(ParsePBGadget()) 
+    ParsePBGadget()\Type$ = \Type$
+    ParsePBGadget()\ID$ = \ID$
+    Protected Object=CallFunctionFast(@OpenPBObject(), *This)
+    If IsWindow(Object)
+      EnableWindowDrop(Object, #PB_Drop_Text, #PB_Drag_Copy)
+      BindEvent(#PB_Event_WindowDrop, @CreateObject_Events(), Object)
+    EndIf
+    
+  EndWith
+EndProcedure
+
 Procedure LoadControls()
   UsePNGImageDecoder()
   
@@ -1904,10 +1949,11 @@ Procedure Window_0_Open(Flag.i=#PB_Window_SystemMenu, ParentID=0)
     
     If Window_0_Menu_0
       MenuTitle("Project")
-      MenuItem(1, "Open"   +Chr(9)+"Ctrl+O")
-      MenuItem(2, "Save"   +Chr(9)+"Ctrl+S")
-      MenuItem(3, "Save as"+Chr(9)+"Ctrl+A")
-      MenuItem(4, "Close"  +Chr(9)+"Ctrl+C")
+      MenuItem(1, "New"   +Chr(9)+"Ctrl+N")
+      MenuItem(2, "Open"   +Chr(9)+"Ctrl+O")
+      MenuItem(3, "Save"   +Chr(9)+"Ctrl+S")
+      MenuItem(4, "Save as"+Chr(9)+"Ctrl+A")
+      MenuItem(5, "Close"  +Chr(9)+"Ctrl+C")
     EndIf
     
     Window_0_Tree_0 = TreeGadget(#PB_Any, 5, 5, 225, 145, #PB_Tree_AlwaysShowSelection)
@@ -1993,6 +2039,9 @@ Procedure Window_Event()
     Case #PB_Event_Menu
       Select EventMenu()
         Case 1
+          CreateObject("Window")
+          
+        Case 2
           Define File$=OpenFileRequester("Выберите файл с описанием окон", "", "Все файлы|*", 0)
           If File$
             Define Load$ = ParsePBFile(File$)
