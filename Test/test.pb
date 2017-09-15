@@ -35,8 +35,8 @@ EndEnumeration
 LoadImage(#Img_Image_0,"C:\Program Files\PureBasic_560(x64)\Examples\Sources\Data\PureBasicLogo.bmp") ; Geebee2
 LoadImage(#Img_Image_1, #PB_Compiler_Home + "Examples\Sources\Data\PureBasic.bmp")
 
-LoadFont(#Font_String_0,"Consolas", 6, #PB_Font_Bold)
-LoadFont(#Font_Button_0,"Consolas", 14, #PB_Font_Bold|#PB_Font_Italic)
+LoadFont(#Font_String_0,"Consolas", 12, #PB_Font_Bold)
+LoadFont(#Font_Button_0,"Consolas", 7, #PB_Font_Bold|#PB_Font_Italic)
 
 Global Button_1
 
@@ -48,8 +48,8 @@ Procedure OpenWindow_0(x = 0, y = 0, width = 390, height = 600)
   
   ContainerGadget(#Container_0, 10, 50, 290, 205, #PB_Container_Flat)
   SetGadgetColor(#Container_0, #PB_Gadget_BackColor, $77FF8A)
-  ButtonGadget(#Button_0, 20, 20, 155, WindowHeight(#Window_0) - 279 * 2, "Button_0")
-  ;ButtonGadget(#Button_0, ReadPreferenceLong("x", WindowWidth(#Window_0)/WindowWidth(#Window_0)+20), 20, WindowWidth(#Window_0)-(390-155), WindowHeight(#Window_0) - 180 * 2 + 5, GetWindowTitle(#Window_0) + Space( 1 ) +"("+ "Button" + "_" + Str(1)+")")
+  ;ButtonGadget(#Button_0, 20, 20, 155, WindowHeight(#Window_0) - 279 * 2, Str($BD)+" Button_0", #PB_Button_Right)
+  ButtonGadget(#Button_0, ReadPreferenceLong("x", WindowWidth(#Window_0)/WindowWidth(#Window_0)+20), 20, WindowWidth(#Window_0)-(390-155), WindowHeight(#Window_0) - 285 * 2, GetWindowTitle(#Window_0) + Space( 1 ) +"("+ "Button" + "_" + Str(1)+")")
   ContainerGadget(#Container_1, 15, 70, 260, 120, #PB_Container_Single)
   SetGadgetColor(#Container_1, #PB_Gadget_BackColor, RGB(138, 255, 119))
   StringGadget(#String_0, 10, 10, 150, 35, "String_0")
@@ -63,6 +63,7 @@ Procedure OpenWindow_0(x = 0, y = 0, width = 390, height = 600)
   
   ResizeGadget(Button_1, 60, 80, #PB_Ignore, #PB_Ignore)
   SetGadgetText(Button_1, "Move "+LCase(GetWindowTitle(#Window_0)) + Space( 1 ) +"("+ "Button" + "_" + StrF(1.123,2)+")")
+  SetGadgetFont(Button_1, FontID(#Font_Button_0))
   
   ListIconGadget(#ListIcon_0, 5, 305, 250, 180, "#", 20)
   AddGadgetColumn(#ListIcon_0, 1, "Слева1", 51)
