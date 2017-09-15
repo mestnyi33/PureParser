@@ -731,8 +731,7 @@ Structure ParsePBGadget Extends Struct
   Content$            ; Содержимое. К примеру: "OpenWindow(#Butler_Window_Settings, x, y, width, height, "Настройки", #PB_Window_SystemMenu)"
   Position.i          ; Положение Content-a в исходном файле
   Length.i            ; длинна Content-a в исходном файле
-  
-  Map SubLevel.i()
+  SubLevel.i
   
 EndStructure
 
@@ -1447,7 +1446,6 @@ Procedure OpenPBObject(*This.ParsePBGadget) ; Ok
         If IsWindow(GetParent)
           CloseGadgetList() ; Bug PB
           UseGadgetList(WindowID(GetParent))
-          SubLevel + 1
         EndIf
         If IsGadget(GetParent) 
           OpenGadgetList = OpenGadgetList(GetParent) 
@@ -1477,7 +1475,7 @@ Procedure OpenPBObject(*This.ParsePBGadget) ; Ok
       Select GadgetType(Result)
         Case #PB_GadgetType_Container, #PB_GadgetType_Panel, #PB_GadgetType_ScrollArea
         Default
-          \SubLevel(\ID$) = SubLevel
+          ParsePBGadget()\SubLevel = SubLevel
       EndSelect
       
     EndIf
@@ -1890,7 +1888,7 @@ Procedure CreateObject(Type$)
       BindEvent(#PB_Event_WindowDrop, @CreateObject_Events(), Object)
     EndIf
     
-    AddGadgetItem(Window_0_Tree_0, -1, \ID$, 0, \SubLevel(\ID$))
+    AddGadgetItem(Window_0_Tree_0, -1, \ID$, 0, ParsePBGadget()\SubLevel)
   EndWith
 EndProcedure
 
@@ -2064,7 +2062,7 @@ Procedure Window_Event()
               EndIf
               
               ;If IsWindow(Object) Or IsContainer
-                AddGadgetItem (Window_0_Tree_0, -1, ParsePBGadget()\ID$, 0, *This\SubLevel(ParsePBGadget()\ID$))
+                AddGadgetItem (Window_0_Tree_0, -1, ParsePBGadget()\ID$, 0, ParsePBGadget()\SubLevel)
                 ;SubItem + 1
 ;               EndIf
 ;               If IsGadget(Object)
