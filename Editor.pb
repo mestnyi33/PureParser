@@ -87,6 +87,10 @@ Macro ReplaceMapKey(FindReplaceMapKey, ReplaceMapKey)
   ChangeCurrentElement(ParsePBGadget(), ReplaceMapData_Index)
 EndMacro
 
+Macro ObjectParent(Object)
+  *This\Parent(Str(Object)))
+EndMacro
+
 ;-
 ;- INCLUDE
 DeclareModule Constant
@@ -809,8 +813,14 @@ Procedure CreatePBObject_Events()
         Object = EventWindow()
       EndIf
       
-      Transformation::Enable(EventGadget(), 5)
-      Properties::UpdateProperties(Object)
+      ;Transformation::Enable(EventGadget(), 5)
+      PushListPosition(ParsePBGadget())
+      ForEach ParsePBGadget()
+        If Object = ParsePBGadget()\ID\Argument
+          Properties::UpdateProperties(Object, ParsePBGadget()\ID\Argument$, ParsePBGadget()\Flag\Argument$)
+        EndIf
+      Next
+      PopListPosition(ParsePBGadget())
       
       
     Case #PB_Event_WindowDrop
@@ -1087,7 +1097,6 @@ Procedure OpenPBObject(*This.ParsePBGadget) ; Ok
       
       AddMapElement(\Class$(), Str(Object)) : \Class$()=\ID\Argument$
       AddMapElement(\Parent(), Str(Object)) : \Parent()=Parent
-      
     EndIf
     
     
@@ -1394,8 +1403,7 @@ Procedure ParsePBFile(FileName.s)
                               Case 9 : ParsePBGadget()\Param3\Argument$ = Arg$
                                 \Param3\Argument = Val(Arg$)
                                 
-                              Case 10 : ParsePBGadget()\Flag\Argument$ = Arg$
-                                
+                              Case 10 
                                 Select Asc(Arg$)
                                   Case '0' To '9'
                                     \Flag\Argument = Val(Arg$)
@@ -1409,6 +1417,7 @@ Procedure ParsePBFile(FileName.s)
                                       \Flag\Argument = OpenPBObjectFlag(Arg$) ; Если строка такого рода "#Flag_0|#Flag_1"
                                     EndIf
                                 EndSelect
+                                ParsePBGadget()\Flag\Argument$ = Arg$
                             EndSelect
                             
                           EndIf
@@ -1597,7 +1606,7 @@ Procedure Window_0_Open(Flag.i=#PB_Window_SystemMenu, ParentID=0)
     
     Window_0_Tree_0 = TreeGadget(#PB_Any, 5, 5, 225, 145, #PB_Tree_AlwaysShowSelection)
     Window_0_Panel_0 = PanelGadget(#PB_Any, 5, 159, 225, 261)
-    AddGadgetItem(Window_0_Panel_0, -1, "Свойства")
+    AddGadgetItem(Window_0_Panel_0, -1, "Properties")
     
     Window_0_Properties = Properties::Gadget( #PB_Any, 225, 261 )
     Properties_ID = Properties::AddItem( Window_0_Properties, "ID:", #PB_GadgetType_String )
@@ -1620,11 +1629,11 @@ Procedure Window_0_Open(Flag.i=#PB_Window_SystemMenu, ParentID=0)
     
     
     
-    AddGadgetItem(Window_0_Panel_0, -1, "Объекты")
+    AddGadgetItem(Window_0_Panel_0, -1, "Objects")
     Window_0_Tree_1 = TreeGadget(#PB_Any, 0, 0, 205, 180, #PB_Tree_NoLines | #PB_Tree_NoButtons)
     EnableGadgetDrop(Window_0_Tree_1, #PB_Drop_Text, #PB_Drag_Copy)
     
-    AddGadgetItem(Window_0_Panel_0, -1, "Событие")
+    AddGadgetItem(Window_0_Panel_0, -1, "Events")
     CloseGadgetList()
     
     Window_0_Splitter_0 = SplitterGadget(#PB_Any, 5, 5, 230-10, 600-MenuHeight()-10, Window_0_Tree_0, Window_0_Panel_0, #PB_Splitter_FirstFixed)
@@ -1647,8 +1656,8 @@ Procedure Window_0_Panel_0_Resize_Event()
   Protected GadgetHeight = GetGadgetAttribute(Window_0_Panel_0, #PB_Panel_ItemHeight)
   
   Select GetGadgetItemText(Window_0_Panel_0, GetGadgetState(Window_0_Panel_0))
-    Case "Свойства" : Properties::Size(GadgetWidth, GadgetHeight)
-    Case "Объекты"  : ResizeGadget(Window_0_Tree_1, #PB_Ignore, #PB_Ignore, GadgetWidth, GadgetHeight)
+    Case "Properties" : Properties::Size(GadgetWidth, GadgetHeight)
+    Case "Objects"  : ResizeGadget(Window_0_Tree_1, #PB_Ignore, #PB_Ignore, GadgetWidth, GadgetHeight)
   EndSelect
 EndProcedure
 
@@ -1732,7 +1741,7 @@ Procedure Window_Event()
               PushListPosition(ParsePBGadget())
               ForEach ParsePBGadget()
                 If GetGadgetText(Window_0_Tree_0) = ParsePBGadget()\ID\Argument$
-                  ParsePBGadget()\Flag\Argument$= Text$
+                  ParsePBGadget()\Flag\Argument$ = Text$
                 EndIf
               Next
               PopListPosition(ParsePBGadget())
@@ -1743,7 +1752,25 @@ Procedure Window_Event()
         Case Window_0_Tree_0
           Select EventType()
             Case #PB_EventType_Change      
-              Properties::UpdateProperties(*This\Object(GetGadgetText(EventGadget()))\ID\Argument)
+              PushListPosition(ParsePBGadget())
+              ForEach ParsePBGadget()
+                Transformation::Disable(ParsePBGadget()\ID\Argument)
+              Next
+              ForEach ParsePBGadget()
+                If GetGadgetText(Window_0_Tree_0) = ParsePBGadget()\ID\Argument$
+                  Properties::UpdateProperties(ParsePBGadget()\ID\Argument, ParsePBGadget()\ID\Argument$, ParsePBGadget()\Flag\Argument$)
+                  If IsGadget(*This\Parent(Str(ParsePBGadget()\ID\Argument)))
+                    OpenGadgetList(*This\Parent(Str(ParsePBGadget()\ID\Argument)))
+                    Transformation::Enable(ParsePBGadget()\ID\Argument, 5)
+                    CloseGadgetList()
+                  ElseIf IsWindow(*This\Parent(Str(ParsePBGadget()\ID\Argument)))
+                    UseGadgetList(WindowID(*This\Parent(Str(ParsePBGadget()\ID\Argument))))
+                    Transformation::Enable(ParsePBGadget()\ID\Argument, 5)
+                  EndIf
+                  Break
+                EndIf
+              Next
+              PopListPosition(ParsePBGadget())
               SetGadgetText(Properties_ID, GetGadgetText(EventGadget()))
               
           EndSelect

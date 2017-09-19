@@ -8,6 +8,9 @@ DeclareModule Properties
     CheckGadget.i
     CheckWindow.i
     
+    Flag$
+    Class$
+    
     Tree.i
     Spin.i
     Button.i
@@ -31,7 +34,7 @@ DeclareModule Properties
   Global NewList Properties.PropertiesStruct()
   
   Declare UpdatePropertiesItem( Item )
-  Declare UpdateProperties( Object )
+  Declare UpdateProperties( Object, Class$, Flag$ )
   
   Declare Size( Width, Height )
   Declare AddItem( Gadget, Text.S, GadgetType)
@@ -602,13 +605,15 @@ Module Properties
     Update( Properties()\Object )
   EndProcedure
   
-  Procedure UpdateProperties( Object )
+  Procedure UpdateProperties( Object, Class$, Flag$ )
     Static CheckObject =- 1
     
     With Properties()
       If CheckObject <> Object
         ForEach Properties()
           \Object = Object
+          \Class$ = Class$
+          \Flag$ = Flag$
           
           Update( Object )
         Next
@@ -702,8 +707,28 @@ Module Properties
                 ;   #PB_EventType_Change: Текущий элемент изменен.
                 ;   #PB_EventType_DragStart: Пользователь попытался запустить операцию Drag & Drop.
                 Select EventType()
+                  Case #PB_EventType_Focus 
+;                        \Flag$ = "#PB_Window_SystemMenu|#PB_Window_ScreenCentered"
+                    Protected i,ii
+                    For i=0 To CountString(\Flag$, "|")
+                      For ii=0 To CountGadgetItems(\Tree)-1
+                        If GetGadgetItemText(\Tree, ii) = Trim( StringField( \Flag$, (i + (1)), "|"))
+                          SetGadgetItemState(\Tree, ii, #PB_Tree_Checked) 
+                        EndIf
+                      Next
+                    Next
+                    
                   Case #PB_EventType_LostFocus 
-                    Debug 8888888888888
+                    Protected iii, Text$
+                    For iii=0 To CountGadgetItems(\Tree)-1
+                      If GetGadgetItemState(\Tree, iii) & #PB_Tree_Checked  
+                        Text$ + GetGadgetItemText(\Tree, iii)+"|"
+                      EndIf
+                    Next
+                    Text$ = Trim(Text$, "|")
+                    SetGadgetText(\String, Text$)
+                    
+                          
                   Case #PB_EventType_Change ; : PostEvent(#PB_Event_Gadget, EventWindow(), \Gadget, #PB_EventType_Change, \Tree )
                     Change( \Object )
                     
@@ -718,17 +743,9 @@ Module Properties
                           Gadget = EventGadget()
                           Window = EventWindow()
                           HideWindow(\TreeWindow, #False)
+                          PostEvent(#PB_Event_Gadget, Window, \Tree, #PB_EventType_Focus, Gadget )
                           ResizeWindow(\TreeWindow, (GadgetX(\Button, #PB_Gadget_ScreenCoordinate)+GadgetWidth(\Button))-GadgetWidth(\Tree)-1, GadgetY(\Button, #PB_Gadget_ScreenCoordinate)+GadgetHeight(\Button), #PB_Ignore, #PB_Ignore)
                         Else
-                          Protected i, Text$
-                          For i=0 To CountGadgetItems(\Tree)-1
-                            If GetGadgetItemState(\Tree, i) & #PB_Tree_Checked  
-                              Text$ + GetGadgetItemText(\Tree, i)+"|"
-                            EndIf
-                          Next
-                          Text$ = Trim(Text$, "|")
-                          SetGadgetText(\String, Text$)
-                          
                           PostEvent(#PB_Event_Gadget, Window, \Tree, #PB_EventType_LostFocus, Gadget )
                           HideWindow(\TreeWindow, #True)
                           Window=-1 
@@ -981,10 +998,11 @@ Module Properties
           UseGadgetList = UseGadgetList(0)
           \TreeWindow = OpenWindow(#PB_Any, \LinePos,Y + 1,Width, 100, "", #PB_Window_BorderLess|#PB_Window_NoActivate|#PB_Window_Invisible)
           \Tree = TreeGadget(#PB_Any, 0,0,0,0, #PB_Tree_NoLines|#PB_Tree_NoButtons|#PB_Tree_CheckBoxes) : Result = \Tree
-          BindEvent(#PB_Event_DeactivateWindow,@Events(), \TreeWindow)
+          BindEvent(#PB_Event_DeactivateWindow, @Events(), \TreeWindow)
           StickyWindow(\TreeWindow, #True)
           SetGadgetFont(\Tree, FontID(Font))
-          BindGadgetEvent(\Tree,@Events())
+          ;BindGadgetEvent(\Tree, @Events())
+          BindEvent(#PB_Event_Gadget, @Events(), GetActiveWindow(), \Tree)
           UseGadgetList(UseGadgetList)
           OpenGadgetList( Gadget )
           Clip(\Tree) 

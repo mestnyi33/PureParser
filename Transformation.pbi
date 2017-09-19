@@ -248,63 +248,65 @@ Module Transformation
     Protected *Anchor.Transformation
     Protected *Cursors.DataBuffer = ?Cursors
     Protected *Flags.DataBuffer = ?Flags
-      
-    Disable(Gadget)
     
-    *Anchor = AddElement(AnChor())
-    
-    With *AnChor
-      \Gadget = Gadget
-      \Grid = Grid
-      If IsGadget(Parent)
-        \Pos = 10
-      Else
-        \Pos = 3
-      EndIf
-      \Size = 6
+    If IsGadget(Gadget)
+      Disable(Gadget)
       
-      For I = 1 To #Alles
-        If Flags & *Flags\ID[I] = *Flags\ID[I]
-          If (I=#Arrows)
-            ID = CanvasGadget(#PB_Any, 0,0, \Size*2, \Size) 
-          Else
-            ID = CanvasGadget(#PB_Any, 0,0, \Size, \Size)
-          EndIf
-          
-          \ID[I] = ID
-          SetGadgetData(ID, *Anchor)
-          SetGadgetAttribute(ID, #PB_Canvas_Cursor, *Cursors\ID[I])
-          
-          If StartDrawing(CanvasOutput(ID))
-            Box(0, 0, OutputWidth(), OutputHeight(), $000000)
-            Box(1, 1, OutputWidth()-2, OutputHeight()-2, $FFFFFF)
-            StopDrawing()
-          EndIf
-          
-          BindGadgetEvent(ID, @Callback())
+      *Anchor = AddElement(AnChor())
+      
+      With *AnChor
+        \Gadget = Gadget
+        \Grid = Grid
+        If IsGadget(Parent)
+          \Pos = 10
+        Else
+          \Pos = 3
         EndIf
-      Next
-      
-      MoveTransformation(*Anchor)
-      ClipGadgets(UseGadgetList(0))
-      
-      UnbindEvent(#PB_Event_ActivateWindow, @FormCallBack())
-      BindEvent(#PB_Event_ActivateWindow, @FormCallBack())
-      UnbindEvent(#PB_Event_LeftClick, @FormCallBack())
-      BindEvent(#PB_Event_LeftClick, @FormCallBack())
-      
-      CompilerIf #PB_Compiler_OS = #PB_OS_Windows
-        UpdateWindow_(UseGadgetList(0))
-      CompilerEndIf 
-    
-      If IsGadget(Parent)
-        For I=1 To #Alles
-          CompilerIf #PB_Compiler_OS = #PB_OS_Windows
-            SetParent_(GadgetID(\ID[I]), GadgetID(Parent))
-          CompilerEndIf 
+        \Size = 6
+        
+        For I = 1 To #Alles
+          If Flags & *Flags\ID[I] = *Flags\ID[I]
+            If (I=#Arrows)
+              ID = CanvasGadget(#PB_Any, 0,0, \Size*2, \Size) 
+            Else
+              ID = CanvasGadget(#PB_Any, 0,0, \Size, \Size)
+            EndIf
+            
+            \ID[I] = ID
+            SetGadgetData(ID, *Anchor)
+            SetGadgetAttribute(ID, #PB_Canvas_Cursor, *Cursors\ID[I])
+            
+            If StartDrawing(CanvasOutput(ID))
+              Box(0, 0, OutputWidth(), OutputHeight(), $000000)
+              Box(1, 1, OutputWidth()-2, OutputHeight()-2, $FFFFFF)
+              StopDrawing()
+            EndIf
+            
+            BindGadgetEvent(ID, @Callback())
+          EndIf
         Next
-      EndIf
-    EndWith
+        
+        MoveTransformation(*Anchor)
+        ClipGadgets(UseGadgetList(0))
+        
+        UnbindEvent(#PB_Event_ActivateWindow, @FormCallBack())
+        BindEvent(#PB_Event_ActivateWindow, @FormCallBack())
+        UnbindEvent(#PB_Event_LeftClick, @FormCallBack())
+        BindEvent(#PB_Event_LeftClick, @FormCallBack())
+        
+        CompilerIf #PB_Compiler_OS = #PB_OS_Windows
+          UpdateWindow_(UseGadgetList(0))
+        CompilerEndIf 
+        
+        If IsGadget(Parent)
+          For I=1 To #Alles
+            CompilerIf #PB_Compiler_OS = #PB_OS_Windows
+              SetParent_(GadgetID(\ID[I]), GadgetID(Parent))
+            CompilerEndIf 
+          Next
+        EndIf
+      EndWith
+    EndIf
     
     DataSection
       Cursors:
