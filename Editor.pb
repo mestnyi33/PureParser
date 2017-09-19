@@ -1759,6 +1759,7 @@ Procedure Window_Event()
               ForEach ParsePBGadget()
                 If GetGadgetText(Window_0_Tree_0) = ParsePBGadget()\ID\Argument$
                   Properties::UpdateProperties(ParsePBGadget()\ID\Argument, ParsePBGadget()\ID\Argument$, ParsePBGadget()\Flag\Argument$)
+                  
                   If IsGadget(*This\Parent(Str(ParsePBGadget()\ID\Argument)))
                     OpenGadgetList(*This\Parent(Str(ParsePBGadget()\ID\Argument)))
                     Transformation::Enable(ParsePBGadget()\ID\Argument, 5)
@@ -1766,6 +1767,12 @@ Procedure Window_Event()
                   ElseIf IsWindow(*This\Parent(Str(ParsePBGadget()\ID\Argument)))
                     UseGadgetList(WindowID(*This\Parent(Str(ParsePBGadget()\ID\Argument))))
                     Transformation::Enable(ParsePBGadget()\ID\Argument, 5)
+                  EndIf
+                  
+                  If IsGadget(ParsePBGadget()\ID\Argument)
+                    SetActiveGadget(ParsePBGadget()\ID\Argument)
+                  ElseIf IsWindow(ParsePBGadget()\ID\Argument)
+                    SetActiveWindow(ParsePBGadget()\ID\Argument)
                   EndIf
                   Break
                 EndIf
