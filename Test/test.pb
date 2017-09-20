@@ -57,9 +57,9 @@ Procedure OpenWindow_0(x = 0, y = 0, width = 390, height = 600)
   CloseGadgetList()
   CloseGadgetList()
   
-  OpenGadgetList(#Container_1)
-  Button_1 = ButtonGadget(#PB_Any, 20, 50, 155, 35, "Button_1")
-  CloseGadgetList()
+;   OpenGadgetList(#Container_1)
+;   Button_1 = ButtonGadget(#PB_Any, 20, 50, 155, 35, "Button_1")
+;   CloseGadgetList()
   
   ResizeGadget(Button_1, 60, 80, #PB_Ignore, #PB_Ignore)
   SetGadgetText(Button_1, "Move "+LCase(GetWindowTitle(#Window_0)) + Space( 1 ) +"("+ "Button" + "_" + StrF(1.123,2)+")")

@@ -35,7 +35,7 @@ EndProcedure
 Procedure OpenWindow_Pager()
   If OpenWindow(#Window, #PB_Ignore, #PB_Ignore, 800, 600, "", #PB_Window_SystemMenu|#PB_Window_SizeGadget|#PB_Window_MinimizeGadget|#PB_Window_MaximizeGadget|#PB_Window_Maximize)
     
-    ;WebGadget(#Gadget_W1, 0, 0, 800, 555, "")
+    WebGadget(#Gadget_W1, 0, 0, 800, 555, "")
     ContainerGadget(#Gadget_BottomPanel, 135, 555, 545, 45)
     ButtonGadget(#Gadget_Right, 455, 5, 85, 35, "Вперёд")
     ButtonGadget(#Gadget_Left, 365, 5, 85, 35, "Назад")

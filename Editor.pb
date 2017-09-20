@@ -456,6 +456,20 @@ Procedure AddPBFunction(*This.ParsePBGadget, Index)
   
   With *This
     Select \Type\Argument$
+      Case "HideWindow", "HideGadget", 
+           "DisableWindow", "DisableGadget"
+        Select Index
+          Case 1 : \ID\Argument$ = \Args$
+          Case 2 : \Param1\Argument$ = \Args$
+        EndSelect
+        
+        Select \Param1\Argument$
+          Case "#True" : \ID\Argument = #True
+          Case "#False" : \Param1\Argument = #False
+          Default
+            \Param1\Argument = Val(\Param1\Argument$)
+        EndSelect
+        
       Case "LoadFont"
         Select Index
           Case 1 : \ID\Argument$ = \Args$
@@ -550,6 +564,11 @@ Procedure SetPBFunction(*This.ParsePBGadget)
       Case "UseGIFImageDecoder"      : UseGIFImageDecoder()
       Case "UseTGAImageDecoder"      : UseTGAImageDecoder()
       Case "UseTIFFImageDecoder"     : UseTIFFImageDecoder()
+        
+      Case "HideWindow"              : HideWindow(ID, \Param1\Argument)
+      Case "HideGadget"              : HideGadget(ID, \Param1\Argument)
+      Case "DisableWindow"           : DisableWindow(ID, \Param1\Argument)
+      Case "DisableGadget"           : DisableGadget(ID, \Param1\Argument)
         
       Case "LoadFont"
         AddMapElement(\Font(), \ID\Argument$) 

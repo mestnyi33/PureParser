@@ -221,18 +221,18 @@ Module Properties
         Case #PB_GadgetType_Window        
           ;{- Ok
           Flags.S = "#PB_Window_SystemMenu|"+
-                    "#PB_Window_MaximizeGadget|"+
-                    "#PB_Window_MinimizeGadget|"+
-                    "#PB_Window_Minimize|"+
-                    "#PB_Window_Maximize|"+
-                    "#PB_Window_SizeGadget|"+
-                    "#PB_Window_ScreenCentered|"+
-                    "#PB_Window_WindowCentered|"+
+                    "#PB_Window_TitleBar|"+
                     "#PB_Window_BorderLess|"+
                     "#PB_Window_Invisible|"+
-                    "#PB_Window_Normal|"+
-                    "#PB_Window_TitleBar|"+
+                    "#PB_Window_SizeGadget|"+
+                    "#PB_Window_MaximizeGadget|"+
+                    "#PB_Window_MinimizeGadget|"+
+                    "#PB_Window_ScreenCentered|"+
+                    "#PB_Window_WindowCentered|"+
                     "#PB_Window_Tool|"+
+                    "#PB_Window_Normal|"+
+                    "#PB_Window_Minimize|"+
+                    "#PB_Window_Maximize|"+
                     "#PB_Window_NoActivate|"+
                     "#PB_Window_NoGadgets|"
           ;}
@@ -480,7 +480,7 @@ Module Properties
             
         EndSelect
         
-      Else 
+      ElseIf IsWindow( Object )  
         Select Trim(\Info.S)
           Case "ID:"   : SetGadgetText(\String, Str(Object))
             ;Case "Type:"   : SetGadgetText(\String, "Open"+CC_Class(-1)+"()")

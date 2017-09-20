@@ -64,7 +64,7 @@ Module Transformation
                 
                 ; Из-за бага когда устанавливаешь фоновый рисунок (например точки на кантейнер)
               Case #PB_GadgetType_Container 
-                SetGadgetColor( Gadget, #PB_Gadget_BackColor, GetSysColor_( #COLOR_BTNFACE ))
+                ; SetGadgetColor( Gadget, #PB_Gadget_BackColor, GetSysColor_( #COLOR_BTNFACE ))
                 
                 ; Для панел гаджета темный фон убирать
               Case #PB_GadgetType_Panel 
