@@ -2,6 +2,7 @@
 ;- Module (Properties)
 DeclareModule Properties
   EnableExplicit
+  
   Structure PropertiesStruct
     Gadget.i
     Object.i
@@ -15,6 +16,7 @@ DeclareModule Properties
     Spin.i
     Button.i
     String.i
+    CheckBox.i
     ComboBox.i
     TreeWindow.i
     
@@ -36,6 +38,8 @@ DeclareModule Properties
   Declare UpdatePropertiesItem( Item )
   Declare UpdateProperties( Object, Class$, Flag$ )
   
+  Declare SetCheckedText(Gadget, Text$)
+  Declare$ GetCheckedText(Gadget)
   Declare Size( Width, Height )
   Declare AddItem( Gadget, Text.S, GadgetType)
   Declare Gadget( Gadget, Width, Height, LinePos = 75 )
@@ -210,253 +214,273 @@ Module Properties
   EndProcedure
   
   Procedure$ Flag( Type )
-      Protected Flags.S
-      
-      #PB_GadgetType_Window = -1
-      #PB_GadgetType_Menu = -2
-      #PB_GadgetType_Toolbar = -3
-      #PB_GadgetType_ImageButton = 34
-      
-      Select Type
-        Case #PB_GadgetType_Window        
-          ;{- Ok
-          Flags.S = "#PB_Window_SystemMenu|"+
-                    "#PB_Window_TitleBar|"+
-                    "#PB_Window_BorderLess|"+
-                    "#PB_Window_Invisible|"+
-                    "#PB_Window_SizeGadget|"+
-                    "#PB_Window_MaximizeGadget|"+
-                    "#PB_Window_MinimizeGadget|"+
-                    "#PB_Window_ScreenCentered|"+
-                    "#PB_Window_WindowCentered|"+
-                    "#PB_Window_Tool|"+
-                    "#PB_Window_Normal|"+
-                    "#PB_Window_Minimize|"+
-                    "#PB_Window_Maximize|"+
-                    "#PB_Window_NoActivate|"+
-                    "#PB_Window_NoGadgets|"
-          ;}
-          
-        Case #PB_GadgetType_Button         
-          ;{- Ok
-          Flags.S = "#PB_Button_MultiLine|"+
-                    "#PB_Button_Default|"+
-                    "#PB_Button_Toggle|"+
-                    "#PB_Button_Left|"+
-                    "#PB_Button_Right"
-          ;}
-          
-        Case #PB_GadgetType_String         
-          ;{- Ok
-          Flags.S = "#PB_String_Numeric|"+
-                    "#PB_String_Password|"+
-                    "#PB_String_ReadOnly|"+
-                    "#PB_String_LowerCase|"+
-                    "#PB_String_UpperCase|"+
-                    "#PB_String_BorderLess" 
-          ;}
-          
-        Case #PB_GadgetType_Text           
-          ;{- Ok
-          Flags.S = "#PB_Text_Center|"+
-                    "#PB_Text_Right|"+
-                    "#PB_Text_Border"
-          ;}
-          
-        Case #PB_GadgetType_CheckBox       
-          ;{- Ok
-          Flags.S = "#PB_CheckBox_Right|"+
-                    "#PB_CheckBox_Center|"+
-                    "#PB_CheckBox_ThreeState"
-          ;}
-          
-        Case #PB_GadgetType_Option         
-          Flags.S = ""
-          
-        Case #PB_GadgetType_ListView       
-          ;{- Ok
-          Flags.S = "#PB_ListView_Multiselect|"+
-                    "#PB_ListView_ClickSelect"
-          ;}
-          
-        Case #PB_GadgetType_Frame          
-          ;{- Ok
-          Flags.S = "#PB_Frame_Single|"+
-                    "#PB_Frame_Double|"+
-                    "#PB_Frame_Flat"
-          ;}
-          
-        Case #PB_GadgetType_ComboBox       
-          ;{- Ok
-          Flags.S = "#PB_ComboBox_Editable|"+
-                    "#PB_ComboBox_LowerCase|"+
-                    "#PB_ComboBox_UpperCase|"+
-                    "#PB_ComboBox_Image"
-          ;}
-          
-        Case #PB_GadgetType_Image          
-          ;{- Ok
-          Flags.S = "#PB_Image_Border|"+
-                    "#PB_Image_Raised"
-          ;}
-          
-        Case #PB_GadgetType_HyperLink      
-          ;{- Ok
-          Flags.S = "#PB_Hyperlink_Underline"
-          ;}
-          
-        Case #PB_GadgetType_Container      
-          ;{- Ok
-          Flags.S = "#PB_Container_BorderLess|"+
-                    "#PB_Container_Flat|"+
-                    "#PB_Container_Raised|"+
-                    "#PB_Container_Single|"+
-                    "#PB_Container_Double"
-          ;}
-          
-        Case #PB_GadgetType_ListIcon       
-          ;{- Ok
-          Flags.S = "#PB_ListIcon_CheckBoxes|"+
-                    "#PB_ListIcon_ThreeState|"+
-                    "#PB_ListIcon_MultiSelect|"+
-                    "#PB_ListIcon_GridLines|"+
-                    "#PB_ListIcon_FullRowSelect|"+
-                    "#PB_ListIcon_HeaderDragDrop|"+
-                    "#PB_ListIcon_AlwaysShowSelection"
-          ;}
-          
-        Case #PB_GadgetType_IPAddress      
-          Flags.S = ""
-          
-        Case #PB_GadgetType_ProgressBar    
-          ;{- Ok
-          Flags.S = "#PB_ProgressBar_Smooth|"+
-                    "#PB_ProgressBar_Vertical"
-          ;}
-          
-        Case #PB_GadgetType_ScrollBar      
-          ;{- Ok
-          Flags.S = "#PB_ScrollBar_Vertical"
-          ;}
-          
-        Case #PB_GadgetType_ScrollArea     
-          ;{- Ok
-          Flags.S = "#PB_ScrollArea_Flat|"+
-                    "#PB_ScrollArea_Raised|"+
-                    "#PB_ScrollArea_Single|"+
-                    "#PB_ScrollArea_BorderLess|"+
-                    "#PB_ScrollArea_Center"
-          ;}
-          
-        Case #PB_GadgetType_TrackBar       
-          ;{- Ok
-          Flags.S = "#PB_TrackBar_Ticks|"+
-                    "#PB_TrackBar_Vertical"
-          ;}
-          
-        Case #PB_GadgetType_Web            
-          Flags.S = ""
-          
-        Case #PB_GadgetType_ButtonImage    
-          ;{- Ok
-          Flags.S = "#PB_Button_Toggle"
-          ;}
-          
-        Case #PB_GadgetType_Calendar       
-          ;{- Ok
-          Flags.S = "#PB_Calendar_Borderless"
-          ;}
-          
-        Case #PB_GadgetType_Date           
-          ;{- Ok
-          Flags.S = "#PB_Date_UpDown"
-          ;}
-          
-        Case #PB_GadgetType_Editor         
-          ;{- Ok
-          Flags.S = "#PB_Editor_ReadOnly|"+
-                    "#PB_Editor_WordWrap"
-          ;}
-          
-        Case #PB_GadgetType_ExplorerList   
-          ;{- Ok
-          Flags.S = "#PB_Explorer_BorderLess|"+
-                    "#PB_Explorer_AlwaysShowSelection|"+
-                    "#PB_Explorer_MultiSelect|"+
-                    "#PB_Explorer_GridLines|"+
-                    "#PB_Explorer_HeaderDragDrop|"+
-                    "#PB_Explorer_FullRowSelect|"+
-                    "#PB_Explorer_NoFiles|"+
-                    "#PB_Explorer_NoFolders|"+
-                    "#PB_Explorer_NoParentFolder|"+
-                    "#PB_Explorer_NoDirectoryChange|"+
-                    "#PB_Explorer_NoDriveRequester|"+
-                    "#PB_Explorer_NoSort|"+
-                    "#PB_Explorer_NoMyDocuments|"+
-                    "#PB_Explorer_AutoSort|"+
-                    "#PB_Explorer_HiddenFiles"
-          ;}
-          
-        Case #PB_GadgetType_ExplorerTree   
-          Flags.S = ""
-          
-        Case #PB_GadgetType_ExplorerCombo  
-          Flags.S = ""
-          
-        Case #PB_GadgetType_Spin           
-          Flags.S = ""
-          
-        Case #PB_GadgetType_Tree           
-          ;{- Ok
-          Flags.S = "#PB_Tree_AlwaysShowSelection|"+
-                    "#PB_Tree_NoLines|"+
-                    "#PB_Tree_NoButtons|"+
-                    "#PB_Tree_CheckBoxes|"+
-                    "#PB_Tree_ThreeState"
-          ;}
-          
-        Case #PB_GadgetType_Panel          
-          Flags.S = ""
-          
-        Case #PB_GadgetType_Splitter       
-          ;{- Ok
-          Flags.S = "#PB_Splitter_Vertical|"+
-                    "#PB_Splitter_Separator|"+
-                    "#PB_Splitter_FirstFixed|"+
-                    "#PB_Splitter_SecondFixed" 
-          ;}
-          
-        Case #PB_GadgetType_MDI           
-          CompilerIf #PB_Compiler_OS = #PB_OS_Windows
-            Flags.S = ""
-          CompilerEndIf
-          
-        Case #PB_GadgetType_Scintilla      
-          Flags.S = ""
-          
-        Case #PB_GadgetType_Shortcut       
-          Flags.S = ""
-          
-        Case #PB_GadgetType_Canvas 
-          ;{- Ok
-          Flags.S = "#PB_Canvas_Border|"+
-                    "#PB_Canvas_ClipMouse|"+
-                    "#PB_Canvas_Keyboard|"+
-                    "#PB_Canvas_DrawFocus"
-          ;}
-          
-      EndSelect
-      ;"#PB_Flag_None|"+
-      ProcedureReturn Flags.S
-    EndProcedure
+    Protected Flags.S
     
+    #PB_GadgetType_Window = -1
+    #PB_GadgetType_Menu = -2
+    #PB_GadgetType_Toolbar = -3
+    #PB_GadgetType_ImageButton = 34
+    
+    Select Type
+      Case #PB_GadgetType_Window        
+        ;{- Ok
+        Flags.S = "#PB_Window_SystemMenu|"+
+                  "#PB_Window_TitleBar|"+
+                  "#PB_Window_BorderLess|"+
+                  "#PB_Window_Invisible|"+
+                  "#PB_Window_SizeGadget|"+
+                  "#PB_Window_MaximizeGadget|"+
+                  "#PB_Window_MinimizeGadget|"+
+                  "#PB_Window_ScreenCentered|"+
+                  "#PB_Window_WindowCentered|"+
+                  "#PB_Window_Tool|"+
+                  "#PB_Window_Normal|"+
+                  "#PB_Window_Minimize|"+
+                  "#PB_Window_Maximize|"+
+                  "#PB_Window_NoActivate|"+
+                  "#PB_Window_NoGadgets|"
+        ;}
+        
+      Case #PB_GadgetType_Button         
+        ;{- Ok
+        Flags.S = "#PB_Button_MultiLine|"+
+                  "#PB_Button_Default|"+
+                  "#PB_Button_Toggle|"+
+                  "#PB_Button_Left|"+
+                  "#PB_Button_Right"
+        ;}
+        
+      Case #PB_GadgetType_String         
+        ;{- Ok
+        Flags.S = "#PB_String_Numeric|"+
+                  "#PB_String_Password|"+
+                  "#PB_String_ReadOnly|"+
+                  "#PB_String_LowerCase|"+
+                  "#PB_String_UpperCase|"+
+                  "#PB_String_BorderLess" 
+        ;}
+        
+      Case #PB_GadgetType_Text           
+        ;{- Ok
+        Flags.S = "#PB_Text_Center|"+
+                  "#PB_Text_Right|"+
+                  "#PB_Text_Border"
+        ;}
+        
+      Case #PB_GadgetType_CheckBox       
+        ;{- Ok
+        Flags.S = "#PB_CheckBox_Right|"+
+                  "#PB_CheckBox_Center|"+
+                  "#PB_CheckBox_ThreeState"
+        ;}
+        
+      Case #PB_GadgetType_Option         
+        Flags.S = ""
+        
+      Case #PB_GadgetType_ListView       
+        ;{- Ok
+        Flags.S = "#PB_ListView_Multiselect|"+
+                  "#PB_ListView_ClickSelect"
+        ;}
+        
+      Case #PB_GadgetType_Frame          
+        ;{- Ok
+        Flags.S = "#PB_Frame_Single|"+
+                  "#PB_Frame_Double|"+
+                  "#PB_Frame_Flat"
+        ;}
+        
+      Case #PB_GadgetType_ComboBox       
+        ;{- Ok
+        Flags.S = "#PB_ComboBox_Editable|"+
+                  "#PB_ComboBox_LowerCase|"+
+                  "#PB_ComboBox_UpperCase|"+
+                  "#PB_ComboBox_Image"
+        ;}
+        
+      Case #PB_GadgetType_Image          
+        ;{- Ok
+        Flags.S = "#PB_Image_Border|"+
+                  "#PB_Image_Raised"
+        ;}
+        
+      Case #PB_GadgetType_HyperLink      
+        ;{- Ok
+        Flags.S = "#PB_Hyperlink_Underline"
+        ;}
+        
+      Case #PB_GadgetType_Container      
+        ;{- Ok
+        Flags.S = "#PB_Container_BorderLess|"+
+                  "#PB_Container_Flat|"+
+                  "#PB_Container_Raised|"+
+                  "#PB_Container_Single|"+
+                  "#PB_Container_Double"
+        ;}
+        
+      Case #PB_GadgetType_ListIcon       
+        ;{- Ok
+        Flags.S = "#PB_ListIcon_CheckBoxes|"+
+                  "#PB_ListIcon_ThreeState|"+
+                  "#PB_ListIcon_MultiSelect|"+
+                  "#PB_ListIcon_GridLines|"+
+                  "#PB_ListIcon_FullRowSelect|"+
+                  "#PB_ListIcon_HeaderDragDrop|"+
+                  "#PB_ListIcon_AlwaysShowSelection"
+        ;}
+        
+      Case #PB_GadgetType_IPAddress      
+        Flags.S = ""
+        
+      Case #PB_GadgetType_ProgressBar    
+        ;{- Ok
+        Flags.S = "#PB_ProgressBar_Smooth|"+
+                  "#PB_ProgressBar_Vertical"
+        ;}
+        
+      Case #PB_GadgetType_ScrollBar      
+        ;{- Ok
+        Flags.S = "#PB_ScrollBar_Vertical"
+        ;}
+        
+      Case #PB_GadgetType_ScrollArea     
+        ;{- Ok
+        Flags.S = "#PB_ScrollArea_Flat|"+
+                  "#PB_ScrollArea_Raised|"+
+                  "#PB_ScrollArea_Single|"+
+                  "#PB_ScrollArea_BorderLess|"+
+                  "#PB_ScrollArea_Center"
+        ;}
+        
+      Case #PB_GadgetType_TrackBar       
+        ;{- Ok
+        Flags.S = "#PB_TrackBar_Ticks|"+
+                  "#PB_TrackBar_Vertical"
+        ;}
+        
+      Case #PB_GadgetType_Web            
+        Flags.S = ""
+        
+      Case #PB_GadgetType_ButtonImage    
+        ;{- Ok
+        Flags.S = "#PB_Button_Toggle"
+        ;}
+        
+      Case #PB_GadgetType_Calendar       
+        ;{- Ok
+        Flags.S = "#PB_Calendar_Borderless"
+        ;}
+        
+      Case #PB_GadgetType_Date           
+        ;{- Ok
+        Flags.S = "#PB_Date_UpDown"
+        ;}
+        
+      Case #PB_GadgetType_Editor         
+        ;{- Ok
+        Flags.S = "#PB_Editor_ReadOnly|"+
+                  "#PB_Editor_WordWrap"
+        ;}
+        
+      Case #PB_GadgetType_ExplorerList   
+        ;{- Ok
+        Flags.S = "#PB_Explorer_BorderLess|"+
+                  "#PB_Explorer_AlwaysShowSelection|"+
+                  "#PB_Explorer_MultiSelect|"+
+                  "#PB_Explorer_GridLines|"+
+                  "#PB_Explorer_HeaderDragDrop|"+
+                  "#PB_Explorer_FullRowSelect|"+
+                  "#PB_Explorer_NoFiles|"+
+                  "#PB_Explorer_NoFolders|"+
+                  "#PB_Explorer_NoParentFolder|"+
+                  "#PB_Explorer_NoDirectoryChange|"+
+                  "#PB_Explorer_NoDriveRequester|"+
+                  "#PB_Explorer_NoSort|"+
+                  "#PB_Explorer_NoMyDocuments|"+
+                  "#PB_Explorer_AutoSort|"+
+                  "#PB_Explorer_HiddenFiles"
+        ;}
+        
+      Case #PB_GadgetType_ExplorerTree   
+        Flags.S = ""
+        
+      Case #PB_GadgetType_ExplorerCombo  
+        Flags.S = ""
+        
+      Case #PB_GadgetType_Spin           
+        Flags.S = ""
+        
+      Case #PB_GadgetType_Tree           
+        ;{- Ok
+        Flags.S = "#PB_Tree_AlwaysShowSelection|"+
+                  "#PB_Tree_NoLines|"+
+                  "#PB_Tree_NoButtons|"+
+                  "#PB_Tree_CheckBoxes|"+
+                  "#PB_Tree_ThreeState"
+        ;}
+        
+      Case #PB_GadgetType_Panel          
+        Flags.S = ""
+        
+      Case #PB_GadgetType_Splitter       
+        ;{- Ok
+        Flags.S = "#PB_Splitter_Vertical|"+
+                  "#PB_Splitter_Separator|"+
+                  "#PB_Splitter_FirstFixed|"+
+                  "#PB_Splitter_SecondFixed" 
+        ;}
+        
+      Case #PB_GadgetType_MDI           
+        CompilerIf #PB_Compiler_OS = #PB_OS_Windows
+          Flags.S = ""
+        CompilerEndIf
+        
+      Case #PB_GadgetType_Scintilla      
+        Flags.S = ""
+        
+      Case #PB_GadgetType_Shortcut       
+        Flags.S = ""
+        
+      Case #PB_GadgetType_Canvas 
+        ;{- Ok
+        Flags.S = "#PB_Canvas_Border|"+
+                  "#PB_Canvas_ClipMouse|"+
+                  "#PB_Canvas_Keyboard|"+
+                  "#PB_Canvas_DrawFocus"
+        ;}
+        
+    EndSelect
+    ;"#PB_Flag_None|"+
+    ProcedureReturn Flags.S
+  EndProcedure
+  
+  Procedure$ GetCheckedText(Gadget)
+    Protected i, Result$
+    For i=0 To CountGadgetItems(Gadget)-1
+      If GetGadgetItemState(Gadget, i) & #PB_Tree_Checked  
+        Result$ + GetGadgetItemText(Gadget, i)+"|"
+      EndIf
+    Next
+    ProcedureReturn Trim(Result$, "|")
+  EndProcedure
+  
+  Procedure SetCheckedText(Gadget, Text$)
+    Protected i,ii
+    For i=0 To CountString(Text$, "|")
+      For ii=0 To CountGadgetItems(Gadget)-1
+        If GetGadgetItemText(Gadget, ii) = Trim( StringField( Text$, (i + (1)), "|"))
+          SetGadgetItemState(Gadget, ii, #PB_Tree_Checked) 
+        EndIf
+      Next
+    Next
+  EndProcedure
+  
   Procedure Update( Object )
     Protected Color
     
     With Properties()
       If IsGadget( Object ) 
         Select Trim(\Info.S)
-            ;Case "ID:"   : SetGadgetText(\String, Str(Object))
           Case "Text:"   : SetGadgetText(\String, GetGadgetText(Object))
             
           Case "Hide:"   : SetGadgetState(\ComboBox, IsHideGadget(Object))
@@ -482,8 +506,6 @@ Module Properties
         
       ElseIf IsWindow( Object )  
         Select Trim(\Info.S)
-          Case "ID:"   : SetGadgetText(\String, Str(Object))
-            ;Case "Type:"   : SetGadgetText(\String, "Open"+CC_Class(-1)+"()")
           Case "Text:"   : SetGadgetText(\String, GetWindowTitle(Object))
             
           Case "Hide:"   : SetGadgetState(\ComboBox, IsHideWindow(Object))
@@ -509,7 +531,8 @@ Module Properties
       EndIf
       
       Select Trim(\Info.S)
-        Case "Flag:"   
+        Case "ID:"     : SetGadgetText(\String, \Class$)
+        Case "Flag:"   : SetGadgetText(\String, \Flag$)
           Protected IC, Len, height
           If IsGadget(\Tree)
             If IsGadget(Object)
@@ -609,7 +632,7 @@ Module Properties
     Static CheckObject =- 1
     
     With Properties()
-      If CheckObject <> Object
+      ;If CheckObject <> Object
         ForEach Properties()
           \Object = Object
           \Class$ = Class$
@@ -618,7 +641,7 @@ Module Properties
           Update( Object )
         Next
         CheckObject = Object
-      EndIf
+      ;EndIf
     EndWith
     
   EndProcedure
@@ -708,27 +731,11 @@ Module Properties
                 ;   #PB_EventType_DragStart: Пользователь попытался запустить операцию Drag & Drop.
                 Select EventType()
                   Case #PB_EventType_Focus 
-;                        \Flag$ = "#PB_Window_SystemMenu|#PB_Window_ScreenCentered"
-                    Protected i,ii
-                    For i=0 To CountString(\Flag$, "|")
-                      For ii=0 To CountGadgetItems(\Tree)-1
-                        If GetGadgetItemText(\Tree, ii) = Trim( StringField( \Flag$, (i + (1)), "|"))
-                          SetGadgetItemState(\Tree, ii, #PB_Tree_Checked) 
-                        EndIf
-                      Next
-                    Next
+                    SetCheckedText(\Tree, \Flag$)
                     
                   Case #PB_EventType_LostFocus 
-                    Protected iii, Text$
-                    For iii=0 To CountGadgetItems(\Tree)-1
-                      If GetGadgetItemState(\Tree, iii) & #PB_Tree_Checked  
-                        Text$ + GetGadgetItemText(\Tree, iii)+"|"
-                      EndIf
-                    Next
-                    Text$ = Trim(Text$, "|")
-                    SetGadgetText(\String, Text$)
+                    SetGadgetText(\String, GetCheckedText(\Tree))
                     
-                          
                   Case #PB_EventType_Change ; : PostEvent(#PB_Event_Gadget, EventWindow(), \Gadget, #PB_EventType_Change, \Tree )
                     Change( \Object )
                     
@@ -930,8 +937,7 @@ Module Properties
         SetWindowLongPtr_(ParentID, #GWL_EXSTYLE, GetWindowLongPtr_(ParentID, #GWL_EXSTYLE) | #WS_EX_COMPOSITED)
     CompilerEndSelect
     
-    LineGadget = CanvasGadget( #PB_Any, 0,0,LinePos,0)
-    Clip(LineGadget)
+    LineGadget = CanvasGadget( #PB_Any, 0,0,LinePos,0) : Clip(LineGadget)
     BindGadgetEvent(LineGadget,@EventSplitter())
     
     CloseGadgetList()
@@ -948,7 +954,7 @@ Module Properties
           CompilerCase #PB_OS_Windows
             \ItemHeight = 24
           CompilerCase #PB_OS_Linux
-            \ItemHeight = 34;GadgetHeight(LineGadget)
+            \ItemHeight = 34
         CompilerEndSelect
         Font = LoadFont(#PB_Any,"Consolas",8 ) 
         \Font=Font
@@ -962,15 +968,16 @@ Module Properties
         Protected Bw = 19
         Width = GetGadgetAttribute(Gadget,#PB_ScrollArea_InnerWidth) - \LinePos 
         
-        
-        \GadgetType = GadgetType
-        \Gadget = Gadget
-        
-        \Seperator =- 1
-        \ComboBox =- 1
+        \Tree =- 1
         \Spin =- 1
         \String =- 1
         \Button =- 1
+        \ComboBox =- 1
+        \Seperator =- 1
+        \TreeWindow =- 1
+        
+        \Gadget = Gadget
+        \GadgetType = GadgetType
         
         
         ;{ - Здесь происходит разделение текста
@@ -1034,6 +1041,7 @@ Module Properties
           SetGadgetFont(\ComboBox, FontID(Font))
         
         ElseIf ((GadgetType & #PB_GadgetType_String) = #PB_GadgetType_String)
+          \CheckBox = CheckBoxGadget(#PB_Any, 0,Y + 2,25,\ItemHeight - 3,"#") :Clip(\CheckBox) ;: Result = \CheckBox
           \String = StringGadget(#PB_Any, \LinePos,Y + 1,Width,\ItemHeight - 1,\Text.S) :Clip(\String): Result = \String
           BindGadgetEvent(\String,@Events())
           SetGadgetFont(\String, FontID(Font))
@@ -1041,7 +1049,6 @@ Module Properties
         Else
           \Seperator = ListIndex(Properties())
         EndIf
-        
         
         If ((GadgetType & #PB_GadgetType_Button) = #PB_GadgetType_Button)
           If ((GadgetType & #PB_GadgetType_Tree) = #PB_GadgetType_Tree)

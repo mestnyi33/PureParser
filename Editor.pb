@@ -549,12 +549,15 @@ Procedure AddPBFunction(*This.ParsePBGadget, Index)
 EndProcedure
 
 Procedure SetPBFunction(*This.ParsePBGadget)
-  Protected I, ID
+  Protected Result, I, ID
   
   With *This
     ID = \Object(\ID\Argument$)\ID\Argument
     
     Select \Type\Argument$
+      Case "GetActiveWindow"         : Result = GetActiveWindow()
+      Case "GetActiveGadget"         : Result = GetActiveGadget()
+        
       Case "UsePNGImageDecoder"      : UsePNGImageDecoder()
       Case "UsePNGImageEncoder"      : UsePNGImageEncoder()
       Case "UseJPEGImageDecoder"     : UseJPEGImageDecoder()
@@ -564,11 +567,6 @@ Procedure SetPBFunction(*This.ParsePBGadget)
       Case "UseGIFImageDecoder"      : UseGIFImageDecoder()
       Case "UseTGAImageDecoder"      : UseTGAImageDecoder()
       Case "UseTIFFImageDecoder"     : UseTIFFImageDecoder()
-        
-      Case "HideWindow"              : HideWindow(ID, \Param1\Argument)
-      Case "HideGadget"              : HideGadget(ID, \Param1\Argument)
-      Case "DisableWindow"           : DisableWindow(ID, \Param1\Argument)
-      Case "DisableGadget"           : DisableGadget(ID, \Param1\Argument)
         
       Case "LoadFont"
         AddMapElement(\Font(), \ID\Argument$) 
@@ -591,13 +589,26 @@ Procedure SetPBFunction(*This.ParsePBGadget)
       Case "LoadImage"
         AddMapElement(\Img(), \ID\Argument$) 
         \Img()\Name$=\Param1\Argument$
-        
         \Img()\ID\Argument=LoadImage(#PB_Any, \Img()\Name$)
         
     EndSelect
     
+    If IsWindow(ID)
+      Select \Type\Argument$
+        Case "SetActiveWindow"         : SetActiveWindow(ID)
+        Case "HideWindow"              : HideWindow(ID, \Param1\Argument)
+        Case "DisableWindow"           : DisableWindow(ID, \Param1\Argument)
+      EndSelect
+    EndIf
+    
     If IsGadget(ID)
       Select \Type\Argument$
+        Case "SetActiveGadget"         : SetActiveGadget(ID)
+        Case "HideGadget"              : HideGadget(ID, \Param1\Argument)
+        Case "DisableGadget"           : DisableGadget(ID, \Param1\Argument)
+        Case "SetGadgetText"           : SetGadgetText(ID, \Param1\Argument$)
+        Case "SetGadgetColor"          : SetGadgetColor(ID, \Param1\Argument, \Param2\Argument)
+          
         Case "SetGadgetFont"
           Protected Font = \Font(\Param1\Argument$)\ID\Argument
           If IsFont(Font)
@@ -610,15 +621,10 @@ Procedure SetPBFunction(*This.ParsePBGadget)
             SetGadgetState(ID, ImageID(Img))
           EndIf
           
-        Case "SetGadgetText"
-          SetGadgetText(ID, \Param1\Argument$)
-          
         Case "ResizeGadget"
           ResizeGadget(ID, \X\Argument, \Y\Argument, \Width\Argument, \Height\Argument)
           Transformation::Update(ID)
           
-        Case "SetGadgetColor"
-          SetGadgetColor(ID, \Param1\Argument, \Param2\Argument)
       EndSelect
     EndIf
   EndWith
@@ -1625,8 +1631,12 @@ Procedure Window_0_Open(Flag.i=#PB_Window_SystemMenu, ParentID=0)
     
     Window_0_Tree_0 = TreeGadget(#PB_Any, 5, 5, 225, 145, #PB_Tree_AlwaysShowSelection)
     Window_0_Panel_0 = PanelGadget(#PB_Any, 5, 159, 225, 261)
-    AddGadgetItem(Window_0_Panel_0, -1, "Properties")
     
+    AddGadgetItem(Window_0_Panel_0, -1, "Objects")
+    Window_0_Tree_1 = TreeGadget(#PB_Any, 0, 0, 205, 180, #PB_Tree_NoLines | #PB_Tree_NoButtons)
+    EnableGadgetDrop(Window_0_Tree_1, #PB_Drop_Text, #PB_Drag_Copy)
+    
+    AddGadgetItem(Window_0_Panel_0, -1, "Properties")
     Window_0_Properties = Properties::Gadget( #PB_Any, 225, 261 )
     Properties_ID = Properties::AddItem( Window_0_Properties, "ID:", #PB_GadgetType_String )
     Properties::AddItem( Window_0_Properties, "Text:", #PB_GadgetType_String )
@@ -1646,13 +1656,8 @@ Procedure Window_0_Open(Flag.i=#PB_Window_SystemMenu, ParentID=0)
     Properties::AddItem( Window_0_Properties, "Puth", #PB_GadgetType_String|#PB_GadgetType_Button )
     Properties::AddItem( Window_0_Properties, "Color:", #PB_GadgetType_String|#PB_GadgetType_Button )
     
-    
-    
-    AddGadgetItem(Window_0_Panel_0, -1, "Objects")
-    Window_0_Tree_1 = TreeGadget(#PB_Any, 0, 0, 205, 180, #PB_Tree_NoLines | #PB_Tree_NoButtons)
-    EnableGadgetDrop(Window_0_Tree_1, #PB_Drop_Text, #PB_Drag_Copy)
-    
     AddGadgetItem(Window_0_Panel_0, -1, "Events")
+    
     CloseGadgetList()
     
     Window_0_Splitter_0 = SplitterGadget(#PB_Any, 5, 5, 230-10, 600-MenuHeight()-10, Window_0_Tree_0, Window_0_Panel_0, #PB_Splitter_FirstFixed)
@@ -1688,7 +1693,8 @@ Procedure Window_0_Resize_Event()
 EndProcedure
 
 Procedure Window_Event()
-  Protected IsContainer.b, Object, SubItem
+  Protected I, File$, SubItem, UseGadgetList
+  Protected IsContainer.b, Object, Parent=-1
   
   Select Event()
     Case #PB_Event_Gadget
@@ -1702,7 +1708,6 @@ Procedure Window_Event()
                   If \ID\Argument$ = GetGadgetText(Window_0_Tree_0)
                     \ID\Argument$ = GetGadgetText(EventGadget())
                   EndIf
-                  
                 Next
               EndWith
               PopListPosition(ParsePBGadget())  
@@ -1735,73 +1740,65 @@ Procedure Window_Event()
               EndIf
               
               
-              
-              
-              
-              
-              
               SetGadgetText(Window_0_Tree_0, GetGadgetText(EventGadget()))
               
           EndSelect
           
-        Case Properties_Flag
+        Case Properties_Flag ; Ok
           Select EventType()
             Case #PB_EventType_LostFocus   
-              Protected i, Text$
-              For i=0 To CountGadgetItems(EventGadget())-1
-                If GetGadgetItemState(EventGadget(), i) & #PB_Tree_Checked  
-                  Text$ + GetGadgetItemText(EventGadget(), i)+"|"
-                EndIf
-              Next
-              Text$ = Trim(Text$, "|")
-              
-;               Debug Text$;SetGadgetText(\String, Text$)
-              
               PushListPosition(ParsePBGadget())
               ForEach ParsePBGadget()
-                If GetGadgetText(Window_0_Tree_0) = ParsePBGadget()\ID\Argument$
-                  ParsePBGadget()\Flag\Argument$ = Text$
-                EndIf
-              Next
-              PopListPosition(ParsePBGadget())
-              ; SetGadgetText(Window_0_Tree_0, GetGadgetText(EventGadget()))
-              
-          EndSelect
-          
-        Case Window_0_Tree_0
-          Select EventType()
-            Case #PB_EventType_Change      
-              PushListPosition(ParsePBGadget())
-              ForEach ParsePBGadget()
-                Transformation::Disable(ParsePBGadget()\ID\Argument)
-              Next
-              ForEach ParsePBGadget()
-                If GetGadgetText(Window_0_Tree_0) = ParsePBGadget()\ID\Argument$
-                  Properties::UpdateProperties(ParsePBGadget()\ID\Argument, ParsePBGadget()\ID\Argument$, ParsePBGadget()\Flag\Argument$)
-                  
-                  If IsGadget(*This\Parent(Str(ParsePBGadget()\ID\Argument)))
-                    OpenGadgetList(*This\Parent(Str(ParsePBGadget()\ID\Argument)))
-                    Transformation::Enable(ParsePBGadget()\ID\Argument, 5)
-                    CloseGadgetList()
-                  ElseIf IsWindow(*This\Parent(Str(ParsePBGadget()\ID\Argument)))
-                    UseGadgetList(WindowID(*This\Parent(Str(ParsePBGadget()\ID\Argument))))
-                    Transformation::Enable(ParsePBGadget()\ID\Argument, 5)
-                  EndIf
-                  
-                  If IsGadget(ParsePBGadget()\ID\Argument)
-                    SetActiveGadget(ParsePBGadget()\ID\Argument)
-                  ElseIf IsWindow(ParsePBGadget()\ID\Argument)
-                    SetActiveWindow(ParsePBGadget()\ID\Argument)
-                  EndIf
+                If ParsePBGadget()\ID\Argument$ = GetGadgetText(Window_0_Tree_0)
+                  ParsePBGadget()\Flag\Argument$ = Properties::GetCheckedText(EventGadget()) 
                   Break
                 EndIf
               Next
               PopListPosition(ParsePBGadget())
-              SetGadgetText(Properties_ID, GetGadgetText(EventGadget()))
               
           EndSelect
           
-        Case Window_0_Tree_1
+        Case Window_0_Tree_0 ; Ok
+          Select EventType()
+            Case #PB_EventType_Change      
+              If GetGadgetState(Window_0_Panel_0) <> 1 ; Properties
+                SetGadgetState(Window_0_Panel_0, 1)    ; Для удобства выбираем вкладку свойства
+              EndIf
+              
+              PushListPosition(ParsePBGadget())
+              With ParsePBGadget()
+                ForEach ParsePBGadget() 
+                  Transformation::Disable(\ID\Argument) 
+                Next
+                ForEach ParsePBGadget()
+                  If GetGadgetText(Window_0_Tree_0) = \ID\Argument$
+                    Parent = *This\Parent(Str(\ID\Argument))
+                    Properties::UpdateProperties(\ID\Argument, \ID\Argument$, \Flag\Argument$)
+                    
+                    If IsGadget(Parent)
+                      OpenGadgetList(Parent)
+                      Transformation::Enable(\ID\Argument, 5)
+                      CloseGadgetList()
+                    ElseIf IsWindow(Parent)
+                      UseGadgetList = UseGadgetList(WindowID(Parent))
+                      Transformation::Enable(\ID\Argument, 5)
+                      UseGadgetList(UseGadgetList)
+                    EndIf
+                    
+                    If IsGadget(\ID\Argument)
+                      SetActiveGadget(\ID\Argument)
+                    ElseIf IsWindow(\ID\Argument)
+                      SetActiveWindow(\ID\Argument)
+                    EndIf
+                    Break
+                  EndIf
+                Next
+              EndWith
+              PopListPosition(ParsePBGadget())
+              
+          EndSelect
+          
+        Case Window_0_Tree_1 ; Ok
           Select EventType()
             Case #PB_EventType_DragStart
               DragText(GetGadgetItemText(EventGadget(), GetGadgetState(EventGadget())))
@@ -1823,8 +1820,10 @@ Procedure Window_Event()
             SetGadgetItemState(Window_0_Tree_0, 0, #PB_Tree_Expanded|#PB_Tree_Selected)
           EndIf
           
+          SetGadgetState(Window_0_Panel_0, 0)
+          
         Case Window_0_Menu_0_Open ;- Open file
-          Define File$=OpenFileRequester("Выберите файл с описанием окон", "", "Все файлы|*", 0)
+          File$=OpenFileRequester("Выберите файл с описанием окон", "", "Все файлы|*", 0)
           If File$
             ParsePBFile(File$)
             
@@ -1839,13 +1838,7 @@ Procedure Window_Event()
                 EndSelect
               EndIf
               
-              ;If IsWindow(Object) Or IsContainer
               AddGadgetItem (Window_0_Tree_0, -1, ParsePBGadget()\ID\Argument$, 0, ParsePBGadget()\SubLevel)
-              ;SubItem + 1
-              ;               EndIf
-              ;               If IsGadget(Object)
-              ;                 AddGadgetItem (Window_0_Tree_0, -1, ParsePBGadget()\ID\Argument$, 0, ParsePBGadget()\SubLevel)
-              ;               EndIf
             Next
             PopListPosition(ParsePBGadget())
             
