@@ -1211,8 +1211,33 @@ EndProcedure
 
 Procedure SavePBObject(*This.ParsePBGadget) ; Ok
   Protected Result, ID$, Handle$
-  
+
   With *This
+    
+    Protected Result$
+    Protected i
+    
+    Debug "\Content$: "+\Content$
+    For i=2 To 5
+      
+      
+      Result$ = Trim(Trim(StringField(\Content$, i, ","), ")"))
+      Debug "Result$: "+Result$
+      Select Asc(Result$)
+        Case 'A' To 'Z' , 'a' To 'z'
+          
+          Select i 
+            Case 2 : \X\Argument$ = Result$
+            Case 3 : \Y\Argument$ = Result$
+            Case 4 : \Width\Argument$ = Result$
+            Case 5 : \Height\Argument$ = Result$
+          EndSelect
+      EndSelect
+    Next
+    
+    
+    
+    
     If Asc(\ID\Argument$) = 35 ; '#'
       ID$ = \ID\Argument$
     Else
@@ -1934,3 +1959,10 @@ CompilerIf #PB_Compiler_IsMainFile
     EndSelect
   Wend
 CompilerEndIf
+
+; IDE Options = PureBasic 5.60 (Windows - x86)
+; CursorPosition = 1926
+; FirstLine = 1699
+; Folding = ------
+; EnableXP
+; CompileSourceDirectory
