@@ -1796,6 +1796,8 @@ EndProcedure
 
 ;-
 
+Declare OpenWindow_Editor(Flag.i=#PB_Window_SystemMenu, ParentID=0)
+Declare CloseWindow_Editor()
 
 Procedure OpenWindow_Editor(Flag.i=#PB_Window_SystemMenu, ParentID=0)
   If Not IsWindow(Window_0)
@@ -1864,6 +1866,22 @@ Procedure OpenWindow_Editor(Flag.i=#PB_Window_SystemMenu, ParentID=0)
   
   ProcedureReturn Window_0
 EndProcedure
+
+Procedure CloseWindow_Editor()
+  If IsWindow(Window_0)
+    UnbindEvent(#PB_Event_Menu, @Window_Event(), Window_0)
+    UnbindEvent(#PB_Event_Gadget, @Window_Event(), Window_0)
+    UnbindEvent(#PB_Event_SizeWindow, @Window_0_Resize_Event(), Window_0)
+    UnbindEvent(#PB_Event_Gadget, @Window_0_Panel_0_Resize_Event(), Window_0, Window_0_Panel_0, #PB_EventType_Resize)
+    
+    UnbindMenuEvent(Window_0_Menu_0, Window_0_Menu_0_Open, @EditorWindow_Open())
+    UnbindMenuEvent(Window_0_Menu_0, Window_0_Menu_0_Save_as, @EditorWindow_SaveAs())
+    UnbindMenuEvent(Window_0_Menu_0, Window_0_Menu_0_Save, @EditorWindow_Save())
+    
+    CloseWindow(Window_0)
+  EndIf
+EndProcedure
+
 
 Procedure Window_0_Panel_0_Resize_Event()
   Protected GadgetWidth = GetGadgetAttribute(Window_0_Panel_0, #PB_Panel_ItemWidth)
@@ -2040,8 +2058,8 @@ CompilerIf #PB_Compiler_IsMainFile
 CompilerEndIf
 
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 1554
-; FirstLine = 1407
-; Folding = ------
+; CursorPosition = 1799
+; FirstLine = 1847
+; Folding = -------
 ; EnableXP
 ; CompileSourceDirectory
