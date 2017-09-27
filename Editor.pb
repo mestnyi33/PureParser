@@ -1334,7 +1334,7 @@ Procedure ParsePBFile(FileName.s)
                 EndIf
                 
                 If \Type\Argument$
-                  Debug "All - "+RegularExpressionMatchString(#RegEx_Function)
+                  ; Debug "All - "+RegularExpressionMatchString(#RegEx_Function)
                   
                   Select \Type\Argument$
                     Case "OpenWindow", 
@@ -1353,9 +1353,9 @@ Procedure ParsePBFile(FileName.s)
                       ParsePBGadget()\Length = Length1 + RegularExpressionMatchLength(#RegEx_Function)
                       ParsePBGadget()\Position = Position1;RegularExpressionMatchPosition(#RegEx_Function)
                       
-                      Debug ""
-                      Debug Position1
-                      Debug ParsePBGadget()\Position
+                      ; Debug ""
+                      ; Debug Position1
+                      ; Debug ParsePBGadget()\Position
                       
                       If ExamineRegularExpression(#RegEx_Arguments, \Args$) : Index=0
                         While NextRegularExpressionMatch(#RegEx_Arguments)
@@ -1639,7 +1639,165 @@ Procedure LoadControls()
   EndIf
 EndProcedure
 
-Procedure Window_0_Open(Flag.i=#PB_Window_SystemMenu, ParentID=0)
+
+;-
+;- PI Редактора
+
+Procedure Editor_Open(Path$) ; Открытие файла
+  Protected Result
+  Debug "Открываю файл '"+Path$+"'"
+  
+  If Path$
+    ParsePBFile(Path$)
+    
+    Protected Object, IsContainer
+    PushListPosition(ParsePBGadget())
+    ForEach ParsePBGadget()
+      Object = *This\Object(ParsePBGadget()\ID\Argument$)\ID\Argument
+      
+      If IsGadget(Object) 
+        Select GadgetType(Object)
+          Case #PB_GadgetType_Container, #PB_GadgetType_Panel, #PB_GadgetType_ScrollArea
+            IsContainer = #True
+        EndSelect
+      EndIf
+      
+      AddGadgetItem (Window_0_Tree_0, -1, ParsePBGadget()\ID\Argument$, 0, ParsePBGadget()\SubLevel)
+    Next
+    PopListPosition(ParsePBGadget())
+    
+    SetGadgetItemState(Window_0_Tree_0, 0, #PB_Tree_Expanded|#PB_Tree_Selected)
+    
+    Result=#True
+    Debug "..успешно"
+  EndIf 
+  
+  ProcedureReturn Result
+EndProcedure
+
+
+Procedure Editor_Save(Path$) ; Процедура сохранения файла
+  Protected Result
+  
+  Debug "Сохраняю файл '"+Path$+"'"
+  
+  Protected Object
+  Protected len, Length, Position
+  Protected Space$, Content$
+  
+  len = 0
+  
+  PushListPosition(ParsePBGadget())
+  ForEach ParsePBGadget()
+    Object = ParsePBGadget()\ID\Argument ; *This\Object(ParsePBGadget()\ID\Argument$)\ID\Argument
+    
+    If IsWindow(Object)
+      ParsePBGadget()\X\Argument$ = Str(WindowX(Object))
+      ParsePBGadget()\Y\Argument$ = Str(WindowY(Object))
+      ParsePBGadget()\Width\Argument$ = Str(WindowWidth(Object))
+      ParsePBGadget()\Height\Argument$ = Str(WindowHeight(Object))
+      ParsePBGadget()\Caption\Argument$ = GetWindowTitle(Object)
+    EndIf
+    If IsGadget(Object)
+      ParsePBGadget()\X\Argument$ = Str(GadgetX(Object))
+      ParsePBGadget()\Y\Argument$ = Str(GadgetY(Object))
+      ParsePBGadget()\Width\Argument$ = Str(GadgetWidth(Object))
+      ParsePBGadget()\Height\Argument$ = Str(GadgetHeight(Object))
+      ParsePBGadget()\Caption\Argument$ = GetGadgetText(Object)
+    EndIf
+    
+  Next
+  
+  With ParsePBGadget()
+    ForEach ParsePBGadget()
+      Content$ = \Content$
+      Length = SavePBObject(ParsePBGadget())
+      
+      If (Length>\Length)
+        Position = \Position
+        This_File$ = InsertString(This_File$, Space(Length), 1+(\Position+\Length+len))
+        \Length = Length
+        \Position + Len
+        len + Length
+      Else
+        \Content$ + Space(\Length-Length)
+      EndIf
+      
+      This_File$=ReplaceString(This_File$, Content$, \Content$, #PB_String_CaseSensitive, Position, 1)
+    Next
+  EndWith
+  PopListPosition(ParsePBGadget())
+  
+  
+  If CreateFile(#File, Path$, #PB_UTF8)
+    WriteStringFormat(#File, #PB_UTF8)
+    WriteString(#File, This_File$, #PB_UTF8)
+    CloseFile(#File)
+    Result=#True
+    Debug "..успешно"
+  EndIf
+  
+  ProcedureReturn Result
+EndProcedure
+
+
+
+
+
+
+
+
+
+;-
+;- UI Окна редактора
+
+Define CurrentFile$ ; Путь к текущему файлу.
+
+
+Procedure EditorWindow_Open() 
+  Shared CurrentFile$
+  
+  Protected File$
+  File$=OpenFileRequester("Выберите файл с описанием окон", CurrentFile$, "Все файлы|*", 0)
+  If File$
+    If Editor_Open(File$)
+      CurrentFile$=File$
+    Else
+      MessageRequester("Ошибка", "Не удалось открыть файл.", #PB_MessageRequester_Error)
+    EndIf
+  EndIf 
+  
+EndProcedure
+
+
+Procedure EditorWindow_SaveAs()
+  Shared CurrentFile$
+  
+  Protected File$
+  File$ = SaveFileRequester("Сохранить файл как ..", CurrentFile$, "PureBasic (*.pb)|*.pb;*.pbi;*.pbf|All files (*.*)|*.*", 0)
+  If File$
+    If Editor_Save(File$)
+      CurrentFile$=File$
+    Else
+      MessageRequester("Ошибка","Не удалось сохранить файл.", #PB_MessageRequester_Error)
+    EndIf
+  EndIf
+  
+EndProcedure
+
+Procedure EditorWindow_Save()
+  Shared CurrentFile$
+  If Not (CurrentFile$ And Editor_Save(CurrentFile$))
+    EditorWindow_SaveAs()
+  EndIf
+EndProcedure
+
+
+
+;-
+
+
+Procedure OpenWindow_Editor(Flag.i=#PB_Window_SystemMenu, ParentID=0)
   If Not IsWindow(Window_0)
     Window_0 = OpenWindow(#PB_Any, 900, 100, 230, 600, "Window_0", Flag, ParentID)
     Window_0_Menu_0 = CreateMenu(#PB_Any, WindowID(Window_0))
@@ -1695,6 +1853,13 @@ Procedure Window_0_Open(Flag.i=#PB_Window_SystemMenu, ParentID=0)
     BindEvent(#PB_Event_Gadget, @Window_Event(), Window_0)
     BindEvent(#PB_Event_SizeWindow, @Window_0_Resize_Event(), Window_0)
     BindEvent(#PB_Event_Gadget, @Window_0_Panel_0_Resize_Event(), Window_0, Window_0_Panel_0, #PB_EventType_Resize)
+    
+    
+    
+    BindMenuEvent(Window_0_Menu_0, Window_0_Menu_0_Open, @EditorWindow_Open())
+    BindMenuEvent(Window_0_Menu_0, Window_0_Menu_0_Save_as, @EditorWindow_SaveAs())
+    BindMenuEvent(Window_0_Menu_0, Window_0_Menu_0_Save, @EditorWindow_Save())
+    
   EndIf
   
   ProcedureReturn Window_0
@@ -1716,6 +1881,11 @@ Procedure Window_0_Resize_Event()
   ResizeGadget(Window_0_Splitter_0, 5, 5, WindowWidth - 10, WindowHeight - 10)
   Window_0_Panel_0_Resize_Event()
 EndProcedure
+
+
+
+
+
 
 Procedure Window_Event()
   Protected I, File$, SubItem, UseGadgetList
@@ -1847,105 +2017,14 @@ Procedure Window_Event()
           
           SetGadgetState(Window_0_Panel_0, 0)
           
-        Case Window_0_Menu_0_Open ;- Open file
-          File$=OpenFileRequester("Выберите файл с описанием окон", "", "Все файлы|*", 0)
-          If File$
-            ParsePBFile(File$)
-            
-            PushListPosition(ParsePBGadget())
-            ForEach ParsePBGadget()
-              Object = *This\Object(ParsePBGadget()\ID\Argument$)\ID\Argument
-              
-              If IsGadget(Object) 
-                Select GadgetType(Object)
-                  Case #PB_GadgetType_Container, #PB_GadgetType_Panel, #PB_GadgetType_ScrollArea
-                    IsContainer = #True
-                EndSelect
-              EndIf
-              
-              AddGadgetItem (Window_0_Tree_0, -1, ParsePBGadget()\ID\Argument$, 0, ParsePBGadget()\SubLevel)
-            Next
-            PopListPosition(ParsePBGadget())
-            
-            SetGadgetItemState(Window_0_Tree_0, 0, #PB_Tree_Expanded|#PB_Tree_Selected)
-            
-          EndIf 
-          
-        Case Window_0_Menu_0_Save_as ;- Save as file
-          Protected len, Length, Position
-          Protected Space$, Content$, StringtoAdd$ = "999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"
-          
-          len = 0
-          ClearDebugOutput()
-          
-          PushListPosition(ParsePBGadget())
-          ForEach ParsePBGadget()
-            Object = ParsePBGadget()\ID\Argument ; *This\Object(ParsePBGadget()\ID\Argument$)\ID\Argument
-            
-            If IsWindow(Object)
-              ParsePBGadget()\X\Argument$ = Str(WindowX(Object))
-              ParsePBGadget()\Y\Argument$ = Str(WindowY(Object))
-              ParsePBGadget()\Width\Argument$ = Str(WindowWidth(Object))
-              ParsePBGadget()\Height\Argument$ = Str(WindowHeight(Object))
-              ParsePBGadget()\Caption\Argument$ = GetWindowTitle(Object)
-            EndIf
-            If IsGadget(Object)
-              ParsePBGadget()\X\Argument$ = Str(GadgetX(Object))
-              ParsePBGadget()\Y\Argument$ = Str(GadgetY(Object))
-              ParsePBGadget()\Width\Argument$ = Str(GadgetWidth(Object))
-              ParsePBGadget()\Height\Argument$ = Str(GadgetHeight(Object))
-              ParsePBGadget()\Caption\Argument$ = GetGadgetText(Object)
-            EndIf
-            
-          Next
-          
-          With ParsePBGadget()
-            ForEach ParsePBGadget()
-              Content$ = \Content$
-              Length = SavePBObject(ParsePBGadget())
-              
-              If (Length>\Length)
-                Position = \Position
-                This_File$ = InsertString(This_File$, Space(Length), 1+(\Position+\Length+len))
-                \Length = Length
-                \Position + Len
-                len + Length
-              Else
-                \Content$ + Space(\Length-Length)
-              EndIf
-              
-              ReplaceString(This_File$, Content$, \Content$, #PB_String_InPlace, Position, 1)
-            Next
-          EndWith
-          PopListPosition(ParsePBGadget())
-          
-          Debug "; >>> - "+StringtoAdd$
-          Debug ""
-          Debug This_File$
-          
-          
-        Case Window_0_Menu_0_Save ;- Save file
-          File$="test1.pb"
-          Protected Title$=File$+"/save"
-          Protected Pattern$="PureBasic (*.pb)|*.pb;*.pbi;*.pbf|All files (*.*)|*.*"
-          
-          File$ = SaveFileRequester(Title$,File$,Pattern$,0)
-          If File$
-            If OpenFile(#File, File$, #PB_UTF8) 
-              WriteStringFormat(#File, #PB_UTF8)
-              WriteString(#File, This_File$, #PB_UTF8) 
-              CloseFile(#File)                       
-            Else
-              MessageRequester("Information","may not create the file!")
-            EndIf
-          EndIf 
+
           
       EndSelect
   EndSelect
 EndProcedure
 
 CompilerIf #PB_Compiler_IsMainFile
-  MainWindow = Window_0_Open(#PB_Window_SystemMenu|
+  MainWindow = OpenWindow_Editor(#PB_Window_SystemMenu|
                              #PB_Window_SizeGadget)
   
   While IsWindow(MainWindow)
@@ -1961,8 +2040,8 @@ CompilerIf #PB_Compiler_IsMainFile
 CompilerEndIf
 
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 1926
-; FirstLine = 1699
+; CursorPosition = 1554
+; FirstLine = 1407
 ; Folding = ------
 ; EnableXP
 ; CompileSourceDirectory
