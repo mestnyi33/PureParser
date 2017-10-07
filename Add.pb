@@ -1,7 +1,7 @@
-﻿Procedure AddPBFunction(Arg$, Index)
+﻿Procedure AddPBFunction(*Function.FUNCTION_STRUCT, Arg$, Index)
   Protected Result, I
   
-  With Function()
+  With *Function
     Select \Type\Get$
       Case "OpenWindow", 
            "ButtonGadget","StringGadget","TextGadget","CheckBoxGadget",
@@ -50,13 +50,13 @@
             \Param1\Def$ = Arg$
             Select \Type\Get$ 
               Case "SplitterGadget"      
-                \Param1\Get = *This\Object(Arg$)\ID\Get
+                \Param1\Get = ID(Arg$)
                 
               Case "ImageGadget", "ButtonImageGadget"     
                 \Param1\Def$=Arg$
                 \Param1\Get$=GetStr(Arg$)
                 
-                Result = *This\Object(\Param1\Get$)\ID\Get 
+                Result = ID(\Param1\Get$) 
                 If IsImage(Result)
                   \Param1\Get = ImageID(Result)
                 EndIf
@@ -70,7 +70,7 @@
             \Param2\Def$ = Arg$
             Select \Type\Get$ 
               Case "SplitterGadget"      
-                \Param2\Get = *This\Object(Arg$)\ID\Get
+                \Param2\Get = ID(Arg$)
               Default
                 \Param2\Get = Val(Arg$)
             EndSelect
