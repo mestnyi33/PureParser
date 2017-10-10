@@ -1643,7 +1643,17 @@ EndProcedure
 ;-
 ;- PI Редактора
 
+Define CurrentFile$ ; Путь к текущему файлу.
+
+Procedure.s Editor_GetCurrentFile()
+  Shared CurrentFile$
+  ProcedureReturn CurrentFile$
+EndProcedure
+
+
+
 Procedure Editor_Open(Path$) ; Открытие файла
+  Protected CurrentFile$
   Protected Result
   Debug "Открываю файл '"+Path$+"'"
   
@@ -1669,6 +1679,7 @@ Procedure Editor_Open(Path$) ; Открытие файла
     SetGadgetItemState(Window_0_Tree_0, 0, #PB_Tree_Expanded|#PB_Tree_Selected)
     
     Result=#True
+    CurrentFile$=Path$
     Debug "..успешно"
   EndIf 
   
@@ -1677,6 +1688,7 @@ EndProcedure
 
 
 Procedure Editor_Save(Path$) ; Процедура сохранения файла
+  Protected CurrentFile$
   Protected Result
   
   Debug "Сохраняю файл '"+Path$+"'"
@@ -1734,6 +1746,7 @@ Procedure Editor_Save(Path$) ; Процедура сохранения файл�
     WriteString(#File, This_File$, #PB_UTF8)
     CloseFile(#File)
     Result=#True
+    CurrentFile$=Path$
     Debug "..успешно"
   EndIf
   
@@ -1751,18 +1764,13 @@ EndProcedure
 ;-
 ;- UI Окна редактора
 
-Define CurrentFile$ ; Путь к текущему файлу.
 
 
 Procedure EditorWindow_Open() 
-  Shared CurrentFile$
-  
   Protected File$
-  File$=OpenFileRequester("Выберите файл с описанием окон", CurrentFile$, "Все файлы|*", 0)
+  File$=OpenFileRequester("Выберите файл с описанием окон", Editor_GetCurrentFile(), "Все файлы|*", 0)
   If File$
-    If Editor_Open(File$)
-      CurrentFile$=File$
-    Else
+    If Not Editor_Open(File$)
       MessageRequester("Ошибка", "Не удалось открыть файл.", #PB_MessageRequester_Error)
     EndIf
   EndIf 
@@ -1771,14 +1779,10 @@ EndProcedure
 
 
 Procedure EditorWindow_SaveAs()
-  Shared CurrentFile$
-  
   Protected File$
-  File$ = SaveFileRequester("Сохранить файл как ..", CurrentFile$, "PureBasic (*.pb)|*.pb;*.pbi;*.pbf|All files (*.*)|*.*", 0)
+  File$ = SaveFileRequester("Сохранить файл как ..", Editor_GetCurrentFile(), "PureBasic (*.pb)|*.pb;*.pbi;*.pbf|All files (*.*)|*.*", 0)
   If File$
-    If Editor_Save(File$)
-      CurrentFile$=File$
-    Else
+    If Not Editor_Save(File$)
       MessageRequester("Ошибка","Не удалось сохранить файл.", #PB_MessageRequester_Error)
     EndIf
   EndIf
@@ -1786,7 +1790,8 @@ Procedure EditorWindow_SaveAs()
 EndProcedure
 
 Procedure EditorWindow_Save()
-  Shared CurrentFile$
+  Protected CurrentFile$
+  CurrentFile$=Editor_GetCurrentFile()
   If Not (CurrentFile$ And Editor_Save(CurrentFile$))
     EditorWindow_SaveAs()
   EndIf
@@ -2042,8 +2047,15 @@ Procedure Window_Event()
 EndProcedure
 
 CompilerIf #PB_Compiler_IsMainFile
-  MainWindow = OpenWindow_Editor(#PB_Window_SystemMenu|
-                             #PB_Window_SizeGadget)
+  
+  
+  MainWindow = OpenWindow_Editor(#PB_Window_SystemMenu|#PB_Window_SizeGadget) ; Инициализация окна редактора
+  
+  
+  Select CountProgramParameters()                 ; Обработка параметров программы
+    Case 1 : Editor_Open(ProgramParameter(0))
+  EndSelect
+  
   
   While IsWindow(MainWindow)
     Select WaitWindowEvent()
@@ -2058,8 +2070,9 @@ CompilerIf #PB_Compiler_IsMainFile
 CompilerEndIf
 
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 1799
-; FirstLine = 1847
+; CursorPosition = 2054
+; FirstLine = 2021
 ; Folding = -------
 ; EnableXP
+; Executable = ..\..\Programs\PureBasic\PureParser.exe
 ; CompileSourceDirectory
