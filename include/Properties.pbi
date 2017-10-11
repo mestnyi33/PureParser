@@ -1,4 +1,8 @@
-﻿;-
+﻿CompilerIf #PB_Compiler_IsMainFile
+  XIncludeFile "Flag.pbi"
+CompilerEndIf
+
+;-
 ;- Module (Properties)
 DeclareModule Properties
   EnableExplicit
@@ -31,9 +35,12 @@ DeclareModule Properties
     
     Font.i
     Seperator.i
+    Help$
   EndStructure
   
   Global NewList Properties.PropertiesStruct()
+  
+  Declare$ Help(Gadget)
   
   Declare UpdatePropertiesItem( Item )
   Declare UpdateProperties( Object, Class$, Flag$ )
@@ -46,26 +53,89 @@ DeclareModule Properties
 EndDeclareModule
 
 Module Properties
-  ;UseModule CC_Form
   Declare Events()
-  Global LineGadget =- 1
-  
-  Global IsShow
-  Global Style.b = 0
   
   Macro Clip(Gadget)
     CompilerSelect #PB_Compiler_OS
       CompilerCase #PB_OS_Windows
-        Define ClipMacroGadgetHeight = GadgetHeight( Gadget )
+        Define ___ClipMacroGadgetHeight___ = GadgetHeight( Gadget )
+        ; SetWindowLongPtr_(GadgetID( Gadget ),#GWL_STYLE,GetWindowLongPtr_(GadgetID( Gadget ),#GWL_STYLE) | #BS_MULTILINE)
         SetWindowLongPtr_( GadgetID( Gadget ), #GWL_STYLE, GetWindowLongPtr_( GadgetID( Gadget ), #GWL_STYLE )|#WS_CLIPSIBLINGS )
-        If ClipMacroGadgetHeight And GadgetType( Gadget ) = #PB_GadgetType_ComboBox
-          ResizeGadget( Gadget, #PB_Ignore, #PB_Ignore, #PB_Ignore, ClipMacroGadgetHeight )
+        If ___ClipMacroGadgetHeight___ And GadgetType( Gadget ) = #PB_GadgetType_ComboBox
+          ResizeGadget( Gadget, #PB_Ignore, #PB_Ignore, #PB_Ignore, ___ClipMacroGadgetHeight___ )
         EndIf
+        SetWindowPos_( GadgetID( Gadget ), #GW_HWNDFIRST, 0,0,0,0, #SWP_NOMOVE|#SWP_NOSIZE )
     CompilerEndSelect
   EndMacro
   
-  Global Font
+  Global LineGadget =- 1
+  
+  Procedure.q GetWindowFlag(Window)
+    Flag::GetWindow(Window)
+  EndProcedure
+  
+  Procedure SetWindowFlag(Window, Flag.q)
+    Flag::SetWindow(Window, Flag)
+  EndProcedure
+  
+  Procedure RemoveWindowFlag(Window, Flag.q)
+    Flag::RemoveWindow(Window, Flag)
+  EndProcedure
+  
+  
+  Procedure IsHideGadget(Gadget) ;Returns TRUE is gadget hide
+    If IsGadget(Gadget)
+      Protected GadgetID = GadgetID(Gadget)
       
+      CompilerSelect #PB_Compiler_OS 
+        CompilerCase #PB_OS_Windows : ProcedureReturn Bool(IsWindowVisible_(GadgetID)=0)
+        CompilerCase #PB_OS_MacOS   : ProcedureReturn Bool(CocoaMessage(0, GadgetID, "isVisible")=0)
+        CompilerCase #PB_OS_Linux
+          Protected *Widget.GtkWidget = GadgetID
+          If (GadgetType(Gadget) = #PB_GadgetType_Container Or
+              GadgetType(Gadget) = #PB_GadgetType_Panel)
+            GadgetID = *Widget\parent
+          Else  
+            GadgetID = *Widget\object
+          EndIf
+          
+          ProcedureReturn Bool(gtk_widget_get_visible(GadgetID)=0)
+          
+      CompilerEndSelect
+    EndIf
+  EndProcedure
+  
+  Procedure IsDisableGadget(Gadget) ;Returns TRUE is gadget disabled
+    If IsGadget(Gadget)
+      CompilerSelect #PB_Compiler_OS 
+        CompilerCase #PB_OS_Windows : ProcedureReturn Bool(IsWindowEnabled_(GadgetID(Gadget))=0)
+        CompilerCase#PB_OS_Linux    : ProcedureReturn Bool(gtk_widget_get_sensitive(GadgetID(Gadget))=0)
+        CompilerCase #PB_OS_MacOS   : ProcedureReturn Bool(CocoaMessage(0, GadgetID(Gadget), "isDisable")=0)
+      CompilerEndSelect
+    EndIf
+  EndProcedure
+  
+  Procedure IsHideWindow(Window) ;Returns TRUE is window hide
+    If IsWindow(Window)
+      CompilerSelect #PB_Compiler_OS 
+        CompilerCase #PB_OS_Windows : ProcedureReturn Bool(IsWindowVisible_(WindowID(Window))=0)
+        CompilerCase #PB_OS_Linux   : ProcedureReturn Bool(gtk_widget_get_visible(WindowID(Window))=0)
+        CompilerCase #PB_OS_MacOS   : ProcedureReturn Bool(CocoaMessage(0, WindowID(Window), "isVisible")=0)
+      CompilerEndSelect
+    EndIf
+  EndProcedure
+  
+  Procedure IsDisableWindow(Window) ;Returns TRUE is window disabled
+    If IsWindow(Window)
+      CompilerSelect #PB_Compiler_OS 
+        CompilerCase #PB_OS_Windows : ProcedureReturn Bool(IsWindowEnabled_(WindowID(Window))=0)
+        CompilerCase#PB_OS_Linux    : ProcedureReturn Bool(gtk_widget_get_sensitive(WindowID(Window))=0)
+        CompilerCase #PB_OS_MacOS   : ProcedureReturn Bool(CocoaMessage(0, WindowID(Window), "isDisable")=0)
+      CompilerEndSelect
+    EndIf
+  EndProcedure
+  
+  ;-    
   Procedure SetLayoutLang( kbLayout$ );
     #ENGLISH = "00000409"             ;
     #RUSSIAN = "00000419"             ;
@@ -151,69 +221,17 @@ Module Properties
     CompilerEndSelect
   EndProcedure
   
-  Procedure IsHideGadget(Gadget) ;Returns TRUE is gadget hide
-    
-    If IsGadget(Gadget)
-      Protected GadgetID = GadgetID(Gadget)
-      
-      CompilerSelect #PB_Compiler_OS 
-        CompilerCase #PB_OS_Windows 
-          ProcedureReturn Bool(IsWindowVisible_(GadgetID)=0)
-          
-        CompilerCase #PB_OS_Linux
-          Protected *Widget.GtkWidget = GadgetID
-          If (GadgetType(Gadget) = #PB_GadgetType_Container Or
-              GadgetType(Gadget) = #PB_GadgetType_Panel)
-            GadgetID = *Widget\parent
-          Else  
-            GadgetID = *Widget\object
-          EndIf
-          
-          ProcedureReturn Bool(gtk_widget_get_visible(GadgetID)=0)
-      CompilerEndSelect
-    EndIf
+  Procedure$ GetCheckedText(Gadget)
+    Protected i, Result$
+    For i=0 To CountGadgetItems(Gadget)-1
+      If GetGadgetItemState(Gadget, i) & #PB_Tree_Checked  
+        Result$ + GetGadgetItemText(Gadget, i)+"|"
+      EndIf
+    Next
+    ProcedureReturn Trim(Result$, "|")
   EndProcedure
   
-  Procedure IsDisableGadget(Gadget) ;Returns TRUE is gadget disabled
-    If IsGadget(Gadget)
-      CompilerSelect #PB_Compiler_OS 
-        CompilerCase #PB_OS_Windows 
-          ProcedureReturn Bool(IsWindowEnabled_(GadgetID(Gadget))=0)
-          
-        CompilerCase#PB_OS_Linux
-          ProcedureReturn Bool(gtk_widget_get_sensitive(GadgetID(Gadget))=0)
-          
-      CompilerEndSelect
-    EndIf
-  EndProcedure
-  
-  Procedure IsHideWindow(Window) ;Returns TRUE is window hide
-    If IsWindow(Window)
-      CompilerSelect #PB_Compiler_OS 
-        CompilerCase #PB_OS_Windows 
-          ProcedureReturn Bool(IsWindowVisible_(WindowID(Window))=0)
-          
-        CompilerCase #PB_OS_Linux
-          ProcedureReturn Bool(gtk_widget_get_visible(WindowID(Window))=0)
-          
-      CompilerEndSelect
-    EndIf
-  EndProcedure
-  
-  Procedure IsDisableWindow(Window) ;Returns TRUE is window disabled
-    If IsWindow(Window)
-      CompilerSelect #PB_Compiler_OS 
-        CompilerCase #PB_OS_Windows 
-          ProcedureReturn Bool(IsWindowEnabled_(WindowID(Window))=0)
-          
-        CompilerCase#PB_OS_Linux
-          ProcedureReturn Bool(gtk_widget_get_sensitive(WindowID(Window))=0)
-          
-      CompilerEndSelect
-    EndIf
-  EndProcedure
-  
-  Procedure$ Flag( Type )
+  Procedure$ GetPBFlag( Type ) ; 
     Protected Flags.S
     
     #PB_GadgetType_Window = -1
@@ -224,19 +242,19 @@ Module Properties
     Select Type
       Case #PB_GadgetType_Window        
         ;{- Ok
-        Flags.S = "#PB_Window_SystemMenu|"+
-                  "#PB_Window_TitleBar|"+
+        Flags.S = "#PB_Window_TitleBar|"+
                   "#PB_Window_BorderLess|"+
-                  "#PB_Window_Invisible|"+
-                  "#PB_Window_SizeGadget|"+
+                  "#PB_Window_SystemMenu|"+
                   "#PB_Window_MaximizeGadget|"+
                   "#PB_Window_MinimizeGadget|"+
                   "#PB_Window_ScreenCentered|"+
+                  "#PB_Window_SizeGadget|"+
                   "#PB_Window_WindowCentered|"+
                   "#PB_Window_Tool|"+
                   "#PB_Window_Normal|"+
                   "#PB_Window_Minimize|"+
                   "#PB_Window_Maximize|"+
+                  "#PB_Window_Invisible|"+
                   "#PB_Window_NoActivate|"+
                   "#PB_Window_NoGadgets|"
         ;}
@@ -454,14 +472,55 @@ Module Properties
     ProcedureReturn Flags.S
   EndProcedure
   
-  Procedure$ GetCheckedText(Gadget)
-    Protected i, Result$
-    For i=0 To CountGadgetItems(Gadget)-1
-      If GetGadgetItemState(Gadget, i) & #PB_Tree_Checked  
-        Result$ + GetGadgetItemText(Gadget, i)+"|"
+  Procedure SetPBFlag(Object)
+    Protected i, Gadget = EventGadget() ; Properties()\Tree
+    
+    If IsGadget(Gadget)
+      i=GetGadgetState(Gadget)
+      
+      If Not GetGadgetItemState(Gadget, i) & #PB_Tree_Checked
+        Select GetGadgetItemText(Gadget, i)
+          Case "#PB_Window_SystemMenu" : RemoveWindowFlag(Object, #PB_Window_SystemMenu)
+          Case "#PB_Window_MinimizeGadget" : RemoveWindowFlag(Object, #PB_Window_MinimizeGadget)
+          Case "#PB_Window_MaximizeGadget" : RemoveWindowFlag(Object, #PB_Window_MaximizeGadget)
+          Case "#PB_Window_SizeGadget" : RemoveWindowFlag(Object, #PB_Window_SizeGadget)
+          Case "#PB_Window_Invisible" : RemoveWindowFlag(Object, #PB_Window_Invisible)
+          Case "#PB_Window_TitleBar" : RemoveWindowFlag(Object, #PB_Window_TitleBar)
+          Case "#PB_Window_Tool" : RemoveWindowFlag(Object, #PB_Window_Tool)
+          Case "#PB_Window_BorderLess" : RemoveWindowFlag(Object, #PB_Window_BorderLess)
+          Case "#PB_Window_ScreenCentered" : RemoveWindowFlag(Object, #PB_Window_ScreenCentered)
+          Case "#PB_Window_WindowCentered" : RemoveWindowFlag(Object, #PB_Window_WindowCentered)
+          Case "#PB_Window_Maximize" : RemoveWindowFlag(Object, #PB_Window_Maximize)
+          Case "#PB_Window_Minimize" : RemoveWindowFlag(Object, #PB_Window_Minimize)
+          Case "#PB_Window_NoGadgets" : RemoveWindowFlag(Object, #PB_Window_NoGadgets)
+          Case "#PB_Window_NoActivate" : RemoveWindowFlag(Object, #PB_Window_NoActivate)
+        EndSelect
       EndIf
-    Next
-    ProcedureReturn Trim(Result$, "|")
+      
+      If GetGadgetItemState(Gadget, i) & #PB_Tree_Checked  
+        Select GetGadgetItemText(Gadget, i)
+          Case "#PB_Window_SystemMenu" : SetWindowFlag(Object, #PB_Window_SystemMenu)
+          Case "#PB_Window_MinimizeGadget" : SetWindowFlag(Object, #PB_Window_MinimizeGadget)
+          Case "#PB_Window_MaximizeGadget" : SetWindowFlag(Object, #PB_Window_MaximizeGadget)
+          Case "#PB_Window_SizeGadget" : SetWindowFlag(Object, #PB_Window_SizeGadget)
+          Case "#PB_Window_Invisible" : SetWindowFlag(Object, #PB_Window_Invisible)
+          Case "#PB_Window_TitleBar" : SetWindowFlag(Object, #PB_Window_TitleBar)
+          Case "#PB_Window_Tool" : SetWindowFlag(Object, #PB_Window_Tool)
+          Case "#PB_Window_BorderLess" : SetWindowFlag(Object, #PB_Window_BorderLess)
+          Case "#PB_Window_ScreenCentered" : SetWindowFlag(Object, #PB_Window_ScreenCentered)
+          Case "#PB_Window_WindowCentered" : SetWindowFlag(Object, #PB_Window_WindowCentered)
+          Case "#PB_Window_Maximize" : SetWindowFlag(Object, #PB_Window_Maximize)
+          Case "#PB_Window_Minimize" : SetWindowFlag(Object, #PB_Window_Minimize)
+          Case "#PB_Window_NoGadgets" : SetWindowFlag(Object, #PB_Window_NoGadgets)
+          Case "#PB_Window_NoActivate" : SetWindowFlag(Object, #PB_Window_NoActivate)
+        EndSelect       
+      EndIf
+      
+      ; Это что бы не нарушалось закрытие окна
+      ; трии гаджета после потери фокуса
+      SetActiveWindow(EventWindow())
+    EndIf
+    
   EndProcedure
   
   Procedure SetCheckedText(Gadget, Text$)
@@ -481,8 +540,12 @@ Module Properties
     With Properties()
       If IsGadget( Object ) 
         Select Trim(\Info.S)
-          Case "Text:"   : SetGadgetText(\String, GetGadgetText(Object))
+          Case "ID:"   
+            If IsGadget(\CheckBox)
+              SetGadgetState(\CheckBox, Bool(Asc(\Class$) = '#'))
+            EndIf
             
+          Case "Text:"   : SetGadgetText(\String, GetGadgetText(Object))
           Case "Hide:"   : SetGadgetState(\ComboBox, IsHideGadget(Object))
           Case "Disable:": SetGadgetState(\ComboBox, IsDisableGadget(Object))
           Case "Font:"   : SetGadgetText(\String, "("+ Str(FontSize( GetGadgetFont(Object) )) +") "+ FontName( GetGadgetFont(Object) ) )   
@@ -536,9 +599,9 @@ Module Properties
           Protected IC, Len, height
           If IsGadget(\Tree)
             If IsGadget(Object)
-              \Text = Flag(GadgetType(Object))
+              \Text = GetPBFlag(GadgetType(Object))
             ElseIf IsWindow(Object)
-              \Text = Flag(-1)
+              \Text = GetPBFlag(-1)
             EndIf
             
             ClearGadgetItems(\Tree)
@@ -556,7 +619,7 @@ Module Properties
             
             If height
               ResizeWindow(\TreeWindow, #PB_Ignore, #PB_Ignore, len*8, height)
-              ResizeGadget(\Tree, #PB_Ignore, #PB_Ignore, WindowWidth(\TreeWindow), WindowHeight(\TreeWindow))
+              ResizeGadget(\Tree, #PB_Ignore, #PB_Ignore, len*8, height)
             EndIf
           EndIf
       EndSelect
@@ -659,8 +722,8 @@ Module Properties
           Protected GadgetWidth = GadgetX + GadgetWidth(Gadget)
           Protected GadgetHeight = GadgetY + GadgetHeight(Gadget)
           
-          If Not Bool(MouseX >= GadgetX And MouseY >= GadgetY And  
-                      MouseX =< GadgetWidth And MouseY =< GadgetHeight)
+          If Bool(WindowMouseX(EventWindow())=-1 And WindowMouseY(EventWindow())=-1) And 
+             Not Bool(MouseX >= GadgetX And MouseY >= GadgetY And MouseX =< GadgetWidth And MouseY =< GadgetHeight)
             PostEvent(#PB_Event_Gadget, Window, Gadget, #PB_EventType_LeftClick)
           EndIf
         EndIf
@@ -688,7 +751,6 @@ Module Properties
                   Case #PB_EventType_LostFocus ; : PostEvent(#PB_Event_Gadget, EventWindow(), \Gadget, #PB_EventType_LostFocus, \String )
                     If GetGadgetText(\String) = "" : SetGadgetText(\String, \Str ) : EndIf ; Вот тут и понадобятся данные
                     
-                    Change( \Object )
                     
                 EndSelect
                 
@@ -734,10 +796,12 @@ Module Properties
                     SetCheckedText(\Tree, \Flag$)
                     
                   Case #PB_EventType_LostFocus 
-                    SetGadgetText(\String, GetCheckedText(\Tree))
+                    \Flag$ = GetCheckedText(\Tree)
+                    SetGadgetText(\String, \Flag$)
                     
                   Case #PB_EventType_Change ; : PostEvent(#PB_Event_Gadget, EventWindow(), \Gadget, #PB_EventType_Change, \Tree )
                     Change( \Object )
+                    SetPBFlag(\Object)
                     
                 EndSelect
                 
@@ -762,6 +826,17 @@ Module Properties
                     Else
                       PostEvent(#PB_Event_Gadget, EventWindow(), GetGadgetData(\Button), #PB_EventType_LeftClick, \Button )
                     EndIf
+                EndSelect
+                
+              Case \CheckBox
+                Select EventType()
+                  Case #PB_EventType_LeftClick 
+                    If GetGadgetState(\CheckBox) 
+                      SetGadgetText(GetGadgetData(\CheckBox), "#"+GetGadgetText(GetGadgetData(\CheckBox)))
+                    Else
+                      SetGadgetText(GetGadgetData(\CheckBox), Trim(GetGadgetText(GetGadgetData(\CheckBox)), "#"))
+                    EndIf
+                    PostEvent(#PB_Event_Gadget, EventWindow(), GetGadgetData(\CheckBox), #PB_EventType_Change, \CheckBox )
                 EndSelect
             EndSelect
           EndWith
@@ -806,12 +881,6 @@ Module Properties
             If IsGadget(\String)
               ResizeGadget(\String , LinePos,#PB_Ignore,W,#PB_Ignore)
             EndIf
-            
-            If IsGadget(\Tree)
-              ResizeGadget(\Tree, LinePos,#PB_Ignore,W,#PB_Ignore)
-            EndIf
-            
-            
           Next
           
         EndIf
@@ -827,7 +896,7 @@ Module Properties
       
       If \Font = #False
         \Font = GetGadgetFont(#PB_Default)
-        \Font = LoadFont(#PB_Any, PeekS(@\Font)  ,  10, #PB_Font_Bold )
+        \Font = LoadFont(#PB_Any, PeekS(@\Font),  8);, #PB_Font_Bold )
       EndIf
       
       X = 16
@@ -843,7 +912,7 @@ Module Properties
           ClipOutput(2,Y,Width,\ItemHeight)
           DrawingMode(#PB_2DDrawing_Default)
           Box(X,Y,Width,\ItemHeight, $F0F0F0)
-          ;Line(X,Y,1,\ItemHeight,$C0C0C0)
+          ; Line(X,Y,1,\ItemHeight,$C0C0C0)
           
           DrawingMode(#PB_2DDrawing_Outlined)
           Box(2,Y+(\ItemHeight-12)/2,12,12, 0)
@@ -851,9 +920,7 @@ Module Properties
           
           DrawingMode(#PB_2DDrawing_Transparent)
           DrawingFont(FontID(\Font) )
-          DrawText(X+3,Y+3,\Info.S,0)
-          
-          
+          DrawText(X+3,Y+(\ItemHeight-TextHeight(\Info.S))/2+1,\Info.S,0)
         Else
           ClipOutput(X,Y+1,Width-1,\ItemHeight-1)
           DrawingMode(#PB_2DDrawing_Default)
@@ -861,7 +928,7 @@ Module Properties
           
           DrawingMode(#PB_2DDrawing_Transparent)
           DrawingFont(FontID(\Font))
-          DrawText(Width-5-TextWidth(\Info.S),Y+TextHeight(\Info.S)/3,\Info.S,0)
+          DrawText(Width-5-TextWidth(\Info.S),Y+(\ItemHeight-TextHeight(\Info.S))/2+1,\Info.S,0)
           
           DrawingMode(#PB_2DDrawing_Outlined)
           Box(X,Y+1,Width-17,\ItemHeight-1, $A9A9A9)
@@ -924,8 +991,17 @@ Module Properties
   EndProcedure 
   
   Procedure Gadget( Gadget, Width, Height, LinePos = 75 )
+    Protected ItemHeight
     Shared LineGadget
-    Gadget = ScrollAreaGadget( #PB_Any,0,0,Width,Height, Width,Height,0,#PB_ScrollArea_Single)
+    
+    CompilerSelect #PB_Compiler_OS
+      CompilerCase #PB_OS_Windows
+        ItemHeight = 24
+      CompilerCase #PB_OS_Linux
+        ItemHeight = 34
+    CompilerEndSelect
+    
+    Gadget = ScrollAreaGadget( #PB_Any,0,0,Width,Height, Width,Height,ItemHeight,#PB_ScrollArea_Single)
     
     CompilerSelect #PB_Compiler_OS
       CompilerCase #PB_OS_Windows
@@ -945,28 +1021,12 @@ Module Properties
   EndProcedure 
   
   Procedure AddItem( Gadget, Text.S, GadgetType)
-    Protected Y,W,Width, Result =- 1
+    Protected Y,W,Width, Result =- 1, Bw = 19
+    ;Protected *This.PropertiesStruct = GetGadgetData(Gadget)
+
     If OpenGadgetList( Gadget )
       AddElement(Properties())
       With Properties()
-        
-        CompilerSelect #PB_Compiler_OS
-          CompilerCase #PB_OS_Windows
-            \ItemHeight = 24
-          CompilerCase #PB_OS_Linux
-            \ItemHeight = 34
-        CompilerEndSelect
-        Font = LoadFont(#PB_Any,"Consolas",8 ) 
-        \Font=Font
-        
-        Y = ListIndex(Properties()) * \ItemHeight
-        \LinePos = GadgetWidth(LineGadget)
-        
-        SetGadgetAttribute(Gadget, #PB_ScrollArea_InnerHeight, ListSize(Properties()) * \ItemHeight)
-        ResizeGadget(LineGadget,#PB_Ignore,#PB_Ignore,#PB_Ignore,GetGadgetAttribute(Gadget,#PB_ScrollArea_InnerHeight))
-        
-        Protected Bw = 19
-        Width = GetGadgetAttribute(Gadget,#PB_ScrollArea_InnerWidth) - \LinePos 
         
         \Tree =- 1
         \Spin =- 1
@@ -979,6 +1039,15 @@ Module Properties
         \Gadget = Gadget
         \GadgetType = GadgetType
         
+        \LinePos = GadgetWidth(LineGadget)
+        \Font = LoadFont(#PB_Any,"Consolas",8 ) 
+        \ItemHeight = GetGadgetAttribute(\Gadget,#PB_ScrollArea_ScrollStep)
+        
+        SetGadgetAttribute(\Gadget, #PB_ScrollArea_InnerHeight, ListSize(Properties()) * \ItemHeight)
+        ResizeGadget(LineGadget,#PB_Ignore,#PB_Ignore,#PB_Ignore, GetGadgetAttribute(\Gadget,#PB_ScrollArea_InnerHeight))
+        
+        Y = ListIndex(Properties()) * \ItemHeight
+        Width = GetGadgetAttribute(\Gadget,#PB_ScrollArea_InnerWidth) - \LinePos 
         
         ;{ - Здесь происходит разделение текста
         Protected IT.I,String.S,Character.C = ':'
@@ -1003,34 +1072,38 @@ Module Properties
           Protected UseGadgetList
           CloseGadgetList()
           UseGadgetList = UseGadgetList(0)
-          \TreeWindow = OpenWindow(#PB_Any, \LinePos,Y + 1,Width, 100, "", #PB_Window_BorderLess|#PB_Window_NoActivate|#PB_Window_Invisible)
+          \TreeWindow = OpenWindow(#PB_Any, \LinePos,Y + 1,Width, 100, "", #PB_Window_BorderLess|#PB_Window_NoActivate|#PB_Window_Invisible, UseGadgetList)
           \Tree = TreeGadget(#PB_Any, 0,0,0,0, #PB_Tree_NoLines|#PB_Tree_NoButtons|#PB_Tree_CheckBoxes) : Result = \Tree
+          If IsFont(\Font) : SetGadgetFont(\Tree, FontID(\Font)) : EndIf
           BindEvent(#PB_Event_DeactivateWindow, @Events(), \TreeWindow)
-          StickyWindow(\TreeWindow, #True)
-          SetGadgetFont(\Tree, FontID(Font))
-          ;BindGadgetEvent(\Tree, @Events())
+          
           BindEvent(#PB_Event_Gadget, @Events(), GetActiveWindow(), \Tree)
+          BindGadgetEvent(\Tree, @Events(), #PB_EventType_Change)
+          
+          StickyWindow(\TreeWindow, #True)
           UseGadgetList(UseGadgetList)
-          OpenGadgetList( Gadget )
+          OpenGadgetList( \Gadget )
           Clip(\Tree) 
           
-          \String = StringGadget(#PB_Any, \LinePos,Y + 1,Width,\ItemHeight - 1,\Text.S) :Clip(\String) ; : Result = \String
+          \String = StringGadget(#PB_Any, \LinePos,Y + 1,Width,\ItemHeight - 1,\Text.S) :Clip(\String)
+          If IsFont(\Font) : SetGadgetFont(\String, FontID(\Font)) : EndIf
           BindGadgetEvent(\String,@Events())
-          SetGadgetFont(\String, FontID(Font))
           
         ElseIf ((GadgetType & #PB_GadgetType_Spin) = #PB_GadgetType_Spin)
           \Spin = SpinGadget(#PB_Any, \LinePos,Y + 1,Width,\ItemHeight - 1,-32767,32767,#PB_Spin_Numeric) : Result = \Spin
+          If IsFont(\Font) : SetGadgetFont(\Spin, FontID(\Font)) : EndIf
           CompilerSelect #PB_Compiler_OS
             CompilerCase #PB_OS_Windows
               SetWindowLongPtr_( GetWindow_(GadgetID( \Spin ), #GW_HWNDNEXT), #GWL_STYLE, GetWindowLongPtr_( GetWindow_(GadgetID( \Spin ), #GW_HWNDNEXT), #GWL_STYLE )|#WS_CLIPSIBLINGS )
               SetWindowLongPtr_( GadgetID( \Spin ), #GWL_STYLE, GetWindowLongPtr_( GadgetID( \Spin ), #GWL_STYLE )|#WS_CLIPSIBLINGS|#SS_CENTER )
           CompilerEndSelect
           BindGadgetEvent(\Spin, @Events())
-          SetGadgetFont(\Spin, FontID(Font))
+          
         
         ElseIf ((GadgetType & #PB_GadgetType_ComboBox) = #PB_GadgetType_ComboBox)
           Protected IC 
           \ComboBox = ComboBoxGadget(#PB_Any, \LinePos,Y + 1,Width,\ItemHeight - 1) :Clip(\ComboBox): Result = \ComboBox
+          If IsFont(\Font) : SetGadgetFont(\ComboBox, FontID(\Font)) : EndIf
           For IC=0 To CountString(\Text.S,"|")
             If Trim(StringField(\Text.S,IC+1,"|"))
               AddGadgetItem(\ComboBox,-1,Trim(StringField(\Text.S,IC+1,"|")))
@@ -1038,25 +1111,31 @@ Module Properties
           Next
           SetGadgetState(\ComboBox, 0)
           BindGadgetEvent(\ComboBox,@Events())
-          SetGadgetFont(\ComboBox, FontID(Font))
-        
-        ElseIf ((GadgetType & #PB_GadgetType_String) = #PB_GadgetType_String)
-          \CheckBox = CheckBoxGadget(#PB_Any, 0,Y + 2,25,\ItemHeight - 3,"#") :Clip(\CheckBox) ;: Result = \CheckBox
-          \String = StringGadget(#PB_Any, \LinePos,Y + 1,Width,\ItemHeight - 1,\Text.S) :Clip(\String): Result = \String
-          BindGadgetEvent(\String,@Events())
-          SetGadgetFont(\String, FontID(Font))
           
+        
+        ElseIf Bool((GadgetType & #PB_GadgetType_String) = #PB_GadgetType_String)
+          \String = StringGadget(#PB_Any, \LinePos,Y + 1,Width,\ItemHeight - 1,\Text.S) :Clip(\String): Result = \String
+          If IsFont(\Font) : SetGadgetFont(\String, FontID(\Font)) : EndIf
+          BindGadgetEvent(\String,@Events())
         Else
           \Seperator = ListIndex(Properties())
         EndIf
         
+        If Bool((GadgetType & #PB_GadgetType_CheckBox) = #PB_GadgetType_CheckBox)
+          \CheckBox = CheckBoxGadget(#PB_Any, 19,Y + 2,25,\ItemHeight - 3,"#") :Clip(\CheckBox)
+          If IsFont(\Font) : SetGadgetFont(\CheckBox, FontID(\Font)) : EndIf
+          BindGadgetEvent(\CheckBox,@Events())
+          SetGadgetData(\CheckBox, Result)
+        EndIf
+        
         If ((GadgetType & #PB_GadgetType_Button) = #PB_GadgetType_Button)
           If ((GadgetType & #PB_GadgetType_Tree) = #PB_GadgetType_Tree)
-            \Button = ButtonGadget(#PB_Any, (\LinePos+Width-Bw),Y,Bw + 1,\ItemHeight + 1,"v") :Clip(\Button)
-            SetGadgetFont(\Button, FontID(Font))
+            \Button = ButtonGadget(#PB_Any, (\LinePos+Width-Bw),Y,Bw + 1,\ItemHeight + 1,">>") :Clip(\Button)
+            If IsFont(\Font) : SetGadgetFont(\Button, FontID(\Font)) : EndIf
           Else
             \Button = ButtonGadget(#PB_Any, (\LinePos+Width-Bw),Y,Bw + 1,\ItemHeight + 1,"...") :Clip(\Button)
           EndIf
+          
           BindGadgetEvent(\Button, @Events())
           SetGadgetData(\Button, Result)
         EndIf
@@ -1074,8 +1153,34 @@ Module Properties
     ProcedureReturn Result ; ListSize(Properties()) - 1
   EndProcedure 
   
+  Procedure$ Help(Gadget)
+    Protected Result$, Type$
+    
+    With Properties()
+      ForEach Properties()
+        Type$ = \Info
+        Select Gadget
+          Case \Spin : Break
+          Case \String : Break
+          Case \ComboBox : Break
+        EndSelect
+      Next
+      
+      Select Type$
+        Case "X:" : Result$ = "Горизонтальная позиция."
+        Case "Y:" : Result$ = "Вертикальная позиция."
+        Case "Width:" : Result$ = "Ширина в пикселях."
+        Case "Height:" : Result$ = "Высота пикселях."
+        Case "Image:" : Result$ = "Рисунок для отображения."
+        Case "Font:" : Result$ = "Шрифт для отображения."
+        Case "Color:" : Result$ = "Цвет для отображения."
+        Case "Flag:" : Result$ = "Флаг для отображения."
+      EndSelect
+    EndWith
+    
+    ProcedureReturn Result$
+  EndProcedure
 EndModule
-
 CompilerIf #PB_Compiler_IsMainFile
   EnableExplicit
   

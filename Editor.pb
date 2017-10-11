@@ -101,8 +101,9 @@ DeclareModule Constant
   EndEnumeration
   EndDeclareModule : Module Constant : EndModule
 
-XIncludeFile "Transformation.pbi"
-XIncludeFile "Properties.pbi"
+XIncludeFile "include\Flag.pbi"
+XIncludeFile "include\Transformation.pbi"
+XIncludeFile "include\Properties.pbi"
 
 
 
