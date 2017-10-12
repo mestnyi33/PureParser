@@ -40,6 +40,7 @@ DeclareModule Properties
   
   Global NewList Properties.PropertiesStruct()
   
+  Declare$ GetPBFlag(Type)
   Declare$ Help(Gadget)
   
   Declare UpdatePropertiesItem( Item )
@@ -70,18 +71,42 @@ Module Properties
   
   Global LineGadget =- 1
   
-  Procedure.q GetWindowFlag(Window)
+  Macro GetWindowFlag(Window)
     Flag::GetWindow(Window)
-  EndProcedure
+  EndMacro
   
-  Procedure SetWindowFlag(Window, Flag.q)
+  Macro SetWindowFlag(Window, Flag)
     Flag::SetWindow(Window, Flag)
-  EndProcedure
+  EndMacro
   
-  Procedure RemoveWindowFlag(Window, Flag.q)
+  Macro RemoveWindowFlag(Window, Flag)
     Flag::RemoveWindow(Window, Flag)
-  EndProcedure
+  EndMacro
   
+  Macro GetGadgetFlag(Gadget)
+    Flag::GetGadget(Gadget)
+  EndMacro
+  
+  Macro SetGadgetFlag(Gadget, Flag)
+    Flag::SetGadget(Gadget, Flag)
+  EndMacro
+  
+  Macro RemoveGadgetFlag(Gadget, Flag)
+    Flag::RemoveGadget(Gadget, Flag)
+  EndMacro
+  
+  CompilerSelect #PB_Compiler_OS 
+    CompilerCase #PB_OS_Linux
+      
+      #G_TYPE_STRING = 64
+      
+      ImportC ""
+        gtk_widget_get_visible(*widget.GtkWidget)
+        gtk_widget_get_sensitive (*widget.GtkWidget)
+;         g_object_get_Properties(*widget.GtkWidget, Properties.p-utf8, *gval)
+      EndImport
+      
+  CompilerEndSelect
   
   Procedure IsHideGadget(Gadget) ;Returns TRUE is gadget hide
     If IsGadget(Gadget)
@@ -170,19 +195,6 @@ Module Properties
     
   EndProcedure
   
-  CompilerSelect #PB_Compiler_OS 
-    CompilerCase #PB_OS_Linux
-      
-      #G_TYPE_STRING = 64
-      
-      ImportC ""
-        gtk_widget_get_visible(*widget.GtkWidget)
-        gtk_widget_get_sensitive (*widget.GtkWidget)
-        g_object_get_Properties(*widget.GtkWidget, Properties.p-utf8, *gval)
-      EndImport
-      
-  CompilerEndSelect
-  
   Procedure.S FontName( FontID )
     CompilerSelect #PB_Compiler_OS 
       CompilerCase #PB_OS_Windows 
@@ -191,13 +203,13 @@ Module Properties
         ProcedureReturn PeekS(@sysFont\lfFaceName[0])
         
       CompilerCase #PB_OS_Linux
-        Protected gVal.GValue
-        Protected.s StdFnt
-        g_value_init_( @gval, #G_TYPE_STRING )
-        g_object_get_Properties( gtk_settings_get_default_(), "gtk-font-name", @gval )
-        StdFnt = PeekS( g_value_get_string_( @gval ), -1, #PB_UTF8 )
-        g_value_unset_( @gval )
-        ProcedureReturn StdFnt 
+;         Protected gVal.GValue
+;         Protected.s StdFnt
+;         g_value_init_( @gval, #G_TYPE_STRING )
+;         g_object_get_Properties( gtk_settings_get_default_(), "gtk-font-name", @gval )
+;         StdFnt = PeekS( g_value_get_string_( @gval ), -1, #PB_UTF8 )
+;         g_value_unset_( @gval )
+;         ProcedureReturn StdFnt 
         
     CompilerEndSelect
   EndProcedure
@@ -210,13 +222,13 @@ Module Properties
         ProcedureReturn MulDiv_(-sysFont\lfHeight, 72, GetDeviceCaps_(GetDC_(#NUL), #LOGPIXELSY))
         
       CompilerCase #PB_OS_Linux
-        Protected   gVal.GValue
-        Protected.s StdFnt
-        g_value_init_(@gval, #G_TYPE_STRING)
-        g_object_get_Properties( gtk_settings_get_default_(), "gtk-font-name", @gval)
-        StdFnt= PeekS(g_value_get_string_(@gval), -1, #PB_UTF8)
-        g_value_unset_(@gval)
-        ProcedureReturn Val(StringField((StdFnt), 2, " "))
+;         Protected   gVal.GValue
+;         Protected.s StdFnt
+;         g_value_init_(@gval, #G_TYPE_STRING)
+;         g_object_get_Properties( gtk_settings_get_default_(), "gtk-font-name", @gval)
+;         StdFnt= PeekS(g_value_get_string_(@gval), -1, #PB_UTF8)
+;         g_value_unset_(@gval)
+;         ProcedureReturn Val(StringField((StdFnt), 2, " "))
         
     CompilerEndSelect
   EndProcedure
@@ -232,244 +244,7 @@ Module Properties
   EndProcedure
   
   Procedure$ GetPBFlag( Type ) ; 
-    Protected Flags.S
-    
-    #PB_GadgetType_Window = -1
-    #PB_GadgetType_Menu = -2
-    #PB_GadgetType_Toolbar = -3
-    #PB_GadgetType_ImageButton = 34
-    
-    Select Type
-      Case #PB_GadgetType_Window        
-        ;{- Ok
-        Flags.S = "#PB_Window_TitleBar|"+
-                  "#PB_Window_BorderLess|"+
-                  "#PB_Window_SystemMenu|"+
-                  "#PB_Window_MaximizeGadget|"+
-                  "#PB_Window_MinimizeGadget|"+
-                  "#PB_Window_ScreenCentered|"+
-                  "#PB_Window_SizeGadget|"+
-                  "#PB_Window_WindowCentered|"+
-                  "#PB_Window_Tool|"+
-                  "#PB_Window_Normal|"+
-                  "#PB_Window_Minimize|"+
-                  "#PB_Window_Maximize|"+
-                  "#PB_Window_Invisible|"+
-                  "#PB_Window_NoActivate|"+
-                  "#PB_Window_NoGadgets|"
-        ;}
-        
-      Case #PB_GadgetType_Button         
-        ;{- Ok
-        Flags.S = "#PB_Button_MultiLine|"+
-                  "#PB_Button_Default|"+
-                  "#PB_Button_Toggle|"+
-                  "#PB_Button_Left|"+
-                  "#PB_Button_Right"
-        ;}
-        
-      Case #PB_GadgetType_String         
-        ;{- Ok
-        Flags.S = "#PB_String_Numeric|"+
-                  "#PB_String_Password|"+
-                  "#PB_String_ReadOnly|"+
-                  "#PB_String_LowerCase|"+
-                  "#PB_String_UpperCase|"+
-                  "#PB_String_BorderLess" 
-        ;}
-        
-      Case #PB_GadgetType_Text           
-        ;{- Ok
-        Flags.S = "#PB_Text_Center|"+
-                  "#PB_Text_Right|"+
-                  "#PB_Text_Border"
-        ;}
-        
-      Case #PB_GadgetType_CheckBox       
-        ;{- Ok
-        Flags.S = "#PB_CheckBox_Right|"+
-                  "#PB_CheckBox_Center|"+
-                  "#PB_CheckBox_ThreeState"
-        ;}
-        
-      Case #PB_GadgetType_Option         
-        Flags.S = ""
-        
-      Case #PB_GadgetType_ListView       
-        ;{- Ok
-        Flags.S = "#PB_ListView_Multiselect|"+
-                  "#PB_ListView_ClickSelect"
-        ;}
-        
-      Case #PB_GadgetType_Frame          
-        ;{- Ok
-        Flags.S = "#PB_Frame_Single|"+
-                  "#PB_Frame_Double|"+
-                  "#PB_Frame_Flat"
-        ;}
-        
-      Case #PB_GadgetType_ComboBox       
-        ;{- Ok
-        Flags.S = "#PB_ComboBox_Editable|"+
-                  "#PB_ComboBox_LowerCase|"+
-                  "#PB_ComboBox_UpperCase|"+
-                  "#PB_ComboBox_Image"
-        ;}
-        
-      Case #PB_GadgetType_Image          
-        ;{- Ok
-        Flags.S = "#PB_Image_Border|"+
-                  "#PB_Image_Raised"
-        ;}
-        
-      Case #PB_GadgetType_HyperLink      
-        ;{- Ok
-        Flags.S = "#PB_Hyperlink_Underline"
-        ;}
-        
-      Case #PB_GadgetType_Container      
-        ;{- Ok
-        Flags.S = "#PB_Container_BorderLess|"+
-                  "#PB_Container_Flat|"+
-                  "#PB_Container_Raised|"+
-                  "#PB_Container_Single|"+
-                  "#PB_Container_Double"
-        ;}
-        
-      Case #PB_GadgetType_ListIcon       
-        ;{- Ok
-        Flags.S = "#PB_ListIcon_CheckBoxes|"+
-                  "#PB_ListIcon_ThreeState|"+
-                  "#PB_ListIcon_MultiSelect|"+
-                  "#PB_ListIcon_GridLines|"+
-                  "#PB_ListIcon_FullRowSelect|"+
-                  "#PB_ListIcon_HeaderDragDrop|"+
-                  "#PB_ListIcon_AlwaysShowSelection"
-        ;}
-        
-      Case #PB_GadgetType_IPAddress      
-        Flags.S = ""
-        
-      Case #PB_GadgetType_ProgressBar    
-        ;{- Ok
-        Flags.S = "#PB_ProgressBar_Smooth|"+
-                  "#PB_ProgressBar_Vertical"
-        ;}
-        
-      Case #PB_GadgetType_ScrollBar      
-        ;{- Ok
-        Flags.S = "#PB_ScrollBar_Vertical"
-        ;}
-        
-      Case #PB_GadgetType_ScrollArea     
-        ;{- Ok
-        Flags.S = "#PB_ScrollArea_Flat|"+
-                  "#PB_ScrollArea_Raised|"+
-                  "#PB_ScrollArea_Single|"+
-                  "#PB_ScrollArea_BorderLess|"+
-                  "#PB_ScrollArea_Center"
-        ;}
-        
-      Case #PB_GadgetType_TrackBar       
-        ;{- Ok
-        Flags.S = "#PB_TrackBar_Ticks|"+
-                  "#PB_TrackBar_Vertical"
-        ;}
-        
-      Case #PB_GadgetType_Web            
-        Flags.S = ""
-        
-      Case #PB_GadgetType_ButtonImage    
-        ;{- Ok
-        Flags.S = "#PB_Button_Toggle"
-        ;}
-        
-      Case #PB_GadgetType_Calendar       
-        ;{- Ok
-        Flags.S = "#PB_Calendar_Borderless"
-        ;}
-        
-      Case #PB_GadgetType_Date           
-        ;{- Ok
-        Flags.S = "#PB_Date_UpDown"
-        ;}
-        
-      Case #PB_GadgetType_Editor         
-        ;{- Ok
-        Flags.S = "#PB_Editor_ReadOnly|"+
-                  "#PB_Editor_WordWrap"
-        ;}
-        
-      Case #PB_GadgetType_ExplorerList   
-        ;{- Ok
-        Flags.S = "#PB_Explorer_BorderLess|"+
-                  "#PB_Explorer_AlwaysShowSelection|"+
-                  "#PB_Explorer_MultiSelect|"+
-                  "#PB_Explorer_GridLines|"+
-                  "#PB_Explorer_HeaderDragDrop|"+
-                  "#PB_Explorer_FullRowSelect|"+
-                  "#PB_Explorer_NoFiles|"+
-                  "#PB_Explorer_NoFolders|"+
-                  "#PB_Explorer_NoParentFolder|"+
-                  "#PB_Explorer_NoDirectoryChange|"+
-                  "#PB_Explorer_NoDriveRequester|"+
-                  "#PB_Explorer_NoSort|"+
-                  "#PB_Explorer_NoMyDocuments|"+
-                  "#PB_Explorer_AutoSort|"+
-                  "#PB_Explorer_HiddenFiles"
-        ;}
-        
-      Case #PB_GadgetType_ExplorerTree   
-        Flags.S = ""
-        
-      Case #PB_GadgetType_ExplorerCombo  
-        Flags.S = ""
-        
-      Case #PB_GadgetType_Spin           
-        Flags.S = ""
-        
-      Case #PB_GadgetType_Tree           
-        ;{- Ok
-        Flags.S = "#PB_Tree_AlwaysShowSelection|"+
-                  "#PB_Tree_NoLines|"+
-                  "#PB_Tree_NoButtons|"+
-                  "#PB_Tree_CheckBoxes|"+
-                  "#PB_Tree_ThreeState"
-        ;}
-        
-      Case #PB_GadgetType_Panel          
-        Flags.S = ""
-        
-      Case #PB_GadgetType_Splitter       
-        ;{- Ok
-        Flags.S = "#PB_Splitter_Vertical|"+
-                  "#PB_Splitter_Separator|"+
-                  "#PB_Splitter_FirstFixed|"+
-                  "#PB_Splitter_SecondFixed" 
-        ;}
-        
-      Case #PB_GadgetType_MDI           
-        CompilerIf #PB_Compiler_OS = #PB_OS_Windows
-          Flags.S = ""
-        CompilerEndIf
-        
-      Case #PB_GadgetType_Scintilla      
-        Flags.S = ""
-        
-      Case #PB_GadgetType_Shortcut       
-        Flags.S = ""
-        
-      Case #PB_GadgetType_Canvas 
-        ;{- Ok
-        Flags.S = "#PB_Canvas_Border|"+
-                  "#PB_Canvas_ClipMouse|"+
-                  "#PB_Canvas_Keyboard|"+
-                  "#PB_Canvas_DrawFocus"
-        ;}
-        
-    EndSelect
-    ;"#PB_Flag_None|"+
-    ProcedureReturn Flags.S
+    ProcedureReturn Flag::PB(Type)
   EndProcedure
   
   Procedure SetPBFlag(Object)
@@ -494,7 +269,21 @@ Module Properties
           Case "#PB_Window_Minimize" : RemoveWindowFlag(Object, #PB_Window_Minimize)
           Case "#PB_Window_NoGadgets" : RemoveWindowFlag(Object, #PB_Window_NoGadgets)
           Case "#PB_Window_NoActivate" : RemoveWindowFlag(Object, #PB_Window_NoActivate)
-        EndSelect
+            
+            
+          Case "#PB_Button_MultiLine" : RemoveGadgetFlag(Object, #PB_Button_MultiLine)
+          Case "#PB_Button_Default" : RemoveGadgetFlag(Object, #PB_Button_Default)
+          Case "#PB_Button_Toggle" : RemoveGadgetFlag(Object, #PB_Button_Toggle)
+          Case "#PB_Button_Left" : RemoveGadgetFlag(Object, #PB_Button_Left)
+          Case "#PB_Button_Right" : RemoveGadgetFlag(Object, #PB_Button_Right)
+            
+          Case "#PB_String_BorderLess" : RemoveGadgetFlag(Object, #PB_String_BorderLess)
+          Case "#PB_String_Numeric" : RemoveGadgetFlag(Object, #PB_String_Numeric)
+          Case "#PB_String_ReadOnly" : RemoveGadgetFlag(Object, #PB_String_ReadOnly)
+          Case "#PB_String_Password" : RemoveGadgetFlag(Object, #PB_String_Password)
+          Case "#PB_String_UpperCase" : RemoveGadgetFlag(Object, #PB_String_UpperCase)
+          Case "#PB_String_LowerCase" : RemoveGadgetFlag(Object, #PB_String_LowerCase)
+       EndSelect
       EndIf
       
       If GetGadgetItemState(Gadget, i) & #PB_Tree_Checked  
@@ -513,6 +302,20 @@ Module Properties
           Case "#PB_Window_Minimize" : SetWindowFlag(Object, #PB_Window_Minimize)
           Case "#PB_Window_NoGadgets" : SetWindowFlag(Object, #PB_Window_NoGadgets)
           Case "#PB_Window_NoActivate" : SetWindowFlag(Object, #PB_Window_NoActivate)
+            
+            
+          Case "#PB_Button_MultiLine" : SetGadgetFlag(Object, #PB_Button_MultiLine)
+          Case "#PB_Button_Default" : SetGadgetFlag(Object, #PB_Button_Default)
+          Case "#PB_Button_Toggle" : SetGadgetFlag(Object, #PB_Button_Toggle)
+          Case "#PB_Button_Left" : SetGadgetFlag(Object, #PB_Button_Left)
+          Case "#PB_Button_Right" : SetGadgetFlag(Object, #PB_Button_Right)
+             
+          Case "#PB_String_BorderLess" : SetGadgetFlag(Object, #PB_String_BorderLess)
+          Case "#PB_String_Numeric" : SetGadgetFlag(Object, #PB_String_Numeric)
+          Case "#PB_String_ReadOnly" : SetGadgetFlag(Object, #PB_String_ReadOnly)
+          Case "#PB_String_Password" : SetGadgetFlag(Object, #PB_String_Password)
+          Case "#PB_String_UpperCase" : SetGadgetFlag(Object, #PB_String_UpperCase)
+          Case "#PB_String_LowerCase" : SetGadgetFlag(Object, #PB_String_LowerCase)
         EndSelect       
       EndIf
       
@@ -618,8 +421,8 @@ Module Properties
             height = (IC*17) : If height>100 : height = 100 : EndIf
             
             If height
-              ResizeWindow(\TreeWindow, #PB_Ignore, #PB_Ignore, len*8, height)
-              ResizeGadget(\Tree, #PB_Ignore, #PB_Ignore, len*8, height)
+              ResizeWindow(\TreeWindow, #PB_Ignore, #PB_Ignore, len*9, height)
+              ResizeGadget(\Tree, #PB_Ignore, #PB_Ignore, len*9, height)
             EndIf
           EndIf
       EndSelect
@@ -998,7 +801,7 @@ Module Properties
       CompilerCase #PB_OS_Windows
         ItemHeight = 24
       CompilerCase #PB_OS_Linux
-        ItemHeight = 34
+        ItemHeight = 18
     CompilerEndSelect
     
     Gadget = ScrollAreaGadget( #PB_Any,0,0,Width,Height, Width,Height,ItemHeight,#PB_ScrollArea_Single)
@@ -1181,10 +984,13 @@ Module Properties
     ProcedureReturn Result$
   EndProcedure
 EndModule
+
+;-
 CompilerIf #PB_Compiler_IsMainFile
   EnableExplicit
   
   Global.i Window_0=-1, 
+          Window_0_Select=-1, 
         Window_0_Properties=-1
   
   Enumeration Gadget
@@ -1194,12 +1000,38 @@ CompilerIf #PB_Compiler_IsMainFile
   Declare Window_0_Event()
   Declare Window_0_Size_Event()
   
+  Procedure Form_Open(Flag.i=#PB_Window_SystemMenu|#PB_Window_ScreenCentered)
+  If Not IsWindow(0)
+    OpenWindow(0,230,230,200,200,"Form_0", Flag)
+    ButtonGadget(1, 10,10,80,20,"Button_0")
+    StringGadget(2, 10,35,80,20,"String_0")
+    ButtonGadget(3, 10,70,80,60,"Button_1 text multi line", #PB_Button_Toggle)
+    
+    AddGadgetItem(Window_0_Select, -1, "Form_0")
+    AddGadgetItem(Window_0_Select, -1, "Button_0")
+    AddGadgetItem(Window_0_Select, -1, "String_0")
+    AddGadgetItem(Window_0_Select, -1, "Button_1")
+    
+    SetGadgetItemData(Window_0_Select, 0,0)
+    SetGadgetItemData(Window_0_Select, 1,1)
+    SetGadgetItemData(Window_0_Select, 2,2)
+    SetGadgetItemData(Window_0_Select, 3,3)
+    
+    
+    ;     BindEvent(#PB_Event_Gadget, @Form_0_Event(), Form_0)
+  EndIf
+  ProcedureReturn 0
+EndProcedure
+
+
   Procedure Window_0_Open(Flag.i=#PB_Window_SystemMenu|#PB_Window_ScreenCentered|#PB_Window_SizeGadget)
+    Protected h=24
     If Not IsWindow(Window_0)
-      Window_0 = OpenWindow(#PB_Any,230,230,200,200,"Window_0", Flag)
-      Window_0_Properties = Properties::Gadget( #PB_Any, 200,200 )
+      Window_0 = OpenWindow(#PB_Any,230,230,200,300,"Window_0", Flag)
+      Window_0_Select = ComboBoxGadget(#PB_Any, 0,0, 200,h)
+      Window_0_Properties = Properties::Gadget( #PB_Any, 200,300 )
       
-      Properties::AddItem( Window_0_Properties, "ID:", #PB_GadgetType_String )
+      Properties::AddItem( Window_0_Properties, "ID:", #PB_GadgetType_String | #PB_GadgetType_CheckBox )
       Properties::AddItem( Window_0_Properties, "Text:", #PB_GadgetType_String )
       Properties::AddItem( Window_0_Properties, "Disable:False|True", #PB_GadgetType_ComboBox )
       Properties::AddItem( Window_0_Properties, "Hide:False|True", #PB_GadgetType_ComboBox )
@@ -1217,6 +1049,7 @@ CompilerIf #PB_Compiler_IsMainFile
       Properties::AddItem( Window_0_Properties, "Puth", #PB_GadgetType_String|#PB_GadgetType_Button )
       Properties::AddItem( Window_0_Properties, "Color:", #PB_GadgetType_String|#PB_GadgetType_Button )
       
+      ResizeGadget(Window_0_Properties,#PB_Ignore,h,#PB_Ignore,300-h)
       BindEvent(#PB_Event_SizeWindow, @Window_0_Size_Event(), Window_0)
       BindEvent(#PB_Event_Gadget, @Window_0_Event(), Window_0)
     EndIf
@@ -1226,16 +1059,25 @@ CompilerIf #PB_Compiler_IsMainFile
   Procedure Window_0_Size_Event()
     Protected WindowWidth = WindowWidth(Window_0)
     Protected WindowHeight = WindowHeight(Window_0)
-    Properties::Size(WindowWidth, WindowHeight)
+    Properties::Size(WindowWidth, WindowHeight-GadgetY(Window_0_Properties))
   EndProcedure
   
   Procedure Window_0_Event()
+    Protected Object
+    
     Select Event()
       Case #PB_Event_Gadget
         Select EventType()
-          Case #PB_EventType_LeftClick
+          Case #PB_EventType_Change
             Select EventGadget()
+              Case Window_0_Select
+                Object = GetGadgetItemData(EventGadget(), GetGadgetState(EventGadget()))
                 
+                If IsGadget(Object)
+                  Properties::UpdateProperties(Object, GetGadgetText(EventGadget()), Properties::GetPBFlag(GadgetType(EventGadget())))
+                ElseIf IsWindow(Object)
+                  Properties::UpdateProperties(Object, GetWindowTitle(EventWindow()), Properties::GetPBFlag(-1))
+                EndIf
             EndSelect
         EndSelect
     EndSelect
@@ -1243,6 +1085,8 @@ CompilerIf #PB_Compiler_IsMainFile
   
   
   Window_0_Open()
+  
+  Form_Open(#PB_Window_SystemMenu|#PB_Window_SizeGadget)
   
   While IsWindow(Window_0)
     Select WaitWindowEvent()
@@ -1257,3 +1101,9 @@ CompilerIf #PB_Compiler_IsMainFile
 CompilerEndIf
 
 
+
+; IDE Options = PureBasic 5.60 (Linux - x86)
+; CursorPosition = 420
+; FirstLine = 401
+; Folding = ------------------------
+; EnableXP

@@ -101,9 +101,9 @@ DeclareModule Constant
   EndEnumeration
   EndDeclareModule : Module Constant : EndModule
 
-XIncludeFile "include\Flag.pbi"
-XIncludeFile "include\Transformation.pbi"
-XIncludeFile "include\Properties.pbi"
+XIncludeFile "include/Flag.pbi"
+XIncludeFile "include/Transformation.pbi"
+XIncludeFile "include/Properties.pbi"
 
 
 
@@ -1084,7 +1084,7 @@ Procedure OpenPBObject(*This.ParsePBGadget) ; Ok
       Case "ScrollBarGadget"     : Object = ScrollBarGadget     (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Param3\Argument, \Flag\Argument)
       Case "ScrollAreaGadget"    : Object = ScrollAreaGadget    (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Param3\Argument, \Flag\Argument) 
       Case "TrackBarGadget"      : Object = TrackBarGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Flag\Argument)
-      Case "WebGadget"           : Object = WebGadget           (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$)
+      ;Case "WebGadget"           : Object = WebGadget           (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$)
       Case "ButtonImageGadget"   : Object = ButtonImageGadget   (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Flag\Argument)
       Case "CalendarGadget"      : Object = CalendarGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Flag\Argument)
       Case "DateGadget"          : Object = DateGadget          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Param1\Argument, \Flag\Argument)
@@ -2069,11 +2069,10 @@ CompilerIf #PB_Compiler_IsMainFile
     EndSelect
   Wend
 CompilerEndIf
-
-; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 2054
-; FirstLine = 2021
-; Folding = -------
+; IDE Options = PureBasic 5.60 (Linux - x86)
+; CursorPosition = 1086
+; FirstLine = 1077
+; Folding = --------------------------------------------
 ; EnableXP
-; Executable = ..\..\Programs\PureBasic\PureParser.exe
+; Executable = ../../Programs/PureBasic/PureParser.exe
 ; CompileSourceDirectory
