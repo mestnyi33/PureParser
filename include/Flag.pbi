@@ -1,4 +1,6 @@
 ﻿; http://www.purebasic.fr/english/viewtopic.php?f=13&t=61700&p=462648#p462648
+; Устанавливает удаляет и получает флаги PB окон и гаджетов
+
 DeclareModule Flag
   EnableExplicit
   
@@ -16,8 +18,6 @@ DeclareModule Flag
   Macro IsFlag(GetFlag, IsFlag)
     Bool((GetFlag & IsFlag) = IsFlag)
   EndMacro
-  
-  Declare$ PB( Type, Type$="" )
   
   Declare.q GetWindow(Window)
   Declare RemoveWindow(Window, Flags.q)
@@ -37,480 +37,6 @@ DeclareModule Flag
 EndDeclareModule
 
 Module Flag
-  Procedure$ PB( Type, Type$="" ) ; 
-    Protected Flags.S
-    
-    If Type$=""
-      Select Type
-        Case #PB_GadgetType_Window        
-          ;{- Ok
-          Flags.S = "#PB_Window_TitleBar|"+
-                    "#PB_Window_BorderLess|"+
-                    "#PB_Window_SystemMenu|"+
-                    "#PB_Window_MaximizeGadget|"+
-                    "#PB_Window_MinimizeGadget|"+
-                    "#PB_Window_ScreenCentered|"+
-                    "#PB_Window_SizeGadget|"+
-                    "#PB_Window_WindowCentered|"+
-                    "#PB_Window_Tool|"+
-                    "#PB_Window_Normal|"+
-                    "#PB_Window_Minimize|"+
-                    "#PB_Window_Maximize|"+
-                    "#PB_Window_Invisible|"+
-                    "#PB_Window_NoActivate|"+
-                    "#PB_Window_NoGadgets|"
-          ;}
-          
-        Case #PB_GadgetType_Button         
-          ;{- Ok
-          Flags.S = "#PB_Button_MultiLine|"+
-                    "#PB_Button_Default|"+
-                    "#PB_Button_Toggle|"+
-                    "#PB_Button_Left|"+
-                    "#PB_Button_Right"
-          ;}
-          
-        Case #PB_GadgetType_String         
-          ;{- Ok
-          Flags.S = "#PB_String_Numeric|"+
-                    "#PB_String_Password|"+
-                    "#PB_String_ReadOnly|"+
-                    "#PB_String_LowerCase|"+
-                    "#PB_String_UpperCase|"+
-                    "#PB_String_BorderLess" 
-          ;}
-          
-        Case #PB_GadgetType_Text           
-          ;{- Ok
-          Flags.S = "#PB_Text_Center|"+
-                    "#PB_Text_Right|"+
-                    "#PB_Text_Border"
-          ;}
-          
-        Case #PB_GadgetType_CheckBox       
-          ;{- Ok
-          Flags.S = "#PB_CheckBox_Right|"+
-                    "#PB_CheckBox_Center|"+
-                    "#PB_CheckBox_ThreeState"
-          ;}
-          
-        Case #PB_GadgetType_Option         
-          Flags.S = ""
-          
-        Case #PB_GadgetType_ListView       
-          ;{- Ok
-          Flags.S = "#PB_ListView_Multiselect|"+
-                    "#PB_ListView_ClickSelect"
-          ;}
-          
-        Case #PB_GadgetType_Frame          
-          ;{- Ok
-          Flags.S = "#PB_Frame_Single|"+
-                    "#PB_Frame_Double|"+
-                    "#PB_Frame_Flat"
-          ;}
-          
-        Case #PB_GadgetType_ComboBox       
-          ;{- Ok
-          Flags.S = "#PB_ComboBox_Editable|"+
-                    "#PB_ComboBox_LowerCase|"+
-                    "#PB_ComboBox_UpperCase|"+
-                    "#PB_ComboBox_Image"
-          ;}
-          
-        Case #PB_GadgetType_Image          
-          ;{- Ok
-          Flags.S = "#PB_Image_Border|"+
-                    "#PB_Image_Raised"
-          ;}
-          
-        Case #PB_GadgetType_HyperLink      
-          ;{- Ok
-          Flags.S = "#PB_Hyperlink_Underline"
-          ;}
-          
-        Case #PB_GadgetType_Container      
-          ;{- Ok
-          Flags.S = "#PB_Container_BorderLess|"+
-                    "#PB_Container_Flat|"+
-                    "#PB_Container_Raised|"+
-                    "#PB_Container_Single|"+
-                    "#PB_Container_Double"
-          ;}
-          
-        Case #PB_GadgetType_ListIcon       
-          ;{- Ok
-          Flags.S = "#PB_ListIcon_CheckBoxes|"+
-                    "#PB_ListIcon_ThreeState|"+
-                    "#PB_ListIcon_MultiSelect|"+
-                    "#PB_ListIcon_GridLines|"+
-                    "#PB_ListIcon_FullRowSelect|"+
-                    "#PB_ListIcon_HeaderDragDrop|"+
-                    "#PB_ListIcon_AlwaysShowSelection"
-          ;}
-          
-        Case #PB_GadgetType_IPAddress      
-          Flags.S = ""
-          
-        Case #PB_GadgetType_ProgressBar    
-          ;{- Ok
-          Flags.S = "#PB_ProgressBar_Smooth|"+
-                    "#PB_ProgressBar_Vertical"
-          ;}
-          
-        Case #PB_GadgetType_ScrollBar      
-          ;{- Ok
-          Flags.S = "#PB_ScrollBar_Vertical"
-          ;}
-          
-        Case #PB_GadgetType_ScrollArea     
-          ;{- Ok
-          Flags.S = "#PB_ScrollArea_Flat|"+
-                    "#PB_ScrollArea_Raised|"+
-                    "#PB_ScrollArea_Single|"+
-                    "#PB_ScrollArea_BorderLess|"+
-                    "#PB_ScrollArea_Center"
-          ;}
-          
-        Case #PB_GadgetType_TrackBar       
-          ;{- Ok
-          Flags.S = "#PB_TrackBar_Ticks|"+
-                    "#PB_TrackBar_Vertical"
-          ;}
-          
-        Case #PB_GadgetType_Web            
-          Flags.S = ""
-          
-        Case #PB_GadgetType_ButtonImage    
-          ;{- Ok
-          Flags.S = "#PB_Button_Toggle"
-          ;}
-          
-        Case #PB_GadgetType_Calendar       
-          ;{- Ok
-          Flags.S = "#PB_Calendar_Borderless"
-          ;}
-          
-        Case #PB_GadgetType_Date           
-          ;{- Ok
-          Flags.S = "#PB_Date_UpDown"
-          ;}
-          
-        Case #PB_GadgetType_Editor         
-          ;{- Ok
-          Flags.S = "#PB_Editor_ReadOnly|"+
-                    "#PB_Editor_WordWrap"
-          ;}
-          
-        Case #PB_GadgetType_ExplorerList   
-          ;{- Ok
-          Flags.S = "#PB_Explorer_BorderLess|"+
-                    "#PB_Explorer_AlwaysShowSelection|"+
-                    "#PB_Explorer_MultiSelect|"+
-                    "#PB_Explorer_GridLines|"+
-                    "#PB_Explorer_HeaderDragDrop|"+
-                    "#PB_Explorer_FullRowSelect|"+
-                    "#PB_Explorer_NoFiles|"+
-                    "#PB_Explorer_NoFolders|"+
-                    "#PB_Explorer_NoParentFolder|"+
-                    "#PB_Explorer_NoDirectoryChange|"+
-                    "#PB_Explorer_NoDriveRequester|"+
-                    "#PB_Explorer_NoSort|"+
-                    "#PB_Explorer_NoMyDocuments|"+
-                    "#PB_Explorer_AutoSort|"+
-                    "#PB_Explorer_HiddenFiles"
-          ;}
-          
-        Case #PB_GadgetType_ExplorerTree   
-          Flags.S = ""
-          
-        Case #PB_GadgetType_ExplorerCombo  
-          Flags.S = ""
-          
-        Case #PB_GadgetType_Spin           
-          Flags.S = ""
-          
-        Case #PB_GadgetType_Tree           
-          ;{- Ok
-          Flags.S = "#PB_Tree_AlwaysShowSelection|"+
-                    "#PB_Tree_NoLines|"+
-                    "#PB_Tree_NoButtons|"+
-                    "#PB_Tree_CheckBoxes|"+
-                    "#PB_Tree_ThreeState"
-          ;}
-          
-        Case #PB_GadgetType_Panel          
-          Flags.S = ""
-          
-        Case #PB_GadgetType_Splitter       
-          ;{- Ok
-          Flags.S = "#PB_Splitter_Vertical|"+
-                    "#PB_Splitter_Separator|"+
-                    "#PB_Splitter_FirstFixed|"+
-                    "#PB_Splitter_SecondFixed" 
-          ;}
-          
-          CompilerIf #PB_Compiler_OS = #PB_OS_Windows
-          Case #PB_GadgetType_MDI           
-            Flags.S = ""
-          CompilerEndIf
-          
-        Case #PB_GadgetType_Scintilla      
-          Flags.S = ""
-          
-        Case #PB_GadgetType_Shortcut       
-          Flags.S = ""
-          
-        Case #PB_GadgetType_Canvas 
-          ;{- Ok
-          Flags.S = "#PB_Canvas_Border|"+
-                    "#PB_Canvas_Container|"+
-                    "#PB_Canvas_ClipMouse|"+
-                    "#PB_Canvas_Keyboard|"+
-                    "#PB_Canvas_DrawFocus"
-          ;}
-          
-      EndSelect
-    Else
-      Select Type$
-        Case "OpenWindow"        
-          ;{- Ok
-          Flags.S = "#PB_Window_TitleBar|"+
-                    "#PB_Window_BorderLess|"+
-                    "#PB_Window_SystemMenu|"+
-                    "#PB_Window_MaximizeGadget|"+
-                    "#PB_Window_MinimizeGadget|"+
-                    "#PB_Window_ScreenCentered|"+
-                    "#PB_Window_SizeGadget|"+
-                    "#PB_Window_WindowCentered|"+
-                    "#PB_Window_Tool|"+
-                    "#PB_Window_Normal|"+
-                    "#PB_Window_Minimize|"+
-                    "#PB_Window_Maximize|"+
-                    "#PB_Window_Invisible|"+
-                    "#PB_Window_NoActivate|"+
-                    "#PB_Window_NoGadgets|"
-          ;}
-          
-        Case "ButtonGadget"         
-          ;{- Ok
-          Flags.S = "#PB_Button_MultiLine|"+
-                    "#PB_Button_Default|"+
-                    "#PB_Button_Toggle|"+
-                    "#PB_Button_Left|"+
-                    "#PB_Button_Right"
-          ;}
-          
-        Case "StringGadget"         
-          ;{- Ok
-          Flags.S = "#PB_String_Numeric|"+
-                    "#PB_String_Password|"+
-                    "#PB_String_ReadOnly|"+
-                    "#PB_String_LowerCase|"+
-                    "#PB_String_UpperCase|"+
-                    "#PB_String_BorderLess" 
-          ;}
-          
-        Case "TextGadget"           
-          ;{- Ok
-          Flags.S = "#PB_Text_Center|"+
-                    "#PB_Text_Right|"+
-                    "#PB_Text_Border"
-          ;}
-          
-        Case "CheckBoxGadget"       
-          ;{- Ok
-          Flags.S = "#PB_CheckBox_Right|"+
-                    "#PB_CheckBox_Center|"+
-                    "#PB_CheckBox_ThreeState"
-          ;}
-          
-        Case "OptionGadget"         
-          Flags.S = ""
-          
-        Case "ListViewGadget"       
-          ;{- Ok
-          Flags.S = "#PB_ListView_Multiselect|"+
-                    "#PB_ListView_ClickSelect"
-          ;}
-          
-        Case "FrameGadget"          
-          ;{- Ok
-          Flags.S = "#PB_Frame_Single|"+
-                    "#PB_Frame_Double|"+
-                    "#PB_Frame_Flat"
-          ;}
-          
-        Case "ComboBoxGadget"       
-          ;{- Ok
-          Flags.S = "#PB_ComboBox_Editable|"+
-                    "#PB_ComboBox_LowerCase|"+
-                    "#PB_ComboBox_UpperCase|"+
-                    "#PB_ComboBox_Image"
-          ;}
-          
-        Case "ImageGadget"          
-          ;{- Ok
-          Flags.S = "#PB_Image_Border|"+
-                    "#PB_Image_Raised"
-          ;}
-          
-        Case "HyperLinkGadget"      
-          ;{- Ok
-          Flags.S = "#PB_Hyperlink_Underline"
-          ;}
-          
-        Case "ContainerGadget"      
-          ;{- Ok
-          Flags.S = "#PB_Container_BorderLess|"+
-                    "#PB_Container_Flat|"+
-                    "#PB_Container_Raised|"+
-                    "#PB_Container_Single|"+
-                    "#PB_Container_Double"
-          ;}
-          
-        Case "ListIconGadget"       
-          ;{- Ok
-          Flags.S = "#PB_ListIcon_CheckBoxes|"+
-                    "#PB_ListIcon_ThreeState|"+
-                    "#PB_ListIcon_MultiSelect|"+
-                    "#PB_ListIcon_GridLines|"+
-                    "#PB_ListIcon_FullRowSelect|"+
-                    "#PB_ListIcon_HeaderDragDrop|"+
-                    "#PB_ListIcon_AlwaysShowSelection"
-          ;}
-          
-        Case "IPAddressGadget"     
-          Flags.S = ""
-          
-        Case "ProgressBarGadget"    
-          ;{- Ok
-          Flags.S = "#PB_ProgressBar_Smooth|"+
-                    "#PB_ProgressBar_Vertical"
-          ;}
-          
-        Case "ScrollBarGadget"      
-          ;{- Ok
-          Flags.S = "#PB_ScrollBar_Vertical"
-          ;}
-          
-        Case "ScrollAreaGadget"     
-          ;{- Ok
-          Flags.S = "#PB_ScrollArea_Flat|"+
-                    "#PB_ScrollArea_Raised|"+
-                    "#PB_ScrollArea_Single|"+
-                    "#PB_ScrollArea_BorderLess|"+
-                    "#PB_ScrollArea_Center"
-          ;}
-          
-        Case "TrackBarGadget"       
-          ;{- Ok
-          Flags.S = "#PB_TrackBar_Ticks|"+
-                    "#PB_TrackBar_Vertical"
-          ;}
-          
-        Case "WebGadget"            
-          Flags.S = ""
-          
-        Case "ButtonImageGadget"    
-          ;{- Ok
-          Flags.S = "#PB_Button_Toggle"
-          ;}
-          
-        Case "CalendarGadget"       
-          ;{- Ok
-          Flags.S = "#PB_Calendar_Borderless"
-          ;}
-          
-        Case "DateGadget"           
-          ;{- Ok
-          Flags.S = "#PB_Date_UpDown"
-          ;}
-          
-        Case "EditorGadget"         
-          ;{- Ok
-          Flags.S = "#PB_Editor_ReadOnly|"+
-                    "#PB_Editor_WordWrap"
-          ;}
-          
-        Case "ExplorerListGadget"   
-          ;{- Ok
-          Flags.S = "#PB_Explorer_BorderLess|"+
-                    "#PB_Explorer_AlwaysShowSelection|"+
-                    "#PB_Explorer_MultiSelect|"+
-                    "#PB_Explorer_GridLines|"+
-                    "#PB_Explorer_HeaderDragDrop|"+
-                    "#PB_Explorer_FullRowSelect|"+
-                    "#PB_Explorer_NoFiles|"+
-                    "#PB_Explorer_NoFolders|"+
-                    "#PB_Explorer_NoParentFolder|"+
-                    "#PB_Explorer_NoDirectoryChange|"+
-                    "#PB_Explorer_NoDriveRequester|"+
-                    "#PB_Explorer_NoSort|"+
-                    "#PB_Explorer_NoMyDocuments|"+
-                    "#PB_Explorer_AutoSort|"+
-                    "#PB_Explorer_HiddenFiles"
-          ;}
-          
-        Case "ExplorerTreeGadget"   
-          Flags.S = ""
-          
-        Case "ExplorerComboGadget"  
-          Flags.S = ""
-          
-        Case "SpinGadget"           
-          Flags.S = ""
-          
-        Case "TreeGadget"           
-          ;{- Ok
-          Flags.S = "#PB_Tree_AlwaysShowSelection|"+
-                    "#PB_Tree_NoLines|"+
-                    "#PB_Tree_NoButtons|"+
-                    "#PB_Tree_CheckBoxes|"+
-                    "#PB_Tree_ThreeState"
-          ;}
-          
-        Case "PanelGadget"          
-          Flags.S = ""
-          
-        Case "SplitterGadget"       
-          ;{- Ok
-          Flags.S = "#PB_Splitter_Vertical|"+
-                    "#PB_Splitter_Separator|"+
-                    "#PB_Splitter_FirstFixed|"+
-                    "#PB_Splitter_SecondFixed" 
-          ;}
-          
-          CompilerIf #PB_Compiler_OS = #PB_OS_Windows
-          Case "MDIGadget"           
-            Flags.S = ""
-          CompilerEndIf
-          
-        Case "ScintillaGadget"      
-          Flags.S = ""
-          
-        Case "ShortcutGadget"       
-          Flags.S = ""
-          
-        Case "CanvasGadget" 
-          ;{- Ok
-          Flags.S = "#PB_Canvas_Border|"+
-                    "#PB_Canvas_Container|"+
-                    "#PB_Canvas_ClipMouse|"+
-                    "#PB_Canvas_Keyboard|"+
-                    "#PB_Canvas_DrawFocus"
-          ;}
-          
-      EndSelect
-    EndIf
-    
-    If Flags.S=""
-      Flags.S="#PB_Flag_None"
-    EndIf
-    
-    ProcedureReturn Flags.S
-  EndProcedure
-  
   ;-
   Procedure GetStyle(Handle)
     CompilerSelect #PB_Compiler_OS  
@@ -571,7 +97,7 @@ Module Flag
           SetWindowPos_(Handle, 0, 0, 0, 0, 0,  #SWP_FRAMECHANGED|#SWP_NOMOVE|#SWP_NOSIZE|#SWP_NOZORDER)
           InvalidateRect_(Handle,0,#True)
         EndIf
-   CompilerEndSelect         
+    CompilerEndSelect         
   EndProcedure   
   
   CompilerSelect #PB_Compiler_OS  
@@ -807,6 +333,17 @@ Module Flag
         Protected Flags = GetStyle(Handle)
         
         Select GadgetType(Gadget)
+          Case #PB_GadgetType_Text
+            If IsFlag(GetExStyle(Handle),#WS_EX_CLIENTEDGE) ;Ok
+              Flag|#PB_Text_Border
+            EndIf
+            If IsFlag(Flags,#ES_CENTER)   ;Ok
+              Flag|#PB_Text_Center
+            EndIf
+            If IsFlag(Flags,#ES_RIGHT)   ;Ok
+              Flag|#PB_Text_Right
+            EndIf
+            
           Case #PB_GadgetType_String
             If Not IsFlag(GetExStyle(Handle),#WS_EX_CLIENTEDGE) ;Ok
               Flag|#PB_String_BorderLess
@@ -843,6 +380,277 @@ Module Flag
             If IsFlag(Flags,#BS_MULTILINE)  ;Ok
               Flag|#PB_Button_MultiLine
             EndIf
+            
+          Case #PB_GadgetType_CheckBox
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_CheckBox_Right
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_CheckBox_Center
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_CheckBox_ThreeState
+            EndIf
+            
+          Case #PB_GadgetType_Option
+            
+          Case #PB_GadgetType_ListView
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_ListView_MultiSelect
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_ListView_ClickSelect
+            EndIf
+            
+          Case #PB_GadgetType_Frame
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Frame_Single
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Frame_Double
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Frame_Flat
+            EndIf
+            
+          Case #PB_GadgetType_ComboBox
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_ComboBox_Editable
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_ComboBox_LowerCase
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_ComboBox_UpperCase
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_ComboBox_Image
+            EndIf
+            
+          Case #PB_GadgetType_Image
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Image_Border
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Image_Raised
+            EndIf
+            
+          Case #PB_GadgetType_HyperLink
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_HyperLink_Underline
+            EndIf
+            
+          Case #PB_GadgetType_Container
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Container_BorderLess
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Container_Flat
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Container_Raised
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Container_Single
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Container_Double
+            EndIf
+            
+          Case #PB_GadgetType_ListIcon
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_ListIcon_CheckBoxes
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_ListIcon_ThreeState
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_ListIcon_MultiSelect
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_ListIcon_GridLines
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_ListIcon_FullRowSelect
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_ListIcon_HeaderDragDrop
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_ListIcon_AlwaysShowSelection
+            EndIf
+            
+          Case #PB_GadgetType_IPAddress
+            
+          Case #PB_GadgetType_ProgressBar
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_ProgressBar_Smooth
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_ProgressBar_Vertical
+            EndIf
+            
+          Case #PB_GadgetType_ScrollBar
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_ScrollBar_Vertical
+            EndIf
+            
+          Case #PB_GadgetType_ScrollArea
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_ScrollArea_Flat
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_ScrollArea_Raised
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_ScrollArea_Single
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_ScrollArea_BorderLess
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_ScrollArea_Center
+            EndIf
+            
+          Case #PB_GadgetType_TrackBar
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_TrackBar_Ticks
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_TrackBar_Vertical
+            EndIf
+            
+          Case #PB_GadgetType_Web
+            
+          Case #PB_GadgetType_ButtonImage
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Button_Toggle
+            EndIf
+            
+          Case #PB_GadgetType_Calendar
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Calendar_Borderless
+            EndIf
+            
+          Case #PB_GadgetType_Date
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Date_UpDown
+            EndIf
+            
+          Case #PB_GadgetType_Editor
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Editor_ReadOnly
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Editor_WordWrap
+            EndIf
+            
+          Case #PB_GadgetType_ExplorerList
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Explorer_BorderLess
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Explorer_AlwaysShowSelection
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Explorer_MultiSelect
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Explorer_GridLines
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Explorer_HeaderDragDrop
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Explorer_FullRowSelect
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Explorer_NoFiles
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Explorer_NoFolders
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Explorer_NoParentFolder
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Explorer_NoDirectoryChange
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Explorer_NoDriveRequester
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Explorer_NoSort
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Explorer_NoMyDocuments
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Explorer_AutoSort
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Explorer_HiddenFiles
+            EndIf
+            
+          Case #PB_GadgetType_ExplorerTree
+            
+          Case #PB_GadgetType_ExplorerCombo
+            
+          Case #PB_GadgetType_Spin
+            
+          Case #PB_GadgetType_Tree
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Tree_AlwaysShowSelection
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Tree_NoLines
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Tree_NoButtons
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Tree_CheckBoxes
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Tree_ThreeState
+            EndIf
+            
+          Case #PB_GadgetType_Panel
+            
+          Case #PB_GadgetType_Splitter
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Splitter_Vertical
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Splitter_Separator
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Splitter_FirstFixed
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Splitter_SecondFixed
+            EndIf
+            
+          Case #PB_GadgetType_Scintilla
+            
+          Case #PB_GadgetType_Shortcut
+            
+          Case #PB_GadgetType_Canvas
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Canvas_Border
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Canvas_Container
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Canvas_ClipMouse
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Canvas_Keyboard
+            EndIf
+            If IsFlag(Flags, #BS_RIGHT )
+              Flag|#PB_Canvas_DrawFocus
+            EndIf
         EndSelect
         
         ProcedureReturn Flag
@@ -852,6 +660,17 @@ Module Flag
         Protected Handle = GadgetID(Gadget)
         
         Select GadgetType(Gadget)
+          Case #PB_GadgetType_Text
+            If IsFlag(Flags,#PB_Text_Border)        ;Ok 
+              SetExStyle(Handle, #WS_EX_CLIENTEDGE)
+            EndIf
+            If IsFlag(Flags,#PB_Text_Center)          ;Ok
+              SetStyle(Handle, #ES_CENTER)
+            EndIf
+            If IsFlag(Flags,#PB_Text_Right)         ;Ok
+              SetStyle(Handle, #ES_RIGHT)           ; 
+            EndIf
+            
           Case #PB_GadgetType_String
             If IsFlag(Flags,#PB_String_BorderLess) ;Ok
               RemoveExStyle(Handle, (#WS_EX_CLIENTEDGE))
@@ -869,13 +688,13 @@ Module Flag
             EndIf
             If IsFlag(Flags,#PB_String_LowerCase)  ;Ok
               SetStyle(Handle, (#ES_LOWERCASE))
-            ;  SetGadgetText(Gadget, LCase(GetGadgetText(Gadget)))
+              ;  SetGadgetText(Gadget, LCase(GetGadgetText(Gadget))
             EndIf
             If IsFlag(Flags,#PB_String_UpperCase)  ;Ok 
               SetStyle(Handle, (#ES_UPPERCASE))
-              ;SetWindowText_(Handle, UCase(GetWindowText_(Handle)))
+              ;SetWindowText_(Handle, UCase(GetWindowText_(Handle))
               ;SendMessage_(Handle, #EM_SETMODIFY, 1,0)
-;               SetGadgetText(Gadget, UCase(GetGadgetText(Gadget)))
+              ;               SetGadgetText(Gadget, UCase(GetGadgetText(Gadget))
             EndIf
             
           Case #PB_GadgetType_Button
@@ -895,6 +714,279 @@ Module Flag
             If IsFlag(Flags,#PB_Button_MultiLine)  ;Ok
               SetStyle(Handle, (#BS_MULTILINE))
             EndIf
+            
+          Case #PB_GadgetType_CheckBox
+            If IsFlag(Flags,#PB_CheckBox_Right)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_CheckBox_Center)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_CheckBox_ThreeState)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_Option
+            
+          Case #PB_GadgetType_ListView
+            If IsFlag(Flags,#PB_ListView_MultiSelect)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ListView_ClickSelect)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_Frame
+            If IsFlag(Flags,#PB_Frame_Single)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Frame_Double)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Frame_Flat)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_ComboBox
+            If IsFlag(Flags,#PB_ComboBox_Editable)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ComboBox_LowerCase)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ComboBox_UpperCase)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ComboBox_Image)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_Image
+            If IsFlag(Flags,#PB_Image_Border)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Image_Raised)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_HyperLink
+            If IsFlag(Flags,#PB_HyperLink_Underline)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_Container
+            If IsFlag(Flags,#PB_Container_BorderLess)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Container_Flat)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Container_Raised)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Container_Single)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Container_Double)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_ListIcon
+            If IsFlag(Flags,#PB_ListIcon_CheckBoxes)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ListIcon_ThreeState)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ListIcon_MultiSelect)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ListIcon_GridLines)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ListIcon_FullRowSelect)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ListIcon_HeaderDragDrop)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ListIcon_AlwaysShowSelection)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_IPAddress
+            
+          Case #PB_GadgetType_ProgressBar
+            If IsFlag(Flags,#PB_ProgressBar_Smooth)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ProgressBar_Vertical)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_ScrollBar
+            If IsFlag(Flags,#PB_ScrollBar_Vertical)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_ScrollArea
+            If IsFlag(Flags,#PB_ScrollArea_Flat)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ScrollArea_Raised)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ScrollArea_Single)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ScrollArea_BorderLess)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ScrollArea_Center)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_TrackBar
+            If IsFlag(Flags,#PB_TrackBar_Ticks)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_TrackBar_Vertical)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_Web
+            
+          Case #PB_GadgetType_ButtonImage
+            If IsFlag(Flags,#PB_Button_Toggle)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_Calendar
+            If IsFlag(Flags,#PB_Calendar_Borderless)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_Date
+            If IsFlag(Flags,#PB_Date_UpDown)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_Editor
+            If IsFlag(Flags,#PB_Editor_ReadOnly)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Editor_WordWrap)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_ExplorerList
+            If IsFlag(Flags,#PB_Explorer_BorderLess)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_AlwaysShowSelection)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_MultiSelect)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_GridLines)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_HeaderDragDrop)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_FullRowSelect)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_NoFiles)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_NoFolders)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_NoParentFolder)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_NoDirectoryChange)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_NoDriveRequester)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_NoSort)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_NoMyDocuments)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_AutoSort)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_HiddenFiles)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_ExplorerTree
+            
+          Case #PB_GadgetType_ExplorerCombo
+            
+          Case #PB_GadgetType_Spin
+            
+          Case #PB_GadgetType_Tree
+            If IsFlag(Flags,#PB_Tree_AlwaysShowSelection)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Tree_NoLines)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Tree_NoButtons)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Tree_CheckBoxes)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Tree_ThreeState)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_Panel
+            
+          Case #PB_GadgetType_Splitter
+            If IsFlag(Flags,#PB_Splitter_Vertical)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Splitter_Separator)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Splitter_FirstFixed)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Splitter_SecondFixed)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_Scintilla
+            
+          Case #PB_GadgetType_Shortcut
+            
+          Case #PB_GadgetType_Canvas
+            If IsFlag(Flags,#PB_Canvas_Border)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Canvas_Container)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Canvas_ClipMouse)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Canvas_Keyboard)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Canvas_DrawFocus)
+              SetStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+            
         EndSelect
       EndProcedure
       
@@ -902,6 +994,17 @@ Module Flag
         Protected Handle = GadgetID(Gadget)
         
         Select GadgetType(Gadget)
+          Case #PB_GadgetType_Text
+            If IsFlag(Flags,#PB_Text_Border)        ;Ok 
+              RemoveExStyle(Handle, #WS_EX_CLIENTEDGE)
+            EndIf
+            If IsFlag(Flags,#PB_Text_Center)          ;Ok
+              RemoveStyle(Handle, #ES_CENTER)
+            EndIf
+            If IsFlag(Flags,#PB_Text_Right)         ;Ok
+              RemoveStyle(Handle, #ES_RIGHT)        ; 
+            EndIf
+            
           Case #PB_GadgetType_String
             If IsFlag(Flags,#PB_String_BorderLess)    ;Ok
               SetExStyle(Handle, (#WS_EX_CLIENTEDGE))
@@ -943,10 +1046,282 @@ Module Flag
             If IsFlag(Flags,#PB_Button_MultiLine)     ;Ok
               RemoveStyle(Handle, (#BS_MULTILINE))
             EndIf
+            
+          Case #PB_GadgetType_CheckBox
+            If IsFlag(Flags,#PB_CheckBox_Right)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_CheckBox_Center)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_CheckBox_ThreeState)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_Option
+            
+          Case #PB_GadgetType_ListView
+            If IsFlag(Flags,#PB_ListView_MultiSelect)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ListView_ClickSelect)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_Frame
+            If IsFlag(Flags,#PB_Frame_Single)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Frame_Double)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Frame_Flat)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_ComboBox
+            If IsFlag(Flags,#PB_ComboBox_Editable)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ComboBox_LowerCase)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ComboBox_UpperCase)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ComboBox_Image)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_Image
+            If IsFlag(Flags,#PB_Image_Border)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Image_Raised)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_HyperLink
+            If IsFlag(Flags,#PB_HyperLink_Underline)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_Container
+            If IsFlag(Flags,#PB_Container_BorderLess)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Container_Flat)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Container_Raised)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Container_Single)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Container_Double)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_ListIcon
+            If IsFlag(Flags,#PB_ListIcon_CheckBoxes)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ListIcon_ThreeState)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ListIcon_MultiSelect)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ListIcon_GridLines)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ListIcon_FullRowSelect)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ListIcon_HeaderDragDrop)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ListIcon_AlwaysShowSelection)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_IPAddress
+            
+          Case #PB_GadgetType_ProgressBar
+            If IsFlag(Flags,#PB_ProgressBar_Smooth)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ProgressBar_Vertical)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_ScrollBar
+            If IsFlag(Flags,#PB_ScrollBar_Vertical)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_ScrollArea
+            If IsFlag(Flags,#PB_ScrollArea_Flat)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ScrollArea_Raised)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ScrollArea_Single)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ScrollArea_BorderLess)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_ScrollArea_Center)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_TrackBar
+            If IsFlag(Flags,#PB_TrackBar_Ticks)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_TrackBar_Vertical)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_Web
+            
+          Case #PB_GadgetType_ButtonImage
+            If IsFlag(Flags,#PB_Button_Toggle)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_Calendar
+            If IsFlag(Flags,#PB_Calendar_Borderless)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_Date
+            If IsFlag(Flags,#PB_Date_UpDown)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_Editor
+            If IsFlag(Flags,#PB_Editor_ReadOnly)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Editor_WordWrap)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_ExplorerList
+            If IsFlag(Flags,#PB_Explorer_BorderLess)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_AlwaysShowSelection)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_MultiSelect)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_GridLines)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_HeaderDragDrop)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_FullRowSelect)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_NoFiles)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_NoFolders)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_NoParentFolder)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_NoDirectoryChange)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_NoDriveRequester)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_NoSort)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_NoMyDocuments)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_AutoSort)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Explorer_HiddenFiles)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_ExplorerTree
+            
+          Case #PB_GadgetType_ExplorerCombo
+            
+          Case #PB_GadgetType_Spin
+            
+          Case #PB_GadgetType_Tree
+            If IsFlag(Flags,#PB_Tree_AlwaysShowSelection)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Tree_NoLines)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Tree_NoButtons)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Tree_CheckBoxes)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Tree_ThreeState)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_Panel
+            
+          Case #PB_GadgetType_Splitter
+            If IsFlag(Flags,#PB_Splitter_Vertical)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Splitter_Separator)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Splitter_FirstFixed)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Splitter_SecondFixed)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
+          Case #PB_GadgetType_Scintilla
+            
+          Case #PB_GadgetType_Shortcut
+            
+          Case #PB_GadgetType_Canvas
+            If IsFlag(Flags,#PB_Canvas_Border)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Canvas_Container)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Canvas_ClipMouse)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Canvas_Keyboard)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            If IsFlag(Flags,#PB_Canvas_DrawFocus)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
+            
         EndSelect
       EndProcedure
     CompilerDefault
-        ;-
+      ;-
       Procedure.q GetWindow( Window )
         Protected Flag.q
         Protected Handle = WindowID(Window)
@@ -963,7 +1338,7 @@ Module Flag
       
       Procedure RemoveWindow( Window, Flags.q )
         Protected Handle = WindowID(Window)
-       
+        
       EndProcedure
       
       ;-
@@ -974,8 +1349,8 @@ Module Flag
         
         Select GadgetType(Gadget)
           Case #PB_GadgetType_String
-         Case #PB_GadgetType_Button
-       EndSelect
+          Case #PB_GadgetType_Button
+        EndSelect
         
         ProcedureReturn Flag
       EndProcedure
@@ -986,7 +1361,7 @@ Module Flag
         Select GadgetType(Gadget)
           Case #PB_GadgetType_String
           Case #PB_GadgetType_Button
-    EndSelect
+        EndSelect
       EndProcedure
       
       Procedure RemoveGadget( Gadget, Flags.q )
@@ -997,7 +1372,8 @@ Module Flag
           Case #PB_GadgetType_Button
         EndSelect
       EndProcedure
-CompilerEndSelect
+  CompilerEndSelect
+  
 EndModule
 
 ;-
