@@ -37,6 +37,10 @@ DeclareModule Flag
 EndDeclareModule
 
 Module Flag
+  Global GetStyle
+  Global GetExStyle
+  Global GetText$
+  
   ;-
   Procedure GetStyle(Handle)
     CompilerSelect #PB_Compiler_OS  
@@ -81,7 +85,7 @@ Module Flag
       CompilerCase #PB_OS_Windows
         SetWindowLongPtr_(Handle,#GWL_EXSTYLE,GetWindowLongPtr_(Handle,#GWL_EXSTYLE)|ExStyle)
         
-        If (ExStyle & #WS_EX_CLIENTEDGE);|#WS_EX_TOOLWINDOW|#WS_EX_NOACTIVATE)
+        If (ExStyle & #WS_EX_CLIENTEDGE|#WS_EX_STATICEDGE|#WS_EX_DLGMODALFRAME);|#WS_EX_TOOLWINDOW|#WS_EX_NOACTIVATE)
           SetWindowPos_(Handle, 0, 0, 0, 0, 0,  #SWP_FRAMECHANGED|#SWP_NOMOVE|#SWP_NOSIZE|#SWP_NOZORDER)
           InvalidateRect_(Handle,0,#True)
         EndIf
@@ -102,7 +106,9 @@ Module Flag
   
   CompilerSelect #PB_Compiler_OS  
     CompilerCase #PB_OS_Windows
-      ;-
+      #CBS_UPPERCASE = $2000;
+      #CBS_LOWERCASE = $4000;
+                                           ;-
       Procedure.q GetWindow( Window )
         Protected Flag.q
         Protected Handle = WindowID(Window)
@@ -385,10 +391,10 @@ Module Flag
             If IsFlag(Flags, #BS_RIGHT )
               Flag|#PB_CheckBox_Right
             EndIf
-            If IsFlag(Flags, #BS_RIGHT )
+            If IsFlag(Flags, #BS_CENTER )
               Flag|#PB_CheckBox_Center
             EndIf
-            If IsFlag(Flags, #BS_RIGHT )
+            If IsFlag(Flags, #BS_AUTO3STATE )
               Flag|#PB_CheckBox_ThreeState
             EndIf
             
@@ -428,10 +434,10 @@ Module Flag
             EndIf
             
           Case #PB_GadgetType_Image
-            If IsFlag(Flags, #BS_RIGHT )
+            If IsFlag(GetExStyle(Handle), #WS_EX_CLIENTEDGE )
               Flag|#PB_Image_Border
             EndIf
-            If IsFlag(Flags, #BS_RIGHT )
+            If IsFlag(GetExStyle(Handle), #WS_EX_DLGMODALFRAME )
               Flag|#PB_Image_Raised
             EndIf
             
@@ -441,19 +447,22 @@ Module Flag
             EndIf
             
           Case #PB_GadgetType_Container
-            If IsFlag(Flags, #BS_RIGHT )
+            If Not IsFlag(Flags, #WS_BORDER ) And 
+               Not IsFlag(GetExStyle(Handle), #WS_EX_DLGMODALFRAME ) And 
+               Not IsFlag(GetExStyle(Handle), #WS_EX_STATICEDGE ) And 
+               Not IsFlag(GetExStyle(Handle), #WS_EX_CLIENTEDGE ) 
               Flag|#PB_Container_BorderLess
             EndIf
-            If IsFlag(Flags, #BS_RIGHT )
+            If IsFlag(Flags, #WS_BORDER )
               Flag|#PB_Container_Flat
             EndIf
-            If IsFlag(Flags, #BS_RIGHT )
+            If IsFlag(GetExStyle(Handle), #WS_EX_DLGMODALFRAME )
               Flag|#PB_Container_Raised
             EndIf
-            If IsFlag(Flags, #BS_RIGHT )
+            If IsFlag(GetExStyle(Handle), #WS_EX_STATICEDGE )
               Flag|#PB_Container_Single
             EndIf
-            If IsFlag(Flags, #BS_RIGHT )
+            If IsFlag(GetExStyle(Handle), #WS_EX_CLIENTEDGE )
               Flag|#PB_Container_Double
             EndIf
             
@@ -661,79 +670,82 @@ Module Flag
         
         Select GadgetType(Gadget)
           Case #PB_GadgetType_Text
-            If IsFlag(Flags,#PB_Text_Border)        ;Ok 
+            If IsFlag(Flags,#PB_Text_Border)            ;Ok 
               SetExStyle(Handle, #WS_EX_CLIENTEDGE)
             EndIf
-            If IsFlag(Flags,#PB_Text_Center)          ;Ok
+            If IsFlag(Flags,#PB_Text_Center)            ;Ok
               SetStyle(Handle, #ES_CENTER)
             EndIf
-            If IsFlag(Flags,#PB_Text_Right)         ;Ok
-              SetStyle(Handle, #ES_RIGHT)           ; 
+            If IsFlag(Flags,#PB_Text_Right)             ;Ok
+              SetStyle(Handle, #ES_RIGHT)           
             EndIf
             
           Case #PB_GadgetType_String
-            If IsFlag(Flags,#PB_String_BorderLess) ;Ok
+            If IsFlag(Flags,#PB_String_BorderLess)      ;Ok
               RemoveExStyle(Handle, (#WS_EX_CLIENTEDGE))
             EndIf
-            If IsFlag(Flags,#PB_String_Password)   ;Ok
+            If IsFlag(Flags,#PB_String_Password)        ;Ok
               SetStyle(Handle, (#ES_PASSWORD))
               SendMessage_(Handle, #EM_SETPASSWORDCHAR, 9679,0)
             EndIf
-            If IsFlag(Flags,#PB_String_ReadOnly)   ;Ok
+            If IsFlag(Flags,#PB_String_ReadOnly)        ;Ok
               SetStyle(Handle, (#ES_READONLY))
               SendMessage_(Handle, #EM_SETREADONLY, 1,0)
             EndIf
-            If IsFlag(Flags,#PB_String_Numeric)    ;Ok
+            If IsFlag(Flags,#PB_String_Numeric)         ;Ok
               SetStyle(Handle, (#ES_NUMBER))
             EndIf
-            If IsFlag(Flags,#PB_String_LowerCase)  ;Ok
+            If IsFlag(Flags,#PB_String_LowerCase)       ;?
+              GetText$ = GetGadgetText(Gadget)
               SetStyle(Handle, (#ES_LOWERCASE))
-              ;  SetGadgetText(Gadget, LCase(GetGadgetText(Gadget))
+              SetGadgetText(Gadget, LCase(GetText$))
             EndIf
-            If IsFlag(Flags,#PB_String_UpperCase)  ;Ok 
+            If IsFlag(Flags,#PB_String_UpperCase)       ;? 
+              GetText$ = Space(GetWindowTextLength_(Handle) + 1)
+              GetWindowText_(Handle, GetText$, Len(GetText$))
               SetStyle(Handle, (#ES_UPPERCASE))
-              ;SetWindowText_(Handle, UCase(GetWindowText_(Handle))
-              ;SendMessage_(Handle, #EM_SETMODIFY, 1,0)
-              ;               SetGadgetText(Gadget, UCase(GetGadgetText(Gadget))
+              SetWindowText_(Handle, UCase(GetText$))
             EndIf
             
           Case #PB_GadgetType_Button
-            If IsFlag(Flags,#PB_Button_Toggle)     ;Ok
+            If IsFlag(Flags,#PB_Button_Toggle)          ;Ok
               SetStyle(Handle, (#BS_PUSHLIKE|#BS_CHECKBOX))
               SendMessage_(Handle, #BM_SETCHECK, 1, 0) ; Чтобы видет эфект сразу
             EndIf
-            If IsFlag(Flags,#PB_Button_Left)       ;Ok
+            If IsFlag(Flags,#PB_Button_Left)            ;Ok
               SetStyle(Handle, (#BS_LEFT))
             EndIf
-            If IsFlag(Flags,#PB_Button_Right)      ;Ok
+            If IsFlag(Flags,#PB_Button_Right)           ;Ok
               SetStyle(Handle, (#BS_RIGHT))
             EndIf
-            If IsFlag(Flags,#PB_Button_Default)    ;Ok
+            If IsFlag(Flags,#PB_Button_Default)         ;Ok
               SetStyle(Handle, (#BS_DEFPUSHBUTTON))
             EndIf
-            If IsFlag(Flags,#PB_Button_MultiLine)  ;Ok
+            If IsFlag(Flags,#PB_Button_MultiLine)       ;Ok
               SetStyle(Handle, (#BS_MULTILINE))
             EndIf
             
           Case #PB_GadgetType_CheckBox
-            If IsFlag(Flags,#PB_CheckBox_Right)
+            If IsFlag(Flags,#PB_CheckBox_Right)         ;Ok
               SetStyle(Handle, (#BS_RIGHT))
             EndIf
-            If IsFlag(Flags,#PB_CheckBox_Center)
-              SetStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_CheckBox_Center)        ;Ok
+              SetStyle(Handle, (#BS_CENTER))
             EndIf
-            If IsFlag(Flags,#PB_CheckBox_ThreeState)
-              SetStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_CheckBox_ThreeState)    ;Ok
+              RemoveStyle(Handle, (#BS_GROUPBOX))
+              SetStyle(Handle, (#BS_AUTO3STATE))
+              SendMessage_(Handle, #BM_SETCHECK, #BST_INDETERMINATE, 0)
             EndIf
             
           Case #PB_GadgetType_Option
             
           Case #PB_GadgetType_ListView
             If IsFlag(Flags,#PB_ListView_MultiSelect)
-              SetStyle(Handle, (#BS_RIGHT))
+              SetExStyle(Handle, (#LVS_EX_MULTIWORKAREAS))
             EndIf
             If IsFlag(Flags,#PB_ListView_ClickSelect)
-              SetStyle(Handle, (#BS_RIGHT))
+              SetExStyle(Handle, (#LVS_EX_ONECLICKACTIVATE))
             EndIf
             
           Case #PB_GadgetType_Frame
@@ -749,46 +761,52 @@ Module Flag
             
           Case #PB_GadgetType_ComboBox
             If IsFlag(Flags,#PB_ComboBox_Editable)
-              SetStyle(Handle, (#BS_RIGHT))
+              SetStyle(Handle, (#CBS_SIMPLE|#CBS_DROPDOWN))
             EndIf
             If IsFlag(Flags,#PB_ComboBox_LowerCase)
-              SetStyle(Handle, (#BS_RIGHT))
+              SetStyle(Handle, (#CBS_LOWERCASE))
             EndIf
             If IsFlag(Flags,#PB_ComboBox_UpperCase)
-              SetStyle(Handle, (#BS_RIGHT))
+              SetStyle(Handle, (#CBS_UPPERCASE))
             EndIf
             If IsFlag(Flags,#PB_ComboBox_Image)
-              SetStyle(Handle, (#BS_RIGHT))
+              SetStyle(Handle, (#BS_BITMAP))
             EndIf
             
           Case #PB_GadgetType_Image
-            If IsFlag(Flags,#PB_Image_Border)
-              SetStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_Image_Border)           ;Ok
+              SetExStyle(Handle, (#WS_EX_CLIENTEDGE))
             EndIf
-            If IsFlag(Flags,#PB_Image_Raised)
-              SetStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_Image_Raised)           ;Ok
+              SetExStyle(Handle, (#WS_EX_DLGMODALFRAME))
             EndIf
             
           Case #PB_GadgetType_HyperLink
             If IsFlag(Flags,#PB_HyperLink_Underline)
-              SetStyle(Handle, (#BS_RIGHT))
+              SetStyle(Handle, (#BS_FLAT))
             EndIf
             
           Case #PB_GadgetType_Container
-            If IsFlag(Flags,#PB_Container_BorderLess)
-              SetStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_Container_BorderLess)   ;Ok
+              GetStyle = GetStyle(Handle)
+              GetExStyle = GetExStyle(Handle)
+              
+              RemoveStyle(Handle, (#WS_BORDER))
+              RemoveExStyle(Handle, (#WS_EX_CLIENTEDGE))
+              RemoveExStyle(Handle, (#WS_EX_STATICEDGE))
+              RemoveExStyle(Handle, (#WS_EX_DLGMODALFRAME))
             EndIf
-            If IsFlag(Flags,#PB_Container_Flat)
-              SetStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_Container_Flat)         ;Ok
+              SetStyle(Handle, (#WS_BORDER))
             EndIf
-            If IsFlag(Flags,#PB_Container_Raised)
-              SetStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_Container_Raised)       ;Ok
+              SetExStyle(Handle, (#WS_EX_DLGMODALFRAME))
             EndIf
-            If IsFlag(Flags,#PB_Container_Single)
-              SetStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_Container_Single)       ;Ok
+              SetExStyle(Handle, (#WS_EX_STATICEDGE))
             EndIf
-            If IsFlag(Flags,#PB_Container_Double)
-              SetStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_Container_Double)       ;Ok
+              SetExStyle(Handle, (#WS_EX_CLIENTEDGE))
             EndIf
             
           Case #PB_GadgetType_ListIcon
@@ -858,7 +876,8 @@ Module Flag
             
           Case #PB_GadgetType_ButtonImage
             If IsFlag(Flags,#PB_Button_Toggle)
-              SetStyle(Handle, (#BS_RIGHT))
+              SetStyle(Handle, (#BS_PUSHLIKE|#BS_CHECKBOX))
+              SendMessage_(Handle, #BM_SETCHECK, 1, 0) ; Чтобы видет эфект сразу
             EndIf
             
           Case #PB_GadgetType_Calendar
@@ -873,7 +892,8 @@ Module Flag
             
           Case #PB_GadgetType_Editor
             If IsFlag(Flags,#PB_Editor_ReadOnly)
-              SetStyle(Handle, (#BS_RIGHT))
+              SetStyle(Handle, (#ES_READONLY))
+              SendMessage_(Handle, #EM_SETREADONLY, 1,0)
             EndIf
             If IsFlag(Flags,#PB_Editor_WordWrap)
               SetStyle(Handle, (#BS_RIGHT))
@@ -991,18 +1011,18 @@ Module Flag
       EndProcedure
       
       Procedure RemoveGadget( Gadget, Flags.q )
-        Protected Handle = GadgetID(Gadget)
+        Protected Text$, Handle = GadgetID(Gadget)
         
         Select GadgetType(Gadget)
           Case #PB_GadgetType_Text
-            If IsFlag(Flags,#PB_Text_Border)        ;Ok 
+            If IsFlag(Flags,#PB_Text_Border)          ;Ok 
               RemoveExStyle(Handle, #WS_EX_CLIENTEDGE)
             EndIf
             If IsFlag(Flags,#PB_Text_Center)          ;Ok
               RemoveStyle(Handle, #ES_CENTER)
             EndIf
-            If IsFlag(Flags,#PB_Text_Right)         ;Ok
-              RemoveStyle(Handle, #ES_RIGHT)        ; 
+            If IsFlag(Flags,#PB_Text_Right)           ;Ok
+              RemoveStyle(Handle, #ES_RIGHT)         
             EndIf
             
           Case #PB_GadgetType_String
@@ -1022,9 +1042,21 @@ Module Flag
             EndIf
             If IsFlag(Flags,#PB_String_LowerCase)     ;Ok
               RemoveStyle(Handle, (#ES_LOWERCASE))
+              
+              Text$ = Space(GetWindowTextLength_(Handle) + 1)
+              GetWindowText_(Handle, Text$, Len(Text$))
+              If Text$ = LCase(GetText$)
+                SetWindowText_(Handle, GetText$)
+              EndIf
             EndIf
             If IsFlag(Flags,#PB_String_UpperCase)     ;Ok
               RemoveStyle(Handle, (#ES_UPPERCASE))
+              
+              Text$ = Space(GetWindowTextLength_(Handle) + 1)
+              GetWindowText_(Handle, Text$, Len(Text$))
+              If Text$ = UCase(GetText$)
+                SetWindowText_(Handle, GetText$)
+              EndIf
             EndIf
             
           Case #PB_GadgetType_Button
@@ -1048,14 +1080,16 @@ Module Flag
             EndIf
             
           Case #PB_GadgetType_CheckBox
-            If IsFlag(Flags,#PB_CheckBox_Right)
+            If IsFlag(Flags,#PB_CheckBox_Right)       ;Ok
               RemoveStyle(Handle, (#BS_RIGHT))
             EndIf
-            If IsFlag(Flags,#PB_CheckBox_Center)
-              RemoveStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_CheckBox_Center)      ;Ok
+              RemoveStyle(Handle, (#BS_CENTER))
             EndIf
-            If IsFlag(Flags,#PB_CheckBox_ThreeState)
-              RemoveStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_CheckBox_ThreeState)  ;Ok
+              SendMessage_(Handle, #BM_SETCHECK, 0, 0)
+              RemoveStyle(Handle, (#BS_AUTO3STATE))
+              SetStyle(Handle, (#BS_AUTOCHECKBOX))
             EndIf
             
           Case #PB_GadgetType_Option
@@ -1094,11 +1128,11 @@ Module Flag
             EndIf
             
           Case #PB_GadgetType_Image
-            If IsFlag(Flags,#PB_Image_Border)
-              RemoveStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_Image_Border)           ;Ok
+              RemoveExStyle(Handle, (#WS_EX_CLIENTEDGE))
             EndIf
-            If IsFlag(Flags,#PB_Image_Raised)
-              RemoveStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_Image_Raised)           ;Ok
+              RemoveExStyle(Handle, (#WS_EX_DLGMODALFRAME))
             EndIf
             
           Case #PB_GadgetType_HyperLink
@@ -1107,20 +1141,21 @@ Module Flag
             EndIf
             
           Case #PB_GadgetType_Container
-            If IsFlag(Flags,#PB_Container_BorderLess)
-              RemoveStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_Container_BorderLess)    ;?
+              SetStyle(Handle, GetStyle)
+              SetExStyle(Handle, GetExStyle)
             EndIf
-            If IsFlag(Flags,#PB_Container_Flat)
-              RemoveStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_Container_Flat)          ;Ok
+              RemoveStyle(Handle, (#WS_BORDER))
             EndIf
-            If IsFlag(Flags,#PB_Container_Raised)
-              RemoveStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_Container_Raised)        ;Ok
+              RemoveExStyle(Handle, (#WS_EX_DLGMODALFRAME))
             EndIf
-            If IsFlag(Flags,#PB_Container_Single)
-              RemoveStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_Container_Single)        ;Ok
+              RemoveExStyle(Handle, (#WS_EX_STATICEDGE))
             EndIf
-            If IsFlag(Flags,#PB_Container_Double)
-              RemoveStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_Container_Double)        ;Ok
+              RemoveExStyle(Handle, (#WS_EX_CLIENTEDGE))
             EndIf
             
           Case #PB_GadgetType_ListIcon

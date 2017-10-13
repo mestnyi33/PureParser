@@ -168,7 +168,7 @@ Module Properties
     
     ;
     
-    ProcedureReturn Flag
+;     ProcedureReturn Flag
   EndProcedure
       
    Procedure$ GetPBFlags( Type=#PB_GadgetType_Unknown ) ; 
@@ -1372,17 +1372,19 @@ CompilerIf #PB_Compiler_IsMainFile
     TextGadget(1, 10,10,80,20,"Text_0")
     StringGadget(2, 10,35,80,20,"String_0")
     ButtonGadget(3, 10,70,80,60,"Button_1 text multi line", #PB_Button_Toggle)
+    CheckBoxGadget(4, 10,135,80,25, "CheckBox")
+    ;ContainerGadget(4, 10,135,80,25) : CloseGadgetList() ; , #PB_ComboBox_Editable)
     
     AddGadgetItem(Window_0_Select, -1, "Form_0")
     AddGadgetItem(Window_0_Select, -1, "Text_0")
     AddGadgetItem(Window_0_Select, -1, "String_0")
     AddGadgetItem(Window_0_Select, -1, "Button_1")
+    AddGadgetItem(Window_0_Select, -1, "ComboBox_1")
     
-    SetGadgetItemData(Window_0_Select, 0,0)
-    SetGadgetItemData(Window_0_Select, 1,1)
-    SetGadgetItemData(Window_0_Select, 2,2)
-    SetGadgetItemData(Window_0_Select, 3,3)
-    
+    Protected i
+    For i=0 To 4
+      SetGadgetItemData(Window_0_Select, i,i)
+    Next
     
     ;     BindEvent(#PB_Event_Gadget, @Form_0_Event(), Form_0)
   EndIf
