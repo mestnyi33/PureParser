@@ -522,10 +522,10 @@ Module Flag
             EndIf
             
           Case #PB_GadgetType_TrackBar
-            If IsFlag(Flags, #BS_RIGHT )
+            If SendMessage_(Handle,#TBM_GETNUMTICS, 0, 0)>2
               Flag|#PB_TrackBar_Ticks
             EndIf
-            If IsFlag(Flags, #BS_RIGHT )
+            If IsFlag(Flags, #TBS_VERT )
               Flag|#PB_TrackBar_Vertical
             EndIf
             
@@ -666,7 +666,7 @@ Module Flag
       EndProcedure
       
       Procedure SetGadget( Gadget, Flags.q, Value=0 )
-        Protected Handle = GadgetID(Gadget)
+        Protected i, Handle = GadgetID(Gadget)
         
         Select GadgetType(Gadget)
           Case #PB_GadgetType_Text
@@ -811,25 +811,25 @@ Module Flag
             
           Case #PB_GadgetType_ListIcon
             If IsFlag(Flags,#PB_ListIcon_CheckBoxes)
-              SetStyle(Handle, (#BS_RIGHT))
+              SetExStyle(Handle, (#LVS_EX_CHECKBOXES))
             EndIf
             If IsFlag(Flags,#PB_ListIcon_ThreeState)
-              SetStyle(Handle, (#BS_RIGHT))
+              SetStyle(Handle, (#LVSIL_STATE))
             EndIf
             If IsFlag(Flags,#PB_ListIcon_MultiSelect)
-              SetStyle(Handle, (#BS_RIGHT))
+              SetStyle(Handle, (#LBS_MULTIPLESEL))
             EndIf
             If IsFlag(Flags,#PB_ListIcon_GridLines)
               SetStyle(Handle, (#BS_RIGHT))
             EndIf
             If IsFlag(Flags,#PB_ListIcon_FullRowSelect)
-              SetStyle(Handle, (#BS_RIGHT))
+              SetExStyle(Handle, (#LVS_EX_FULLROWSELECT))
             EndIf
             If IsFlag(Flags,#PB_ListIcon_HeaderDragDrop)
               SetStyle(Handle, (#BS_RIGHT))
             EndIf
             If IsFlag(Flags,#PB_ListIcon_AlwaysShowSelection)
-              SetStyle(Handle, (#BS_RIGHT))
+              SetExStyle(Handle, (#LVS_EX_AUTOCHECKSELECT))
             EndIf
             
           Case #PB_GadgetType_IPAddress
@@ -865,17 +865,17 @@ Module Flag
             EndIf
             
           Case #PB_GadgetType_TrackBar
-            If IsFlag(Flags,#PB_TrackBar_Ticks)
-              SetStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_TrackBar_Ticks)    ;Ok
+              For i=1 To SendMessage_(Handle,#TBM_GETRANGEMAX,0, 0)-1 : SendMessage_(Handle,#TBM_SETTIC,0, i) : Next
             EndIf
-            If IsFlag(Flags,#PB_TrackBar_Vertical)
-              SetStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_TrackBar_Vertical) ;Ok
+              SetStyle(Handle, (#TBS_VERT))
             EndIf
             
           Case #PB_GadgetType_Web
             
           Case #PB_GadgetType_ButtonImage
-            If IsFlag(Flags,#PB_Button_Toggle)
+            If IsFlag(Flags,#PB_Button_Toggle) 
               SetStyle(Handle, (#BS_PUSHLIKE|#BS_CHECKBOX))
               SendMessage_(Handle, #BM_SETCHECK, 1, 0) ; Чтобы видет эфект сразу
             EndIf
@@ -1197,6 +1197,9 @@ Module Flag
             EndIf
             
           Case #PB_GadgetType_ScrollArea
+            If IsFlag(Flags,#PB_ScrollArea_BorderLess)
+              RemoveStyle(Handle, (#BS_RIGHT))
+            EndIf
             If IsFlag(Flags,#PB_ScrollArea_Flat)
               RemoveStyle(Handle, (#BS_RIGHT))
             EndIf
@@ -1206,19 +1209,16 @@ Module Flag
             If IsFlag(Flags,#PB_ScrollArea_Single)
               RemoveStyle(Handle, (#BS_RIGHT))
             EndIf
-            If IsFlag(Flags,#PB_ScrollArea_BorderLess)
-              RemoveStyle(Handle, (#BS_RIGHT))
-            EndIf
             If IsFlag(Flags,#PB_ScrollArea_Center)
               RemoveStyle(Handle, (#BS_RIGHT))
             EndIf
             
           Case #PB_GadgetType_TrackBar
             If IsFlag(Flags,#PB_TrackBar_Ticks)
-              RemoveStyle(Handle, (#BS_RIGHT))
+              SendMessage_(Handle, #TBM_CLEARTICS, #NUL,#NUL)
             EndIf
             If IsFlag(Flags,#PB_TrackBar_Vertical)
-              RemoveStyle(Handle, (#BS_RIGHT))
+              RemoveStyle(Handle, (#TBS_VERT))
             EndIf
             
           Case #PB_GadgetType_Web
