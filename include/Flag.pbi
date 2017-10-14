@@ -106,6 +106,7 @@ Module Flag
   
   CompilerSelect #PB_Compiler_OS  
     CompilerCase #PB_OS_Windows
+      #BS_TYPEMASK = $0000000F ; 0x0000000F;
       #CBS_UPPERCASE = $2000;
       #CBS_LOWERCASE = $4000;
                                            ;-
@@ -409,14 +410,17 @@ Module Flag
             EndIf
             
           Case #PB_GadgetType_Frame
-            If IsFlag(Flags, #BS_RIGHT )
-              Flag|#PB_Frame_Single
-            EndIf
-            If IsFlag(Flags, #BS_RIGHT )
-              Flag|#PB_Frame_Double
-            EndIf
-            If IsFlag(Flags, #BS_RIGHT )
-              Flag|#PB_Frame_Flat
+            If IsFlag(Flags, #BS_USERBUTTON )
+              If IsFlag(Flags, #WS_BORDER )
+                Flag|#PB_Frame_Flat
+              Else
+                If IsFlag(GetExStyle(Handle), #WS_EX_STATICEDGE )
+                  Flag|#PB_Frame_Single
+                EndIf
+                If IsFlag(GetExStyle(Handle), #WS_EX_CLIENTEDGE )
+                  Flag|#PB_Frame_Double
+                EndIf
+              EndIf
             EndIf
             
           Case #PB_GadgetType_ComboBox
@@ -742,21 +746,25 @@ Module Flag
             
           Case #PB_GadgetType_ListView
             If IsFlag(Flags,#PB_ListView_MultiSelect)
-              SetExStyle(Handle, (#LVS_EX_MULTIWORKAREAS))
+             SetStyle(Handle, (#LBS_MULTIPLESEL))
+             ;  SetExStyle(Handle, (#LVS_EX_MULTIWORKAREAS))
             EndIf
             If IsFlag(Flags,#PB_ListView_ClickSelect)
               SetExStyle(Handle, (#LVS_EX_ONECLICKACTIVATE))
             EndIf
             
           Case #PB_GadgetType_Frame
-            If IsFlag(Flags,#PB_Frame_Single)
-              SetStyle(Handle, (#BS_RIGHT))
-            EndIf
-            If IsFlag(Flags,#PB_Frame_Double)
-              SetStyle(Handle, (#BS_RIGHT))
-            EndIf
             If IsFlag(Flags,#PB_Frame_Flat)
-              SetStyle(Handle, (#BS_RIGHT))
+              SetStyle(Handle, (#WS_BORDER|#BS_USERBUTTON))
+            Else
+              If IsFlag(Flags,#PB_Frame_Single)
+                SetStyle(Handle, (#BS_USERBUTTON))
+                SetExStyle(Handle, (#WS_EX_STATICEDGE))
+              EndIf
+              If IsFlag(Flags,#PB_Frame_Double)
+                SetStyle(Handle, (#BS_USERBUTTON))
+                SetExStyle(Handle, (#WS_EX_CLIENTEDGE))
+              EndIf
             EndIf
             
           Case #PB_GadgetType_ComboBox
@@ -811,22 +819,22 @@ Module Flag
             
           Case #PB_GadgetType_ListIcon
             If IsFlag(Flags,#PB_ListIcon_CheckBoxes)
-              SetExStyle(Handle, (#LVS_EX_CHECKBOXES))
+              SendMessage_(Handle, #LVM_SETEXTENDEDLISTVIEWSTYLE, 0,#LVS_EX_CHECKBOXES)
             EndIf
             If IsFlag(Flags,#PB_ListIcon_ThreeState)
               SetStyle(Handle, (#LVSIL_STATE))
             EndIf
             If IsFlag(Flags,#PB_ListIcon_MultiSelect)
-              SetStyle(Handle, (#LBS_MULTIPLESEL))
+              ;SendMessage_(Handle, #LVM_SETEXTENDEDLISTVIEWSTYLE, 0,#LBS_MULTIPLESEL)
             EndIf
             If IsFlag(Flags,#PB_ListIcon_GridLines)
-              SetExStyle(Handle, (#LVS_EX_GRIDLINES))
+              SendMessage_(Handle, #LVM_SETEXTENDEDLISTVIEWSTYLE, 0,#LVS_EX_GRIDLINES)
             EndIf
             If IsFlag(Flags,#PB_ListIcon_FullRowSelect)
-              SetExStyle(Handle, (#LVS_EX_FULLROWSELECT))
+              SendMessage_(Handle, #LVM_SETEXTENDEDLISTVIEWSTYLE, 0,#LVS_EX_FULLROWSELECT)
             EndIf
             If IsFlag(Flags,#PB_ListIcon_HeaderDragDrop)
-              SetExStyle(Handle, (#LVS_EX_HEADERDRAGDROP))
+              SendMessage_(Handle, #LVM_SETEXTENDEDLISTVIEWSTYLE, 0,#LVS_EX_HEADERDRAGDROP)
             EndIf
             If IsFlag(Flags,#PB_ListIcon_AlwaysShowSelection)
               SetStyle(Handle, (#LVS_SHOWSELALWAYS))
@@ -1103,14 +1111,17 @@ Module Flag
             EndIf
             
           Case #PB_GadgetType_Frame
-            If IsFlag(Flags,#PB_Frame_Single)
-              RemoveStyle(Handle, (#BS_RIGHT))
-            EndIf
-            If IsFlag(Flags,#PB_Frame_Double)
-              RemoveStyle(Handle, (#BS_RIGHT))
-            EndIf
             If IsFlag(Flags,#PB_Frame_Flat)
-              RemoveStyle(Handle, (#BS_RIGHT))
+              RemoveStyle(Handle, (#WS_BORDER|#BS_USERBUTTON))
+            Else
+              If IsFlag(Flags,#PB_Frame_Single)
+                RemoveStyle(Handle, (#BS_USERBUTTON))
+                RemoveExStyle(Handle, (#WS_EX_STATICEDGE))
+              EndIf
+              If IsFlag(Flags,#PB_Frame_Double)
+                RemoveStyle(Handle, (#BS_USERBUTTON))
+                RemoveExStyle(Handle, (#WS_EX_CLIENTEDGE))
+              EndIf
             EndIf
             
           Case #PB_GadgetType_ComboBox
@@ -1160,7 +1171,7 @@ Module Flag
             
           Case #PB_GadgetType_ListIcon
             If IsFlag(Flags,#PB_ListIcon_CheckBoxes)
-              RemoveStyle(Handle, (#BS_RIGHT))
+              SendMessage_(Handle, #LVM_SETEXTENDEDLISTVIEWSTYLE,#LVS_EX_CHECKBOXES, 0)
             EndIf
             If IsFlag(Flags,#PB_ListIcon_ThreeState)
               RemoveStyle(Handle, (#BS_RIGHT))
@@ -1169,16 +1180,16 @@ Module Flag
               RemoveStyle(Handle, (#BS_RIGHT))
             EndIf
             If IsFlag(Flags,#PB_ListIcon_GridLines)
-              RemoveStyle(Handle, (#BS_RIGHT))
+              SendMessage_(Handle, #LVM_SETEXTENDEDLISTVIEWSTYLE,#LVS_EX_GRIDLINES, 0)
             EndIf
             If IsFlag(Flags,#PB_ListIcon_FullRowSelect)
-              RemoveStyle(Handle, (#BS_RIGHT))
+              SendMessage_(Handle, #LVM_SETEXTENDEDLISTVIEWSTYLE,#LVS_EX_FULLROWSELECT, 0)
             EndIf
             If IsFlag(Flags,#PB_ListIcon_HeaderDragDrop)
-              RemoveStyle(Handle, (#BS_RIGHT))
+              SendMessage_(Handle, #LVM_SETEXTENDEDLISTVIEWSTYLE,#LVS_EX_HEADERDRAGDROP, 0)
             EndIf
             If IsFlag(Flags,#PB_ListIcon_AlwaysShowSelection)
-              RemoveStyle(Handle, (#BS_RIGHT))
+              RemoveStyle(Handle, (#LVS_SHOWSELALWAYS))
             EndIf
             
           Case #PB_GadgetType_IPAddress
@@ -1355,108 +1366,76 @@ Module Flag
             
         EndSelect
       EndProcedure
+      
+      ;-  
     CompilerDefault
-      ;-
-      Procedure.q GetWindow( Window )
-        Protected Flag.q
-        Protected Handle = WindowID(Window)
-        Protected Flags = GetStyle(Handle)
-        
-        ;; Debug Bin(Flag)
-        ProcedureReturn Flag
-      EndProcedure
-      
-      Procedure SetWindow( Window, Flags.q, Value=0 )
-        Protected Handle = WindowID(Window)
-        
-      EndProcedure
-      
-      Procedure RemoveWindow( Window, Flags.q )
-        Protected Handle = WindowID(Window)
-        
-      EndProcedure
-      
-      ;-
-      Procedure.q GetGadget( Gadget )
-        Protected Flag.q
-        Protected Handle = GadgetID(Gadget)
-        Protected Flags = GetStyle(Handle)
-        
-        Select GadgetType(Gadget)
-          Case #PB_GadgetType_String
-          Case #PB_GadgetType_Button
-        EndSelect
-        
-        ProcedureReturn Flag
-      EndProcedure
-      
-      Procedure SetGadget( Gadget, Flags.q, Value=0 )
-        Protected Handle = GadgetID(Gadget)
-        
-        Select GadgetType(Gadget)
-          Case #PB_GadgetType_String
-          Case #PB_GadgetType_Button
-        EndSelect
-      EndProcedure
-      
-      Procedure RemoveGadget( Gadget, Flags.q )
-        Protected Handle = GadgetID(Gadget)
-        
-        Select GadgetType(Gadget)
-          Case #PB_GadgetType_String
-          Case #PB_GadgetType_Button
-        EndSelect
-      EndProcedure
+      Procedure.q GetWindow( Window ) : EndProcedure
+      Procedure SetWindow( Window, Flags.q, Value=0 ) : EndProcedure
+      Procedure RemoveWindow( Window, Flags.q ) : EndProcedure
+      Procedure.q GetGadget( Gadget ) : EndProcedure
+      Procedure SetGadget( Gadget, Flags.q, Value=0 ): EndProcedure
+      Procedure RemoveGadget( Gadget, Flags.q ) : EndProcedure
   CompilerEndSelect
   
 EndModule
 
-;-
+;- >>>> Example demo
 CompilerIf #PB_Compiler_IsMainFile
   EnableExplicit
   
   Procedure Create( Object, Type$, Caption$="",Width=200,Height=100, X=5,Y=5, Param1=0, Param2=1, Param3=1000, Flag=0)
   Select Type$
-      Case "OpenWindow"          : Object = OpenWindow          (Object, X,Y,Width,Height, Caption$, Flag) 
-      Case "ButtonGadget"        : Object = ButtonGadget        (Object, X,Y,Width,Height, Caption$, Flag)
-      Case "StringGadget"        : Object = StringGadget        (Object, X,Y,Width,Height, Caption$, Flag)
-      Case "TextGadget"          : Object = TextGadget          (Object, X,Y,Width,Height, Caption$, Flag)
-      Case "CheckBoxGadget"      : Object = CheckBoxGadget      (Object, X,Y,Width,Height, Caption$, Flag)
-      Case "OptionGadget"        : Object = OptionGadget        (Object, X,Y,Width,Height, Caption$)
-      Case "ListViewGadget"      : Object = ListViewGadget      (Object, X,Y,Width,Height, Flag)
-      Case "FrameGadget"         : Object = FrameGadget         (Object, X,Y,Width,Height, Caption$, Flag)
-      Case "ComboBoxGadget"      : Object = ComboBoxGadget      (Object, X,Y,Width,Height, Flag)
-      Case "ImageGadget"         : Object = ImageGadget         (Object, X,Y,Width,Height, Param1, Flag)
-      Case "HyperLinkGadget"     : Object = HyperLinkGadget     (Object, X,Y,Width,Height, Caption$, Param1, Flag)
-      Case "ContainerGadget"     : Object = ContainerGadget     (Object, X,Y,Width,Height, Flag)
-      Case "ListIconGadget"      : Object = ListIconGadget      (Object, X,Y,Width,Height, Caption$, Param1, Flag)
-      Case "IPAddressGadget"     : Object = IPAddressGadget     (Object, X,Y,Width,Height)
-      Case "ProgressBarGadget"   : Object = ProgressBarGadget   (Object, X,Y,Width,Height, Param1, Param2, Flag)
-      Case "ScrollBarGadget"     : Object = ScrollBarGadget     (Object, X,Y,Width,Height, Param1, Param2, Param3, Flag)
-      Case "ScrollAreaGadget"    : Object = ScrollAreaGadget    (Object, X,Y,Width,Height, Param1, Param2, Param3, Flag) 
-      Case "TrackBarGadget"      : Object = TrackBarGadget      (Object, X,Y,Width,Height, Param1, Param2, Flag)
-      Case "WebGadget"           : Object = WebGadget           (Object, X,Y,Width,Height, Caption$)
-      Case "ButtonImageGadget"   : Object = ButtonImageGadget   (Object, X,Y,Width,Height, Param1, Flag)
-      Case "CalendarGadget"      : Object = CalendarGadget      (Object, X,Y,Width,Height, Param1, Flag)
-      Case "DateGadget"          : Object = DateGadget          (Object, X,Y,Width,Height, Caption$, Param1, Flag)
-      Case "EditorGadget"        : Object = EditorGadget        (Object, X,Y,Width,Height, Flag)
-      Case "ExplorerListGadget"  : Object = ExplorerListGadget  (Object, X,Y,Width,Height, Caption$, Flag)
-      Case "ExplorerTreeGadget"  : Object = ExplorerTreeGadget  (Object, X,Y,Width,Height, Caption$, Flag)
-      Case "ExplorerComboGadget" : Object = ExplorerComboGadget (Object, X,Y,Width,Height, Caption$, Flag)
-      Case "SpinGadget"          : Object = SpinGadget          (Object, X,Y,Width,Height, Param1, Param2, Flag)
-      Case "TreeGadget"          : Object = TreeGadget          (Object, X,Y,Width,Height, Flag)
-      Case "PanelGadget"         : Object = PanelGadget         (Object, X,Y,Width,Height) 
+      Case "OpenWindow"          : OpenWindow          (Object, X,Y,Width,Height, Caption$, Flag) 
+      Case "ButtonGadget"        : ButtonGadget        (Object, X,Y,Width,Height, Caption$, Flag)
+      Case "StringGadget"        : StringGadget        (Object, X,Y,Width,Height, Caption$, Flag)
+      Case "TextGadget"          : TextGadget          (Object, X,Y,Width,Height, Caption$, Flag)
+      Case "CheckBoxGadget"      : CheckBoxGadget      (Object, X,Y,Width,Height, Caption$, Flag)
+      Case "OptionGadget"        : OptionGadget        (Object, X,Y,Width,Height, Caption$)
+      Case "ListViewGadget"      : ListViewGadget      (Object, X,Y,Width,Height, Flag)
+        Protected a
+        For a = 1 To 12
+          AddGadgetItem (Object, -1, "Элемент  " + Str(a) + "  Списка") ; Определить содержимое списка.
+        Next
+        SetGadgetState(Object, 9) ; Установить (начиная с 0) десятый элемент как активный.
+        
+      Case "FrameGadget"         : FrameGadget         (Object, X,Y,Width,Height, Caption$, Flag)
+      Case "ComboBoxGadget"      : ComboBoxGadget      (Object, X,Y,Width,Height, Flag)
+      Case "ImageGadget"         : ImageGadget         (Object, X,Y,Width,Height, Param1, Flag)
+      Case "HyperLinkGadget"     : HyperLinkGadget     (Object, X,Y,Width,Height, Caption$, Param1, Flag)
+      Case "ContainerGadget"     : ContainerGadget     (Object, X,Y,Width,Height, Flag)
+      Case "ListIconGadget"      : ListIconGadget      (Object, X,Y,Width,Height, Caption$, Param1, Flag)
+        AddGadgetColumn(Object, 0, "Name", 100)
+        AddGadgetColumn(Object, 1, "Address", 250)
+        AddGadgetItem(Object, -1, "Harry Rannit"+Chr(10)+"12 Parliament Way, Battle Street, By the Bay")
+        AddGadgetItem(Object, -1, "Ginger Brokeit"+Chr(10)+"130 PureBasic Road, BigTown, CodeCity")
+   
+      Case "IPAddressGadget"     : IPAddressGadget     (Object, X,Y,Width,Height)
+      Case "ProgressBarGadget"   : ProgressBarGadget   (Object, X,Y,Width,Height, Param1, Param2, Flag)
+      Case "ScrollBarGadget"     : ScrollBarGadget     (Object, X,Y,Width,Height, Param1, Param2, Param3, Flag)
+      Case "ScrollAreaGadget"    : ScrollAreaGadget    (Object, X,Y,Width,Height, Param1, Param2, Param3, Flag) 
+      Case "TrackBarGadget"      : TrackBarGadget      (Object, X,Y,Width,Height, Param1, Param2, Flag)
+      Case "WebGadget"           : WebGadget           (Object, X,Y,Width,Height, Caption$)
+      Case "ButtonImageGadget"   : ButtonImageGadget   (Object, X,Y,Width,Height, Param1, Flag)
+      Case "CalendarGadget"      : CalendarGadget      (Object, X,Y,Width,Height, Param1, Flag)
+      Case "DateGadget"          : DateGadget          (Object, X,Y,Width,Height, Caption$, Param1, Flag)
+      Case "EditorGadget"        : EditorGadget        (Object, X,Y,Width,Height, Flag)
+      Case "ExplorerListGadget"  : ExplorerListGadget  (Object, X,Y,Width,Height, Caption$, Flag)
+      Case "ExplorerTreeGadget"  : ExplorerTreeGadget  (Object, X,Y,Width,Height, Caption$, Flag)
+      Case "ExplorerComboGadget" : ExplorerComboGadget (Object, X,Y,Width,Height, Caption$, Flag)
+      Case "SpinGadget"          : SpinGadget          (Object, X,Y,Width,Height, Param1, Param2, Flag)
+      Case "TreeGadget"          : TreeGadget          (Object, X,Y,Width,Height, Flag)
+      Case "PanelGadget"         : PanelGadget         (Object, X,Y,Width,Height) 
       Case "SplitterGadget"      
         If IsGadget(Param1) And IsGadget(Param2)
-                                   Object = SplitterGadget      (Object, X,Y,Width,Height, Param1, Param2, Flag)
+                                   SplitterGadget      (Object, X,Y,Width,Height, Param1, Param2, Flag)
         EndIf
       Case "MDIGadget"          
         CompilerIf #PB_Compiler_OS = #PB_OS_Windows
-                                   Object = MDIGadget           (Object, X,Y,Width,Height, Param1, Param2, Flag) 
+                                   MDIGadget           (Object, X,Y,Width,Height, Param1, Param2, Flag) 
         CompilerEndIf
-      Case "ScintillaGadget"     : Object = ScintillaGadget     (Object, X,Y,Width,Height, Param1)
-      Case "ShortcutGadget"      : Object = ShortcutGadget      (Object, X,Y,Width,Height, Param1)
-      Case "CanvasGadget"        : Object = CanvasGadget        (Object, X,Y,Width,Height, Flag)
+      Case "ScintillaGadget"     : ScintillaGadget     (Object, X,Y,Width,Height, Param1)
+      Case "ShortcutGadget"      : ShortcutGadget      (Object, X,Y,Width,Height, Param1)
+      Case "CanvasGadget"        : CanvasGadget        (Object, X,Y,Width,Height, Flag)
     EndSelect
   EndProcedure  
   
@@ -1527,9 +1506,9 @@ CompilerIf #PB_Compiler_IsMainFile
         
       Case #PB_GadgetType_Frame          
         ;{- Ok
-        Flags.S = "#PB_Frame_Single|"+
-                  "#PB_Frame_Double|"+
-                  "#PB_Frame_Flat"
+        Flags.S = "#PB_Frame_Flat|"+
+                  "#PB_Frame_Single|"+
+                  "#PB_Frame_Double"
         ;}
         
       Case #PB_GadgetType_ComboBox       
