@@ -106,6 +106,7 @@ Module Flag
   
   CompilerSelect #PB_Compiler_OS  
     CompilerCase #PB_OS_Windows
+      #PBM_GETPOS = $0408
       #BS_TYPEMASK = $0000000F ; 0x0000000F;
       #CBS_UPPERCASE = $2000;
       #CBS_LOWERCASE = $4000;
@@ -745,12 +746,11 @@ Module Flag
           Case #PB_GadgetType_Option
             
           Case #PB_GadgetType_ListView
-            If IsFlag(Flags,#PB_ListView_MultiSelect)
-             SetStyle(Handle, (#LBS_MULTIPLESEL))
-             ;  SetExStyle(Handle, (#LVS_EX_MULTIWORKAREAS))
+            If IsFlag(Flags,#PB_ListView_MultiSelect) ; The LSB_EXTENDEDSEL style can not be changed after creation
+              SetStyle(Handle, (#LBS_EXTENDEDSEL))
             EndIf
-            If IsFlag(Flags,#PB_ListView_ClickSelect)
-              SetExStyle(Handle, (#LVS_EX_ONECLICKACTIVATE))
+            If IsFlag(Flags,#PB_ListView_ClickSelect) ; The LBS_MULTIPLESEL style can not be changed after creation
+              SetStyle(Handle, (#LBS_MULTIPLESEL))
             EndIf
             
           Case #PB_GadgetType_Frame
@@ -818,58 +818,67 @@ Module Flag
             EndIf
             
           Case #PB_GadgetType_ListIcon
-            If IsFlag(Flags,#PB_ListIcon_CheckBoxes)
+            If IsFlag(Flags,#PB_ListIcon_CheckBoxes)          ;Ok
               SendMessage_(Handle, #LVM_SETEXTENDEDLISTVIEWSTYLE, 0,#LVS_EX_CHECKBOXES)
             EndIf
             If IsFlag(Flags,#PB_ListIcon_ThreeState)
-              SetStyle(Handle, (#LVSIL_STATE))
+              MessageRequester("Предупреждение!!!","Еще не реализованно");SetStyle(Handle, (#LVSIL_STATE))
             EndIf
             If IsFlag(Flags,#PB_ListIcon_MultiSelect)
-              ;SendMessage_(Handle, #LVM_SETEXTENDEDLISTVIEWSTYLE, 0,#LBS_MULTIPLESEL)
+              MessageRequester("Предупреждение!!!","Еще не реализованно");SendMessage_(Handle, #LVM_SETEXTENDEDLISTVIEWSTYLE, 0,#LBS_MULTIPLESEL)
             EndIf
-            If IsFlag(Flags,#PB_ListIcon_GridLines)
+            If IsFlag(Flags,#PB_ListIcon_GridLines)           ;Ok
               SendMessage_(Handle, #LVM_SETEXTENDEDLISTVIEWSTYLE, 0,#LVS_EX_GRIDLINES)
             EndIf
-            If IsFlag(Flags,#PB_ListIcon_FullRowSelect)
+            If IsFlag(Flags,#PB_ListIcon_FullRowSelect)       ;Ok
               SendMessage_(Handle, #LVM_SETEXTENDEDLISTVIEWSTYLE, 0,#LVS_EX_FULLROWSELECT)
             EndIf
-            If IsFlag(Flags,#PB_ListIcon_HeaderDragDrop)
+            If IsFlag(Flags,#PB_ListIcon_HeaderDragDrop)      ;Ok
               SendMessage_(Handle, #LVM_SETEXTENDEDLISTVIEWSTYLE, 0,#LVS_EX_HEADERDRAGDROP)
             EndIf
-            If IsFlag(Flags,#PB_ListIcon_AlwaysShowSelection)
+            If IsFlag(Flags,#PB_ListIcon_AlwaysShowSelection) ;Ok
               SetStyle(Handle, (#LVS_SHOWSELALWAYS))
             EndIf
             
           Case #PB_GadgetType_IPAddress
             
           Case #PB_GadgetType_ProgressBar
+            Protected ProgressPos = SendMessage_(Handle, #PBM_GETPOS, 0, 0)
             If IsFlag(Flags,#PB_ProgressBar_Smooth)
-              SetStyle(Handle, (#BS_RIGHT))
+              SetStyle(Handle, (#PBS_SMOOTH))
             EndIf
             If IsFlag(Flags,#PB_ProgressBar_Vertical)
-              SetStyle(Handle, (#BS_RIGHT))
+              SetStyle(Handle, (#PBS_VERTICAL))
             EndIf
+            SendMessage_(Handle, #PBM_SETPOS, ProgressPos, 0); 
             
           Case #PB_GadgetType_ScrollBar
             If IsFlag(Flags,#PB_ScrollBar_Vertical)
-              SetStyle(Handle, (#BS_RIGHT))
+              SetStyle(Handle, (#SB_VERT))
             EndIf
             
           Case #PB_GadgetType_ScrollArea
-            If IsFlag(Flags,#PB_ScrollArea_Flat)
-              SetStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_ScrollArea_BorderLess)
+              RemoveStyle(Handle, (#WS_BORDER))
+              RemoveExStyle(Handle, (#WS_EX_STATICEDGE))
+              RemoveExStyle(Handle, (#WS_EX_DLGMODALFRAME))
+              RemoveExStyle(Handle, (#WS_EX_CLIENTEDGE))
             EndIf
-            If IsFlag(Flags,#PB_ScrollArea_Raised)
-              SetStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_ScrollArea_Flat)
+              RemoveExStyle(Handle, (#WS_EX_CLIENTEDGE))
+              SetStyle(Handle, (#WS_BORDER))
+            Else
+              If IsFlag(Flags,#PB_ScrollArea_Raised)
+              RemoveExStyle(Handle, (#WS_EX_CLIENTEDGE))
+            SetExStyle(Handle, (#WS_EX_DLGMODALFRAME))
             EndIf
             If IsFlag(Flags,#PB_ScrollArea_Single)
-              SetStyle(Handle, (#BS_RIGHT))
+              RemoveExStyle(Handle, (#WS_EX_CLIENTEDGE))
+            SetExStyle(Handle, (#WS_EX_STATICEDGE))
             EndIf
-            If IsFlag(Flags,#PB_ScrollArea_BorderLess)
-              SetStyle(Handle, (#BS_RIGHT))
             EndIf
             If IsFlag(Flags,#PB_ScrollArea_Center)
-              SetStyle(Handle, (#BS_RIGHT))
+              ;SetStyle(Handle, (#))
             EndIf
             
           Case #PB_GadgetType_TrackBar
@@ -897,6 +906,7 @@ Module Flag
             If IsFlag(Flags,#PB_Date_UpDown)
               SetStyle(Handle, (#BS_RIGHT))
             EndIf
+            
             
           Case #PB_GadgetType_Editor
             If IsFlag(Flags,#PB_Editor_ReadOnly)
@@ -1170,58 +1180,63 @@ Module Flag
             EndIf
             
           Case #PB_GadgetType_ListIcon
-            If IsFlag(Flags,#PB_ListIcon_CheckBoxes)
+            If IsFlag(Flags,#PB_ListIcon_CheckBoxes)        ;Ok
               SendMessage_(Handle, #LVM_SETEXTENDEDLISTVIEWSTYLE,#LVS_EX_CHECKBOXES, 0)
             EndIf
             If IsFlag(Flags,#PB_ListIcon_ThreeState)
-              RemoveStyle(Handle, (#BS_RIGHT))
+            ;  RemoveStyle(Handle, (#BS_RIGHT))
             EndIf
             If IsFlag(Flags,#PB_ListIcon_MultiSelect)
-              RemoveStyle(Handle, (#BS_RIGHT))
+            ;  RemoveStyle(Handle, (#BS_RIGHT))
             EndIf
-            If IsFlag(Flags,#PB_ListIcon_GridLines)
+            If IsFlag(Flags,#PB_ListIcon_GridLines)        ;Ok
               SendMessage_(Handle, #LVM_SETEXTENDEDLISTVIEWSTYLE,#LVS_EX_GRIDLINES, 0)
             EndIf
-            If IsFlag(Flags,#PB_ListIcon_FullRowSelect)
+            If IsFlag(Flags,#PB_ListIcon_FullRowSelect)        ;Ok
               SendMessage_(Handle, #LVM_SETEXTENDEDLISTVIEWSTYLE,#LVS_EX_FULLROWSELECT, 0)
             EndIf
-            If IsFlag(Flags,#PB_ListIcon_HeaderDragDrop)
+            If IsFlag(Flags,#PB_ListIcon_HeaderDragDrop)        ;Ok
               SendMessage_(Handle, #LVM_SETEXTENDEDLISTVIEWSTYLE,#LVS_EX_HEADERDRAGDROP, 0)
             EndIf
-            If IsFlag(Flags,#PB_ListIcon_AlwaysShowSelection)
+            If IsFlag(Flags,#PB_ListIcon_AlwaysShowSelection)        ;Ok
               RemoveStyle(Handle, (#LVS_SHOWSELALWAYS))
             EndIf
             
           Case #PB_GadgetType_IPAddress
             
           Case #PB_GadgetType_ProgressBar
-            If IsFlag(Flags,#PB_ProgressBar_Smooth)
-              RemoveStyle(Handle, (#BS_RIGHT))
+            Protected ProgressPos = SendMessage_(Handle, #PBM_GETPOS, 0, 0)
+            If IsFlag(Flags,#PB_ProgressBar_Smooth)        ;Ok
+              RemoveStyle(Handle, (#PBS_SMOOTH))
             EndIf
-            If IsFlag(Flags,#PB_ProgressBar_Vertical)
-              RemoveStyle(Handle, (#BS_RIGHT))
+            If IsFlag(Flags,#PB_ProgressBar_Vertical)        ;Ok
+              RemoveStyle(Handle, (#PBS_VERTICAL))
             EndIf
+            SendMessage_(Handle, #PBM_SETPOS, ProgressPos, 0); 
             
           Case #PB_GadgetType_ScrollBar
             If IsFlag(Flags,#PB_ScrollBar_Vertical)
-              RemoveStyle(Handle, (#BS_RIGHT))
+              RemoveStyle(Handle, (#SB_VERT))
             EndIf
             
           Case #PB_GadgetType_ScrollArea
             If IsFlag(Flags,#PB_ScrollArea_BorderLess)
-              RemoveStyle(Handle, (#BS_RIGHT))
+              SetExStyle(Handle, (#WS_EX_CLIENTEDGE))
             EndIf
             If IsFlag(Flags,#PB_ScrollArea_Flat)
-              RemoveStyle(Handle, (#BS_RIGHT))
+              SetExStyle(Handle, (#WS_EX_CLIENTEDGE))
+              RemoveStyle(Handle, (#WS_BORDER))
             EndIf
             If IsFlag(Flags,#PB_ScrollArea_Raised)
-              RemoveStyle(Handle, (#BS_RIGHT))
+              SetExStyle(Handle, (#WS_EX_CLIENTEDGE))
+              RemoveExStyle(Handle, (#WS_EX_DLGMODALFRAME))
             EndIf
             If IsFlag(Flags,#PB_ScrollArea_Single)
-              RemoveStyle(Handle, (#BS_RIGHT))
+              SetExStyle(Handle, (#WS_EX_CLIENTEDGE))
+              RemoveExStyle(Handle, (#WS_EX_STATICEDGE))
             EndIf
             If IsFlag(Flags,#PB_ScrollArea_Center)
-              RemoveStyle(Handle, (#BS_RIGHT))
+            ;  RemoveStyle(Handle, (#BS_RIGHT))
             EndIf
             
           Case #PB_GadgetType_TrackBar
@@ -1236,12 +1251,15 @@ Module Flag
             
           Case #PB_GadgetType_ButtonImage
             If IsFlag(Flags,#PB_Button_Toggle)
-              RemoveStyle(Handle, (#BS_RIGHT))
+              If SendMessage_(Handle, #BM_GETCHECK, 0, 0)
+                SendMessage_(Handle, #BM_SETCHECK, 0, 0)
+              EndIf
+              RemoveStyle(Handle, (#BS_PUSHLIKE|#BS_CHECKBOX))
             EndIf
             
           Case #PB_GadgetType_Calendar
             If IsFlag(Flags,#PB_Calendar_Borderless)
-              RemoveStyle(Handle, (#BS_RIGHT))
+              SetExStyle(Handle, (#WS_EX_CLIENTEDGE))
             EndIf
             
           Case #PB_GadgetType_Date
@@ -1384,6 +1402,8 @@ CompilerIf #PB_Compiler_IsMainFile
   EnableExplicit
   
   Procedure Create( Object, Type$, Caption$="",Width=200,Height=100, X=5,Y=5, Param1=0, Param2=1, Param3=1000, Flag=0)
+  Protected a
+  
   Select Type$
       Case "OpenWindow"          : OpenWindow          (Object, X,Y,Width,Height, Caption$, Flag) 
       Case "ButtonGadget"        : ButtonGadget        (Object, X,Y,Width,Height, Caption$, Flag)
@@ -1392,7 +1412,6 @@ CompilerIf #PB_Compiler_IsMainFile
       Case "CheckBoxGadget"      : CheckBoxGadget      (Object, X,Y,Width,Height, Caption$, Flag)
       Case "OptionGadget"        : OptionGadget        (Object, X,Y,Width,Height, Caption$)
       Case "ListViewGadget"      : ListViewGadget      (Object, X,Y,Width,Height, Flag)
-        Protected a
         For a = 1 To 12
           AddGadgetItem (Object, -1, "Элемент  " + Str(a) + "  Списка") ; Определить содержимое списка.
         Next
@@ -1410,7 +1429,9 @@ CompilerIf #PB_Compiler_IsMainFile
         AddGadgetItem(Object, -1, "Ginger Brokeit"+Chr(10)+"130 PureBasic Road, BigTown, CodeCity")
    
       Case "IPAddressGadget"     : IPAddressGadget     (Object, X,Y,Width,Height)
-      Case "ProgressBarGadget"   : ProgressBarGadget   (Object, X,Y,Width,Height, Param1, Param2, Flag)
+      Case "ProgressBarGadget"   : ProgressBarGadget   (Object, X,Y,Width,Height, Param1, Param2+100, Flag)
+        SetGadgetState   (Object, 50)  
+        
       Case "ScrollBarGadget"     : ScrollBarGadget     (Object, X,Y,Width,Height, Param1, Param2, Param3, Flag)
       Case "ScrollAreaGadget"    : ScrollAreaGadget    (Object, X,Y,Width,Height, Param1, Param2, Param3, Flag)  : CloseGadgetList()
       Case "TrackBarGadget"      : TrackBarGadget      (Object, X,Y,Width,Height, Param1, Param2, Flag)
@@ -1419,6 +1440,10 @@ CompilerIf #PB_Compiler_IsMainFile
       Case "CalendarGadget"      : CalendarGadget      (Object, X,Y,Width,Height, Param1, Flag)
       Case "DateGadget"          : DateGadget          (Object, X,Y,Width,Height, Caption$, Param1, Flag)
       Case "EditorGadget"        : EditorGadget        (Object, X,Y,Width,Height, Flag)
+        For a = 0 To 5
+      AddGadgetItem(Object, a, "Строка "+Str(a))
+    Next
+
       Case "ExplorerListGadget"  : ExplorerListGadget  (Object, X,Y,Width,Height, Caption$, Flag)
       Case "ExplorerTreeGadget"  : ExplorerTreeGadget  (Object, X,Y,Width,Height, Caption$, Flag)
       Case "ExplorerComboGadget" : ExplorerComboGadget (Object, X,Y,Width,Height, Caption$, Flag)
