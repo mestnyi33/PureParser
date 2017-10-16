@@ -107,10 +107,9 @@ Module Flag
   CompilerSelect #PB_Compiler_OS  
     CompilerCase #PB_OS_Windows
       #PBM_GETPOS = $0408
-      #BS_TYPEMASK = $0000000F ; 0x0000000F;
-      #CBS_UPPERCASE = $2000;
-      #CBS_LOWERCASE = $4000;
-                                           ;-
+      #CBS_UPPERCASE = $2000   ;
+      #CBS_LOWERCASE = $4000   ;
+                               ;-
       Procedure.q GetWindow( Window )
         Protected Flag.q
         Protected Handle = WindowID(Window)
@@ -869,13 +868,13 @@ Module Flag
               SetStyle(Handle, (#WS_BORDER))
             Else
               If IsFlag(Flags,#PB_ScrollArea_Raised)
-              RemoveExStyle(Handle, (#WS_EX_CLIENTEDGE))
-            SetExStyle(Handle, (#WS_EX_DLGMODALFRAME))
-            EndIf
-            If IsFlag(Flags,#PB_ScrollArea_Single)
-              RemoveExStyle(Handle, (#WS_EX_CLIENTEDGE))
-            SetExStyle(Handle, (#WS_EX_STATICEDGE))
-            EndIf
+                RemoveExStyle(Handle, (#WS_EX_CLIENTEDGE))
+                SetExStyle(Handle, (#WS_EX_DLGMODALFRAME))
+              EndIf
+              If IsFlag(Flags,#PB_ScrollArea_Single)
+                RemoveExStyle(Handle, (#WS_EX_CLIENTEDGE))
+                SetExStyle(Handle, (#WS_EX_STATICEDGE))
+              EndIf
             EndIf
             If IsFlag(Flags,#PB_ScrollArea_Center)
               ;SetStyle(Handle, (#))
@@ -1184,10 +1183,10 @@ Module Flag
               SendMessage_(Handle, #LVM_SETEXTENDEDLISTVIEWSTYLE,#LVS_EX_CHECKBOXES, 0)
             EndIf
             If IsFlag(Flags,#PB_ListIcon_ThreeState)
-            ;  RemoveStyle(Handle, (#BS_RIGHT))
+              ;  RemoveStyle(Handle, (#BS_RIGHT))
             EndIf
             If IsFlag(Flags,#PB_ListIcon_MultiSelect)
-            ;  RemoveStyle(Handle, (#BS_RIGHT))
+              ;  RemoveStyle(Handle, (#BS_RIGHT))
             EndIf
             If IsFlag(Flags,#PB_ListIcon_GridLines)        ;Ok
               SendMessage_(Handle, #LVM_SETEXTENDEDLISTVIEWSTYLE,#LVS_EX_GRIDLINES, 0)
@@ -1236,7 +1235,7 @@ Module Flag
               RemoveExStyle(Handle, (#WS_EX_STATICEDGE))
             EndIf
             If IsFlag(Flags,#PB_ScrollArea_Center)
-            ;  RemoveStyle(Handle, (#BS_RIGHT))
+              ;  RemoveStyle(Handle, (#BS_RIGHT))
             EndIf
             
           Case #PB_GadgetType_TrackBar
@@ -1402,9 +1401,9 @@ CompilerIf #PB_Compiler_IsMainFile
   EnableExplicit
   
   Procedure Create( Object, Type$, Caption$="",Width=200,Height=100, X=5,Y=5, Param1=0, Param2=1, Param3=1000, Flag=0)
-  Protected a
-  
-  Select Type$
+    Protected a
+    
+    Select Type$
       Case "OpenWindow"          : OpenWindow          (Object, X,Y,Width,Height, Caption$, Flag) 
       Case "ButtonGadget"        : ButtonGadget        (Object, X,Y,Width,Height, Caption$, Flag)
       Case "StringGadget"        : StringGadget        (Object, X,Y,Width,Height, Caption$, Flag)
@@ -1427,7 +1426,7 @@ CompilerIf #PB_Compiler_IsMainFile
         AddGadgetColumn(Object, 1, "Address", 250)
         AddGadgetItem(Object, -1, "Harry Rannit"+Chr(10)+"12 Parliament Way, Battle Street, By the Bay")
         AddGadgetItem(Object, -1, "Ginger Brokeit"+Chr(10)+"130 PureBasic Road, BigTown, CodeCity")
-   
+        
       Case "IPAddressGadget"     : IPAddressGadget     (Object, X,Y,Width,Height)
       Case "ProgressBarGadget"   : ProgressBarGadget   (Object, X,Y,Width,Height, Param1, Param2+100, Flag)
         SetGadgetState   (Object, 50)  
@@ -1441,9 +1440,9 @@ CompilerIf #PB_Compiler_IsMainFile
       Case "DateGadget"          : DateGadget          (Object, X,Y,Width,Height, Caption$, Param1, Flag)
       Case "EditorGadget"        : EditorGadget        (Object, X,Y,Width,Height, Flag)
         For a = 0 To 5
-      AddGadgetItem(Object, a, "Строка "+Str(a))
-    Next
-
+          AddGadgetItem(Object, a, "Строка "+Str(a))
+        Next
+        
       Case "ExplorerListGadget"  : ExplorerListGadget  (Object, X,Y,Width,Height, Caption$, Flag)
       Case "ExplorerTreeGadget"  : ExplorerTreeGadget  (Object, X,Y,Width,Height, Caption$, Flag)
       Case "ExplorerComboGadget" : ExplorerComboGadget (Object, X,Y,Width,Height, Caption$, Flag)
@@ -1452,11 +1451,11 @@ CompilerIf #PB_Compiler_IsMainFile
       Case "PanelGadget"         : PanelGadget         (Object, X,Y,Width,Height)  : CloseGadgetList()
       Case "SplitterGadget"      
         If IsGadget(Param1) And IsGadget(Param2)
-                                   SplitterGadget      (Object, X,Y,Width,Height, Param1, Param2, Flag)
+          SplitterGadget      (Object, X,Y,Width,Height, Param1, Param2, Flag)
         EndIf
       Case "MDIGadget"          
         CompilerIf #PB_Compiler_OS = #PB_OS_Windows
-                                   MDIGadget           (Object, X,Y,Width,Height, Param1, Param2, Flag) 
+          MDIGadget           (Object, X,Y,Width,Height, Param1, Param2, Flag) 
         CompilerEndIf
       Case "ScintillaGadget"     : ScintillaGadget     (Object, X,Y,Width,Height, Param1)
       Case "ShortcutGadget"      : ShortcutGadget      (Object, X,Y,Width,Height, Param1)
@@ -1591,10 +1590,10 @@ CompilerIf #PB_Compiler_IsMainFile
         
       Case #PB_GadgetType_ScrollArea     
         ;{- Ok
-        Flags.S = "#PB_ScrollArea_Flat|"+
-                  "#PB_ScrollArea_Raised|"+
+        Flags.S = "#PB_ScrollArea_BorderLess|"+
+                  "#PB_ScrollArea_Flat|"+
                   "#PB_ScrollArea_Single|"+
-                  "#PB_ScrollArea_BorderLess|"+
+                  "#PB_ScrollArea_Raised|"+
                   "#PB_ScrollArea_Center"
         ;}
         
@@ -1939,7 +1938,7 @@ CompilerIf #PB_Compiler_IsMainFile
       SetGadgetItemData(Tree, i, GetPBFlag( Trim(StringField(Text.S,i+1,"|")) ))
     EndIf
   Next
-            
+  
   
   OpenWindow( 1, 221, 211, 300, 200, "test to set window centered", #PB_Window_SystemMenu) 
   OpenWindow( 2, 221, 11, 200, 100, "test set flag", #PB_Window_TitleBar, WindowID(1)) 
@@ -1991,7 +1990,7 @@ CompilerIf #PB_Compiler_IsMainFile
                     SetGadgetItemState(Tree, i,#PB_Tree_Checked)
                   EndIf
                 Next 
-  
+                
             EndSelect
             
           Case Tree

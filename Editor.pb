@@ -675,7 +675,7 @@ Procedure CreatePBObject_Events()
         Object = EventWindow()
       EndIf
       
-      ;Transformation::Enable(EventGadget(), 5)
+      Transformation::Enable(EventGadget(), 5)
       PushListPosition(ParsePBGadget())
       ForEach ParsePBGadget()
         If Object = ParsePBGadget()\ID\Argument
