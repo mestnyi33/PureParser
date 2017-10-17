@@ -160,11 +160,28 @@ Module Transformation
     EndIf
   EndProcedure
   
+  
+;   Procedure VerticalLineGadget()
+;     
+;     
+;   EndProcedure
+;   
+;   Procedure HorisontalLineGadget()
+;     
+;     
+;   EndProcedure
+  
+  
+  
+  
   Procedure Lines(Gadget.i, Parent.i, Item.i, change.b=0)
     Protected ls=1
     
     Static left_in=-1, right_in=-1, top_in=-1, bottom_in=-1
     Static left_gadget=-1,right_gadget=-1,top_gadget=-1,bottom_gadget=-1
+    
+    Static CrossLeft_in=-1, CrossRight_in=-1, CrossTop_in=-1, CrossBottom_in=-1
+    Static Crossleft_gadget=-1,Crossright_gadget=-1,Crosstop_gadget=-1,Crossbottom_gadget=-1
     
     Protected top_x1,left_y2,top_x2,left_y1,bottom_x1,right_y2,bottom_x2,right_y1
     Protected checked_x1,checked_y1,checked_x2,checked_y2, relative_x1,relative_y1,relative_x2,relative_y2
@@ -280,6 +297,98 @@ Module Transformation
                   bottom_in =- 1
                 EndIf
               EndIf
+              
+              
+
+              
+              ;CrossLeft
+              If checked_x1 = relative_x2
+                If left_y1 > relative_y1 : left_y1 = relative_y1 : EndIf
+                If left_y2 < relative_y2 : left_y2 = relative_y2 : EndIf
+                
+                If IsGadget(Crossleft_gadget)
+                  ResizeGadget(Crossleft_gadget, checked_x1,left_y1,ls,left_y2-left_y1)
+                Else
+                  CrossLeft_in = \Gadget
+                  ;Crossleft_gadget = TextGadget(#PB_Any, checked_x1,left_y1,ls,left_y2-left_y1,"")
+                  Crossleft_gadget = ContainerGadget(#PB_Any, checked_x1,left_y1,ls,left_y2-left_y1) : CloseGadgetList()
+                  SetGadgetColor(Crossleft_gadget, #PB_Gadget_BackColor, $0094FE)
+                  Clip(Crossleft_gadget)
+                EndIf
+              ElseIf checked_y1 <> relative_y1
+                If CrossLeft_in = \Gadget
+                  If IsGadget(Crossleft_gadget) : FreeGadget(Crossleft_gadget) : EndIf
+                  CrossLeft_in =- 1
+                EndIf
+              EndIf
+              
+              ;CrossRight
+              If checked_x2 = relative_x1
+                If right_y1 > relative_y1 : right_y1 = relative_y1 : EndIf
+                If right_y2 < relative_y2 : right_y2 = relative_y2 : EndIf
+                
+                If IsGadget(Crossright_gadget)
+                  ResizeGadget(Crossright_gadget, checked_x2-ls, right_y1, ls, right_y2-right_y1)
+                Else
+                  CrossRight_in = \Gadget
+                  ;Crossright_gadget = TextGadget(#PB_Any, checked_x2-ls, right_y1, ls, right_y2-right_y1,"") 
+                  Crossright_gadget = ContainerGadget(#PB_Any, checked_x2-ls, right_y1, ls, right_y2-right_y1) : CloseGadgetList()
+                  SetGadgetColor(Crossright_gadget, #PB_Gadget_BackColor, $0094FE)
+                  Clip(Crossright_gadget)
+                EndIf
+              ElseIf checked_y2 <> relative_y2 
+                If CrossRight_in = \Gadget
+                  If IsGadget(Crossright_gadget) : FreeGadget(Crossright_gadget) : EndIf
+                  CrossRight_in =- 1
+                EndIf
+              EndIf
+              
+              ;CrossTop
+              If checked_y1 = relative_y2 
+                If top_x1 > relative_x1 : top_x1 = relative_x1 : EndIf
+                If top_x2 < relative_x2 : top_x2 = relative_x2: EndIf
+                
+                If IsGadget(Crosstop_gadget)
+                  ResizeGadget(Crosstop_gadget, top_x1, checked_y1, top_x2-top_x1,ls)
+                Else
+                  CrossTop_in = \Gadget
+                  ;Crosstop_gadget = TextGadget(#PB_Any, top_x1, checked_y1, top_x2-top_x1,ls,"")  
+                  Crosstop_gadget = ContainerGadget(#PB_Any, top_x1, checked_y1, top_x2-top_x1,ls) : CloseGadgetList() 
+                  SetGadgetColor(Crosstop_gadget, #PB_Gadget_BackColor, $FE00E1)
+                  Clip(Crosstop_gadget)
+                EndIf
+              ElseIf checked_x1 <> relative_x1
+                If CrossTop_in = \Gadget
+                  If IsGadget(Crosstop_gadget) : FreeGadget(Crosstop_gadget) : EndIf
+                  CrossTop_in =- 1
+                EndIf
+              EndIf
+              
+              ;CrossBottom
+              If checked_y2 = relative_y1 
+                If bottom_x1 > relative_x1 : bottom_x1 = relative_x1 : EndIf
+                If bottom_x2 < relative_x2 : bottom_x2 = relative_x2: EndIf
+                
+                If IsGadget(Crossbottom_gadget)
+                  ResizeGadget(Crossbottom_gadget, bottom_x1, checked_y2-ls, bottom_x2-bottom_x1,ls)
+                Else
+                  CrossBottom_in = \Gadget
+                  ;Crossbottom_gadget = TextGadget(#PB_Any, bottom_x1, checked_y2-ls, bottom_x2-bottom_x1,ls,"")
+                  Crossbottom_gadget = ContainerGadget(#PB_Any, bottom_x1, checked_y2-ls, bottom_x2-bottom_x1,ls) : CloseGadgetList() 
+                  SetGadgetColor(Crossbottom_gadget, #PB_Gadget_BackColor, $FE00E1)
+                  Clip(Crossbottom_gadget)
+                EndIf
+              ElseIf checked_x2 <> relative_x2
+                If CrossBottom_in = \Gadget
+                  If IsGadget(Crossbottom_gadget) : FreeGadget(Crossbottom_gadget) : EndIf
+                  CrossBottom_in =- 1
+                EndIf
+              EndIf
+              
+              
+              
+              
+              
               
             EndIf
           Next
@@ -623,3 +732,9 @@ CompilerIf #PB_Compiler_IsMainFile
     
   ForEver
 CompilerEndIf
+; IDE Options = PureBasic 5.60 (Windows - x86)
+; CursorPosition = 184
+; FirstLine = 164
+; Folding = ----
+; EnableXP
+; CompileSourceDirectory
