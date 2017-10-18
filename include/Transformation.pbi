@@ -302,7 +302,7 @@ Module Transformation
 
               
               ;CrossLeft
-              If checked_x1 = relative_x2
+              If checked_x1 = relative_x2+5
                 If left_y1 > relative_y1 : left_y1 = relative_y1 : EndIf
                 If left_y2 < relative_y2 : left_y2 = relative_y2 : EndIf
                 
@@ -323,7 +323,7 @@ Module Transformation
               EndIf
               
               ;CrossRight
-              If checked_x2 = relative_x1
+              If checked_x2 = relative_x1-5
                 If right_y1 > relative_y1 : right_y1 = relative_y1 : EndIf
                 If right_y2 < relative_y2 : right_y2 = relative_y2 : EndIf
                 
@@ -344,7 +344,7 @@ Module Transformation
               EndIf
               
               ;CrossTop
-              If checked_y1 = relative_y2 
+              If checked_y1 = relative_y2+5
                 If top_x1 > relative_x1 : top_x1 = relative_x1 : EndIf
                 If top_x2 < relative_x2 : top_x2 = relative_x2: EndIf
                 
@@ -365,7 +365,7 @@ Module Transformation
               EndIf
               
               ;CrossBottom
-              If checked_y2 = relative_y1 
+              If checked_y2 = relative_y1-5
                 If bottom_x1 > relative_x1 : bottom_x1 = relative_x1 : EndIf
                 If bottom_x2 < relative_x2 : bottom_x2 = relative_x2: EndIf
                 
@@ -733,8 +733,8 @@ CompilerIf #PB_Compiler_IsMainFile
   ForEver
 CompilerEndIf
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 184
-; FirstLine = 164
+; CursorPosition = 365
+; FirstLine = 332
 ; Folding = ----
 ; EnableXP
 ; CompileSourceDirectory
