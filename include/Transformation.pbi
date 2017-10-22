@@ -161,16 +161,61 @@ Module Transformation
   EndProcedure
   
   
-;   Procedure VerticalLineGadget()
-;     
-;     
-;   EndProcedure
-;   
-;   Procedure HorisontalLineGadget()
-;     
-;     
-;   EndProcedure
+  Procedure VerticalLineGadget(Gadget, x, y1, y2, Size, Color=#PB_Default)
+    Protected Result
+    
+    Protected y, Height
+    
+    If y1<y2
+      y=y1
+      Height=y2-y1
+    Else
+      y=y2
+      Height=y1-y2
+    EndIf
+    
+    Size=1
+    Result = ContainerGadget(Gadget, x,y,Size, Height)
+    If Result
+      CloseGadgetList()
+      
+      If Gadget=#PB_Any
+        Gadget=Result
+      EndIf
+      
+      SetGadgetColor(Gadget, #PB_Gadget_BackColor, Color)
+    EndIf
+    
+    ProcedureReturn Result
+  EndProcedure
   
+  Procedure HorisontalLineGadget(Gadget, x1, x2, y, Size, Color=#PB_Default)
+    Protected Result
+    
+    Protected x, Width
+    
+    If x1<x2
+      x=x1
+      Width=x2-x1
+    Else
+      x=x2
+      Width=x1-x2
+    EndIf
+    
+    Size=1
+    Result = ContainerGadget(Gadget, x, y, Width, Size)
+    If Result
+      CloseGadgetList()
+      
+      If Gadget=#PB_Any
+        Gadget=Result
+      EndIf
+      
+      SetGadgetColor(Gadget, #PB_Gadget_BackColor, Color)
+    EndIf
+    
+    ProcedureReturn Result
+  EndProcedure
   
   
   
@@ -219,13 +264,14 @@ Module Transformation
                 If left_y1 > relative_y1 : left_y1 = relative_y1 : EndIf
                 If left_y2 < relative_y2 : left_y2 = relative_y2 : EndIf
                 
+                
+                
                 If IsGadget(left_gadget)
                   ResizeGadget(left_gadget, checked_x1,left_y1,ls,left_y2-left_y1)
                 Else
                   left_in = \Gadget
                   ;left_gadget = TextGadget(#PB_Any, checked_x1,left_y1,ls,left_y2-left_y1,"")
-                  left_gadget = ContainerGadget(#PB_Any, checked_x1,left_y1,ls,left_y2-left_y1) : CloseGadgetList()
-                  SetGadgetColor(left_gadget, #PB_Gadget_BackColor, $0000FF)
+                  left_gadget = VerticalLineGadget(#PB_Any, checked_x1, left_y1, left_y2, ls, $0000FF)
                   Clip(left_gadget)
                 EndIf
               ElseIf checked_y1 <> relative_y1
@@ -245,8 +291,7 @@ Module Transformation
                 Else
                   right_in = \Gadget
                   ;right_gadget = TextGadget(#PB_Any, checked_x2-ls, right_y1, ls, right_y2-right_y1,"") 
-                  right_gadget = ContainerGadget(#PB_Any, checked_x2-ls, right_y1, ls, right_y2-right_y1) : CloseGadgetList()
-                  SetGadgetColor(right_gadget, #PB_Gadget_BackColor, $0000FF)
+                  right_gadget = VerticalLineGadget(#PB_Any, checked_x2-ls, right_y1, right_y2, ls, $0000FF)
                   Clip(right_gadget)
                 EndIf
               ElseIf checked_y2 <> relative_y2 
@@ -265,9 +310,8 @@ Module Transformation
                   ResizeGadget(top_gadget, top_x1, checked_y1, top_x2-top_x1,ls)
                 Else
                   top_in = \Gadget
-                  ;top_gadget = TextGadget(#PB_Any, top_x1, checked_y1, top_x2-top_x1,ls,"")  
-                  top_gadget = ContainerGadget(#PB_Any, top_x1, checked_y1, top_x2-top_x1,ls) : CloseGadgetList() 
-                  SetGadgetColor(top_gadget, #PB_Gadget_BackColor, $FF0000)
+                  ;top_gadget = TextGadget(#PB_Any, top_x1, checked_y1, top_x2-top_x1,ls,"")
+                  top_gadget = HorisontalLineGadget(#PB_Any, top_x1, top_x2, checked_y1, ls, $FF0000)
                   Clip(top_gadget)
                 EndIf
               ElseIf checked_x1 <> relative_x1
@@ -287,8 +331,7 @@ Module Transformation
                 Else
                   bottom_in = \Gadget
                   ;bottom_gadget = TextGadget(#PB_Any, bottom_x1, checked_y2-ls, bottom_x2-bottom_x1,ls,"")
-                  bottom_gadget = ContainerGadget(#PB_Any, bottom_x1, checked_y2-ls, bottom_x2-bottom_x1,ls) : CloseGadgetList() 
-                  SetGadgetColor(bottom_gadget, #PB_Gadget_BackColor, $FF0000)
+                  bottom_gadget = HorisontalLineGadget(#PB_Any, bottom_x1, bottom_x2, checked_y2-ls, ls, $FF0000)
                   Clip(bottom_gadget)
                 EndIf
               ElseIf checked_x2 <> relative_x2
@@ -311,8 +354,7 @@ Module Transformation
                 Else
                   CrossLeft_in = \Gadget
                   ;Crossleft_gadget = TextGadget(#PB_Any, checked_x1,left_y1,ls,left_y2-left_y1,"")
-                  Crossleft_gadget = ContainerGadget(#PB_Any, checked_x1,left_y1,ls,left_y2-left_y1) : CloseGadgetList()
-                  SetGadgetColor(Crossleft_gadget, #PB_Gadget_BackColor, $0094FE)
+                  Crossleft_gadget = VerticalLineGadget(#PB_Any, checked_x1, left_y1, left_y2, ls, $0094FE)
                   Clip(Crossleft_gadget)
                 EndIf
               ElseIf checked_y1 <> relative_y1
@@ -331,9 +373,8 @@ Module Transformation
                   ResizeGadget(Crossright_gadget, checked_x2-ls, right_y1, ls, right_y2-right_y1)
                 Else
                   CrossRight_in = \Gadget
-                  ;Crossright_gadget = TextGadget(#PB_Any, checked_x2-ls, right_y1, ls, right_y2-right_y1,"") 
-                  Crossright_gadget = ContainerGadget(#PB_Any, checked_x2-ls, right_y1, ls, right_y2-right_y1) : CloseGadgetList()
-                  SetGadgetColor(Crossright_gadget, #PB_Gadget_BackColor, $0094FE)
+                  ;Crossright_gadget = TextGadget(#PB_Any, checked_x2-ls, right_y1, ls, right_y2-right_y1,"")
+                  Crossright_gadget = VerticalLineGadget(#PB_Any, checked_x2-ls, right_y1, right_y2, ls, $0094FE)
                   Clip(Crossright_gadget)
                 EndIf
               ElseIf checked_y2 <> relative_y2 
@@ -352,9 +393,8 @@ Module Transformation
                   ResizeGadget(Crosstop_gadget, top_x1, checked_y1, top_x2-top_x1,ls)
                 Else
                   CrossTop_in = \Gadget
-                  ;Crosstop_gadget = TextGadget(#PB_Any, top_x1, checked_y1, top_x2-top_x1,ls,"")  
-                  Crosstop_gadget = ContainerGadget(#PB_Any, top_x1, checked_y1, top_x2-top_x1,ls) : CloseGadgetList() 
-                  SetGadgetColor(Crosstop_gadget, #PB_Gadget_BackColor, $FE00E1)
+                  ;Crosstop_gadget = TextGadget(#PB_Any, top_x1, checked_y1, top_x2-top_x1,ls,"")
+                  Crosstop_gadget = HorisontalLineGadget(#PB_Any, top_x1, top_x2, checked_y1, ls, $FE00E1)
                   Clip(Crosstop_gadget)
                 EndIf
               ElseIf checked_x1 <> relative_x1
@@ -374,8 +414,7 @@ Module Transformation
                 Else
                   CrossBottom_in = \Gadget
                   ;Crossbottom_gadget = TextGadget(#PB_Any, bottom_x1, checked_y2-ls, bottom_x2-bottom_x1,ls,"")
-                  Crossbottom_gadget = ContainerGadget(#PB_Any, bottom_x1, checked_y2-ls, bottom_x2-bottom_x1,ls) : CloseGadgetList() 
-                  SetGadgetColor(Crossbottom_gadget, #PB_Gadget_BackColor, $FE00E1)
+                  Crossbottom_gadget = HorisontalLineGadget(#PB_Any, bottom_x1, bottom_x2, checked_y2-ls, ls, $FE00E1)
                   Clip(Crossbottom_gadget)
                 EndIf
               ElseIf checked_x2 <> relative_x2
@@ -733,8 +772,7 @@ CompilerIf #PB_Compiler_IsMainFile
   ForEver
 CompilerEndIf
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 365
-; FirstLine = 332
-; Folding = ----
+; CursorPosition = 220
+; Folding = -----
 ; EnableXP
 ; CompileSourceDirectory
