@@ -101,6 +101,8 @@ DeclareModule Constant
   EndEnumeration
   EndDeclareModule : Module Constant : EndModule
 
+XIncludeFile "include/Hide.pbi"
+XIncludeFile "include/Disable.pbi"
 XIncludeFile "include/Flag.pbi"
 XIncludeFile "include/Transformation.pbi"
 XIncludeFile "include/Properties.pbi"
@@ -665,16 +667,29 @@ Declare CreateObject(Type$)
 Declare OpenPBObject(*This.ParsePBGadget)
 
 Procedure CreatePBObject_Events()
-  Protected Object =- 1
+  Protected I.i, Object =- 1
+  
+  If IsGadget(EventGadget())
+    Object = EventGadget()
+  ElseIf IsWindow(EventWindow())
+    Object = EventWindow()
+  EndIf
+      
+  Select EventType()
+    Case #PB_EventType_StatusChange
+      
+      For i=0 To CountGadgetItems(Window_0_Tree_0)-1
+        If Object = GetGadgetItemData(Window_0_Tree_0, i)
+          SetGadgetState(Window_0_Tree_0, i)
+          PostEvent(#PB_Event_Gadget, Window_0, Window_0_Tree_0, #PB_EventType_Change)
+          Break
+        EndIf
+      Next  
+                
+  EndSelect
   
   Select Event()
     Case Constant::#Event_Create
-      If IsGadget(EventGadget())
-        Object = EventGadget()
-      ElseIf IsWindow(EventWindow())
-        Object = EventWindow()
-      EndIf
-      
       Transformation::Enable(EventGadget(), 5)
       PushListPosition(ParsePBGadget())
       ForEach ParsePBGadget()
@@ -1037,6 +1052,9 @@ Procedure OpenPBObject(*This.ParsePBGadget) ; Ok
       EnableWindowDrop(Object, #PB_Drop_Text, #PB_Drag_Copy)
       PostEvent(Constant::#Event_Create, Object, #PB_All)
       BindEvent(#PB_Event_WindowDrop, @CreatePBObject_Events(), Object)
+      
+      UnbindEvent(#PB_Event_Gadget, @CreatePBObject_Events(), Object)
+      BindEvent(#PB_Event_Gadget, @CreatePBObject_Events(), Object)
     EndIf
     
     BindEvent(Constant::#Event_Create, @CreatePBObject_Events(), \Parent(Str(Object)), Object)
@@ -1814,37 +1832,20 @@ Procedure Window_Event()
           EndSelect
           
         Case Window_0_Tree_0 ; Ok
+          
           Select EventType()
-            Case #PB_EventType_Change      
-              If GetGadgetState(Window_0_Panel_0) <> 1 ; Properties
-                SetGadgetState(Window_0_Panel_0, 1)    ; Для удобства выбираем вкладку свойства
+            Case #PB_EventType_Change     
+              ; Для удобства выбираем вкладку свойства 
+              If GetGadgetState(Window_0_Panel_0) <> 1 ; Properties = 1
+                SetGadgetState(Window_0_Panel_0, 1)   
               EndIf
               
               PushListPosition(ParsePBGadget())
               With ParsePBGadget()
-                ForEach ParsePBGadget() 
-                  Transformation::Disable(\ID\Argument) 
-                Next
                 ForEach ParsePBGadget()
                   If GetGadgetText(Window_0_Tree_0) = \ID\Argument$
-                    Parent = *This\Parent(Str(\ID\Argument))
                     Properties::Initialize(\ID\Argument, \ID\Argument$, \Flag\Argument$)
-                    
-                    If IsGadget(Parent)
-                      OpenGadgetList(Parent)
-                      Transformation::Enable(\ID\Argument, 5)
-                      CloseGadgetList()
-                    ElseIf IsWindow(Parent)
-                      UseGadgetList = UseGadgetList(WindowID(Parent))
-                      Transformation::Enable(\ID\Argument, 5)
-                      UseGadgetList(UseGadgetList)
-                    EndIf
-                    
-                    If IsGadget(\ID\Argument)
-                      SetActiveGadget(\ID\Argument)
-                    ElseIf IsWindow(\ID\Argument)
-                      SetActiveWindow(\ID\Argument)
-                    EndIf
+                    Transformation::Change(\ID\Argument)
                     Break
                   EndIf
                 Next
@@ -1869,6 +1870,7 @@ Procedure Window_Event()
             PushListPosition(ParsePBGadget())
             ForEach ParsePBGadget()
               AddGadgetItem (Window_0_Tree_0, -1, ParsePBGadget()\ID\Argument$, 0, ParsePBGadget()\SubLevel)
+              SetGadgetItemData(Window_0_Tree_0, CountGadgetItems(Window_0_Tree_0)-1, ParsePBGadget()\ID\Argument)
             Next
             PopListPosition(ParsePBGadget())
             

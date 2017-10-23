@@ -1,5 +1,7 @@
 ﻿CompilerIf #PB_Compiler_IsMainFile
   XIncludeFile "Flag.pbi"
+  XIncludeFile "Hide.pbi"
+  XIncludeFile "Disable.pbi"
 CompilerEndIf
 
 ;-
@@ -72,30 +74,6 @@ Module Properties
   
   Global LineGadget =- 1
   
-  Macro GetWindowFlag(Window)
-    Flag::GetWindow(Window)
-  EndMacro
-  
-  Macro SetWindowFlag(Window, Flag)
-    Flag::SetWindow(Window, Flag)
-  EndMacro
-  
-  Macro RemoveWindowFlag(Window, Flag)
-    Flag::RemoveWindow(Window, Flag)
-  EndMacro
-  
-  Macro GetGadgetFlag(Gadget)
-    Flag::GetGadget(Gadget)
-  EndMacro
-  
-  Macro SetGadgetFlag(Gadget, Flag)
-    Flag::SetGadget(Gadget, Flag)
-  EndMacro
-  
-  Macro RemoveGadgetFlag(Gadget, Flag)
-    Flag::RemoveGadget(Gadget, Flag)
-  EndMacro
-  
   ;-
   CompilerSelect #PB_Compiler_OS 
     CompilerCase #PB_OS_Linux
@@ -110,57 +88,46 @@ Module Properties
       
   CompilerEndSelect
   
-  Procedure IsHideGadget(Gadget) ;Returns TRUE is gadget hide
-    If IsGadget(Gadget)
-      Protected GadgetID = GadgetID(Gadget)
-      
-      CompilerSelect #PB_Compiler_OS 
-        CompilerCase #PB_OS_Windows : ProcedureReturn Bool(IsWindowVisible_(GadgetID)=0)
-        CompilerCase #PB_OS_MacOS   : ProcedureReturn Bool(CocoaMessage(0, GadgetID, "isVisible")=0)
-        CompilerCase #PB_OS_Linux
-          Protected *Widget.GtkWidget = GadgetID
-          If (GadgetType(Gadget) = #PB_GadgetType_Container Or
-              GadgetType(Gadget) = #PB_GadgetType_Panel)
-            GadgetID = *Widget\parent
-          Else  
-            GadgetID = *Widget\object
-          EndIf
-          
-          ProcedureReturn Bool(gtk_widget_get_visible(GadgetID)=0)
-          
-      CompilerEndSelect
-    EndIf
-  EndProcedure
   
-  Procedure IsDisableGadget(Gadget) ;Returns TRUE is gadget disabled
-    If IsGadget(Gadget)
-      CompilerSelect #PB_Compiler_OS 
-        CompilerCase #PB_OS_Windows : ProcedureReturn Bool(IsWindowEnabled_(GadgetID(Gadget))=0)
-        CompilerCase#PB_OS_Linux    : ProcedureReturn Bool(gtk_widget_get_sensitive(GadgetID(Gadget))=0)
-        CompilerCase #PB_OS_MacOS   : ProcedureReturn Bool(CocoaMessage(0, GadgetID(Gadget), "isDisable")=0)
-      CompilerEndSelect
-    EndIf
-  EndProcedure
+  Macro GetWindowFlag(_window_)
+    Flag::GetWindow(_window_)
+  EndMacro
   
-  Procedure IsHideWindow(Window) ;Returns TRUE is window hide
-    If IsWindow(Window)
-      CompilerSelect #PB_Compiler_OS 
-        CompilerCase #PB_OS_Windows : ProcedureReturn Bool(IsWindowVisible_(WindowID(Window))=0)
-        CompilerCase #PB_OS_Linux   : ProcedureReturn Bool(gtk_widget_get_visible(WindowID(Window))=0)
-        CompilerCase #PB_OS_MacOS   : ProcedureReturn Bool(CocoaMessage(0, WindowID(Window), "isVisible")=0)
-      CompilerEndSelect
-    EndIf
-  EndProcedure
+  Macro SetWindowFlag(_window_, Flag)
+    Flag::SetWindow(_window_, Flag)
+  EndMacro
   
-  Procedure IsDisableWindow(Window) ;Returns TRUE is window disabled
-    If IsWindow(Window)
-      CompilerSelect #PB_Compiler_OS 
-        CompilerCase #PB_OS_Windows : ProcedureReturn Bool(IsWindowEnabled_(WindowID(Window))=0)
-        CompilerCase#PB_OS_Linux    : ProcedureReturn Bool(gtk_widget_get_sensitive(WindowID(Window))=0)
-        CompilerCase #PB_OS_MacOS   : ProcedureReturn Bool(CocoaMessage(0, WindowID(Window), "isDisable")=0)
-      CompilerEndSelect
-    EndIf
-  EndProcedure
+  Macro RemoveWindowFlag(_window_, Flag)
+    Flag::RemoveWindow(_window_, Flag)
+  EndMacro
+  
+  Macro GetGadgetFlag(_gadget_)
+    Flag::GetGadget(_gadget_)
+  EndMacro
+  
+  Macro SetGadgetFlag(_gadget_, Flag)
+    Flag::SetGadget(_gadget_, Flag)
+  EndMacro
+  
+  Macro RemoveGadgetFlag(_gadget_, Flag)
+    Flag::RemoveGadget(_gadget_, Flag)
+  EndMacro
+  
+  Macro IsHideGadget(_gadget_) ;Returns TRUE is gadget hide
+    Hide::Gadget(_gadget_)
+  EndMacro
+  
+  Macro IsDisableGadget(_gadget_) ;Returns TRUE is gadget disabled
+    Disable::Gadget(_gadget_)
+  EndMacro
+  
+  Macro IsHideWindow(_window_) ;Returns TRUE is window hide
+    Hide::Window(_window_)
+  EndMacro
+  
+  Macro IsDisableWindow(_window_) ;Returns TRUE is window disabled
+    Disable::Window(_window_)
+  EndMacro
   
   ;-
   Procedure$ GetPBFlagString( Gadget )
