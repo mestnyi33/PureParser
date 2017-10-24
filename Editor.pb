@@ -703,6 +703,7 @@ Procedure CO_Events()
       
       Select EventType()
         Case #PB_EventType_StatusChange
+          
           ; При выборе гаджета обнавляем испектор
           For I=0 To CountGadgetItems(Window_0_Tree_0)-1
             If Object = GetGadgetItemData(Window_0_Tree_0, I) : SetGadgetState(Window_0_Tree_0, I)
@@ -801,14 +802,17 @@ Procedure CO_Create(Type$, Parent, MouseX, MouseY)
       
       ParsePBGadget()\Object\Argument$ = \Object\Argument$
       ParsePBGadget()\Type\Argument$ = \Type\Argument$
-      ;ParsePBGadget()\Flag\Argument$ = "#PB_Window_SystemMenu|#PB_Window_ScreenCentered"
     EndIf
     
     Protected Object=CallFunctionFast(@CO_Open(), *This)
     
+;     If IsGadget(Object)
+;       BindGadgetEvent(Object, @CO_Events())
+;     EndIf
     
     AddGadgetItem(Window_0_Tree_0, Position, \Object\Argument$, 0, ParsePBGadget()\SubLevel)
-  
+    SetGadgetItemData(Window_0_Tree_0, CountGadgetItems(Window_0_Tree_0)-1, ParsePBGadget()\Object\Argument)
+            
     If GadgetList 
       If IsGadget(Parent) 
         CloseGadgetList() 
@@ -963,8 +967,6 @@ Procedure CO_Open(*ThisParse.ParsePBGadget) ; Ok
       Else
         *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count+1 
       EndIf
-      
-      ;Debug *This\get(\Type\Argument$)\Count ; \Type\Argument$
       
       AddMapElement(*This\get(), \Object\Argument$) 
       *This\get()\Index=@ParsePBGadget()
