@@ -160,7 +160,6 @@ Structure IMG
 EndStructure
 
 Structure ParsePBGadget Extends Object
-  Class.Argument
   Type.Argument
   X.Argument 
   Y.Argument
@@ -750,7 +749,6 @@ Procedure CO_Create(Type$, Parent, MouseX, MouseY)
       \SubLevel = 1
     EndIf
     
-    \Parent\Argument = Parent
     
     Select Type$
       Case "Window" : \Type\Argument$ = "OpenWindow"
@@ -777,7 +775,7 @@ Procedure CO_Create(Type$, Parent, MouseX, MouseY)
           If BuffType$ = \Type\Argument$
             Select j
               Case 1 : ParsePBGadget()\Type\Argument$=Buffer
-              Case 2 : ParsePBGadget()\Class\Argument$=Buffer
+              Case 2 : \Caption\Argument$=Buffer
               Case 3 : ParsePBGadget()\Width\Argument$=Buffer
               Case 4 : ParsePBGadget()\Height\Argument$=Buffer
               Case 5 : ParsePBGadget()\Caption\Argument$=Buffer
@@ -791,8 +789,9 @@ Procedure CO_Create(Type$, Parent, MouseX, MouseY)
         BuffType$ = ""
       Next  
       
-      \Caption\Argument$=ParsePBGadget()\Class\Argument$+*This\get(Str(Parent)+"_"+\Type\Argument$)\Count
-      \Object\Argument$ = *This\get(Str(Parent))\Object\Argument$+"_"+\Caption\Argument$
+      \Parent\Argument = Parent
+      \Caption\Argument$+*This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count
+      \Object\Argument$ = *This\get(Str(\Parent\Argument))\Object\Argument$+"_"+\Caption\Argument$
       
       \X\Argument = MouseX
       \Y\Argument = MouseY
@@ -1710,7 +1709,7 @@ Procedure OpenWindow_Editor(Flag.i=#PB_Window_SystemMenu, ParentID=0)
     
     AddGadgetItem(Window_0_Panel_0, -1, "Properties")
     Window_0_Properties = Properties::Gadget( #PB_Any, 315, 261 )
-    Properties_ID = Properties::AddItem( Window_0_Properties, "ID:", #PB_GadgetType_String )
+    Properties_ID = Properties::AddItem( Window_0_Properties, "ID:", #PB_GadgetType_String | #PB_GadgetType_CheckBox )
     Properties::AddItem( Window_0_Properties, "Text:", #PB_GadgetType_String )
     Properties::AddItem( Window_0_Properties, "Disable:False|True", #PB_GadgetType_ComboBox )
     Properties::AddItem( Window_0_Properties, "Hide:False|True", #PB_GadgetType_ComboBox )
