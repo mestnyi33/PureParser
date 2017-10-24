@@ -140,6 +140,7 @@ Structure Argument
 EndStructure
 
 Structure Object
+  Count.i
   Index.i
   Object.Argument 
   Parent.Argument
@@ -159,6 +160,7 @@ Structure IMG
 EndStructure
 
 Structure ParsePBGadget Extends Object
+  Class.Argument
   Type.Argument
   X.Argument 
   Y.Argument
@@ -673,12 +675,8 @@ Macro CO_Flag(Flag) ; Ok
   Properties::GetPBFlag(Flag)
 EndMacro
 
-;-
-Declare CreateObject(Type$)
-Declare OpenPBObject(*This.ParsePBGadget)
-
-Procedure CreatePBObject_Events()
-  Protected I.i, Object =- 1
+Procedure CO_Events()
+  Protected I.i, Parent=-1, Object =- 1
   
   If IsGadget(EventGadget())
     Object = EventGadget()
@@ -752,58 +750,59 @@ Procedure CO_Create(Type$, Parent, MouseX, MouseY)
     EndIf
     
     \Parent\Argument = Parent
-    \Object\Argument$ = *This\get(Str(Parent))\Object\Argument$+"_"+Type$
     
     Select Type$
-      Case "Window" 
-        \Type\Argument$ = "OpenWindow"
-      Case "Menu", "ToolBar"
-        \Type\Argument$ = Type$
-      Default
-        \Type\Argument$=ULCase(Type$) + "Gadget"
+      Case "Window" : \Type\Argument$ = "OpenWindow"
+      Case "Menu", "ToolBar" : \Type\Argument$ = Type$
+      Default : \Type\Argument$=ULCase(Type$) + "Gadget"
     EndSelect
-    \Caption\Argument$=Type$
     
     
-    AddElement(ParsePBGadget()) 
-    ParsePBGadget()\Type\Argument$ = \Type\Argument$
-    ParsePBGadget()\Object\Argument$ = \Object\Argument$
-    ;ParsePBGadget()\Flag\Argument$ = "#PB_Window_SystemMenu|#PB_Window_ScreenCentered"
-    
-    Protected Buffer.s, BuffType$, i.i, j.i
-    Restore Model 
-    For i=1 To 13
-      For j=1 To 10 ; argument count
-        Read.s Buffer
-        
-        Select j
-          Case 1  
-            If \Type\Argument$=Buffer
-              BuffType$ = Buffer
-            EndIf
-        EndSelect
-        
-        If BuffType$ = \Type\Argument$
+    If AddElement(ParsePBGadget()) 
+      Protected Buffer.s, BuffType$, i.i, j.i
+      
+      Restore Model 
+      For i=1 To 13
+        For j=1 To 10 ; argument count
+          Read.s Buffer
+          
           Select j
-            Case 1  : ParsePBGadget()\Type\Argument$=Buffer
-            Case 2  : ParsePBGadget()\Width\Argument$=Buffer
-            Case 3  : ParsePBGadget()\Height\Argument$=Buffer
-            Case 4  : ParsePBGadget()\Caption\Argument$=Buffer
-            Case 5  : ParsePBGadget()\Param1\Argument$=Buffer
-            Case 6  : ParsePBGadget()\Param2\Argument$=Buffer
-            Case 7  : ParsePBGadget()\Param3\Argument$=Buffer
-            Case 8  : ParsePBGadget()\Flag\Argument$=Buffer
+            Case 1  
+              If \Type\Argument$=Buffer
+                BuffType$ = Buffer
+              EndIf
           EndSelect
-        EndIf
+          
+          If BuffType$ = \Type\Argument$
+            Select j
+              Case 1 : ParsePBGadget()\Type\Argument$=Buffer
+              Case 2 : ParsePBGadget()\Class\Argument$=Buffer
+              Case 3 : ParsePBGadget()\Width\Argument$=Buffer
+              Case 4 : ParsePBGadget()\Height\Argument$=Buffer
+              Case 5 : ParsePBGadget()\Caption\Argument$=Buffer
+              Case 6 : ParsePBGadget()\Param1\Argument$=Buffer
+              Case 7 : ParsePBGadget()\Param2\Argument$=Buffer
+              Case 8 : ParsePBGadget()\Param3\Argument$=Buffer
+              Case 9 : ParsePBGadget()\Flag\Argument$=Buffer
+            EndSelect
+          EndIf
+        Next  
+        BuffType$ = ""
       Next  
-      BuffType$ = ""
-    Next  
-    
-    \X\Argument = MouseX
-    \Y\Argument = MouseY
-    \Width\Argument = Val(ParsePBGadget()\Width\Argument$)
-    \Height\Argument = Val(ParsePBGadget()\Height\Argument$)
-    \Flag\Argument=CO_Flag(ParsePBGadget()\Flag\Argument$)
+      
+      \Caption\Argument$=ParsePBGadget()\Class\Argument$+*This\get(Str(Parent)+"_"+\Type\Argument$)\Count
+      \Object\Argument$ = *This\get(Str(Parent))\Object\Argument$+"_"+\Caption\Argument$
+      
+      \X\Argument = MouseX
+      \Y\Argument = MouseY
+      \Width\Argument = Val(ParsePBGadget()\Width\Argument$)
+      \Height\Argument = Val(ParsePBGadget()\Height\Argument$)
+      \Flag\Argument=CO_Flag(ParsePBGadget()\Flag\Argument$)
+      
+      ParsePBGadget()\Object\Argument$ = \Object\Argument$
+      ParsePBGadget()\Type\Argument$ = \Type\Argument$
+      ;ParsePBGadget()\Flag\Argument$ = "#PB_Window_SystemMenu|#PB_Window_ScreenCentered"
+    EndIf
     
     Protected Object=CallFunctionFast(@CO_Open(), *This)
     
@@ -821,7 +820,7 @@ Procedure CO_Create(Type$, Parent, MouseX, MouseY)
    
   DataSection
     Model:
-    Data.s "OpenWindow","300","200","Text","Window_0","0","0","1","0",
+    Data.s "OpenWindow","Window_0","300","200","Text","0","0","1","0",
            "#PB_Window_SystemMenu,"+
            "#PB_Window_MinimizeGadget,"+
            "#PB_Window_MaximizeGadget,"+
@@ -836,33 +835,33 @@ Procedure CO_Create(Type$, Parent, MouseX, MouseY)
            "#PB_Window_Minimize,"+
            "#PB_Window_NoGadgets"
     
-    Data.s "ButtonGadget","80","20","Text","Button_","0","0","1","0",
+    Data.s "ButtonGadget","Button_","80","20","Text","0","0","1","0",
            "#PB_Button_Right,"+
            "#PB_Button_Left,"+
            "#PB_Button_Default,"+
            "#PB_Button_MultiLine,"+
            "#PB_Button_Toggle"
     
-    Data.s "CheckBoxGadget","80","20","Text","CheckBox_","0","0","1","0",
+    Data.s "CheckBoxGadget","CheckBox_","80","20","Text","0","0","1","0",
            "#PB_CheckBox_Right,"+
            "#PB_CheckBox_Center,"+
            "#PB_CheckBox_ThreeState"
     
-    Data.s "ComboBoxGadget","100","20","","Combo_","0","0","1","0",
+    Data.s "ComboBoxGadget","Combo_","100","20","","0","0","1","0",
            "#PB_ComboBox_Editable,"+
            "#PB_ComboBox_LowerCase,"+
            "#PB_ComboBox_UpperCase,"+
            "#PB_ComboBox_Image"
     
-    Data.s "EditorGadget","150","200","","Editor_","0","0","1","0",
+    Data.s "EditorGadget","Editor_","150","200","","0","0","1","0",
            "#PB_Editor_ReadOnly"
     
-    Data.s "FrameGadget","180","150","Texte","Frame_","1","0","1","0",
+    Data.s "FrameGadget","Frame_","180","150","Texte","1","0","1","0",
            "#PB_Frame3D_Single,"+
            "#PB_Frame3D_Double,"+
            "#PB_Frame3D_Flat"
     
-    Data.s "ListIconGadget","180","180","","ListIcon_","0","1","1","0",
+    Data.s "ListIconGadget","ListIcon_","180","180","","0","1","1","0",
            "#PB_ListIcon_CheckBoxes,"+
            "#PB_ListIcon_MultiSelect,"+
            "#PB_ListIcon_GridLines,"+
@@ -870,13 +869,13 @@ Procedure CO_Create(Type$, Parent, MouseX, MouseY)
            "#PB_ListIcon_HeaderDragDrop,"+
            "#PB_ListIcon_AlwaysShowSelection"
     
-    Data.s "ListViewGadget","150","150","","ListView_","0","0","1","0",
+    Data.s "ListViewGadget","ListView_","150","150","","0","0","1","0",
            "#PB_ListView_MultiSelect,"+
            "#PB_ListView_ClickSelect"
     
-    Data.s "OptionGadget","80","20","Texte","Option_","0","0","1","0",""
+    Data.s "OptionGadget","Option_","80","20","Texte","0","0","1","0",""
     
-    Data.s "StringGadget","80","20","Texte","String_","0","0","1","0",
+    Data.s "StringGadget","String_","80","20","Texte","0","0","1","0",
            "#PB_String_Password,"+
            "#PB_String_ReadOnly,"+
            "#PB_String_Numeric,"+
@@ -884,25 +883,26 @@ Procedure CO_Create(Type$, Parent, MouseX, MouseY)
            "#PB_String_UpperCase,"+
            "#PB_String_BorderLess"
     
-    Data.s "TextGadget","80","20","Text","Text_","1","0","0","0",
+    Data.s "TextGadget","Text_","80","20","Text","1","0","0","0",
            "#PB_Text_Center,"+
            "#PB_Text_Right,"+
            "#PB_Text_Border"
     
-    Data.s "CanvasGadget", "150", "150","","Canvas_", "0","0","1","0",
+    Data.s "CanvasGadget","Canvas_","150","150","","0","0","1","0",
            "#PB_Canvas_Border,"+
            "#PB_Canvas_ClipMouse,"+
            "#PB_Canvas_Keyboard,"+
            "#PB_Canvas_DrawFocus,"+
            "#PB_Canvas_Container"
     
-    Data.s "ImageGadget" , "150", "150","","Image_", "0","0","1","0",
+    Data.s "ImageGadget","Image_","150", "150","","0","0","1","0",
            "#PB_Image_Border,"+
            "#PB_Image_Raised" 
     
   EndDataSection
   
 EndProcedure
+
 
 Procedure CO_Open(*ThisParse.ParsePBGadget) ; Ok
   Protected OpenGadgetList, GetParent, Object=-1
@@ -956,6 +956,16 @@ Procedure CO_Open(*ThisParse.ParsePBGadget) ; Ok
     
     ; Заносим данные объекта в памят
     If Bool(IsGadget(Object) | IsWindow(Object))
+      If Not FindMapElement(*This\get(), Str(\Parent\Argument)+"_"+\Type\Argument$)
+        AddMapElement(*This\get(), Str(\Parent\Argument)+"_"+\Type\Argument$) 
+        *This\get()\Index=@ParsePBGadget()
+        *This\get()\Count+1 
+      Else
+        *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count+1 
+      EndIf
+      
+      ;Debug *This\get(\Type\Argument$)\Count ; \Type\Argument$
+      
       AddMapElement(*This\get(), \Object\Argument$) 
       *This\get()\Index=@ParsePBGadget()
       *This\get()\Object\Argument=Object
@@ -987,6 +997,7 @@ Procedure CO_Open(*ThisParse.ParsePBGadget) ; Ok
         
       Case "AddGadgetColumn"       
         AddGadgetColumn( *This\get(\Object\Argument$)\Object\Argument, \Param1\Argument, \Caption\Argument$, \Param2\Argument)
+        
       Case "AddGadgetItem"   
         If IsGadget(*This\get(\Object\Argument$)\Object\Argument)
           AddGadgetItem( *This\get(\Object\Argument$)\Object\Argument, \Param1\Argument, \Caption\Argument$, \Param2\Argument, \Flag\Argument)
