@@ -24,7 +24,7 @@ DeclareModule Transformation
   Declare Gadget(Gadget.i)
   Declare Update(Gadget.i)
   Declare Disable(Gadget.i)
-  Declare Enable(Gadget.i, Grid.i=1, Flags.i=#Anchor_All, Parent=-1, Item=0)
+  Declare Enable(Gadget.i, Parent.i, Grid.i=1, Flags.i=#Anchor_All, Item=0)
   
 EndDeclareModule
 
@@ -683,12 +683,18 @@ Module Transformation
     
   EndProcedure
   
-  Procedure Enable(Gadget.i, Grid.i=1, Flags.i=#Anchor_All, Parent=-1, Item=0)
-    Protected ID.i, I.i
+  Procedure Enable(Gadget.i, Parent.i, Grid.i=1, Flags.i=#Anchor_All, Item=0)
+    Protected ID.i, I.i, UseGadgetList.i
     Protected *This.Transformation
     Protected *Cursors.DataBuffer = ?CursorsBuffer
     Protected *Flags.DataBuffer = ?FlagsBuffer
     
+    If IsGadget(Parent)
+      OpenGadgetList(Parent)
+    ElseIf IsWindow(Parent)
+      UseGadgetList = UseGadgetList(WindowID(Parent))
+    EndIf
+            
     If IsGadget(Gadget)
       Disable(Gadget)
       
@@ -743,6 +749,12 @@ Module Transformation
         UnbindEvent(#PB_Event_LeftClick, @CallBack(), \Window)
         BindEvent(#PB_Event_LeftClick, @CallBack(), \Window)
       EndWith
+    EndIf
+    
+    If IsGadget(Parent)
+      CloseGadgetList()
+    ElseIf IsWindow(Parent)
+      UseGadgetList(UseGadgetList)
     EndIf
     
     DataSection
@@ -857,17 +869,17 @@ CompilerIf #PB_Compiler_IsMainFile
               Case #True
                 SetGadgetText(#Transformation, "Disable Transformation")
                 ; Enable(#Window, 5, #Anchor_Position)
-                Enable(#EditorGadget, 5, #Anchor_All)
-                OpenGadgetList(#ContainerGadget2)
-                Enable(#ButtonGadget, 1, #Anchor_All, #ContainerGadget2)
-                CloseGadgetList()
-                Enable(#TrackBarGadget, 1, #Anchor_Position|#Anchor_Horizontally)
-                Enable(#SpinGadget, 1, #Anchor_Position)
-                Enable(#CanvasGadget, 1, #Anchor_All)
-                Enable(#ContainerGadget, 1, #Anchor_All)
-                OpenGadgetList(#ContainerGadget)
-                Enable(#ContainerGadget2, 10, #Anchor_All, #ContainerGadget)
-                CloseGadgetList()
+                Enable(#EditorGadget, #Window, 5, #Anchor_All)
+;                 OpenGadgetList(#ContainerGadget2)
+                Enable(#ButtonGadget, #ContainerGadget2, 1, #Anchor_All, #ContainerGadget2)
+;                 CloseGadgetList()
+                Enable(#TrackBarGadget, #Window, 1, #Anchor_Position|#Anchor_Horizontally)
+                Enable(#SpinGadget, #Window, 1, #Anchor_Position)
+                Enable(#CanvasGadget, #Window, 1, #Anchor_All)
+                Enable(#ContainerGadget, #Window, 1, #Anchor_All)
+;                 OpenGadgetList(#ContainerGadget)
+                Enable(#ContainerGadget2, #ContainerGadget, 10, #Anchor_All, #ContainerGadget)
+;                 CloseGadgetList()
             EndSelect
         EndSelect
         
