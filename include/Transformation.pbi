@@ -23,8 +23,8 @@ DeclareModule Transformation
   Declare Change(Object.i)
   Declare Gadget(Gadget.i)
   Declare Update(Gadget.i)
-  Declare Disable(Gadget.i)
-  Declare Enable(Gadget.i, Parent.i, Grid.i=1, Flags.i=#Anchor_All, Item=0)
+  Declare Free(Gadget.i)
+  Declare Create(Gadget.i, Window.i, Parent.i, Grid.i=1, Flags.i=#Anchor_All, Item=0)
   
 EndDeclareModule
 
@@ -496,6 +496,11 @@ Module Transformation
         
         With *This
           Select EventType()
+            Case #PB_EventType_RightClick
+              If \ID[#Arrows] = EventGadget()
+                PostEvent(#PB_Event_Gadget, EventWindow(), \Gadget, #PB_EventType_CloseItem, *This) ; EventGadget())
+              EndIf
+              
             Case #PB_EventType_KeyDown
               GadgetX0 = GadgetX(\Gadget)
               GadgetY0 = GadgetY(\Gadget)
@@ -663,10 +668,39 @@ Module Transformation
     
   EndProcedure
   
-  Procedure Disable(Gadget.i)
+  Procedure Free(Gadget.i)
     Protected I.i
     
     If ListSize(AnChor())
+      
+      Select GadgetType(Gadget)
+        Case #PB_GadgetType_Panel, 
+             #PB_GadgetType_Container, 
+             #PB_GadgetType_ScrollArea
+          
+          ForEach AnChor()
+            If AnChor()\Parent = Gadget 
+              Select GadgetType(AnChor()\Gadget)
+                Case #PB_GadgetType_Panel, 
+                     #PB_GadgetType_Container, 
+                     #PB_GadgetType_ScrollArea
+                  
+                  Free(AnChor()\Gadget)
+                Default
+                  ; TODO
+                  For I = 1 To #Alles
+                    If AnChor()\ID[I]
+                      FreeGadget(AnChor()\ID[I])
+                    EndIf
+                  Next
+                  
+                  DeleteMapElement(Index(), Str(Gadget))
+                  DeleteElement(AnChor())
+               EndSelect
+            EndIf
+          Next
+      EndSelect
+      
       ForEach AnChor()
         If AnChor()\Gadget = Gadget
           For I = 1 To #Alles
@@ -683,7 +717,7 @@ Module Transformation
     
   EndProcedure
   
-  Procedure Enable(Gadget.i, Parent.i, Grid.i=1, Flags.i=#Anchor_All, Item=0)
+  Procedure Create(Gadget.i, Window.i, Parent.i, Grid.i=1, Flags.i=#Anchor_All, Item=0)
     Protected ID.i, I.i, UseGadgetList.i
     Protected *This.Transformation
     Protected *Cursors.DataBuffer = ?CursorsBuffer
@@ -696,12 +730,23 @@ Module Transformation
     EndIf
             
     If IsGadget(Gadget)
-      Disable(Gadget)
+      ForEach AnChor()
+        If AnChor()\Gadget = Gadget
+          For I = 1 To #Alles
+            If AnChor()\ID[I]
+              FreeGadget(AnChor()\ID[I])
+            EndIf
+          Next
+          
+          DeleteMapElement(Index(), Str(Gadget))
+          DeleteElement(AnChor())
+        EndIf
+      Next
       
       *This = AddElement(AnChor())
       
       With *This
-        \Window = GetActiveWindow()
+        \Window = Window
         \Parent = Parent
         \Gadget = Gadget
         \Item = Item
@@ -859,26 +904,26 @@ CompilerIf #PB_Compiler_IsMainFile
             Select GetGadgetState(#Transformation)
               Case #False
                 SetGadgetText(#Transformation, "Enable Transformation")
-                Disable(#EditorGadget)
-                Disable(#ButtonGadget)
-                Disable(#TrackBarGadget)
-                Disable(#SpinGadget)
-                Disable(#CanvasGadget)
-                Disable(#ContainerGadget)
-                Disable(#ContainerGadget2)
+                Free(#EditorGadget)
+                Free(#ButtonGadget)
+                Free(#TrackBarGadget)
+                Free(#SpinGadget)
+                Free(#CanvasGadget)
+                Free(#ContainerGadget)
+                Free(#ContainerGadget2)
               Case #True
                 SetGadgetText(#Transformation, "Disable Transformation")
-                ; Enable(#Window, 5, #Anchor_Position)
-                Enable(#EditorGadget, #Window, 5, #Anchor_All)
+                ; Create(#Window, 5, #Anchor_Position)
+                Create(#EditorGadget, #Window, #Window, 5, #Anchor_All)
 ;                 OpenGadgetList(#ContainerGadget2)
-                Enable(#ButtonGadget, #ContainerGadget2, 1, #Anchor_All, #ContainerGadget2)
+                Create(#ButtonGadget, #Window, #ContainerGadget2, 1, #Anchor_All, #ContainerGadget2)
 ;                 CloseGadgetList()
-                Enable(#TrackBarGadget, #Window, 1, #Anchor_Position|#Anchor_Horizontally)
-                Enable(#SpinGadget, #Window, 1, #Anchor_Position)
-                Enable(#CanvasGadget, #Window, 1, #Anchor_All)
-                Enable(#ContainerGadget, #Window, 1, #Anchor_All)
+                Create(#TrackBarGadget, #Window, #Window, 1, #Anchor_Position|#Anchor_Horizontally)
+                Create(#SpinGadget, #Window, #Window, 1, #Anchor_Position)
+                Create(#CanvasGadget, #Window, #Window, 1, #Anchor_All)
+                Create(#ContainerGadget, #Window, #Window, 1, #Anchor_All)
 ;                 OpenGadgetList(#ContainerGadget)
-                Enable(#ContainerGadget2, #ContainerGadget, 10, #Anchor_All, #ContainerGadget)
+                Create(#ContainerGadget2, #Window, #ContainerGadget, 10, #Anchor_All, #ContainerGadget)
 ;                 CloseGadgetList()
             EndSelect
         EndSelect

@@ -25,30 +25,32 @@ EnableExplicit
 ;- GLOBAL
 Global MainWindow=-1
 Global Window_0=-1, 
-       Window_0_Menu_0, 
-       Window_0_Tree_0, 
-       Window_0_Tree_1, 
-       Window_0_Panel_0,
-       Window_0_Splitter_0
+       WE_Menu_0, 
+       WE_PopupMenu_0,
+       WE_Tree_0, 
+       WE_Tree_1, 
+       WE_Panel_0,
+       WE_Splitter_0
 
-Global Window_0_Properties
+Global WE_Properties
 Global Properties_ID 
 Global Properties_Image 
 Global Properties_Color 
 Global Properties_Puch
 Global Properties_Flag
 
-Global Window_0_Menu_0_New=1,
-       Window_0_Menu_0_Open=2,
-       Window_0_Menu_0_Save=3,
-       Window_0_Menu_0_Save_as=4,
-       Window_0_Menu_0_Close=5
+Global WE_Menu_New=1,
+       WE_Menu_Open=2,
+       WE_Menu_Save=3,
+       WE_Menu_Save_as=4,
+       WE_Menu_Delete=5,
+       WE_Menu_Close=6
 
 ;-
 ;- DECLARE
-Declare Window_Event()
-Declare Window_0_Resize_Event()
-Declare Window_0_Panel_0_Resize_Event()
+Declare WE_Events()
+Declare WE_Resize()
+Declare WE_Panel_0_Resize()
 Declare$ GetObjectClass(Object)
 
 ;-
@@ -667,12 +669,42 @@ EndProcedure
 
 ;-
 ;- CREATE_OBJECT
-Declare CO_Create(Type$, Parent, MouseX, MouseY)
+Declare CO_Create(Type$, MouseX, MouseY, Parent)
 Declare CO_Open(*This.ParsePBGadget)
 
 Macro CO_Flag(Flag) ; Ok
   Properties::GetPBFlag(Flag)
 EndMacro
+
+Procedure CO_Free(Object)
+  Protected i
+     
+  For i=0 To CountGadgetItems(WE_Tree_0)-1
+    If Object=GetGadgetItemData(WE_Tree_0, i) 
+      RemoveGadgetItem(WE_Tree_0, i)
+      Break
+    EndIf
+  Next 
+  
+  With ParsePBGadget()
+    ChangeCurrentElement(ParsePBGadget(), *This\get(Str(Object))\Index)
+    *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count-1 
+    If *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count =< 0
+      DeleteMapElement(*This\get(), Str(\Parent\Argument)+"_"+\Type\Argument$)
+    EndIf
+    DeleteMapElement(*This\get(), \Object\Argument$)
+    DeleteMapElement(*This\get(), Str(Object))
+    DeleteElement(ParsePBGadget())
+    
+    Transformation::Free(Object)
+    
+    If IsGadget(Object)
+      FreeGadget(Object)
+    ElseIf IsWindow(Object)
+      CloseWindow(Object)
+    EndIf
+  EndWith
+EndProcedure
 
 Procedure CO_Events()
   Protected I.i, Parent=-1, Object =- 1
@@ -690,7 +722,7 @@ Procedure CO_Events()
         PushListPosition(ParsePBGadget())
         ForEach ParsePBGadget()
           If Object = \Object\Argument
-            Transformation::Enable(\Object\Argument, \Parent\Argument, 5)
+            Transformation::Create(\Object\Argument, \Window\Argument, \Parent\Argument, 5)
             Properties::Initialize(\Object\Argument, \Object\Argument$, \Flag\Argument$)
             Break
           EndIf
@@ -701,12 +733,16 @@ Procedure CO_Events()
     Case #PB_Event_Gadget
       
       Select EventType()
+        Case #PB_EventType_CloseItem
+          Debug 7777777777777
+          CO_Free(EventGadget())
+          
         Case #PB_EventType_StatusChange
           
           ; При выборе гаджета обнавляем испектор
-          For I=0 To CountGadgetItems(Window_0_Tree_0)-1
-            If Object = GetGadgetItemData(Window_0_Tree_0, I) : SetGadgetState(Window_0_Tree_0, I)
-              PostEvent(#PB_Event_Gadget, Window_0, Window_0_Tree_0, #PB_EventType_Change)
+          For I=0 To CountGadgetItems(WE_Tree_0)-1
+            If Object = GetGadgetItemData(WE_Tree_0, I) : SetGadgetState(WE_Tree_0, I)
+              PostEvent(#PB_Event_Gadget, Window_0, WE_Tree_0, #PB_EventType_Change)
               Break
             EndIf
           Next  
@@ -715,31 +751,31 @@ Procedure CO_Events()
       
     Case #PB_Event_WindowDrop, #PB_Event_GadgetDrop
       
-      CO_Create(ReplaceString(EventDropText(), "gadget", ""), Object,
-                WindowMouseX(EventWindow()), WindowMouseY(EventWindow()))
+      CO_Create(ReplaceString(EventDropText(), "gadget", ""),
+                WindowMouseX(EventWindow()), WindowMouseY(EventWindow()), Object)
       
    EndSelect
 EndProcedure
 
-Procedure CO_Create(Type$, Parent, MouseX, MouseY)
-  Protected GadgetList, ii.i, Position=-1
+Procedure CO_Create(Type$, X, Y, Parent)
+  Protected GadgetList, ii.i, Position=-1 ; 
   
   With *This
     If IsGadget(Parent) 
-      MouseX - GadgetX(Parent, #PB_Gadget_WindowCoordinate)
-      MouseY - GadgetY(Parent, #PB_Gadget_WindowCoordinate)
+      X - GadgetX(Parent, #PB_Gadget_WindowCoordinate)
+      Y - GadgetY(Parent, #PB_Gadget_WindowCoordinate)
       GadgetList = OpenGadgetList(Parent) 
       
       ; Определяем позицию в списке
-      For ii=0 To CountGadgetItems(Window_0_Tree_0)-1
-        If Parent=GetGadgetItemData(Window_0_Tree_0, ii) 
-          \SubLevel=GetGadgetItemAttribute(Window_0_Tree_0, ii, #PB_Tree_SubLevel)+1
+      For ii=0 To CountGadgetItems(WE_Tree_0)-1
+        If Parent=GetGadgetItemData(WE_Tree_0, ii) 
+          \SubLevel=GetGadgetItemAttribute(WE_Tree_0, ii, #PB_Tree_SubLevel)+1
           Position=(ii+1)
           Break
         EndIf
       Next 
-      For ii=Position To CountGadgetItems(Window_0_Tree_0)-1
-        If \SubLevel=<GetGadgetItemAttribute(Window_0_Tree_0, ii, #PB_Tree_SubLevel)
+      For ii=Position To CountGadgetItems(WE_Tree_0)-1
+        If \SubLevel=<GetGadgetItemAttribute(WE_Tree_0, ii, #PB_Tree_SubLevel)
           Position+1
         EndIf
       Next 
@@ -749,16 +785,18 @@ Procedure CO_Create(Type$, Parent, MouseX, MouseY)
       \SubLevel = 1
     EndIf
     
-    
     Select Type$
       Case "Window" : \Type\Argument$ = "OpenWindow"
       Case "Menu", "ToolBar" : \Type\Argument$ = Type$
       Default : \Type\Argument$=ULCase(Type$) + "Gadget"
     EndSelect
     
-    
     If AddElement(ParsePBGadget()) 
       Protected Buffer.s, BuffType$, i.i, j.i
+      
+      Restore Content
+      Read.s Buffer
+      This_File$ = Buffer
       
       Restore Model 
       For i=1 To 13
@@ -791,10 +829,15 @@ Procedure CO_Create(Type$, Parent, MouseX, MouseY)
       
       \Parent\Argument = Parent
       \Caption\Argument$+*This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count
-      \Object\Argument$ = *This\get(Str(\Parent\Argument))\Object\Argument$+"_"+\Caption\Argument$
       
-      \X\Argument = MouseX
-      \Y\Argument = MouseY
+      If *This\get(Str(\Parent\Argument))\Object\Argument$
+        \Object\Argument$ = *This\get(Str(\Parent\Argument))\Object\Argument$+"_"+\Caption\Argument$
+      Else
+        \Object\Argument$ = \Caption\Argument$
+      EndIf
+      
+      \X\Argument = X
+      \Y\Argument = Y
       \Width\Argument = Val(ParsePBGadget()\Width\Argument$)
       \Height\Argument = Val(ParsePBGadget()\Height\Argument$)
       \Flag\Argument=CO_Flag(ParsePBGadget()\Flag\Argument$)
@@ -805,13 +848,20 @@ Procedure CO_Create(Type$, Parent, MouseX, MouseY)
     
     Protected Object=CallFunctionFast(@CO_Open(), *This)
     
-;     If IsGadget(Object)
-;       BindGadgetEvent(Object, @CO_Events())
-;     EndIf
+    AddGadgetItem(WE_Tree_0, Position, \Object\Argument$, 0, ParsePBGadget()\SubLevel)
+    If Position=-1
+      Position = CountGadgetItems(WE_Tree_0)-1
+    EndIf
+    SetGadgetItemData(WE_Tree_0, Position, ParsePBGadget()\Object\Argument)
+    For ii=0 To CountGadgetItems(WE_Tree_0)-1
+      If GetGadgetItemState(WE_Tree_0, ii) & #PB_Tree_Collapsed
+        SetGadgetItemState(WE_Tree_0, ii, #PB_Tree_Expanded)
+        ; Break
+      EndIf
+    Next 
+    SetGadgetItemState(WE_Tree_0, Position, #PB_Tree_Selected)
     
-    AddGadgetItem(Window_0_Tree_0, Position, \Object\Argument$, 0, ParsePBGadget()\SubLevel)
-    SetGadgetItemData(Window_0_Tree_0, CountGadgetItems(Window_0_Tree_0)-1, ParsePBGadget()\Object\Argument)
-            
+    
     If GadgetList 
       If IsGadget(Parent) 
         CloseGadgetList() 
@@ -823,7 +873,7 @@ Procedure CO_Create(Type$, Parent, MouseX, MouseY)
    
   DataSection
     Model:
-    Data.s "OpenWindow","Window_0","300","200","Text","0","0","1","0",
+    Data.s "OpenWindow","Window_","300","200","Text","0","0","1","0",
            "#PB_Window_SystemMenu,"+
            "#PB_Window_MinimizeGadget,"+
            "#PB_Window_MaximizeGadget,"+
@@ -902,10 +952,66 @@ Procedure CO_Create(Type$, Parent, MouseX, MouseY)
            "#PB_Image_Border,"+
            "#PB_Image_Raised" 
     
+    
+    Content:
+    Data.s "EnableExplicit"+#CRLF$+
+       ""+#CRLF$+
+       "Enumeration Window"+#CRLF$+
+       "  #Window_0"+#CRLF$+
+       "EndEnumeration"+#CRLF$+
+       ""+#CRLF$+
+       "Enumeration Gadget"+#CRLF$+
+       "EndEnumeration"+#CRLF$+
+       ""+#CRLF$+
+       "Enumeration Font"+#CRLF$+
+       "EndEnumeration"+#CRLF$+
+       ""+#CRLF$+
+       "Declare WE_Events()"+#CRLF$+
+       ""+#CRLF$+
+       "Procedure WE_Open(Flag.i=#PB_Window_SystemMenu|#PB_Window_ScreenCentered)"+#CRLF$+
+       "  If Not IsWindow(#Window_0)"+#CRLF$+
+       ~"    OpenWindow(#Window_0,230,230,240,200,\"Window_0\", Flag)"+#CRLF$+
+       ""+#CRLF$+    
+       ""+#CRLF$+    
+       "    BindEvent(#PB_Event_Gadget, @WE_Events(), #Window_0)"+#CRLF$+
+       "  EndIf"+#CRLF$+
+       ""+#CRLF$+  
+       "  ProcedureReturn #Window_0"+#CRLF$+
+       "EndProcedure"+#CRLF$+
+       ""+#CRLF$+
+       "Procedure WE_Events()"+#CRLF$+
+       "  Select Event()"+#CRLF$+
+       "    Case #PB_Event_Gadget"+#CRLF$+
+       "      Select EventType()"+#CRLF$+
+       "        Case #PB_EventType_LeftClick"+#CRLF$+
+       "          Select EventGadget()"+#CRLF$+
+       ""+#CRLF$+            
+       "          EndSelect"+#CRLF$+
+       "      EndSelect"+#CRLF$+
+       "  EndSelect"+#CRLF$+
+       "EndProcedure"+#CRLF$+
+       ""+#CRLF$+
+       ""+#CRLF$+
+       "CompilerIf #PB_Compiler_IsMainFile"+#CRLF$+
+       "  WE_Open()"+#CRLF$+
+       ""+#CRLF$+  
+       "  While IsWindow(#Window_0)"+#CRLF$+
+       "    Select WaitWindowEvent()"+#CRLF$+
+       "      Case #PB_Event_CloseWindow"+#CRLF$+
+       "        If IsWindow(EventWindow())"+#CRLF$+
+       "          CloseWindow(EventWindow())"+#CRLF$+
+       "        Else"+#CRLF$+
+       "          CloseWindow(#Window_0)"+#CRLF$+
+       "        EndIf"+#CRLF$+
+       "    EndSelect"+#CRLF$+
+       "  Wend"+#CRLF$+
+       "CompilerEndIf"
+
+
+    
   EndDataSection
   
 EndProcedure
-
 
 Procedure CO_Open(*ThisParse.ParsePBGadget) ; Ok
   Protected OpenGadgetList, GetParent, Object=-1
@@ -1046,8 +1152,8 @@ Procedure CO_Open(*ThisParse.ParsePBGadget) ; Ok
                 ParsePBGadget()\Parent\Argument)
       
       If GadgetType(Object) = #PB_GadgetType_Splitter
-        Transformation::Disable(GetGadgetAttribute(Object, #PB_Splitter_FirstGadget))
-        Transformation::Disable(GetGadgetAttribute(Object, #PB_Splitter_SecondGadget))
+        Transformation::Free(GetGadgetAttribute(Object, #PB_Splitter_FirstGadget))
+        Transformation::Free(GetGadgetAttribute(Object, #PB_Splitter_SecondGadget))
       EndIf
       
       ; Закрываем гаджет лист.
@@ -1090,10 +1196,10 @@ Procedure CO_Open(*ThisParse.ParsePBGadget) ; Ok
   ProcedureReturn Object
 EndProcedure
 
-Procedure CO_Save(*This.ParsePBGadget) ; Ok
+Procedure CO_Save(*ThisParse.ParsePBGadget) ; Ok
   Protected Result, ID$, Handle$
 
-  With *This
+  With *ThisParse
     
     Protected Result$
     Protected i
@@ -1508,7 +1614,7 @@ Procedure LoadControls()
           Select PackEntryType(ZipFile)
             Case #PB_Packer_File
               If GadgetImage
-                AddGadgetItem(Window_0_Tree_1, -1, GadgetName, ImageID(GadgetImage))
+                AddGadgetItem(WE_Tree_1, -1, GadgetName, ImageID(GadgetImage))
               EndIf
           EndSelect
           
@@ -1520,22 +1626,17 @@ Procedure LoadControls()
   EndIf
 EndProcedure
 
-
 ;-
 ;- PI Редактора
 
-Define CurrentFile$ ; Путь к текущему файлу.
-
-Procedure.s Editor_GetCurrentFile()
-  Shared CurrentFile$
-  ProcedureReturn CurrentFile$
-EndProcedure
+Global CurrentFile$ ; Путь к текущему файлу.
+Declare WE_Close()
+Declare WE_Open(Flag.i=#PB_Window_SystemMenu, ParentID=0)
 
 
-
-Procedure Editor_Open(Path$) ; Открытие файла
+Procedure WE_OpenFile(Path$) ; Открытие файла
   Protected CurrentFile$
-  Protected Result
+  Protected I, Result
   Debug "Открываю файл '"+Path$+"'"
   
   If Path$
@@ -1544,20 +1645,17 @@ Procedure Editor_Open(Path$) ; Открытие файла
     Protected Object, IsContainer
     PushListPosition(ParsePBGadget())
     ForEach ParsePBGadget()
-      Object = *This\get(ParsePBGadget()\Object\Argument$)\Object\Argument
-      
-      If IsGadget(Object) 
-        Select GadgetType(Object)
-          Case #PB_GadgetType_Container, #PB_GadgetType_Panel, #PB_GadgetType_ScrollArea
-            IsContainer = #True
-        EndSelect
-      EndIf
-      
-      AddGadgetItem (Window_0_Tree_0, -1, ParsePBGadget()\Object\Argument$, 0, ParsePBGadget()\SubLevel)
+      AddGadgetItem (WE_Tree_0, -1, ParsePBGadget()\Object\Argument$, 0, ParsePBGadget()\SubLevel)
+      SetGadgetItemData(WE_Tree_0, CountGadgetItems(WE_Tree_0)-1, ParsePBGadget()\Object\Argument)
     Next
     PopListPosition(ParsePBGadget())
     
-    SetGadgetItemState(Window_0_Tree_0, 0, #PB_Tree_Expanded|#PB_Tree_Selected)
+    For i=0 To CountGadgetItems(WE_Tree_0)-1
+      If GetGadgetItemState(WE_Tree_0, i) & #PB_Tree_Collapsed
+        SetGadgetItemState(WE_Tree_0, i, #PB_Tree_Expanded)
+      EndIf
+    Next 
+    ;SetGadgetItemState(WE_Tree_0, 0, #PB_Tree_Selected)
     
     Result=#True
     CurrentFile$=Path$
@@ -1567,8 +1665,7 @@ Procedure Editor_Open(Path$) ; Открытие файла
   ProcedureReturn Result
 EndProcedure
 
-
-Procedure Editor_Save(Path$) ; Процедура сохранения файла
+Procedure WE_SaveFile(Path$) ; Процедура сохранения файла
   Protected CurrentFile$
   Protected Result
   
@@ -1635,190 +1732,169 @@ Procedure Editor_Save(Path$) ; Процедура сохранения файл�
 EndProcedure
 
 
-
-
-
-
-
-
-
-;-
-;- UI Окна редактора
-
-
-
-Procedure EditorWindow_Open() 
-  Protected File$
-  File$=OpenFileRequester("Выберите файл с описанием окон", Editor_GetCurrentFile(), "Все файлы|*", 0)
+Procedure WE_Open_MenuEvent() 
+  Protected File$=OpenFileRequester("Выберите файл с описанием окон", CurrentFile$, "Все файлы|*", 0)
+  
   If File$
-    If Not Editor_Open(File$)
+    If Not WE_OpenFile(File$)
       MessageRequester("Ошибка", "Не удалось открыть файл.", #PB_MessageRequester_Error)
     EndIf
   EndIf 
-  
 EndProcedure
 
-
-Procedure EditorWindow_SaveAs()
-  Protected File$
-  File$ = SaveFileRequester("Сохранить файл как ..", Editor_GetCurrentFile(), "PureBasic (*.pb)|*.pb;*.pbi;*.pbf|All files (*.*)|*.*", 0)
+Procedure WE_SaveAs_MenuEvent()
+  Protected File$ = SaveFileRequester("Сохранить файл как ..", CurrentFile$, "PureBasic (*.pb)|*.pb;*.pbi;*.pbf|All files (*.*)|*.*", 0)
+  
   If File$
-    If Not Editor_Save(File$)
+    If Not WE_SaveFile(File$)
       MessageRequester("Ошибка","Не удалось сохранить файл.", #PB_MessageRequester_Error)
     EndIf
   EndIf
-  
 EndProcedure
 
-Procedure EditorWindow_Save()
-  Protected CurrentFile$
-  CurrentFile$=Editor_GetCurrentFile()
-  If Not (CurrentFile$ And Editor_Save(CurrentFile$))
-    EditorWindow_SaveAs()
+Procedure WE_Save_MenuEvent()
+  If Not (CurrentFile$ And WE_SaveFile(CurrentFile$))
+    WE_SaveAs_MenuEvent()
   EndIf
 EndProcedure
 
 
-
-;-
-
-Declare OpenWindow_Editor(Flag.i=#PB_Window_SystemMenu, ParentID=0)
-Declare CloseWindow_Editor()
-
-Procedure OpenWindow_Editor(Flag.i=#PB_Window_SystemMenu, ParentID=0)
+Procedure WE_Open(Flag.i=#PB_Window_SystemMenu, ParentID=0)
   If Not IsWindow(Window_0)
-    Window_0 = OpenWindow(#PB_Any, 900, 100, 320, 600, "Window_0", Flag, ParentID)
-    Window_0_Menu_0 = CreateMenu(#PB_Any, WindowID(Window_0))
+    Window_0 = OpenWindow(#PB_Any, 900, 100, 320, 600, "(WE) - Редактор объектов", Flag, ParentID)
     StickyWindow(Window_0, #True)
     
-    If Window_0_Menu_0
+    WE_Menu_0 = CreateMenu(#PB_Any, WindowID(Window_0))
+    If WE_Menu_0
       MenuTitle("Project")
-      MenuItem(Window_0_Menu_0_New, "New"   +Chr(9)+"Ctrl+N")
-      MenuItem(Window_0_Menu_0_Open, "Open"   +Chr(9)+"Ctrl+O")
-      MenuItem(Window_0_Menu_0_Save, "Save"   +Chr(9)+"Ctrl+S")
-      MenuItem(Window_0_Menu_0_Save_as, "Save as"+Chr(9)+"Ctrl+A")
-      MenuItem(Window_0_Menu_0_Close, "Close"  +Chr(9)+"Ctrl+C")
+      MenuItem(WE_Menu_New, "New"   +Chr(9)+"Ctrl+N")
+      MenuItem(WE_Menu_Open, "Open"   +Chr(9)+"Ctrl+O")
+      MenuItem(WE_Menu_Save, "Save"   +Chr(9)+"Ctrl+S")
+      MenuItem(WE_Menu_Save_as, "Save as"+Chr(9)+"Ctrl+A")
+      MenuItem(WE_Menu_Close, "Close"  +Chr(9)+"Ctrl+C")
     EndIf
     
-    Window_0_Tree_0 = TreeGadget(#PB_Any, 5, 5, 315, 145, #PB_Tree_AlwaysShowSelection)
-    Window_0_Panel_0 = PanelGadget(#PB_Any, 5, 159, 315, 261)
+    WE_PopupMenu_0 = CreatePopupMenu(#PB_Any)
+    If WE_PopupMenu_0
+      MenuItem(WE_Menu_Delete, "Delete"   +Chr(9)+"Ctrl+D")
+    EndIf
     
-    AddGadgetItem(Window_0_Panel_0, -1, "Objects")
-    Window_0_Tree_1 = TreeGadget(#PB_Any, 0, 0, 205, 180, #PB_Tree_NoLines | #PB_Tree_NoButtons)
-    EnableGadgetDrop(Window_0_Tree_1, #PB_Drop_Text, #PB_Drag_Copy)
+    WE_Tree_0 = TreeGadget(#PB_Any, 5, 5, 315, 145, #PB_Tree_AlwaysShowSelection)
+    WE_Panel_0 = PanelGadget(#PB_Any, 5, 159, 315, 261)
     
-    AddGadgetItem(Window_0_Panel_0, -1, "Properties")
-    Window_0_Properties = Properties::Gadget( #PB_Any, 315, 261 )
-    Properties_ID = Properties::AddItem( Window_0_Properties, "ID:", #PB_GadgetType_String | #PB_GadgetType_CheckBox )
-    Properties::AddItem( Window_0_Properties, "Text:", #PB_GadgetType_String )
-    Properties::AddItem( Window_0_Properties, "Disable:False|True", #PB_GadgetType_ComboBox )
-    Properties::AddItem( Window_0_Properties, "Hide:False|True", #PB_GadgetType_ComboBox )
+    AddGadgetItem(WE_Panel_0, -1, "Objects")
+    WE_Tree_1 = TreeGadget(#PB_Any, 0, 0, 205, 180, #PB_Tree_NoLines | #PB_Tree_NoButtons)
+    EnableGadgetDrop(WE_Tree_1, #PB_Drop_Text, #PB_Drag_Copy)
     
-    Properties::AddItem( Window_0_Properties, "Layouts:", #False )
-    Properties::AddItem( Window_0_Properties, "X:", #PB_GadgetType_Spin )
-    Properties::AddItem( Window_0_Properties, "Y:", #PB_GadgetType_Spin )
-    Properties::AddItem( Window_0_Properties, "Width:", #PB_GadgetType_Spin )
-    Properties::AddItem( Window_0_Properties, "Height:", #PB_GadgetType_Spin )
+    AddGadgetItem(WE_Panel_0, -1, "Properties")
+    WE_Properties = Properties::Gadget( #PB_Any, 315, 261 )
+    Properties_ID = Properties::AddItem( WE_Properties, "ID:", #PB_GadgetType_String | #PB_GadgetType_CheckBox )
+    Properties::AddItem( WE_Properties, "Text:", #PB_GadgetType_String )
+    Properties::AddItem( WE_Properties, "Disable:False|True", #PB_GadgetType_ComboBox )
+    Properties::AddItem( WE_Properties, "Hide:False|True", #PB_GadgetType_ComboBox )
     
-    Properties::AddItem( Window_0_Properties, "Other:", #False )
-    Properties_Flag = Properties::AddItem( Window_0_Properties, "Flag:", #PB_GadgetType_Tree|#PB_GadgetType_Button )
-    Properties::AddItem( Window_0_Properties, "Font:", #PB_GadgetType_String|#PB_GadgetType_Button )
-    Properties_Image = Properties::AddItem( Window_0_Properties, "Image:", #PB_GadgetType_String|#PB_GadgetType_Button )
-    Properties::AddItem( Window_0_Properties, "Puth", #PB_GadgetType_String|#PB_GadgetType_Button )
-    Properties::AddItem( Window_0_Properties, "Color:", #PB_GadgetType_String|#PB_GadgetType_Button )
+    Properties::AddItem( WE_Properties, "Layouts:", #False )
+    Properties::AddItem( WE_Properties, "X:", #PB_GadgetType_Spin )
+    Properties::AddItem( WE_Properties, "Y:", #PB_GadgetType_Spin )
+    Properties::AddItem( WE_Properties, "Width:", #PB_GadgetType_Spin )
+    Properties::AddItem( WE_Properties, "Height:", #PB_GadgetType_Spin )
     
-    AddGadgetItem(Window_0_Panel_0, -1, "Events")
+    Properties::AddItem( WE_Properties, "Other:", #False )
+    Properties_Flag = Properties::AddItem( WE_Properties, "Flag:", #PB_GadgetType_Tree|#PB_GadgetType_Button )
+    Properties::AddItem( WE_Properties, "Font:", #PB_GadgetType_String|#PB_GadgetType_Button )
+    Properties_Image = Properties::AddItem( WE_Properties, "Image:", #PB_GadgetType_String|#PB_GadgetType_Button )
+    Properties::AddItem( WE_Properties, "Puth", #PB_GadgetType_String|#PB_GadgetType_Button )
+    Properties::AddItem( WE_Properties, "Color:", #PB_GadgetType_String|#PB_GadgetType_Button )
+    
+    AddGadgetItem(WE_Panel_0, -1, "Events")
     
     CloseGadgetList()
     
-    Window_0_Splitter_0 = SplitterGadget(#PB_Any, 5, 5, 320-10, 600-MenuHeight()-10, Window_0_Tree_0, Window_0_Panel_0, #PB_Splitter_FirstFixed)
-    SetGadgetState(Window_0_Splitter_0, 145)
+    WE_Splitter_0 = SplitterGadget(#PB_Any, 5, 5, 320-10, 600-MenuHeight()-10, WE_Tree_0, WE_Panel_0, #PB_Splitter_FirstFixed)
+    SetGadgetState(WE_Splitter_0, 145)
     
     LoadControls()
-    Window_0_Panel_0_Resize_Event()
+    WE_Panel_0_Resize()
     
-    BindEvent(#PB_Event_Menu, @Window_Event(), Window_0)
-    BindEvent(#PB_Event_Gadget, @Window_Event(), Window_0)
-    BindEvent(#PB_Event_SizeWindow, @Window_0_Resize_Event(), Window_0)
-    BindEvent(#PB_Event_Gadget, @Window_0_Panel_0_Resize_Event(), Window_0, Window_0_Panel_0, #PB_EventType_Resize)
+    BindEvent(#PB_Event_Menu, @WE_Events(), Window_0)
+    BindEvent(#PB_Event_Gadget, @WE_Events(), Window_0)
+    BindEvent(#PB_Event_SizeWindow, @WE_Resize(), Window_0)
     
+    BindGadgetEvent(WE_Panel_0, @WE_Panel_0_Resize(), #PB_EventType_Resize)
+    BindEvent(#PB_Event_CloseWindow, @WE_Close(), Window_0)
     
-    
-    BindMenuEvent(Window_0_Menu_0, Window_0_Menu_0_Open, @EditorWindow_Open())
-    BindMenuEvent(Window_0_Menu_0, Window_0_Menu_0_Save_as, @EditorWindow_SaveAs())
-    BindMenuEvent(Window_0_Menu_0, Window_0_Menu_0_Save, @EditorWindow_Save())
-    
+    BindMenuEvent(WE_Menu_0, WE_Menu_Open, @WE_Open_MenuEvent())
+    BindMenuEvent(WE_Menu_0, WE_Menu_Save_as, @WE_SaveAs_MenuEvent())
+    BindMenuEvent(WE_Menu_0, WE_Menu_Save, @WE_Save_MenuEvent())
   EndIf
   
   ProcedureReturn Window_0
 EndProcedure
 
-Procedure CloseWindow_Editor()
+
+Procedure WE_Panel_0_Resize()
+  Protected GadgetWidth = GetGadgetAttribute(WE_Panel_0, #PB_Panel_ItemWidth)
+  Protected GadgetHeight = GetGadgetAttribute(WE_Panel_0, #PB_Panel_ItemHeight)
+  
+  Select GetGadgetItemText(WE_Panel_0, GetGadgetState(WE_Panel_0))
+    Case "Properties" : Properties::Size(GadgetWidth, GadgetHeight)
+    Case "Objects"  : ResizeGadget(WE_Tree_1, #PB_Ignore, #PB_Ignore, GadgetWidth, GadgetHeight)
+  EndSelect
+EndProcedure
+
+Procedure WE_Resize()
+  Protected WindowWidth = WindowWidth(Window_0)
+  Protected WindowHeight = WindowHeight(Window_0)-MenuHeight()
+  ResizeGadget(WE_Splitter_0, 5, 5, WindowWidth - 10, WindowHeight - 10)
+  WE_Panel_0_Resize()
+EndProcedure
+
+Procedure WE_Close()
   If IsWindow(Window_0)
-    UnbindEvent(#PB_Event_Menu, @Window_Event(), Window_0)
-    UnbindEvent(#PB_Event_Gadget, @Window_Event(), Window_0)
-    UnbindEvent(#PB_Event_SizeWindow, @Window_0_Resize_Event(), Window_0)
-    UnbindEvent(#PB_Event_Gadget, @Window_0_Panel_0_Resize_Event(), Window_0, Window_0_Panel_0, #PB_EventType_Resize)
+    UnbindEvent(#PB_Event_Menu, @WE_Events(), Window_0)
+    UnbindEvent(#PB_Event_Gadget, @WE_Events(), Window_0)
+    UnbindEvent(#PB_Event_SizeWindow, @WE_Resize(), Window_0)
     
-    UnbindMenuEvent(Window_0_Menu_0, Window_0_Menu_0_Open, @EditorWindow_Open())
-    UnbindMenuEvent(Window_0_Menu_0, Window_0_Menu_0_Save_as, @EditorWindow_SaveAs())
-    UnbindMenuEvent(Window_0_Menu_0, Window_0_Menu_0_Save, @EditorWindow_Save())
+    UnbindGadgetEvent(WE_Panel_0, @WE_Panel_0_Resize(), #PB_EventType_Resize)
+    
+    UnbindMenuEvent(WE_Menu_0, WE_Menu_Open, @WE_Open_MenuEvent())
+    UnbindMenuEvent(WE_Menu_0, WE_Menu_Save_as, @WE_SaveAs_MenuEvent())
+    UnbindMenuEvent(WE_Menu_0, WE_Menu_Save, @WE_Save_MenuEvent())
     
     CloseWindow(Window_0)
   EndIf
 EndProcedure
 
 
-Procedure Window_0_Panel_0_Resize_Event()
-  Protected GadgetWidth = GetGadgetAttribute(Window_0_Panel_0, #PB_Panel_ItemWidth)
-  Protected GadgetHeight = GetGadgetAttribute(Window_0_Panel_0, #PB_Panel_ItemHeight)
-  
-  Select GetGadgetItemText(Window_0_Panel_0, GetGadgetState(Window_0_Panel_0))
-    Case "Properties" : Properties::Size(GadgetWidth, GadgetHeight)
-    Case "Objects"  : ResizeGadget(Window_0_Tree_1, #PB_Ignore, #PB_Ignore, GadgetWidth, GadgetHeight)
-  EndSelect
-EndProcedure
-
-Procedure Window_0_Resize_Event()
-  Protected WindowWidth = WindowWidth(Window_0)
-  Protected WindowHeight = WindowHeight(Window_0)-MenuHeight()
-  ResizeGadget(Window_0_Splitter_0, 5, 5, WindowWidth - 10, WindowHeight - 10)
-  Window_0_Panel_0_Resize_Event()
-EndProcedure
-
-
-
-
-
-
-Procedure Window_Event()
+Procedure WE_Events()
   Protected I, File$, SubItem, UseGadgetList
   Protected IsContainer.b, Object, Parent=-1
-  
+  ;-
   Select Event()
-    Case #PB_Event_Gadget
+    Case #PB_Event_Gadget ;- Gadget()
       Select EventGadget()
-        Case Properties_ID
+        Case Properties_ID ;- Event(_Properties_ID_)
+          
           Select EventType()
             Case #PB_EventType_Change      
               PushListPosition(ParsePBGadget())
               With ParsePBGadget()
                 ForEach ParsePBGadget()
-                  If \Object\Argument$ = GetGadgetText(Window_0_Tree_0)
+                  If \Object\Argument$ = GetGadgetText(WE_Tree_0)
                     \Object\Argument$ = GetGadgetText(EventGadget())
                   EndIf
                 Next
               EndWith
               PopListPosition(ParsePBGadget())  
               
-              ReplaceMapKey(GetGadgetText(Window_0_Tree_0), GetGadgetText(EventGadget()))
-              ;Trim(GetRegExString("[^\w]("+Window_0_Button_0+")[^\w]", 1), #CR$)
+              ReplaceMapKey(GetGadgetText(WE_Tree_0), GetGadgetText(EventGadget()))
+              ;Trim(GetRegExString("[^\w]("+WE_Button_0+")[^\w]", 1), #CR$)
               ;Debug *This\get(GetGadgetText(EventGadget()))\Index
               
               Debug ParsePBGadget()\Content$
               
               
-              Protected Result$, Group=1, _Pattern$ = "[^\w]("+GetGadgetText(Window_0_Tree_0)+")[^\w]"
+              Protected Result$, Group=1, _Pattern$ = "[^\w]("+GetGadgetText(WE_Tree_0)+")[^\w]"
               Protected Create_Reg_Flag = #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll    
               Protected RegExID = CreateRegularExpression(#PB_Any, _Pattern$, Create_Reg_Flag)
               
@@ -1838,17 +1914,17 @@ Procedure Window_Event()
                 FreeRegularExpression(RegExID)
               EndIf
               
-              
-              SetGadgetText(Window_0_Tree_0, GetGadgetText(EventGadget()))
+              SetGadgetText(WE_Tree_0, GetGadgetText(EventGadget()))
               
           EndSelect
           
-        Case Properties_Flag ; Ok
+        Case Properties_Flag ;- Event(_Properties_Flag_)
+          
           Select EventType()
             Case #PB_EventType_LostFocus   
               PushListPosition(ParsePBGadget())
               ForEach ParsePBGadget()
-                If ParsePBGadget()\Object\Argument$ = GetGadgetText(Window_0_Tree_0)
+                If ParsePBGadget()\Object\Argument$ = GetGadgetText(WE_Tree_0)
                   ParsePBGadget()\Flag\Argument$ = Properties::GetCheckedText(EventGadget()) 
                   Break
                 EndIf
@@ -1857,19 +1933,22 @@ Procedure Window_Event()
               
           EndSelect
           
-        Case Window_0_Tree_0 ; Ok
+        Case WE_Tree_0 ;- Event(_WE_Tree_0_)
           
           Select EventType()
+            Case #PB_EventType_RightClick    
+              DisplayPopupMenu(WE_PopupMenu_0, WindowID(EventWindow()))
+              
             Case #PB_EventType_Change     
               ; Для удобства выбираем вкладку свойства 
-              If GetGadgetState(Window_0_Panel_0) <> 1 ; Properties = 1
-                SetGadgetState(Window_0_Panel_0, 1)   
+              If GetGadgetState(WE_Panel_0) <> 1 ; Properties = 1
+                SetGadgetState(WE_Panel_0, 1)   
               EndIf
               
               PushListPosition(ParsePBGadget())
               With ParsePBGadget()
                 ForEach ParsePBGadget()
-                  If GetGadgetText(Window_0_Tree_0) = \Object\Argument$
+                  If GetGadgetText(WE_Tree_0) = \Object\Argument$
                     Properties::Initialize(\Object\Argument, \Object\Argument$, \Flag\Argument$)
                     Transformation::Change(\Object\Argument)
                     Break
@@ -1880,47 +1959,39 @@ Procedure Window_Event()
               
           EndSelect
           
-        Case Window_0_Tree_1 ; Ok
+        Case WE_Tree_1 ;- Event(_WE_Tree_1_)
+          
           Select EventType()
             Case #PB_EventType_DragStart
               DragText(GetGadgetItemText(EventGadget(), GetGadgetState(EventGadget())))
           EndSelect
+          
       EndSelect
       
-    Case #PB_Event_Menu
+    Case #PB_Event_Menu ;- Menu()
       Select EventMenu()
-        Case Window_0_Menu_0_New ;- New file
-                                 ; CreateObject("Window")
-          If ParsePBFile("Window_0.pb")
-            
-            PushListPosition(ParsePBGadget())
-            ForEach ParsePBGadget()
-              AddGadgetItem (Window_0_Tree_0, -1, ParsePBGadget()\Object\Argument$, 0, ParsePBGadget()\SubLevel)
-              SetGadgetItemData(Window_0_Tree_0, CountGadgetItems(Window_0_Tree_0)-1, ParsePBGadget()\Object\Argument)
-            Next
-            PopListPosition(ParsePBGadget())
-            
-            SetGadgetItemState(Window_0_Tree_0, 0, #PB_Tree_Expanded|#PB_Tree_Selected)
-          EndIf
+        Case WE_Menu_Delete 
+          CO_Free(GetGadgetItemData(WE_Tree_0, GetGadgetState(WE_Tree_0)))
           
-          SetGadgetState(Window_0_Panel_0, 0)
+        Case WE_Menu_New ;- Event(_WE_Menu_New_)
+          CO_Create("Window",WindowX(EventWindow())-350,WindowHeight(EventWindow())-300, -1)
           
-
+;           WE_OpenFile("Window_0.pb")
+          
+          SetGadgetState(WE_Panel_0, 0)
+          
           
       EndSelect
   EndSelect
 EndProcedure
 
+
 CompilerIf #PB_Compiler_IsMainFile
-  
-  
-  MainWindow = OpenWindow_Editor(#PB_Window_SystemMenu|#PB_Window_SizeGadget) ; Инициализация окна редактора
-  
+  MainWindow = WE_Open(#PB_Window_SystemMenu|#PB_Window_SizeGadget) ; Инициализация окна редактора
   
   Select CountProgramParameters()                 ; Обработка параметров программы
-    Case 1 : Editor_Open(ProgramParameter(0))
+    Case 1 : WE_OpenFile(ProgramParameter(0))
   EndSelect
-  
   
   While IsWindow(MainWindow)
     Select WaitWindowEvent()
@@ -1933,10 +2004,3 @@ CompilerIf #PB_Compiler_IsMainFile
     EndSelect
   Wend
 CompilerEndIf
-; IDE Options = PureBasic 5.60 (Linux - x86)
-; CursorPosition = 1086
-; FirstLine = 1077
-; Folding = --------------------------------------------
-; EnableXP
-; Executable = ../../Programs/PureBasic/PureParser.exe
-; CompileSourceDirectory
