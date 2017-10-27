@@ -18,13 +18,13 @@ Font_Button_0 = LoadFont(#PB_Any, "Consolas", 7, #PB_Font_Bold|#PB_Font_Italic)
 
 Procedure Window_0_Open(Flag.i=#PB_Window_SystemMenu|#PB_Window_ScreenCentered)
   If Not IsWindow(Window_0)
-    Window_0 = OpenWindow(#PB_Any, 643, 278, 200, 260, "Window_0", #PB_Window_SystemMenu|#PB_Window_ScreenCentered)                                                                                                                
+    Window_0 = OpenWindow(#PB_Any, 665, 282, 200, 260, "Window_0", #PB_Window_SystemMenu|#PB_Window_ScreenCentered)                                                                                                                
     
-    Window_0_Button_0 = ButtonGadget(#PB_Any, 10, 10, 80, 20, "Button_0")
+                                                                         
                                                                      
-    Window_0_String_0 = StringGadget(#PB_Any, 10, 35, 80, 20, "String_0")                                                                     
+                                                                                                                                              
     
-    Window_0_Container_0 = ContainerGadget(#PB_Any, 5, 5, 190, 155, #PB_Container_Flat)  
+    Window_0_Container_0 = ContainerGadget(#PB_Any, 5, 100, 190, 155, #PB_Container_Flat)
     SetGadgetColor(Window_0_Container_0, #PB_Gadget_BackColor, $77FF8A)
     Window_0_Button_0 = ButtonGadget(#PB_Any, 20, 10, 105, 30, "189 Button_0")                                                                                                                            
     

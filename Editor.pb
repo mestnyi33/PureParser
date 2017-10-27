@@ -52,6 +52,8 @@ Declare WE_Events()
 Declare WE_ResizeWindow()
 Declare WE_ResizePanel_0()
 Declare$ GetObjectClass(Object)
+Declare CF_Free(Object.i)
+
 
 ;-
 ;- MACRO
@@ -462,8 +464,51 @@ Procedure GetVal(String$)
   ProcedureReturn Result
 EndProcedure
 
+Procedure$ GetRegExString(Pattern$, Group)
+  Protected Result$
+  Protected Create_Reg_Flag = #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll    
+  Protected RegExID = CreateRegularExpression(#PB_Any, Pattern$, Create_Reg_Flag)
+  
+  If RegExID
+    
+    If ExamineRegularExpression(RegExID, CurrentContent$)
+      While NextRegularExpressionMatch(RegExID)
+        If Group
+          Result$ = RegularExpressionGroup(RegExID, Group)
+        Else
+          Result$ = RegularExpressionMatchString(RegExID)
+        EndIf
+      Wend
+    EndIf
+    
+    FreeRegularExpression(RegExID)
+  EndIf
+  
+  Debug Result$
+  ProcedureReturn Result$
+EndProcedure
 
-Procedure AddPBFunction(*This.ParsePBGadget, Index)
+Procedure$ CurrentContent(FileName$)
+  Protected *File, Format, Length
+  Protected File = ReadFile(#PB_Any, FileName$)
+  
+  If File
+    Length = Lof(File) 
+    *File = AllocateMemory(Length)
+    Format = ReadStringFormat(File)
+    
+    If *File 
+      ReadData(File, *File, Length)
+      ProcedureReturn PeekS(*File, Length, Format)
+    EndIf
+  Else
+    MessageRequester("Предупреждение!!!", "Не получилось прочитать "+FileName$)
+  EndIf
+EndProcedure
+
+;-
+;- CREATE_FUNCTION
+Procedure CF_Add(*This.ParsePBGadget, Index)
   Protected Result
   
   With *This
@@ -560,7 +605,7 @@ Procedure AddPBFunction(*This.ParsePBGadget, Index)
   
 EndProcedure
 
-Procedure SetPBFunction(*ThisParse.ParsePBGadget)
+Procedure CF_Set(*ThisParse.ParsePBGadget)
   Protected Result, I, ID
   
   With *ThisParse ; 
@@ -643,70 +688,64 @@ Procedure SetPBFunction(*ThisParse.ParsePBGadget)
   
 EndProcedure
 
-Procedure$ GetRegExString(Pattern$, Group)
-  Protected Result$
-  Protected Create_Reg_Flag = #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll    
-  Protected RegExID = CreateRegularExpression(#PB_Any, Pattern$, Create_Reg_Flag)
-  
-  If RegExID
-    
-    If ExamineRegularExpression(RegExID, CurrentContent$)
-      While NextRegularExpressionMatch(RegExID)
-        If Group
-          Result$ = RegularExpressionGroup(RegExID, Group)
-        Else
-          Result$ = RegularExpressionMatchString(RegExID)
-        EndIf
-      Wend
-    EndIf
-    
-    FreeRegularExpression(RegExID)
-  EndIf
-  
-  Debug Result$
-  ProcedureReturn Result$
-EndProcedure
-
-Procedure ClearPBGadget(Object.i)
+Procedure CF_Free(Object.i)
   
   If ListSize(ParsePBGadget())
-    
-    If IsGadget(Object)
-      Select GadgetType(Object)
-        Case #PB_GadgetType_Panel, 
-             #PB_GadgetType_Container, 
-             #PB_GadgetType_ScrollArea
-          
-          ForEach ParsePBGadget()
-            If ParsePBGadget()\Parent\Argument = Object 
-              Select GadgetType(ParsePBGadget()\Object\Argument)
-                Case #PB_GadgetType_Panel, 
-                     #PB_GadgetType_Container, 
-                     #PB_GadgetType_ScrollArea
-                  
-                  ClearPBGadget(ParsePBGadget()\Object\Argument)
-                  
-                Default
-                  ParsePBGadget()\Content$ = ""
-                  ParsePBGadget()\Position = 0
-                  ParsePBGadget()\Length = 0
-              EndSelect
-            EndIf
-          Next
-      EndSelect
-    EndIf
-    
-    ChangeCurrentElement(ParsePBGadget(), *This\get(Str(Object))\Index)
-    ParsePBGadget()\Content$ = ""
-    ParsePBGadget()\Position = 0
-    ParsePBGadget()\Length = 0
-    
-    ReplaceString(CurrentContent$, ParsePBGadget()\Content$, "", #PB_String_InPlace, ParsePBGadget()\Position, 1)
+    With ParsePBGadget()
+      If IsGadget(Object)
+        Select GadgetType(Object)
+          Case #PB_GadgetType_Panel, 
+               #PB_GadgetType_Container, 
+               #PB_GadgetType_ScrollArea
+            
+            ForEach ParsePBGadget()
+              If \Parent\Argument = Object 
+                Select GadgetType(\Object\Argument)
+                  Case #PB_GadgetType_Panel, 
+                       #PB_GadgetType_Container, 
+                       #PB_GadgetType_ScrollArea
+                    
+                    CF_Free(\Object\Argument)
+                    
+                  Default
+                    ReplaceString(CurrentContent$, \Content$, Space(Len(\Content$)), #PB_String_InPlace, \Position, 1)
+                    
+                    *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count-1 
+                    If *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count =< 0
+                      DeleteMapElement(*This\get(), Str(\Parent\Argument)+"_"+\Type\Argument$)
+                    EndIf
+                    DeleteMapElement(*This\get(), \Object\Argument$)
+                    DeleteMapElement(*This\get(), Str(\Object\Argument))
+                    DeleteElement(ParsePBGadget())
+                    
+                EndSelect
+              EndIf
+            Next
+        EndSelect
+      EndIf
       
+      If ChangeCurrentElement(ParsePBGadget(), *This\get(Str(Object))\Index)
+        Debug 666666666666
+        Debug "Content$ "+\Content$
+        ReplaceString(CurrentContent$, \Content$, Space(Len(\Content$)), #PB_String_InPlace, \Position, 1)
+;          \Content$ = ""
+;         \Position = 0
+;         \Length = 0
+       ; Debug CurrentContent$
+        
+        *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count-1 
+        If *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count =< 0
+          DeleteMapElement(*This\get(), Str(\Parent\Argument)+"_"+\Type\Argument$)
+        EndIf
+        DeleteMapElement(*This\get(), \Object\Argument$)
+        DeleteMapElement(*This\get(), Str(Object))
+        DeleteElement(ParsePBGadget())
+        
+        EndIf
+        
+        
+      EndWith  
   EndIf
-  
-  
-  
   
 EndProcedure
 
@@ -721,7 +760,8 @@ EndMacro
 
 Procedure CO_Free(Object)
   Protected i
-     
+  ;ProcedureReturn 
+  
   For i=0 To CountGadgetItems(WE_Tree_0)-1
     If Object=GetGadgetItemData(WE_Tree_0, i) 
       RemoveGadgetItem(WE_Tree_0, i)
@@ -729,18 +769,17 @@ Procedure CO_Free(Object)
     EndIf
   Next 
   
-  ClearPBGadget(Object)
-  
   With ParsePBGadget()
-    ChangeCurrentElement(ParsePBGadget(), *This\get(Str(Object))\Index)
-    *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count-1 
-    If *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count =< 0
-      DeleteMapElement(*This\get(), Str(\Parent\Argument)+"_"+\Type\Argument$)
-    EndIf
-    DeleteMapElement(*This\get(), \Object\Argument$)
-    DeleteMapElement(*This\get(), Str(Object))
-    DeleteElement(ParsePBGadget())
-    
+;     ChangeCurrentElement(ParsePBGadget(), *This\get(Str(Object))\Index)
+;     *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count-1 
+;     If *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count =< 0
+;       DeleteMapElement(*This\get(), Str(\Parent\Argument)+"_"+\Type\Argument$)
+;     EndIf
+;     DeleteMapElement(*This\get(), \Object\Argument$)
+;     DeleteMapElement(*This\get(), Str(Object))
+;     DeleteElement(ParsePBGadget())
+    CF_Free(Object)
+   
     Transformation::Free(Object)
     
     If IsGadget(Object)
@@ -1246,8 +1285,6 @@ Procedure CO_Save(*ThisParse.ParsePBGadget) ; Ok
 
   With *ThisParse
     If \Content$
-      Debug "\Content$: "+\Content$
-      
       For i=2 To 5
         Result$ = Trim(Trim(StringField(\Content$, i, ","), ")"))
         ; Debug "Coordinate: "+Result$
@@ -1319,24 +1356,6 @@ EndProcedure
 
 
 ;-
-Procedure$ CurrentContent(FileName$)
-  Protected *File, Format, Length
-  Protected File = ReadFile(#PB_Any, FileName$)
-  
-  If File
-    Length = Lof(File) 
-    *File = AllocateMemory(Length)
-    Format = ReadStringFormat(File)
-    
-    If *File 
-      ReadData(File, *File, Length)
-      ProcedureReturn PeekS(*File, Length, Format)
-    EndIf
-  Else
-    MessageRequester("Предупреждение!!!", "Не получилось прочитать "+FileName$)
-  EndIf
-EndProcedure
-
 Procedure ParsePBFile(FileName.s)
   Protected i,Result, Texts.S, Text.S, Find.S, String.S, Count, Position, Index, Args$, Arg$
   
@@ -1371,12 +1390,19 @@ Procedure ParsePBFile(FileName.s)
                   \Object\Argument$ = RegularExpressionGroup(#RegEx_Function, 3)
                 EndIf
                 
+                ; Если идентификатрор сгенерирован с #PB_Any то есть (Ident=PBFunction(#PB_Any))
                 If RegularExpressionGroup(#RegEx_Function, 3)
                   Protected Content1$ = RegularExpressionMatchString(#RegEx_Function)
                   Protected Length1 = RegularExpressionMatchLength(#RegEx_Function)
                   Protected Position1 = RegularExpressionMatchPosition(#RegEx_Function)
                 EndIf
-                
+;                 If RegularExpressionGroup(#RegEx_Function, 3)
+;                   \Object\Argument$ = RegularExpressionGroup(#RegEx_Function, 3)
+;                   \Content$ = RegularExpressionMatchString(#RegEx_Function)
+;                   \Length = RegularExpressionMatchLength(#RegEx_Function)
+;                   \Position = RegularExpressionMatchPosition(#RegEx_Function)
+;                 EndIf
+              
                 If \Type\Argument$
                   ; Debug "All - "+RegularExpressionMatchString(#RegEx_Function)
                   
@@ -1395,7 +1421,11 @@ Procedure ParsePBFile(FileName.s)
                       ParsePBGadget()\Type\Argument$ = \Type\Argument$
                       ParsePBGadget()\Content$ = Content1$ + RegularExpressionMatchString(#RegEx_Function)
                       ParsePBGadget()\Length = Length1 + RegularExpressionMatchLength(#RegEx_Function)
-                      ParsePBGadget()\Position = Position1;RegularExpressionMatchPosition(#RegEx_Function)
+                      If Position1
+                        ParsePBGadget()\Position = Position1
+                      Else
+                        ParsePBGadget()\Position = RegularExpressionMatchPosition(#RegEx_Function)
+                      EndIf
                       
                       ; Debug ""
                       ; Debug Position1
@@ -1440,9 +1470,7 @@ Procedure ParsePBFile(FileName.s)
                             
                             Select Index
                               Case 1
-                                If "#PB_Any" <> Arg$ And
-                                   "#PB_All" <> Arg$ And 
-                                   45 <> Asc(Arg$) ; - (-1;- 1)
+                                If Bool(Arg$<>"#PB_Any" And Arg$<>"#PB_All" And Arg$<>"#PB_Default" And Asc(Arg$)<>'-')
                                   \Object\Argument$ = Arg$
                                 EndIf
                                 ParsePBGadget()\Object\Argument$ = \Object\Argument$
@@ -1581,11 +1609,11 @@ Procedure ParsePBFile(FileName.s)
                           If Args$
                             \Args$ = Args$ 
                             Index+1
-                            AddPBFunction(*This, Index)
+                            CF_Add(*This, Index)
                           EndIf
                         Wend
                         
-                        SetPBFunction(*This)
+                        CF_Set(*This)
                       EndIf
                       
                   EndSelect
@@ -1760,6 +1788,8 @@ Procedure WE_SaveFile(Path$) ; Процедура сохранения файл�
 ;           \Content$ = ~"OpenWindow(#Window_0, 230,230,240,200,\"Window_0\", Flag)"
 ;         EndIf
         
+        Debug ""+Str(\Position)+" "+Str(\Length)+" "+\Content$
+        
         Content$ = \Content$
         Length = CO_Save(ParsePBGadget())
         
@@ -1770,9 +1800,11 @@ Procedure WE_SaveFile(Path$) ; Процедура сохранения файл�
           \Position + Len
           len + Length
         Else
-          \Content$ + Space(\Length-Length)
+          \Content$ + Space((\Length-Length))
         EndIf
         
+        Debug "  "+Str(Position)+" "+Str(\Length)+" "+\Content$
+        ;CurrentContent$=ReplaceString(CurrentContent$, Content$, \Content$, #PB_String_CaseSensitive, Position, 1)
         ReplaceString(CurrentContent$, Content$, \Content$, #PB_String_InPlace, Position, 1)
         ;Replace(\Content$, Content$, \Position)
       Next
@@ -1795,7 +1827,7 @@ Procedure WE_SaveFile(Path$) ; Процедура сохранения файл�
   ProcedureReturn Bool(CurrentFile$)
 EndProcedure
 
-
+;-
 Procedure WE_OpenWindow(Flag.i=#PB_Window_SystemMenu, ParentID=0)
   If Not IsWindow(WE)
     WE = OpenWindow(#PB_Any, 900, 100, 320, 600, "(WE) - Редактор объектов", Flag, ParentID)
@@ -1853,6 +1885,8 @@ Procedure WE_OpenWindow(Flag.i=#PB_Window_SystemMenu, ParentID=0)
     LoadControls()
     WE_ResizePanel_0()
     
+    ;;;WE_OpenFile("Ссылкодел.pb")
+    
     BindEvent(#PB_Event_Menu, @WE_Events(), WE)
     BindEvent(#PB_Event_Gadget, @WE_Events(), WE)
     BindEvent(#PB_Event_SizeWindow, @WE_ResizeWindow(), WE)
@@ -1893,6 +1927,7 @@ Procedure WE_CloseWindow()
     CloseWindow(WE)
   EndIf
 EndProcedure
+
 
 
 Procedure WE_Events()
@@ -2010,7 +2045,7 @@ Procedure WE_Events()
           EndIf
           
         Case WE_Menu_Save_as ;- Event(_WE_Menu_Save_as_) 
-          If Not WE_SaveFile(SaveFileRequester("Сохранить файл как ..", CurrentFile$, "PureBasic (*.pb)|*.pb;*.pbi;*.pbf|All files (*.*)|*.*", 0))
+          If Not WE_SaveFile("Test_0.pb") ; SaveFileRequester("Сохранить файл как ..", CurrentFile$, "PureBasic (*.pb)|*.pb;*.pbi;*.pbf|All files (*.*)|*.*", 0))
             MessageRequester("Ошибка","Не удалось сохранить файл.", #PB_MessageRequester_Error)
           EndIf
           

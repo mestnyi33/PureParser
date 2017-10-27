@@ -711,6 +711,7 @@ Module Transformation
           
           DeleteMapElement(Index(), Str(Gadget))
           DeleteElement(AnChor())
+          Lines() ; Reset show all lines
         EndIf
       Next
     EndIf
