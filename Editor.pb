@@ -53,7 +53,7 @@ Declare WE_ResizeWindow()
 Declare WE_ResizePanel_0()
 Declare$ GetObjectClass(Object)
 Declare CF_Free(Object.i)
-
+Declare WE_Update(Gadget, Position=-1)
 
 ;-
 ;- MACRO
@@ -79,17 +79,19 @@ Macro MacroCoordinate(MacroValue, MacroArg) ;
 EndMacro
 
 Macro ChangeContentObject(ChangeContentObjectID)
-  ChangeCurrentElement(ParsePBGadget(), *This\get(ChangeContentObjectID)\Index)
+  ChangeCurrentElement(ParsePBGadget(), *This\get(ChangeContentObjectID)\Adress)
 EndMacro
 
 Macro ReplaceMapKey(FindReplaceMapKey, ReplaceMapKey)
-  Define ReplaceMapData_ID = *This\get(FindReplaceMapKey)\Object\Argument
-  Define ReplaceMapData_Index = *This\get(FindReplaceMapKey)\Index
-  DeleteMapElement(*This\get(), FindReplaceMapKey)
-  AddMapElement(*This\get(), ReplaceMapKey) 
-  *This\get()\Object\Argument = ReplaceMapData_ID
-  *This\get()\Index = ReplaceMapData_Index
-  ChangeCurrentElement(ParsePBGadget(), ReplaceMapData_Index)
+  If FindReplaceMapKey And ReplaceMapKey
+    Define ReplaceMapData_ID = *This\get(FindReplaceMapKey)\Object\Argument
+    Define ReplaceMapData_Adress = *This\get(FindReplaceMapKey)\Adress
+    DeleteMapElement(*This\get(), FindReplaceMapKey)
+    AddMapElement(*This\get(), ReplaceMapKey) 
+    *This\get()\Object\Argument = ReplaceMapData_ID
+    *This\get()\Adress = ReplaceMapData_Adress
+    ChangeCurrentElement(ParsePBGadget(), ReplaceMapData_Adress)
+  EndIf
 EndMacro
 
 Macro Parent(Object)
@@ -147,6 +149,7 @@ EndStructure
 Structure ObjectStruct
   Count.i
   Index.i
+  Adress.i
   Object.ArgumentStruct 
   Parent.ArgumentStruct
   Window.ArgumentStruct
@@ -173,6 +176,7 @@ Structure ContentStruct
 EndStructure
 
 Structure ParseStruct Extends ObjectStruct
+  Item.i
   SubLevel.i ; 
   Content.ContentStruct  
   Type.ArgumentStruct
@@ -198,7 +202,8 @@ EndStructure
 
 Global NewList ParsePBGadget.ParseStruct() 
 Global *This.ThisStruct = AllocateStructure(ThisStruct)
-
+*This\Index=-1
+*This\Item=-1
 
 Enumeration RegularExpression
   #RegEx_Function
@@ -726,7 +731,7 @@ Procedure CF_Free(Object.i)
         EndSelect
       EndIf
       
-      If ChangeCurrentElement(ParsePBGadget(), *This\get(Str(Object))\Index)
+      If ChangeCurrentElement(ParsePBGadget(), *This\get(Str(Object))\Adress)
         ;         Debug 666666666666
         ;         Debug "Text$ "+\Content\String$
         ReplaceString(*This\Content\Text$, \Content\String$, Space(Len(\Content\String$)), #PB_String_InPlace, \Content\Position, 1)
@@ -770,7 +775,7 @@ Procedure CO_Free(Object)
   Next 
   
   With ParsePBGadget()
-    ;     ChangeCurrentElement(ParsePBGadget(), *This\get(Str(Object))\Index)
+    ;     ChangeCurrentElement(ParsePBGadget(), *This\get(Str(Object))\Adress)
     ;     *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count-1 
     ;     If *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count =< 0
     ;       DeleteMapElement(*This\get(), Str(\Parent\Argument)+"_"+\Type\Argument$)
@@ -814,6 +819,9 @@ Procedure CO_Events()
         PopListPosition(ParsePBGadget())
       EndWith
       
+;       WE_Update(WE_Tree_0, CountGadgetItems(WE_Tree_0)-1)
+      
+      
     Case #PB_Event_Gadget
       
       Select EventType()
@@ -845,8 +853,19 @@ Procedure CO_Insert(*ThisParse.ParseStruct)
   Protected ID$, Handle$
   
   With *ThisParse
-    \Content\Position = (*This\Content\Position+*This\Content\Length)+Len(#CRLF$)
+    ; 
+    Static VariablePosition
+    If VariablePosition = 0
+      VariablePosition = 37
+    EndIf
+    Protected Variable$ = ", "+#CRLF$+\Object\Argument$+"=-1"
+    Protected VariableLength = Len(Variable$)
+    *This\Content\Text$ = InsertString(*This\Content\Text$, Variable$, VariablePosition) : VariablePosition + VariableLength
+    
+    ;
+    \Content\Position = (*This\Content\Position+*This\Content\Length)+Len(#CRLF$)+VariableLength
     *This\Content\Text$ = InsertString(*This\Content\Text$, Space(4), \Content\Position) : \Content\Position + Len(Space(4))
+    
     
     If Asc(\Object\Argument$) = 35 ; '#'
       ID$ = \Object\Argument$
@@ -904,31 +923,15 @@ Procedure CO_Insert(*ThisParse.ParseStruct)
 EndProcedure
 
 Procedure CO_Create(Type$, X, Y, Parent)
-  Protected GadgetList, ii.i, Position=-1 ; 
+  Protected GadgetList
   
   With *This
     If IsGadget(Parent) 
       X - GadgetX(Parent, #PB_Gadget_WindowCoordinate)
       Y - GadgetY(Parent, #PB_Gadget_WindowCoordinate)
       GadgetList = OpenGadgetList(Parent) 
-      
-      ; Определяем позицию в списке
-      For ii=0 To CountGadgetItems(WE_Tree_0)-1
-        If Parent=GetGadgetItemData(WE_Tree_0, ii) 
-          \SubLevel=GetGadgetItemAttribute(WE_Tree_0, ii, #PB_Tree_SubLevel)+1
-          Position=(ii+1)
-          Break
-        EndIf
-      Next 
-      For ii=Position To CountGadgetItems(WE_Tree_0)-1
-        If \SubLevel=<GetGadgetItemAttribute(WE_Tree_0, ii, #PB_Tree_SubLevel)
-          Position+1
-        EndIf
-      Next 
-      
     ElseIf IsWindow(Parent)
       GadgetList = UseGadgetList(WindowID(Parent))
-      \SubLevel = 1
     EndIf
     
     Select Type$
@@ -950,8 +953,8 @@ Procedure CO_Create(Type$, X, Y, Parent)
       EndIf
       
       Restore Model 
-      For i=1 To 13
-        For j=1 To 10 ; argument count
+      For i=1 To 14
+        For j=1 To 9 ; argument count
           Read.s Buffer
           
           Select j
@@ -967,7 +970,7 @@ Procedure CO_Create(Type$, X, Y, Parent)
               Case 2 : \Caption\Argument$=Buffer
               Case 3 : ParsePBGadget()\Width\Argument$=Buffer
               Case 4 : ParsePBGadget()\Height\Argument$=Buffer
-              Case 5 : ParsePBGadget()\Caption\Argument$=Buffer
+              ;Case 5 : ParsePBGadget()\Caption\Argument$=Buffer
               Case 6 : ParsePBGadget()\Param1\Argument$=Buffer
               Case 7 : ParsePBGadget()\Param2\Argument$=Buffer
               Case 8 : ParsePBGadget()\Param3\Argument$=Buffer
@@ -980,6 +983,7 @@ Procedure CO_Create(Type$, X, Y, Parent)
       
       \Parent\Argument = Parent
       \Caption\Argument$+*This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count
+      ParsePBGadget()\Caption\Argument$ = \Caption\Argument$
       
       If *This\get(Str(\Parent\Argument))\Object\Argument$
         \Object\Argument$ = *This\get(Str(\Parent\Argument))\Object\Argument$+"_"+\Caption\Argument$
@@ -994,35 +998,42 @@ Procedure CO_Create(Type$, X, Y, Parent)
       \Height\Argument = Val(ParsePBGadget()\Height\Argument$)
       \Flag\Argument=CO_Flag(ParsePBGadget()\Flag\Argument$)
       
-      ParsePBGadget()\Object\Argument$ = \Object\Argument$
       ParsePBGadget()\Type\Argument$ = \Type\Argument$
+      ParsePBGadget()\Object\Argument$ = \Object\Argument$
+      ParsePBGadget()\X\Argument$ = Str(\X\Argument)
+      ParsePBGadget()\Y\Argument$ = Str(\Y\Argument)
       
       CO_Insert(*ThisParse) 
     EndIf
     
-    Protected Object=CallFunctionFast(@CO_Open(), *This)
     
     
-    
-    
-    
-    AddGadgetItem(WE_Tree_0, Position, \Object\Argument$, 0, ParsePBGadget()\SubLevel)
-    If Position=-1
-      Position = CountGadgetItems(WE_Tree_0)-1
+    ; Определяем позицию в списке
+    Protected ii.i, Position=-1 ; 
+    If IsGadget(Parent) 
+      For ii=0 To CountGadgetItems(WE_Tree_0)-1
+        If Parent=GetGadgetItemData(WE_Tree_0, ii) 
+          \SubLevel=GetGadgetItemAttribute(WE_Tree_0, ii, #PB_Tree_SubLevel)+1
+          Position=(ii+1)
+          Break
+        EndIf
+      Next 
+      For ii=Position To CountGadgetItems(WE_Tree_0)-1
+        If \SubLevel=<GetGadgetItemAttribute(WE_Tree_0, ii, #PB_Tree_SubLevel)
+          Position+1
+        EndIf
+      Next 
+    ElseIf IsWindow(Parent)
+      Position = CountGadgetItems(WE_Tree_0)
+      \SubLevel = 1
     EndIf
-    SetGadgetItemData(WE_Tree_0, Position, ParsePBGadget()\Object\Argument)
-    For ii=0 To CountGadgetItems(WE_Tree_0)-1
-      If GetGadgetItemState(WE_Tree_0, ii) & #PB_Tree_Collapsed
-        SetGadgetItemState(WE_Tree_0, ii, #PB_Tree_Expanded)
-        ; Break
-      EndIf
-    Next 
-    SetGadgetItemState(WE_Tree_0, Position, #PB_Tree_Selected)
+    *This\Item=Position
+    
+    CallFunctionFast(@CO_Open(), *This)
     
     
-    
-    
-    
+    WE_Update(WE_Tree_0, Position)
+
     
     If GadgetList 
       If IsGadget(Parent) 
@@ -1036,7 +1047,7 @@ Procedure CO_Create(Type$, X, Y, Parent)
   DataSection
     Model:
     ;{
-    Data.s "OpenWindow","Window_","300","200","Text","0","0","1","0",
+    Data.s "OpenWindow","Window_","300","200","Text","0","0","1",
            "#PB_Window_SystemMenu,"+
            "#PB_Window_MinimizeGadget,"+
            "#PB_Window_MaximizeGadget,"+
@@ -1051,33 +1062,39 @@ Procedure CO_Create(Type$, X, Y, Parent)
            "#PB_Window_Minimize,"+
            "#PB_Window_NoGadgets"
     
-    Data.s "ButtonGadget","Button_","80","20","Text","0","0","1","0",
+    Data.s "ButtonGadget","Button_","80","20","Text","0","0","1",
            "#PB_Button_Right,"+
            "#PB_Button_Left,"+
            "#PB_Button_Default,"+
            "#PB_Button_MultiLine,"+
            "#PB_Button_Toggle"
     
-    Data.s "CheckBoxGadget","CheckBox_","80","20","Text","0","0","1","0",
+    Data.s "CheckBoxGadget","CheckBox_","80","20","Text","0","0","1",
            "#PB_CheckBox_Right,"+
            "#PB_CheckBox_Center,"+
            "#PB_CheckBox_ThreeState"
     
-    Data.s "ComboBoxGadget","Combo_","100","20","","0","0","1","0",
+    Data.s "ComboBoxGadget","Combo_","100","20","","0","0","1",
            "#PB_ComboBox_Editable,"+
            "#PB_ComboBox_LowerCase,"+
            "#PB_ComboBox_UpperCase,"+
            "#PB_ComboBox_Image"
     
-    Data.s "EditorGadget","Editor_","150","200","","0","0","1","0",
+    Data.s "ContainerGadget","Container_","100","120","","0","0","1",
+           "#PB_Container_Flat,"+
+           "#PB_Container_LowerCase,"+
+           "#PB_Container_UpperCase,"+
+           "#PB_Container_Image"
+    
+    Data.s "EditorGadget","Editor_","150","200","","0","0","1",
            "#PB_Editor_ReadOnly"
     
-    Data.s "FrameGadget","Frame_","180","150","Texte","1","0","1","0",
+    Data.s "FrameGadget","Frame_","180","150","Texte","1","0","1",
            "#PB_Frame3D_Single,"+
            "#PB_Frame3D_Double,"+
            "#PB_Frame3D_Flat"
     
-    Data.s "ListIconGadget","ListIcon_","180","180","","0","1","1","0",
+    Data.s "ListIconGadget","ListIcon_","180","180","","0","1","1",
            "#PB_ListIcon_CheckBoxes,"+
            "#PB_ListIcon_MultiSelect,"+
            "#PB_ListIcon_GridLines,"+
@@ -1085,13 +1102,13 @@ Procedure CO_Create(Type$, X, Y, Parent)
            "#PB_ListIcon_HeaderDragDrop,"+
            "#PB_ListIcon_AlwaysShowSelection"
     
-    Data.s "ListViewGadget","ListView_","150","150","","0","0","1","0",
+    Data.s "ListViewGadget","ListView_","150","150","","0","0","1",
            "#PB_ListView_MultiSelect,"+
            "#PB_ListView_ClickSelect"
     
-    Data.s "OptionGadget","Option_","80","20","Texte","0","0","1","0",""
+    Data.s "OptionGadget","Option_","80","20","Texte","0","0","1",""
     
-    Data.s "StringGadget","String_","80","20","Texte","0","0","1","0",
+    Data.s "StringGadget","String_","80","20","Texte","0","0","1",
            "#PB_String_Password,"+
            "#PB_String_ReadOnly,"+
            "#PB_String_Numeric,"+
@@ -1099,19 +1116,19 @@ Procedure CO_Create(Type$, X, Y, Parent)
            "#PB_String_UpperCase,"+
            "#PB_String_BorderLess"
     
-    Data.s "TextGadget","Text_","80","20","Text","1","0","0","0",
+    Data.s "TextGadget","Text_","80","20","Text","1","0","0",
            "#PB_Text_Center,"+
            "#PB_Text_Right,"+
            "#PB_Text_Border"
     
-    Data.s "CanvasGadget","Canvas_","150","150","","0","0","1","0",
+    Data.s "CanvasGadget","Canvas_","150","150","","0","0","1",
            "#PB_Canvas_Border,"+
            "#PB_Canvas_ClipMouse,"+
            "#PB_Canvas_Keyboard,"+
            "#PB_Canvas_DrawFocus,"+
            "#PB_Canvas_Container"
     
-    Data.s "ImageGadget","Image_","150", "150","","0","0","1","0",
+    Data.s "ImageGadget","Image_","150", "150","","0","0","1",
            "#PB_Image_Border,"+
            "#PB_Image_Raised" 
     ;}
@@ -1276,14 +1293,16 @@ Procedure CO_Open(*ThisParse.ParseStruct) ; Ok
     If Bool(IsGadget(Object) | IsWindow(Object))
       If Not FindMapElement(*This\get(), Str(\Parent\Argument)+"_"+\Type\Argument$)
         AddMapElement(*This\get(), Str(\Parent\Argument)+"_"+\Type\Argument$) 
-        *This\get()\Index=@ParsePBGadget()
+        *This\get()\Index=ListIndex(ParsePBGadget())
+        *This\get()\Adress=@ParsePBGadget()
         *This\get()\Count+1 
       Else
         *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count+1 
       EndIf
       
       AddMapElement(*This\get(), \Object\Argument$) 
-      *This\get()\Index=@ParsePBGadget()
+      *This\get()\Index=ListIndex(ParsePBGadget())
+      *This\get()\Adress=@ParsePBGadget()
       *This\get()\Object\Argument=Object
       *This\get()\Window\Argument=\Window\Argument 
       *This\get()\Parent\Argument=\Parent\Argument 
@@ -1294,7 +1313,8 @@ Procedure CO_Open(*ThisParse.ParseStruct) ; Ok
       ; Чтобы по идентификатору 
       ; объекта получить все остальное
       AddMapElement(*This\get(), Str(Object)) 
-      *This\get()\Index=@ParsePBGadget()
+      *This\get()\Index=ListIndex(ParsePBGadget())
+      *This\get()\Adress=@ParsePBGadget()
       *This\get()\Object\Argument=Object 
       *This\get()\Window\Argument=\Window\Argument 
       *This\get()\Parent\Argument=\Parent\Argument 
@@ -1391,6 +1411,7 @@ Procedure CO_Open(*ThisParse.ParseStruct) ; Ok
     
     ;
     If IsWindow(Object)
+      StickyWindow(Object, #True)
       ParsePBGadget()\Object\Argument = Object
       EnableWindowDrop(Object, #PB_Drop_Text, #PB_Drag_Copy)
       PostEvent(Constant::#Event_Create, Object, #PB_Ignore)
@@ -1840,27 +1861,47 @@ Global *This\Content\File$ ; Путь к текущему файлу.
 Declare WE_CloseWindow()
 Declare WE_OpenWindow(Flag.i=#PB_Window_SystemMenu, ParentID=0)
 
+Procedure WE_Update(Gadget, Position=-1)
+  Protected i
+  
+  ; Добавляем объекты к списку
+  If Position=-1
+    PushListPosition(ParsePBGadget())
+    ForEach ParsePBGadget()
+      Position = CountGadgetItems(Gadget)
+      AddGadgetItem (Gadget, -1, ParsePBGadget()\Object\Argument$, 0, ParsePBGadget()\SubLevel)
+      SetGadgetItemData(Gadget, Position, ParsePBGadget()\Object\Argument)
+    Next
+    PopListPosition(ParsePBGadget())
+  Else
+    AddGadgetItem(Gadget, Position, ParsePBGadget()\Object\Argument$, 0, ParsePBGadget()\SubLevel)
+    SetGadgetItemData(Gadget, Position, ParsePBGadget()\Object\Argument)
+  EndIf
+  
+  ; Раскрываем весь список
+  For i=0 To Position 
+    If GetGadgetItemState(Gadget, i) & #PB_Tree_Collapsed
+      SetGadgetItemState(Gadget, i, #PB_Tree_Expanded)
+    EndIf
+  Next 
+  
+  ; Выбыраем последный объект списка
+  SetGadgetState(Gadget, Position) ; Bug
+  SetGadgetItemState(Gadget, Position, #PB_Tree_Selected)
+EndProcedure 
+
 Procedure WE_OpenFile(Path$) ; Открытие файла
   Protected I
   
   If Path$
     Debug "Открываю файл '"+Path$+"'"
-    ParsePBFile(Path$)
     
-    Protected Object, IsContainer
-    PushListPosition(ParsePBGadget())
-    ForEach ParsePBGadget()
-      AddGadgetItem (WE_Tree_0, -1, ParsePBGadget()\Object\Argument$, 0, ParsePBGadget()\SubLevel)
-      SetGadgetItemData(WE_Tree_0, CountGadgetItems(WE_Tree_0)-1, ParsePBGadget()\Object\Argument)
-    Next
-    PopListPosition(ParsePBGadget())
-    
-    For i=0 To CountGadgetItems(WE_Tree_0)-1
-      If GetGadgetItemState(WE_Tree_0, i) & #PB_Tree_Collapsed
-        SetGadgetItemState(WE_Tree_0, i, #PB_Tree_Expanded)
-      EndIf
-    Next 
-    ;SetGadgetItemState(WE_Tree_0, 0, #PB_Tree_Selected)
+    ; Начинаем перебырать файл
+    If ParsePBFile(Path$)
+      
+      WE_Update(WE_Tree_0)
+      
+    EndIf
     
     *This\Content\File$=Path$
     Debug "..успешно"
@@ -2077,9 +2118,15 @@ Procedure WE_Events()
               EndWith
               PopListPosition(ParsePBGadget())  
               
+              Debug ParsePBGadget()\Content\String$
+;               If GetGadgetState(WE_Tree_0)=-1
+;                 SetGadgetState(WE_Tree_0,0)
+;               EndIf
+              
+              Debug GetGadgetState(WE_Tree_0);GetGadgetText(WE_Tree_0);GetGadgetItemText(WE_Tree_0, GetGadgetState(WE_Tree_0)) ; ReplaceMapData_Index
               ReplaceMapKey(GetGadgetText(WE_Tree_0), GetGadgetText(EventGadget()))
               ;Trim(GetRegExString("[^\w]("+WE_Button_0+")[^\w]", 1), #CR$)
-              ;Debug *This\get(GetGadgetText(EventGadget()))\Index
+              ;Debug *This\get(GetGadgetText(EventGadget()))\Adress
               
               Debug ParsePBGadget()\Content\String$
               
@@ -2093,8 +2140,8 @@ Procedure WE_Events()
                   While NextRegularExpressionMatch(RegExID)
                     If Group
                       Result$ = RegularExpressionGroup(RegExID, Group)
-                      ParsePBGadget()\Content\String$ = ReplaceRegularExpression(RegExID, ParsePBGadget()\Content\String$, GetGadgetText(EventGadget()))
-                      *This\Content\Text$ = ReplaceRegularExpression(RegExID, *This\Content\Text$, GetGadgetText(EventGadget()))
+                      ; ParsePBGadget()\Content\String$ = ReplaceRegularExpression(RegExID, ParsePBGadget()\Content\String$, GetGadgetText(EventGadget()))
+                      ; *This\Content\Text$ = ReplaceRegularExpression(RegExID, *This\Content\Text$, GetGadgetText(EventGadget()))
                     Else
                       Result$ = RegularExpressionMatchString(RegExID)
                     EndIf
