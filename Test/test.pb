@@ -41,7 +41,8 @@ LoadFont(#Font_Button_0,"Consolas", 7, #PB_Font_Bold|#PB_Font_Italic)
 Global Button_1
 
 Procedure OpenWindow_0(x = 0, y = 0, width = 390, height = 600)
-  OpenWindow(#Window_0, x, y, width, height, "Window", #PB_Window_SystemMenu)
+  Protected Flag = #PB_Window_SystemMenu
+  OpenWindow(#Window_0, x, y, width, height, "Window", Flag)
   ImageGadget(#Image_0, ReadPreferenceLong("x", 105), 5, 381, 68, 0)
   SetGadgetState(#Image_0, ImageID(#Img_Image_0))
   ImageGadget(#Image_1, 10, 265, 381, 68, ImageID(#Img_Image_1))

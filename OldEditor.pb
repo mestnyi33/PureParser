@@ -22,15 +22,6 @@
 EnableExplicit
 
 ;-
-;- INCLUDE
-XIncludeFile "include/Constant.pbi"
-XIncludeFile "include/Hide.pbi"
-XIncludeFile "include/Disable.pbi"
-XIncludeFile "include/Flag.pbi"
-XIncludeFile "include/Transformation.pbi"
-XIncludeFile "include/Properties.pbi"
-
-;-
 ;- GLOBAL
 Global MainWindow=-1
 Global WE=-1, 
@@ -58,15 +49,11 @@ Global WE_Menu_New=1,
 ;-
 ;- DECLARE
 Declare WE_Events()
-Declare WE_CloseWindow()
 Declare WE_ResizeWindow()
 Declare WE_ResizePanel_0()
-Declare WE_Tree_0_Position(Gadget, Parent)
-Declare WE_Tree_0_Update(Gadget, Position=-1)
-Declare WE_OpenWindow(Flag.i=#PB_Window_SystemMenu, ParentID=0)
-
 Declare$ GetObjectClass(Object)
 Declare CF_Free(Object.i)
+Declare WE_Update(Gadget, Position=-1)
 
 ;-
 ;- MACRO
@@ -75,8 +62,8 @@ Macro ULCase(String)
 EndMacro
 
 Macro GetVarValue(StrToFind)
-  ;GetArguments(*This\Content\Text$, "(?:(\w+)\s*\(.*)?"+StrToFind+"[\.\w]*\s*=\s*([\#\w\|\s]+$|[\#\w\|\s]+)", 2)
-  GetArguments(*This\Content\Text$, ~"(?:(\\w+)\\s*\\(.*)?"+StrToFind+~"(?:\\$)?(?:\\.\\w)?\\s*=\\s*(?:\")?([\\#\\w\\|\\s\\(\\)]+$|[\\#\\w\\|\\s\\(\\)]+)(?:\")?", 2)
+  ;FindStringRegEx(*This\Content\Text$, "(?:(\w+)\s*\(.*)?"+StrToFind+"[\.\w]*\s*=\s*([\#\w\|\s]+$|[\#\w\|\s]+)", 2)
+  FindStringRegEx(*This\Content\Text$, ~"(?:(\\w+)\\s*\\(.*)?"+StrToFind+~"(?:\\$)?(?:\\.\\w)?\\s*=\\s*(?:\")?([\\#\\w\\|\\s\\(\\)]+$|[\\#\\w\\|\\s\\(\\)]+)(?:\")?", 2)
 EndMacro
 
 Macro MacroCoordinate(MacroValue, MacroArg) ; 
@@ -91,63 +78,85 @@ Macro MacroCoordinate(MacroValue, MacroArg) ;
   EndSelect
 EndMacro
 
-Macro change_current_object_from_class(_class_)
-  ChangeCurrentElement(ParsePBGadget(), *This\get(_class_)\Adress)
+Macro ChangeContentObject(ChangeContentObjectID)
+  ChangeCurrentElement(ParsePBGadget(), *This\get(ChangeContentObjectID)\Adress)
 EndMacro
 
-Macro change_current_object_from_id(_object_)
-  change_current_object_from_class(Str(_object_))
+Macro ReplaceMapKey1(FindReplaceMapKey, ReplaceMapKey)
+  If FindReplaceMapKey And ReplaceMapKey
+    Define ReplaceMapData_ID = *This\get(FindReplaceMapKey)\Object\Argument
+    Define ReplaceMapData_Adress = *This\get(FindReplaceMapKey)\Adress
+    DeleteMapElement(*This\get(), FindReplaceMapKey)
+    AddMapElement(*This\get(), ReplaceMapKey) 
+    *This\get()\Object\Argument = ReplaceMapData_ID
+    *This\get()\Adress = ReplaceMapData_Adress
+    ChangeCurrentElement(ParsePBGadget(), ReplaceMapData_Adress)
+  EndIf
 EndMacro
 
-Macro replace_map_key(_find_mapkey, _replace_mapkey)
-  CopyStructure(*This\get(_find_mapkey), *This\get(_replace_mapkey), ObjectStruct)
-  ChangeCurrentElement(ParsePBGadget(), *This\get(_replace_mapkey)\Adress)
+Macro ReplaceMapKey(_find_mapkey, _replace_mapkey)
+  CopyStructure(@*This\get(_find_mapkey), @*This\get(_replace_mapkey), ObjectStruct)
   DeleteMapElement(*This\get(), _find_mapkey)
+  ChangeCurrentElement(ParsePBGadget(), *This\get(_replace_mapkey)\Adress)
 EndMacro
 
-Macro get_argument_string(_string_)
-  GetArguments(_string_, #RegEx_Pattern_Function, 2)
+Macro ReplaceMapKey3(_find_mapkey, _replace_mapkey)
+  Define *Source.ObjectStruct=*This\get(_find_mapkey)
+  Define *Destination.ObjectStruct=*This\get(_replace_mapkey)
+
+  CopyStructure(*Source, *Destination, ThisStruct)
+
+  DeleteMapElement(*This\get(), _find_mapkey)
+  ChangeCurrentElement(ParsePBGadget(), *This\get(_replace_mapkey)\Adress)
 EndMacro
 
-Macro is_object(Object)
+Macro Parent(Object)
+  *This\get(Str(Object))\Parent\Argument)
+EndMacro
+
+Macro Window(Object)
+  *This\get(Str(Object))\Window\Argument)
+EndMacro
+
+Macro IsObject(Object)
   Bool(IsGadget(Object) | IsWindow(Object))
 EndMacro
 
-Macro get_object_type(Object)
-  *This\get(Str(Object))\Type\Argument$
-EndMacro
+;-
+;- INCLUDE
+DeclareModule Constant
+  Enumeration #PB_Event_FirstCustomValue
+    #Event_Create
+    #Event_Down
+    #Event_Up
+  EndEnumeration
+  EndDeclareModule : Module Constant : EndModule
 
-Macro get_object_class(Object)
-  *This\get(Str(Object))\Object\Argument$
-EndMacro
+XIncludeFile "include/Hide.pbi"
+XIncludeFile "include/Disable.pbi"
+XIncludeFile "include/Flag.pbi"
+XIncludeFile "include/Transformation.pbi"
+XIncludeFile "include/Properties.pbi"
 
-Macro get_object_count(Object)
-  *This\get(Str(*This\get(Str(Object))\Parent\Argument)+"_"+*This\get(Str(Object))\Type\Argument$)\Count
-EndMacro
 
-Macro get_object_adress(Object)
-  *This\get(Str(Object))\Adress
-EndMacro
 
-Macro get_object_parent(Object)
-  *This\get(Str(Object))\Parent\Argument
-EndMacro
-
-Macro get_object_window(Object)
-  *This\get(Str(Object))\Window\Argument
-EndMacro
-
-Macro get_class_id(Class)
-  *This\get(Class)\Object\Argument
-EndMacro
-
-      
-; Macro is_container(Object)
-;   *This\get(Str(Object))\container)
-; EndMacro
 
 ;-
-;- STRUCTURE
+;#RegEx_Pattern_Others1 = ~"[\\^\\;\\/\\|\\!\\*\\w\\s\\.\\-\\+\\~\\#\\&\\$\\\\]"
+#RegEx_Pattern_Quotes = ~"(?:\"(.*?)\")" ; - Находит Кавычки
+#RegEx_Pattern_Others = ~"(?:[\\s\\^\\|\\!\\~\\&\\$])" ; Находим остальное
+#RegEx_Pattern_Match = ~"(?:([\\/])|([\\*])|([\\-])|([\\+]))" ; Находит (*-+/)
+#RegEx_Pattern_Function = ~"(?:(\\w*)\\s*\\(((?>[^()]|(?R))*)\\))" ; - Находит функции
+#RegEx_Pattern_World = ~"(?:([\\d]+)|(\b[\\w]+)|([\\#\\w]+)|([\\*\\w]+)|[\\.]([\\w]+)|([\\\\w]+))"
+#RegEx_Pattern_Captions = #RegEx_Pattern_Quotes+"|"+#RegEx_Pattern_Function+"|"+#RegEx_Pattern_Match+"|"+#RegEx_Pattern_World
+#RegEx_Pattern_Arguments = "("+#RegEx_Pattern_Captions+"|"+#RegEx_Pattern_Others+")+"
+
+#RegEx_Func = ~"(?:((?:;|[0-9]|\\.\\s|\\.\\w\\w).*)|(?:(?:(\\w+\\(.*\\)|(?:(\\w+)(|\\.\\w+)))\\s*=\\s*)|(?:(?:\\w+\\(.*\\)|(?:(\\w+)(|\\.\\w+)))\\s*=\\s*(?:\\w\\s*\\(.*\\))))|(?:([A-Za-z_0-9]+)\\s*\\((\".*?\"|[^:]|.*)\\))|(?:(\\w+)(|\\.\\w))\\s)"
+
+#File=0
+#Window=0
+
+
 Structure ArgumentStruct
   Argument.i 
   Argument$
@@ -157,8 +166,6 @@ Structure ObjectStruct
   Count.i
   Index.i
   Adress.i
-  
-  Type.ArgumentStruct 
   Object.ArgumentStruct 
   Parent.ArgumentStruct
   Window.ArgumentStruct
@@ -188,7 +195,7 @@ Structure ParseStruct Extends ObjectStruct
   Item.i
   SubLevel.i ; 
   Content.ContentStruct  
-  
+  Type.ArgumentStruct
   X.ArgumentStruct 
   Y.ArgumentStruct
   Width.ArgumentStruct
@@ -211,27 +218,9 @@ EndStructure
 
 Global NewList ParsePBGadget.ParseStruct() 
 Global *This.ThisStruct = AllocateStructure(ThisStruct)
-;
 *This\Index=-1
 *This\Item=-1
 
-;-
-;- ENUMERATION
-;#RegEx_Pattern_Others1 = ~"[\\^\\;\\/\\|\\!\\*\\w\\s\\.\\-\\+\\~\\#\\&\\$\\\\]"
-#RegEx_Pattern_Quotes = ~"(?:\"(.*?)\")" ; - Находит Кавычки
-#RegEx_Pattern_Others = ~"(?:[\\s\\^\\|\\!\\~\\&\\$])" ; Находим остальное
-#RegEx_Pattern_Match = ~"(?:([\\/])|([\\*])|([\\-])|([\\+]))" ; Находит (*-+/)
-#RegEx_Pattern_Function = ~"(?:(\\w*)\\s*\\(((?>[^()]|(?R))*)\\))" ; - Находит функции
-#RegEx_Pattern_World = ~"(?:([\\d]+)|(\b[\\w]+)|([\\#\\w]+)|([\\*\\w]+)|[\\.]([\\w]+)|([\\\\w]+))"
-#RegEx_Pattern_Captions = #RegEx_Pattern_Quotes+"|"+#RegEx_Pattern_Function+"|"+#RegEx_Pattern_Match+"|"+#RegEx_Pattern_World
-#RegEx_Pattern_Arguments = "("+#RegEx_Pattern_Captions+"|"+#RegEx_Pattern_Others+")+"
-
-#RegEx_Func = ~"(?:((?:;|[0-9]|\\.\\s|\\.\\w\\w).*)|(?:(?:(\\w+\\(.*\\)|(?:(\\w+)(|\\.\\w+)))\\s*=\\s*)|(?:(?:\\w+\\(.*\\)|(?:(\\w+)(|\\.\\w+)))\\s*=\\s*(?:\\w\\s*\\(.*\\))))|(?:([A-Za-z_0-9]+)\\s*\\((\".*?\"|[^:]|.*)\\))|(?:(\\w+)(|\\.\\w))\\s)"
-
-#File=0
-#Window=0
-
-;-
 Enumeration RegularExpression
   #RegEx_Function
   #RegEx_Arguments
@@ -242,8 +231,6 @@ Enumeration RegularExpression
   #RegEx_Var
 EndEnumeration
 
-;-
-;- OTHERS
 Runtime Procedure$ GetObjectClass(Object)
   ProcedureReturn *This\get(Str(Object))\Object\Argument$
 EndProcedure
@@ -499,7 +486,7 @@ Procedure GetVal(String$)
   ProcedureReturn Result
 EndProcedure
 
-Procedure$ GetArguments(String$, Pattern$, Group)
+Procedure$ FindStringRegEx(String$, Pattern$, Group)
   Protected Result$
   Protected Create_Reg_Flag = #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll    
   Protected RegExID = CreateRegularExpression(#PB_Any, Pattern$, Create_Reg_Flag)
@@ -519,8 +506,9 @@ Procedure$ GetArguments(String$, Pattern$, Group)
     FreeRegularExpression(RegExID)
   EndIf
   
-  ;Debug " >> "+Result$ +" - "+Pattern$
-  ProcedureReturn Trim(Trim(Trim(Result$), #CR$))
+  ;Debug Result$
+  Debug " >> "+Result$ +" - "+Pattern$
+  ProcedureReturn Trim(Result$, #CR$)
 EndProcedure
 
 Procedure$ ContentContent(FileName$)
@@ -785,7 +773,7 @@ EndProcedure
 ;-
 ;- CREATE_OBJECT
 Declare CO_Create(Type$, MouseX, MouseY, Parent)
-Declare CO_Open()
+Declare CO_Open(*This.ParseStruct)
 
 Macro CO_Flag(Flag) ; Ok
   Properties::GetPBFlag(Flag)
@@ -833,24 +821,22 @@ Procedure CO_Events()
   EndIf
   
   Select Event()
-    Case #PB_Event_Create
+    Case Constant::#Event_Create
       
       With ParsePBGadget()
         PushListPosition(ParsePBGadget())
         ForEach ParsePBGadget()
           If Object = \Object\Argument
             Transformation::Create(\Object\Argument, \Window\Argument, \Parent\Argument, 5)
-            If IsGadget(\Object\Argument) And GadgetType(\Object\Argument) = #PB_GadgetType_Splitter
-              Transformation::Free(GetGadgetAttribute(\Object\Argument, #PB_Splitter_FirstGadget))
-              Transformation::Free(GetGadgetAttribute(\Object\Argument, #PB_Splitter_SecondGadget))
-            EndIf
             Properties::Initialize(\Object\Argument, \Object\Argument$, \Flag\Argument$)
             Break
           EndIf
         Next
         PopListPosition(ParsePBGadget())
       EndWith
-            
+      
+;       WE_Update(WE_Tree_0, CountGadgetItems(WE_Tree_0)-1)
+      
       
     Case #PB_Event_Gadget
       
@@ -890,7 +876,6 @@ Procedure CO_Insert(*ThisParse.ParseStruct)
     EndIf
     Protected Variable$ = ", "+#CRLF$+\Object\Argument$+"=-1"
     Protected VariableLength = Len(Variable$)
-    ; *This\Content\Text$ = InsertString(*This\Content\Text$, Space(7), VariablePosition) : VariablePosition + Len(Space(7))
     *This\Content\Text$ = InsertString(*This\Content\Text$, Variable$, VariablePosition) : VariablePosition + VariableLength
     
     ;
@@ -954,7 +939,6 @@ Procedure CO_Insert(*ThisParse.ParseStruct)
 EndProcedure
 
 Procedure CO_Create(Type$, X, Y, Parent)
-  Protected Object, Position
   Protected GadgetList
   
   With *This
@@ -1006,7 +990,7 @@ Procedure CO_Create(Type$, X, Y, Parent)
               Case 6 : ParsePBGadget()\Param1\Argument$=Buffer
               Case 7 : ParsePBGadget()\Param2\Argument$=Buffer
               Case 8 : ParsePBGadget()\Param3\Argument$=Buffer
-              Case 9 : ParsePBGadget()\Flag\Argument$=Buffer
+                ;               Case 9 : ParsePBGadget()\Flag\Argument$=Buffer
             EndSelect
           EndIf
         Next  
@@ -1030,29 +1014,41 @@ Procedure CO_Create(Type$, X, Y, Parent)
       \Height\Argument = Val(ParsePBGadget()\Height\Argument$)
       \Flag\Argument=CO_Flag(ParsePBGadget()\Flag\Argument$)
       
-      ParsePBGadget()\X\Argument$ = Str(\X\Argument)
-      ParsePBGadget()\Y\Argument$ = Str(\Y\Argument)
       ParsePBGadget()\Type\Argument$ = \Type\Argument$
       ParsePBGadget()\Object\Argument$ = \Object\Argument$
+      ParsePBGadget()\X\Argument$ = Str(\X\Argument)
+      ParsePBGadget()\Y\Argument$ = Str(\Y\Argument)
       
       CO_Insert(*ThisParse) 
     EndIf
     
     
-    Position = WE_Tree_0_Position(WE_Tree_0, Parent)
     
-    Object=CallFunctionFast(@CO_Open())
-    
-    If IsGadget(Object)
-      Select GadgetType(Object)
-        Case #PB_GadgetType_Panel, 
-             #PB_GadgetType_Container, 
-             #PB_GadgetType_ScrollArea
-          CloseGadgetList()
-      EndSelect
+    ; Определяем позицию в списке
+    Protected ii.i, Position=-1 ; 
+    If IsGadget(Parent) 
+      For ii=0 To CountGadgetItems(WE_Tree_0)-1
+        If Parent=GetGadgetItemData(WE_Tree_0, ii) 
+          \SubLevel=GetGadgetItemAttribute(WE_Tree_0, ii, #PB_Tree_SubLevel)+1
+          Position=(ii+1)
+          Break
+        EndIf
+      Next 
+      For ii=Position To CountGadgetItems(WE_Tree_0)-1
+        If \SubLevel=<GetGadgetItemAttribute(WE_Tree_0, ii, #PB_Tree_SubLevel)
+          Position+1
+        EndIf
+      Next 
+    ElseIf IsWindow(Parent)
+      Position = CountGadgetItems(WE_Tree_0)
+      \SubLevel = 1
     EndIf
+    *This\Item=Position
     
-    WE_Tree_0_Update(WE_Tree_0, Position)
+    CallFunctionFast(@CO_Open(), *This)
+    
+    
+    WE_Update(WE_Tree_0, Position)
 
     
     If GadgetList 
@@ -1082,12 +1078,51 @@ Procedure CO_Create(Type$, X, Y, Parent)
            "#PB_Window_Minimize,"+
            "#PB_Window_NoGadgets"
     
-    Data.s "ButtonGadget","Button_","80","20","Text","0","0","1",""
-;            "#PB_Button_Right,"+
-;            "#PB_Button_Left,"+
-;            "#PB_Button_Default,"+
-;            "#PB_Button_MultiLine,"+
-;            "#PB_Button_Toggle"
+    Data.s "ButtonGadget","Button_","80","20","Text","0","0","1",
+           "#PB_Button_Right,"+
+           "#PB_Button_Left,"+
+           "#PB_Button_Default,"+
+           "#PB_Button_MultiLine,"+
+           "#PB_Button_Toggle"
+    
+    Data.s "CheckBoxGadget","CheckBox_","80","20","Text","0","0","1",
+           "#PB_CheckBox_Right,"+
+           "#PB_CheckBox_Center,"+
+           "#PB_CheckBox_ThreeState"
+    
+    Data.s "ComboBoxGadget","Combo_","100","20","","0","0","1",
+           "#PB_ComboBox_Editable,"+
+           "#PB_ComboBox_LowerCase,"+
+           "#PB_ComboBox_UpperCase,"+
+           "#PB_ComboBox_Image"
+    
+    Data.s "ContainerGadget","Container_","100","120","","0","0","1",
+           "#PB_Container_Flat,"+
+           "#PB_Container_LowerCase,"+
+           "#PB_Container_UpperCase,"+
+           "#PB_Container_Image"
+    
+    Data.s "EditorGadget","Editor_","150","200","","0","0","1",
+           "#PB_Editor_ReadOnly"
+    
+    Data.s "FrameGadget","Frame_","180","150","Texte","1","0","1",
+           "#PB_Frame3D_Single,"+
+           "#PB_Frame3D_Double,"+
+           "#PB_Frame3D_Flat"
+    
+    Data.s "ListIconGadget","ListIcon_","180","180","","0","1","1",
+           "#PB_ListIcon_CheckBoxes,"+
+           "#PB_ListIcon_MultiSelect,"+
+           "#PB_ListIcon_GridLines,"+
+           "#PB_ListIcon_FullRowSelect,"+
+           "#PB_ListIcon_HeaderDragDrop,"+
+           "#PB_ListIcon_AlwaysShowSelection"
+    
+    Data.s "ListViewGadget","ListView_","150","150","","0","0","1",
+           "#PB_ListView_MultiSelect,"+
+           "#PB_ListView_ClickSelect"
+    
+    Data.s "OptionGadget","Option_","80","20","Texte","0","0","1",""
     
     Data.s "StringGadget","String_","80","20","Texte","0","0","1",
            "#PB_String_Password,"+
@@ -1101,45 +1136,6 @@ Procedure CO_Create(Type$, X, Y, Parent)
            "#PB_Text_Center,"+
            "#PB_Text_Right,"+
            "#PB_Text_Border"
-    
-    Data.s "CheckBoxGadget","CheckBox_","80","20","Text","0","0","1",
-           "#PB_CheckBox_Right,"+
-           "#PB_CheckBox_Center,"+
-           "#PB_CheckBox_ThreeState"
-    
-    Data.s "OptionGadget","Option_","80","20","Texte","0","0","1",""
-    
-    Data.s "ListViewGadget","ListView_","150","150","","0","0","1",
-           "#PB_ListView_MultiSelect,"+
-           "#PB_ListView_ClickSelect"
-    
-    Data.s "FrameGadget","Frame_","180","150","Texte","1","0","1",
-           "#PB_Frame3D_Single,"+
-           "#PB_Frame3D_Double,"+
-           "#PB_Frame3D_Flat"
-    
-    Data.s "ComboBoxGadget","Combo_","100","20","","0","0","1",
-           "#PB_ComboBox_Editable,"+
-           "#PB_ComboBox_LowerCase,"+
-           "#PB_ComboBox_UpperCase,"+
-           "#PB_ComboBox_Image"
-    
-    Data.s "ImageGadget","Image_","150","200","","0","0","1",
-           "#PB_Editor_ReadOnly"
-    
-    Data.s "HyperLinkGadget","HyperLink_","150","200","","0","0","1",
-           "#PB_Editor_ReadOnly"
-    
-    Data.s "ContainerGadget","Container_","100","120","","0","0","1",
-           "#PB_Container_Flat"
-    
-    Data.s "ListIconGadget","ListIcon_","180","180","","0","1","1",
-           "#PB_ListIcon_CheckBoxes,"+
-           "#PB_ListIcon_MultiSelect,"+
-           "#PB_ListIcon_GridLines,"+
-           "#PB_ListIcon_FullRowSelect,"+
-           "#PB_ListIcon_HeaderDragDrop,"+
-           "#PB_ListIcon_AlwaysShowSelection"
     
     Data.s "CanvasGadget","Canvas_","150","150","","0","0","1",
            "#PB_Canvas_Border,"+
@@ -1259,131 +1255,97 @@ Procedure CO_Create(Type$, X, Y, Parent)
   
 EndProcedure
 
-Procedure CO_Open() ; Ok
-  Protected GetParent, OpenGadgetList
+Procedure CO_Open(*ThisParse.ParseStruct) ; Ok
+  Protected OpenGadgetList, GetParent, Object=-1
   
-  With *This
+  With *ThisParse
     ;
     Select \Type\Argument$
-      Case "OpenWindow"          : \Type\Argument =- 1                           : \Object\Argument = OpenWindow          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument|#PB_Window_SizeGadget, \Param1\Argument) 
-      Case "ButtonGadget"        : \Type\Argument = #PB_GadgetType_Button        : \Object\Argument = ButtonGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
-      Case "StringGadget"        : \Type\Argument = #PB_GadgetType_String        : \Object\Argument = StringGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
-      Case "TextGadget"          : \Type\Argument = #PB_GadgetType_Text          : \Object\Argument = TextGadget          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
-      Case "CheckBoxGadget"      : \Type\Argument = #PB_GadgetType_CheckBox      : \Object\Argument = CheckBoxGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
-      Case "OptionGadget"        : \Type\Argument = #PB_GadgetType_Option        : \Object\Argument = OptionGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$)
-      Case "ListViewGadget"      : \Type\Argument = #PB_GadgetType_ListView      : \Object\Argument = ListViewGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Flag\Argument)
-      Case "FrameGadget"         : \Type\Argument = #PB_GadgetType_Frame         : \Object\Argument = FrameGadget         (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
-      Case "ComboBoxGadget"      : \Type\Argument = #PB_GadgetType_ComboBox      : \Object\Argument = ComboBoxGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Flag\Argument)
-      Case "ImageGadget"         : \Type\Argument = #PB_GadgetType_Image         : \Object\Argument = ImageGadget         (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Flag\Argument)
-      Case "HyperLinkGadget"     : \Type\Argument = #PB_GadgetType_HyperLink     : \Object\Argument = HyperLinkGadget     (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Param1\Argument, \Flag\Argument)
-      Case "ContainerGadget"     : \Type\Argument = #PB_GadgetType_Container     : \Object\Argument = ContainerGadget     (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Flag\Argument)
-      Case "ListIconGadget"      : \Type\Argument = #PB_GadgetType_ListIcon      : \Object\Argument = ListIconGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Param1\Argument, \Flag\Argument)
-      Case "IPAddressGadget"     : \Type\Argument = #PB_GadgetType_IPAddress     : \Object\Argument = IPAddressGadget     (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument)
-      Case "ProgressBarGadget"   : \Type\Argument = #PB_GadgetType_ProgressBar   : \Object\Argument = ProgressBarGadget   (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Flag\Argument)
-      Case "ScrollBarGadget"     : \Type\Argument = #PB_GadgetType_ScrollBar     : \Object\Argument = ScrollBarGadget     (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Param3\Argument, \Flag\Argument)
-      Case "ScrollAreaGadget"    : \Type\Argument = #PB_GadgetType_ScrollArea    : \Object\Argument = ScrollAreaGadget    (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Param3\Argument, \Flag\Argument) 
-      Case "TrackBarGadget"      : \Type\Argument = #PB_GadgetType_TrackBar      : \Object\Argument = TrackBarGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Flag\Argument)
-        ;Case "WebGadget"           : \Type\Argument = #PB_GadgetType_Web           : \Object\Argument = WebGadget           (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$)
-      Case "ButtonImageGadget"   : \Type\Argument = #PB_GadgetType_ButtonImage   : \Object\Argument = ButtonImageGadget   (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Flag\Argument)
-      Case "CalendarGadget"      : \Type\Argument = #PB_GadgetType_Calendar      : \Object\Argument = CalendarGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Flag\Argument)
-      Case "DateGadget"          : \Type\Argument = #PB_GadgetType_Date          : \Object\Argument = DateGadget          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Param1\Argument, \Flag\Argument)
-      Case "EditorGadget"        : \Type\Argument = #PB_GadgetType_Editor        : \Object\Argument = EditorGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Flag\Argument)
-      Case "ExplorerListGadget"  : \Type\Argument = #PB_GadgetType_ExplorerList  : \Object\Argument = ExplorerListGadget  (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
-      Case "ExplorerTreeGadget"  : \Type\Argument = #PB_GadgetType_ExplorerTree  : \Object\Argument = ExplorerTreeGadget  (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
-      Case "ExplorerComboGadget" : \Type\Argument = #PB_GadgetType_ExplorerCombo : \Object\Argument = ExplorerComboGadget (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
-      Case "SpinGadget"          : \Type\Argument = #PB_GadgetType_Spin          : \Object\Argument = SpinGadget          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Flag\Argument)
-      Case "TreeGadget"          : \Type\Argument = #PB_GadgetType_Tree          : \Object\Argument = TreeGadget          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Flag\Argument)
-      Case "PanelGadget"         : \Type\Argument = #PB_GadgetType_Panel         : \Object\Argument = PanelGadget         (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument) 
+      Case "OpenWindow"          : Object = OpenWindow          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument|#PB_Window_SizeGadget) 
+      Case "ButtonGadget"        : Object = ButtonGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
+      Case "StringGadget"        : Object = StringGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
+      Case "TextGadget"          : Object = TextGadget          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
+      Case "CheckBoxGadget"      : Object = CheckBoxGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
+      Case "OptionGadget"        : Object = OptionGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$)
+      Case "ListViewGadget"      : Object = ListViewGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Flag\Argument)
+      Case "FrameGadget"         : Object = FrameGadget         (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
+      Case "ComboBoxGadget"      : Object = ComboBoxGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Flag\Argument)
+      Case "ImageGadget"         : Object = ImageGadget         (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Flag\Argument)
+      Case "HyperLinkGadget"     : Object = HyperLinkGadget     (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Param1\Argument, \Flag\Argument)
+      Case "ContainerGadget"     : Object = ContainerGadget     (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Flag\Argument)
+      Case "ListIconGadget"      : Object = ListIconGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Param1\Argument, \Flag\Argument)
+      Case "IPAddressGadget"     : Object = IPAddressGadget     (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument)
+      Case "ProgressBarGadget"   : Object = ProgressBarGadget   (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Flag\Argument)
+      Case "ScrollBarGadget"     : Object = ScrollBarGadget     (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Param3\Argument, \Flag\Argument)
+      Case "ScrollAreaGadget"    : Object = ScrollAreaGadget    (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Param3\Argument, \Flag\Argument) 
+      Case "TrackBarGadget"      : Object = TrackBarGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Flag\Argument)
+        ;Case "WebGadget"           : Object = WebGadget           (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$)
+      Case "ButtonImageGadget"   : Object = ButtonImageGadget   (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Flag\Argument)
+      Case "CalendarGadget"      : Object = CalendarGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Flag\Argument)
+      Case "DateGadget"          : Object = DateGadget          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Param1\Argument, \Flag\Argument)
+      Case "EditorGadget"        : Object = EditorGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Flag\Argument)
+      Case "ExplorerListGadget"  : Object = ExplorerListGadget  (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
+      Case "ExplorerTreeGadget"  : Object = ExplorerTreeGadget  (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
+      Case "ExplorerComboGadget" : Object = ExplorerComboGadget (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
+      Case "SpinGadget"          : Object = SpinGadget          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Flag\Argument)
+      Case "TreeGadget"          : Object = TreeGadget          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Flag\Argument)
+      Case "PanelGadget"         : Object = PanelGadget         (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument) 
       Case "SplitterGadget"      
         Debug "Splitter FirstGadget "+\Param1\Argument
         Debug "Splitter SecondGadget "+\Param2\Argument
         If IsGadget(\Param1\Argument) And IsGadget(\Param2\Argument)
-          \Type\Argument = #PB_GadgetType_Splitter                               : \Object\Argument = SplitterGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Flag\Argument)
+          Object = SplitterGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Flag\Argument)
         EndIf
       Case "MDIGadget"          
         CompilerIf #PB_Compiler_OS = #PB_OS_Windows
-          \Type\Argument = #PB_GadgetType_MDI                                    : \Object\Argument = MDIGadget           (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Flag\Argument) 
+          Object = MDIGadget           (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Flag\Argument) 
         CompilerEndIf
-      Case "ScintillaGadget"     : \Type\Argument = #PB_GadgetType_Scintilla     : \Object\Argument = ScintillaGadget     (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument)
-      Case "ShortcutGadget"      : \Type\Argument = #PB_GadgetType_Shortcut      : \Object\Argument = ShortcutGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument)
-      Case "CanvasGadget"        : \Type\Argument = #PB_GadgetType_Canvas        : \Object\Argument = CanvasGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Flag\Argument)
+      Case "ScintillaGadget"     : Object = ScintillaGadget     (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument)
+      Case "ShortcutGadget"      : Object = ShortcutGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument)
+      Case "CanvasGadget"        : Object = CanvasGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Flag\Argument)
     EndSelect
     
     ; Заносим данные объекта в памят
-    If Bool(IsGadget(\Object\Argument) | IsWindow(\Object\Argument))
-      ParsePBGadget()\Type\Argument = \Type\Argument
-      ParsePBGadget()\Object\Argument = \Object\Argument
-      
-      If IsGadget(\Object\Argument)
-        ParsePBGadget()\Parent\Argument = \Parent\Argument
-        ParsePBGadget()\Window\Argument = \Window\Argument
-        
-      ElseIf IsWindow(\Object\Argument)
-        \Parent\Argument =- 1
-      EndIf
-      
-      Macro Init_object_data(_object_, _object_key_)
-        If AddMapElement(*This\get(), _object_key_)
-          *This\get()\Index=ListIndex(ParsePBGadget())
-          *This\get()\Adress=@ParsePBGadget()
-          
-          *This\get()\Object\Argument=_object_ 
-          *This\get()\Object\Argument$=*This\Object\Argument$ 
-          
-          *This\get()\Type\Argument=*This\Type\Argument 
-          *This\get()\Type\Argument$=*This\Type\Argument$ 
-          
-          *This\get()\Window\Argument=*This\Window\Argument 
-          *This\get()\Parent\Argument=*This\Parent\Argument 
-        EndIf
-        
-        *This\get(_object_key_)\Window\Argument$=*This\get(Str(_object_))\Window\Argument$ 
-        *This\get(_object_key_)\Parent\Argument$=*This\get(Str(_object_))\Parent\Argument$ 
-      EndMacro
-      
-      ; Количество однотипных объектов
+    If Bool(IsGadget(Object) | IsWindow(Object))
       If Not FindMapElement(*This\get(), Str(\Parent\Argument)+"_"+\Type\Argument$)
-        AddMapElement(*This\get(), Str(\Parent\Argument)+"_"+\Type\Argument$)
+        AddMapElement(*This\get(), Str(\Parent\Argument)+"_"+\Type\Argument$) 
         *This\get()\Index=ListIndex(ParsePBGadget())
         *This\get()\Adress=@ParsePBGadget()
         *This\get()\Count+1 
       Else
         *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count+1 
       EndIf
-       
+      
+      AddMapElement(*This\get(), \Object\Argument$) 
+      *This\get()\Index=ListIndex(ParsePBGadget())
+      *This\get()\Adress=@ParsePBGadget()
+      *This\get()\Object\Argument=Object
+      *This\get()\Window\Argument=\Window\Argument 
+      *This\get()\Parent\Argument=\Parent\Argument 
+      *This\get()\Object\Argument$=\Object\Argument$ 
+      ;*This\get()\Window\Argument$=*This\get(Str(Window))\Window\Argument$ 
+      ;*This\get()\Parent\Argument$=*This\get(Str(\Parent\Argument))\Parent\Argument$ 
+      
       ; Чтобы по идентификатору 
       ; объекта получить все остальное
-      Init_object_data(\Object\Argument, Str(\Object\Argument))
-      
-      ; Чтобы по классу
-      ; объекта получить все остальное
-      Init_object_data(\Object\Argument, \Object\Argument$)
+      AddMapElement(*This\get(), Str(Object)) 
+      *This\get()\Index=ListIndex(ParsePBGadget())
+      *This\get()\Adress=@ParsePBGadget()
+      *This\get()\Object\Argument=Object 
+      *This\get()\Window\Argument=\Window\Argument 
+      *This\get()\Parent\Argument=\Parent\Argument 
+      *This\get()\Object\Argument$=\Object\Argument$ 
+      *This\get()\Window\Argument$=*This\get(Str(Object))\Window\Argument$ 
+      *This\get()\Parent\Argument$=*This\get(Str(Object))\Parent\Argument$ 
     EndIf
     
     ;
     Select \Type\Argument$
-      Case "UseGadgetList" 
-        If IsWindow(\Param1\Argument)
-          \SubLevel = 1
-          \Window\Argument = \Param1\Argument
-          \Parent\Argument = \Window\Argument
-          UseGadgetList( WindowID(\Parent\Argument) )
-        EndIf
-        
-      Case "OpenWindow" : \Window\Argument = \Object\Argument : \Parent\Argument = \Object\Argument : \SubLevel = 1
-      Case "ContainerGadget", "ScrollAreaGadget", "PanelGadget" : \Parent\Argument = \Object\Argument : \SubLevel + 1
+      Case "UseGadgetList" : UseGadgetList( WindowID(\Parent\Argument) )
+      Case "OpenWindow" : \Window\Argument = Object : \Parent\Argument = Object : \SubLevel = 1
+      Case "ContainerGadget", "ScrollAreaGadget", "PanelGadget" : \Parent\Argument = Object : \SubLevel + 1
       Case "CloseGadgetList" 
-        If IsGadget(\Parent\Argument) 
-          \Parent\Argument = *This\get(Str(\Parent\Argument))\Parent\Argument 
-          CloseGadgetList() 
-        EndIf
-        
-      Case "OpenGadgetList"      
-        \Parent\Argument = *This\get(\Object\Argument$)\Object\Argument
-        
-        If IsGadget(\Parent\Argument)
-          OpenGadgetList(\Parent\Argument, \Param1\Argument)
-        EndIf
+        If IsGadget(\Parent\Argument) : CloseGadgetList() : \Parent\Argument = *This\get(Str(\Parent\Argument))\Parent\Argument : EndIf
         
       Case "AddGadgetColumn"       
         AddGadgetColumn( *This\get(\Object\Argument$)\Object\Argument, \Param1\Argument, \Caption\Argument$, \Param2\Argument)
@@ -1395,10 +1357,20 @@ Procedure CO_Open() ; Ok
           Debug " add gadget column "+\Object\Argument$
         EndIf
         
+      Case "OpenGadgetList"      
+        \Parent\Argument = *This\get(\Object\Argument$)\Object\Argument
+        
+        If IsGadget(\Parent\Argument)
+          OpenGadgetList(\Parent\Argument, \Param1\Argument)
+        EndIf
     EndSelect
     
     ;
-    If IsGadget(\Object\Argument)
+    If IsGadget(Object)
+      ParsePBGadget()\Object\Argument = Object
+      ParsePBGadget()\Window\Argument = *This\get(Str(Object))\Window\Argument
+      ParsePBGadget()\Parent\Argument = *This\get(Str(Object))\Parent\Argument
+      
       ;
       If IsGadget(\Parent\Argument)
         GetParent = *This\get(Str(\Parent\Argument))\Parent\Argument
@@ -1407,7 +1379,7 @@ Procedure CO_Open() ; Ok
       EndIf
       
       ; Открываем гаджет лист.
-      If \Object\Argument = \Parent\Argument
+      If Object = \Parent\Argument
         If IsWindow(GetParent)
           CloseGadgetList() ; Bug PB
           UseGadgetList(WindowID(GetParent))
@@ -1419,15 +1391,20 @@ Procedure CO_Open() ; Ok
       EndIf
       
       ; Посылаем сообщение, что создали гаджет.
-      PostEvent(#PB_Event_Create,
+      PostEvent(Constant::#Event_Create,
                 ParsePBGadget()\Window\Argument,
                 ParsePBGadget()\Object\Argument, #PB_All, 
                 ParsePBGadget()\Parent\Argument)
       
+      If GadgetType(Object) = #PB_GadgetType_Splitter
+        Transformation::Free(GetGadgetAttribute(Object, #PB_Splitter_FirstGadget))
+        Transformation::Free(GetGadgetAttribute(Object, #PB_Splitter_SecondGadget))
+      EndIf
+      
       ; Закрываем гаджет лист.
-      If \Object\Argument = \Parent\Argument
+      If Object = \Parent\Argument
         If IsWindow(GetParent) 
-          OpenGadgetList(\Object\Argument) 
+          OpenGadgetList(Object) 
         EndIf
         If OpenGadgetList 
           CloseGadgetList() 
@@ -1436,31 +1413,33 @@ Procedure CO_Open() ; Ok
       EndIf
       
       ; Позиция в списке листа гаджетов.
-      Select \Type\Argument
-        Case #PB_GadgetType_Panel, 
-             #PB_GadgetType_Container, 
+      Select GadgetType(Object)
+        Case #PB_GadgetType_Container, 
+             #PB_GadgetType_Panel, 
              #PB_GadgetType_ScrollArea
           ParsePBGadget()\SubLevel = \SubLevel - 1
-          EnableGadgetDrop(\Object\Argument, #PB_Drop_Text, #PB_Drag_Copy)
-          BindEvent(#PB_Event_GadgetDrop, @CO_Events(), ParsePBGadget()\Window\Argument, \Object\Argument)
+          EnableGadgetDrop(Object, #PB_Drop_Text, #PB_Drag_Copy)
+          BindEvent(#PB_Event_GadgetDrop, @CO_Events(), ParsePBGadget()\Window\Argument, Object)
         Default
           ParsePBGadget()\SubLevel = \SubLevel
       EndSelect
     EndIf
     
     ;
-    If IsWindow(\Object\Argument)
-      StickyWindow(\Object\Argument, #True)
-      PostEvent(#PB_Event_Create, \Object\Argument, #PB_Ignore)
-      EnableWindowDrop(\Object\Argument, #PB_Drop_Text, #PB_Drag_Copy)
+    If IsWindow(Object)
+      StickyWindow(Object, #True)
+      ParsePBGadget()\Object\Argument = Object
+      EnableWindowDrop(Object, #PB_Drop_Text, #PB_Drag_Copy)
+      PostEvent(Constant::#Event_Create, Object, #PB_Ignore)
+      BindEvent(#PB_Event_WindowDrop, @CO_Events(), Object)
+      BindEvent(Constant::#Event_Create, @CO_Events(), Object)
       
-      BindEvent(#PB_Event_Create, @CO_Events(), \Object\Argument)
-      BindEvent(#PB_Event_Gadget, @CO_Events(), \Object\Argument)
-      BindEvent(#PB_Event_WindowDrop, @CO_Events(), \Object\Argument)
+      ;       UnbindEvent(#PB_Event_Gadget, @CO_Events(), Object)
+      BindEvent(#PB_Event_Gadget, @CO_Events(), Object)
     EndIf
-  
-    ProcedureReturn \Object\Argument
   EndWith
+  
+  ProcedureReturn Object
 EndProcedure
 
 Procedure CO_Save(*ThisParse.ParseStruct) ; Ok
@@ -1577,7 +1556,7 @@ Procedure ParsePBFile(FileName.s)
                 
                 ; Если идентификатрор сгенерирован с #PB_Any то есть (Ident=PBFunction(#PB_Any))
                 If RegularExpressionGroup(#RegEx_Function, 3)
-                  \Object\Argument$ = RegularExpressionGroup(#RegEx_Function, 3)
+                  ;\Object\Argument$ = RegularExpressionGroup(#RegEx_Function, 3)
                   \Content\String$ = RegularExpressionMatchString(#RegEx_Function)
                   \Content\Length = RegularExpressionMatchLength(#RegEx_Function)
                   \Content\Position = RegularExpressionMatchPosition(#RegEx_Function)
@@ -1637,11 +1616,8 @@ Procedure ParsePBFile(FileName.s)
                                     Case 7 : Index+2
                                   EndSelect
                                   
-                                Case "OpenWindow"
-                                  If Index=7 : Index+3 : EndIf
-                                  If Index=11 : Index-4: EndIf ; param1=OwnerID
-                                  
-                                Case "ButtonGadget","StringGadget","TextGadget","CheckBoxGadget","FrameGadget",
+                                Case "OpenWindow",
+                                     "ButtonGadget","StringGadget","TextGadget","CheckBoxGadget","FrameGadget",
                                      "ExplorerListGadget","ExplorerTreeGadget","ExplorerComboGadget"
                                   If Index=7 : Index+3 : EndIf
                                   
@@ -1674,15 +1650,7 @@ Procedure ParsePBFile(FileName.s)
                                 \Caption\Argument$ = GetStr(Arg$) 
                                 
                               Case 7 : ParsePBGadget()\Param1\Argument$ = Arg$
-                               Select \Type\Argument$ 
-                                 Case "OpenWindow"      
-                                   \Param1\Argument$ = Arg$
-                                   \Param1\Argument = *This\get(get_argument_string(\Param1\Argument$))\Object\Argument
-                                   
-                                   If \Param1\Argument
-                                     \Param1\Argument = WindowID(\Param1\Argument)
-                                   EndIf
-                      
+                                Select \Type\Argument$ 
                                   Case "SplitterGadget"      
                                     \Param1\Argument = *This\get(Arg$)\Object\Argument
                                     
@@ -1701,7 +1669,7 @@ Procedure ParsePBFile(FileName.s)
                                 EndSelect
                                 
                               Case 8 : ParsePBGadget()\Param2\Argument$ = Arg$
-                               Select \Type\Argument$ 
+                                Select \Type\Argument$ 
                                   Case "SplitterGadget"      
                                     \Param2\Argument = *This\get(Arg$)\Object\Argument
                                     
@@ -1737,7 +1705,7 @@ Procedure ParsePBFile(FileName.s)
                         Wend
                       EndIf
                       
-                      Protected win = CallFunctionFast(@CO_Open())
+                      Protected win = CallFunctionFast(@CO_Open(), *This)
                       
                       \Object\Argument=-1
                       \Object\Argument$=""
@@ -1747,19 +1715,7 @@ Procedure ParsePBFile(FileName.s)
                       \Caption\Argument$ = ""
                       \Flag\Argument = 0
                       
-                    Case "UseGadgetList"
-                      \Param1\Argument$ = \Args$
-                      \Param1\Argument = *This\get(get_argument_string(\Param1\Argument$))\Object\Argument
-                      
-                      If \Param1\Argument
-                       *This\get(\Object\Argument$)\Object\Argument = *This\get(Str(\Param1\Argument))\Window\Argument
-                      Else
-                        \Param1\Argument = *This\get(\Param1\Argument$)\Object\Argument
-                      EndIf
-                      
-                      CallFunctionFast(@CO_Open())
-                      
-                    Case "CloseGadgetList"      : CallFunctionFast(@CO_Open()) ; ; TODO
+                    Case "CloseGadgetList"      : CallFunctionFast(@CO_Open(), *This) ; , "UseGadgetList" ; TODO
                       
                     Case "AddGadgetItem", "AddGadgetColumn", "OpenGadgetList"      
                       If ExamineRegularExpression(#RegEx_Arguments, \Args$) : Index=0
@@ -1786,7 +1742,7 @@ Procedure ParsePBFile(FileName.s)
                         Wend
                       EndIf
                       
-                      CallFunctionFast(@CO_Open())
+                      CallFunctionFast(@CO_Open(), *This)
                       
                       
                       \Object\Argument =- 1
@@ -1916,32 +1872,12 @@ EndProcedure
 
 ;-
 ;- PI Редактора
-Procedure WE_Tree_0_Position(Gadget, Parent)
-  Protected i, Position=-1 ; 
-  
-  ; Определяем позицию в списке
-  If IsGadget(Parent) 
-    For i=0 To CountGadgetItems(Gadget)-1
-      If Parent=GetGadgetItemData(Gadget, i) 
-        *This\SubLevel=GetGadgetItemAttribute(Gadget, i, #PB_Tree_SubLevel)+1
-        Position=(i+1)
-        Break
-      EndIf
-    Next 
-    For i=Position To CountGadgetItems(Gadget)-1
-      If *This\SubLevel=<GetGadgetItemAttribute(Gadget, i, #PB_Tree_SubLevel)
-        Position+1
-      EndIf
-    Next 
-  ElseIf IsWindow(Parent)
-    Position = CountGadgetItems(Gadget)
-    *This\SubLevel = 1
-  EndIf
-  
-  ProcedureReturn Position
-EndProcedure
 
-Procedure WE_Tree_0_Update(Gadget, Position=-1)
+Global *This\Content\File$ ; Путь к текущему файлу.
+Declare WE_CloseWindow()
+Declare WE_OpenWindow(Flag.i=#PB_Window_SystemMenu, ParentID=0)
+
+Procedure WE_Update(Gadget, Position=-1)
   Protected i
   
   ; Добавляем объекты к списку
@@ -1979,7 +1915,7 @@ Procedure WE_OpenFile(Path$) ; Открытие файла
     ; Начинаем перебырать файл
     If ParsePBFile(Path$)
       
-      WE_Tree_0_Update(WE_Tree_0)
+      WE_Update(WE_Tree_0)
       
     EndIf
     
@@ -2204,7 +2140,7 @@ Procedure WE_Events()
 ;               EndIf
               
               Debug GetGadgetState(WE_Tree_0);GetGadgetText(WE_Tree_0);GetGadgetItemText(WE_Tree_0, GetGadgetState(WE_Tree_0)) ; ReplaceMapData_Index
-              replace_map_key(GetGadgetText(WE_Tree_0), GetGadgetText(EventGadget()))
+              ReplaceMapKey(GetGadgetText(WE_Tree_0), GetGadgetText(EventGadget()))
               ;Trim(GetRegExString("[^\w]("+WE_Button_0+")[^\w]", 1), #CR$)
               ;Debug *This\get(GetGadgetText(EventGadget()))\Adress
               
