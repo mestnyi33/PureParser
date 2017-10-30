@@ -1,17 +1,16 @@
 ﻿EnableExplicit
-Global Window_0=-1, 
-       Window_0_Button_0=-1, 
-       Window_0_Button_1=-1, 
-       Window_0_Button_2=-1
+
+Global Window_0=-1, 
+       Window_0_String_0=-1, 
+       Window_0_Button_Close=-1
 
 Declare Window_0_Events()
 
 Procedure Window_0_Open(Flag.i=#PB_Window_SystemMenu|#PB_Window_ScreenCentered)
   If Not IsWindow(Window_0)
-    Window_0 = OpenWindow(#PB_Any, 550, 300, 300, 200, "Window_0", Flag)
-    Window_0_Button_0 = ButtonGadget(#PB_Any, 134, 56, 80, 20, "Button_0")
-    Window_0_Button_1 = ButtonGadget(#PB_Any, 140, 99, 80, 20, "Button_1")
-    Window_0_Button_2 = ButtonGadget(#PB_Any, 158, 141, 80, 20, "Button_2")
+    Window_0 = OpenWindow(#PB_Any, 468, 257, 300, 200, "Window_0", #PB_Window_SystemMenu|#PB_Window_ScreenCentered)
+    Window_0_String_0 = StringGadget(#PB_Any, 5, 5, 290, 165, "")                                                                    
+    Window_0_Button_Close = ButtonGadget(#PB_Any, 210, 175, 85, 20, "Закрыть")   
     
     BindEvent(#PB_Event_Gadget, @Window_0_Events(), Window_0)
   EndIf
@@ -25,7 +24,8 @@ Procedure Window_0_Events()
       Select EventType()
         Case #PB_EventType_LeftClick
           Select EventGadget()
-
+            Case Window_0_Button_Close
+              CloseWindow(EventWindow())
           EndSelect
       EndSelect
   EndSelect

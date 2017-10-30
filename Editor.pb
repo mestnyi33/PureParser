@@ -989,7 +989,7 @@ Procedure CO_Create(Type$, X, Y, Parent)
       Protected Buffer.s, BuffType$, i.i, j.i
       
       If *This\Content\Text$=""
-        Restore Content_global ; Content_constant
+        Restore Content
         Read.s Buffer
         *This\Content\Text$ = Buffer
         *This\Content\Position = 178 ; 281
@@ -998,7 +998,7 @@ Procedure CO_Create(Type$, X, Y, Parent)
       
       Restore Model 
       For i=1 To 14
-        For j=1 To 9 ; argument count
+        For j=1 To 7 ; argument count
           Read.s Buffer
           
           Select j
@@ -1010,15 +1010,19 @@ Procedure CO_Create(Type$, X, Y, Parent)
           
           If BuffType$ = \Type\Argument$
             Select j
-              Case 1 : ParsePBGadget()\Type\Argument$=Buffer
-              Case 2 : \Caption\Argument$=Buffer
-              Case 3 : ParsePBGadget()\Width\Argument$=Buffer
-              Case 4 : ParsePBGadget()\Height\Argument$=Buffer
-              ;Case 5 : ParsePBGadget()\Caption\Argument$=Buffer
-              Case 6 : ParsePBGadget()\Param1\Argument$=Buffer
-              Case 7 : ParsePBGadget()\Param2\Argument$=Buffer
-              Case 8 : ParsePBGadget()\Param3\Argument$=Buffer
-              Case 9 : ParsePBGadget()\Flag\Argument$=Buffer
+              Case 1 
+                ParsePBGadget()\Type\Argument$=Buffer
+                If Buffer = "OpenWindow"
+                  \Caption\Argument$=ReplaceString(Buffer, "Open","")+"_"
+                Else
+                  \Caption\Argument$=ReplaceString(Buffer, "Gadget","_")
+                EndIf
+              Case 2 : ParsePBGadget()\Width\Argument$=Buffer
+              Case 3 : ParsePBGadget()\Height\Argument$=Buffer
+              Case 4 : ParsePBGadget()\Param1\Argument$=Buffer
+              Case 5 : ParsePBGadget()\Param2\Argument$=Buffer
+              Case 6 : ParsePBGadget()\Param3\Argument$=Buffer
+              Case 7 : ParsePBGadget()\Flag\Argument$=Buffer
             EndSelect
           EndIf
         Next  
@@ -1084,158 +1088,33 @@ Procedure CO_Create(Type$, X, Y, Parent)
   DataSection
     Model:
     ;{
-    Data.s "OpenWindow","Window_","300","200","Text","0","0","1",
-           "#PB_Window_SystemMenu,"+
-           "#PB_Window_MinimizeGadget,"+
-           "#PB_Window_MaximizeGadget,"+
-           "#PB_Window_SizeGadget,"+
-           "#PB_Window_Invisible,"+
-           "#PB_Window_TitleBar,"+
-           "#PB_Window_BorderLess,"+
-           "#PB_Window_Tool,"+
-           "#PB_Window_ScreenCentered,"+
-           "#PB_Window_WindowCentered,"+
-           "#PB_Window_Maximize,"+
-           "#PB_Window_Minimize,"+
-           "#PB_Window_NoGadgets"
-    
-    Data.s "ButtonGadget","Button_","80","20","Text","0","0","1",""
-;            "#PB_Button_Right,"+
-;            "#PB_Button_Left,"+
-;            "#PB_Button_Default,"+
-;            "#PB_Button_MultiLine,"+
-;            "#PB_Button_Toggle"
-    
-    Data.s "StringGadget","String_","80","20","Texte","0","0","1",
-           "#PB_String_Password,"+
-           "#PB_String_ReadOnly,"+
-           "#PB_String_Numeric,"+
-           "#PB_String_LowerCase,"+
-           "#PB_String_UpperCase,"+
-           "#PB_String_BorderLess"
-    
-    Data.s "TextGadget","Text_","80","20","Text","1","0","0",
-           "#PB_Text_Center,"+
-           "#PB_Text_Right,"+
-           "#PB_Text_Border"
-    
-    Data.s "CheckBoxGadget","CheckBox_","80","20","Text","0","0","1",
-           "#PB_CheckBox_Right,"+
-           "#PB_CheckBox_Center,"+
-           "#PB_CheckBox_ThreeState"
-    
-    Data.s "OptionGadget","Option_","80","20","Texte","0","0","1",""
-    
-    Data.s "ListViewGadget","ListView_","150","150","","0","0","1",
-           "#PB_ListView_MultiSelect,"+
-           "#PB_ListView_ClickSelect"
-    
-    Data.s "FrameGadget","Frame_","180","150","Texte","1","0","1",
-           "#PB_Frame3D_Single,"+
-           "#PB_Frame3D_Double,"+
-           "#PB_Frame3D_Flat"
-    
-    Data.s "ComboBoxGadget","Combo_","100","20","","0","0","1",
-           "#PB_ComboBox_Editable,"+
-           "#PB_ComboBox_LowerCase,"+
-           "#PB_ComboBox_UpperCase,"+
-           "#PB_ComboBox_Image"
-    
-    Data.s "ImageGadget","Image_","150","200","","0","0","1",
-           "#PB_Editor_ReadOnly"
-    
-    Data.s "HyperLinkGadget","HyperLink_","150","200","","0","0","1",
-           "#PB_Editor_ReadOnly"
-    
-    Data.s "ContainerGadget","Container_","100","120","","0","0","1",
-           "#PB_Container_Flat"
-    
-    Data.s "ListIconGadget","ListIcon_","180","180","","0","1","1",
-           "#PB_ListIcon_CheckBoxes,"+
-           "#PB_ListIcon_MultiSelect,"+
-           "#PB_ListIcon_GridLines,"+
-           "#PB_ListIcon_FullRowSelect,"+
-           "#PB_ListIcon_HeaderDragDrop,"+
-           "#PB_ListIcon_AlwaysShowSelection"
-    
-    Data.s "CanvasGadget","Canvas_","150","150","","0","0","1",
-           "#PB_Canvas_Border,"+
-           "#PB_Canvas_ClipMouse,"+
-           "#PB_Canvas_Keyboard,"+
-           "#PB_Canvas_DrawFocus,"+
-           "#PB_Canvas_Container"
-    
-    Data.s "ImageGadget","Image_","150", "150","","0","0","1",
-           "#PB_Image_Border,"+
-           "#PB_Image_Raised" 
+    Data.s "OpenWindow","300","200","0","0","1", "#PB_Window_SystemMenu"
+    Data.s "ButtonGadget","80","20","0","0","1",""
+    Data.s "StringGadget","80","20","0","0","1",""
+    Data.s "TextGadget","80","20","1","0","0","#PB_Text_Border"
+    Data.s "CheckBoxGadget","80","20","0","0","1",""
+    Data.s "OptionGadget","80","20","0","0","1",""
+    Data.s "ListViewGadget","150","150","0","0","1",""
+    Data.s "FrameGadget","180","150","1","0","1",""
+    Data.s "ComboBoxGadget","100","20","0","0","1",""
+    Data.s "ImageGadget","150","200","0","0","1",""
+    Data.s "HyperLinkGadget","150","200","0","0","1",""
+    Data.s "ContainerGadget","150","150","0","0","1", "#PB_Container_Flat"
+    Data.s "ListIconGadget","180","180","0","1","1",""
+    Data.s "CanvasGadget","150","150","0","0","1",""
+    Data.s "ImageGadget","150", "150","0","0","1","#PB_Image_Border"
+           
     ;}
     
-    Content_constant:
-    ;{ 
-    Data.s "EnableExplicit"+#CRLF$+
-           ""+#CRLF$+
-           "Enumeration Window"+#CRLF$+
-           "  #Window_0"+#CRLF$+
-           "EndEnumeration"+#CRLF$+
-           ""+#CRLF$+
-           "Enumeration Gadget"+#CRLF$+
-           "EndEnumeration"+#CRLF$+
-           ""+#CRLF$+
-           "Enumeration Font"+#CRLF$+
-           "EndEnumeration"+#CRLF$+
-           ""+#CRLF$+
-           "Declare Window_0_Events()"+#CRLF$+
-           ""+#CRLF$+
-           "Procedure Window_0_Open(Flag.i=#PB_Window_SystemMenu|#PB_Window_ScreenCentered)"+#CRLF$+
-           "  If Not IsWindow(#Window_0)"+#CRLF$+
-           ;~"    OpenWindow(#Window_0,230,230,240,200,\"Window_0\", Flag)"+#CRLF$+   
-    "    "+#CRLF$+    
-           "    BindEvent(#PB_Event_Gadget, @Window_0_Events(), #Window_0)"+#CRLF$+
-           "  EndIf"+#CRLF$+
-           ""+#CRLF$+  
-           "  ProcedureReturn #Window_0"+#CRLF$+
-           "EndProcedure"+#CRLF$+
-           ""+#CRLF$+
-           "Procedure Window_0_Events()"+#CRLF$+
-           "  Select Event()"+#CRLF$+
-           "    Case #PB_Event_Gadget"+#CRLF$+
-           "      Select EventType()"+#CRLF$+
-           "        Case #PB_EventType_LeftClick"+#CRLF$+
-           "          Select EventGadget()"+#CRLF$+
-           ""+#CRLF$+            
-           "          EndSelect"+#CRLF$+
-           "      EndSelect"+#CRLF$+
-           "  EndSelect"+#CRLF$+
-           "EndProcedure"+#CRLF$+
-           ""+#CRLF$+
-           ""+#CRLF$+
-           "CompilerIf #PB_Compiler_IsMainFile"+#CRLF$+
-           "  Window_0_Open()"+#CRLF$+
-           ""+#CRLF$+  
-           "  While IsWindow(#Window_0)"+#CRLF$+
-           "    Select WaitWindowEvent()"+#CRLF$+
-           "      Case #PB_Event_CloseWindow"+#CRLF$+
-           "        If IsWindow(EventWindow())"+#CRLF$+
-           "          CloseWindow(EventWindow())"+#CRLF$+
-           "        Else"+#CRLF$+
-           "          CloseWindow(#Window_0)"+#CRLF$+
-           "        EndIf"+#CRLF$+
-           "    EndSelect"+#CRLF$+
-           "  Wend"+#CRLF$+
-           "CompilerEndIf"
-    ;}
-    
-    Content_global:
+    Content:
     ;{
     Data.s "EnableExplicit"+#CRLF$+
            ""+#CRLF$+
-           ;"Global Window_0=-1"+#CRLF$+
            ""+#CRLF$+
            "Declare Window_0_Events()"+#CRLF$+
            ""+#CRLF$+
            "Procedure Window_0_Open(Flag.i=#PB_Window_SystemMenu|#PB_Window_ScreenCentered)"+#CRLF$+
            "  If Not IsWindow(Window_0)"+#CRLF$+
-           ;~"    OpenWindow(Window_0,230,230,240,200,\"Window_0\", Flag)"+#CRLF$+  
            "    "+#CRLF$+    
            "    BindEvent(#PB_Event_Gadget, @Window_0_Events(), Window_0)"+#CRLF$+
            "  EndIf"+#CRLF$+
@@ -1249,7 +1128,7 @@ Procedure CO_Create(Type$, X, Y, Parent)
            "      Select EventType()"+#CRLF$+
            "        Case #PB_EventType_LeftClick"+#CRLF$+
            "          Select EventGadget()"+#CRLF$+
-           ""+#CRLF$+            
+           "             "+#CRLF$+            
            "          EndSelect"+#CRLF$+
            "      EndSelect"+#CRLF$+
            "  EndSelect"+#CRLF$+
@@ -1919,7 +1798,45 @@ Procedure LoadControls()
           Select PackEntryType(ZipFile)
             Case #PB_Packer_File
               If GadgetImage
-                AddGadgetItem(WE_Tree_1, -1, GadgetName, ImageID(GadgetImage))
+                Select GadgetName
+                  Case "buttongadget",
+                       "stringgadget",
+                       "textgadget",
+;                        "checkboxgadget",
+                       "optiongadget",
+;                        "listviewgadget",
+;                        "framegadget",
+;                        "comboboxgadget",
+;                        "imagegadget",
+;                        "hyperlinkgadget",
+                       "containergadget",
+;                        "listicongadget",
+;                        "ipaddressgadget",
+;                        "progressbargadget",
+;                        "scrollbargadget",
+;                        "scrollareagadget",
+;                        "trackbargadget",
+;                        "webgadget",
+;                        "buttonimagegadget",
+;                        "calendargadget",
+;                        "dategadget",
+;                        "editorgadget",
+;                        "explorerlistgadget",
+;                        "explorertreegadget",
+;                        "explorercombogadget",
+;                        "spingadget",
+;                        "treegadget",
+;                        "panelgadget",
+;                        "splittergadget",
+;                        "mdigadget",
+;                        "scintillagadget",
+;                        "shortcutgadget",
+                        "canvasgadget"
+                    
+                    AddGadgetItem(WE_Tree_1, -1, GadgetName, ImageID(GadgetImage))
+                EndSelect
+                
+                
               EndIf
           EndSelect
           
@@ -1986,6 +1903,40 @@ Procedure WE_Tree_0_Update(Gadget, Position=-1)
   SetGadgetState(Gadget, Position) ; Bug
   SetGadgetItemState(Gadget, Position, #PB_Tree_Selected)
 EndProcedure 
+
+Procedure WE_Tree_0_Replace(Gadget)
+  Protected Find$ = GetGadgetText(Gadget)
+  Protected Replace$ = GetGadgetText(EventGadget())
+  Protected RegExID = CreateRegularExpression(#PB_Any, "(?<!\w)"+Find$+"(?!\w|\s*"+~"\")")
+  
+  PushListPosition(ParsePBGadget())
+  ForEach ParsePBGadget()
+    If ParsePBGadget()\Object\Argument$ = Find$
+      ParsePBGadget()\Object\Argument$ = Replace$ 
+      Break 
+    EndIf
+  Next
+  PopListPosition(ParsePBGadget())  
+  
+  replace_map_key(GetGadgetText(Gadget), Replace$)
+  
+  If RegExID
+    If ExamineRegularExpression(RegExID, *This\Content\Text$)
+      While NextRegularExpressionMatch(RegExID)
+        *This\Content\Text$ = ReplaceRegularExpression(RegExID, *This\Content\Text$, Replace$)
+        Break
+      Wend
+    EndIf
+    FreeRegularExpression(RegExID)
+  EndIf
+  
+  SetGadgetText(Gadget, Replace$)
+  
+  Debug "---------------replace---------------------"
+  ClearDebugOutput()
+  Debug *This\Content\Text$
+  
+EndProcedure
 
 Procedure WE_OpenFile(Path$) ; Открытие файла
   If Path$
@@ -2201,49 +2152,10 @@ Procedure WE_Events()
           
           Select EventType()
             Case #PB_EventType_Change      
-              PushListPosition(ParsePBGadget())
-              With ParsePBGadget()
-                ForEach ParsePBGadget()
-                  If \Object\Argument$ = GetGadgetText(WE_Tree_0)
-                    \Object\Argument$ = GetGadgetText(EventGadget())
-                    Break
-                  EndIf
-                Next
-              EndWith
-              PopListPosition(ParsePBGadget())  
-              
-              replace_map_key(GetGadgetText(WE_Tree_0), GetGadgetText(EventGadget()))
-                
-              Protected _Pattern$ = "(?<!\w)"+GetGadgetText(WE_Tree_0)+"(?!\w|\s*"+~"\")" 
-              Protected Create_Reg_Flag = #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll    
-              Protected RegExID = CreateRegularExpression(#PB_Any, _Pattern$, Create_Reg_Flag)
-              
-              If RegExID
-                If ExamineRegularExpression(RegExID, *This\Content\Text$)
-                  While NextRegularExpressionMatch(RegExID)
-                    *This\Content\Text$ = ReplaceRegularExpression(RegExID, *This\Content\Text$, GetGadgetText(EventGadget()))
-                    Break
-                  Wend
-                EndIf
-                
-                FreeRegularExpression(RegExID)
-              EndIf
-              
-              
-              Debug "------------------------------------"
-              
-                ClearDebugOutput()
-                Debug *This\Content\Text$
-                
-              ;Debug *This\Content\Text$
-              
-              
-              SetGadgetText(WE_Tree_0, GetGadgetText(EventGadget()))
+              WE_Tree_0_Replace(WE_Tree_0)
               
           EndSelect
-          
-          
-          
+           
         Case Properties_Flag ;- Event(_Properties_Flag_)
           
           Select EventType()

@@ -752,8 +752,8 @@ Module Properties
             height = (IC*17) : If height>100 : height = 100 : EndIf
             
             If height
-              ResizeWindow(\TreeWindow, #PB_Ignore, #PB_Ignore, len*9, height)
-              ResizeGadget(\Tree, #PB_Ignore, #PB_Ignore, len*9, height)
+              If IsWindow(\TreeWindow) : ResizeWindow(\TreeWindow, #PB_Ignore, #PB_Ignore, len*9, height) : EndIf
+              If IsGadget(\Tree) : ResizeGadget(\Tree, #PB_Ignore, #PB_Ignore, len*9, height) : EndIf
             EndIf
           EndIf
       EndSelect
