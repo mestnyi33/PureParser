@@ -1,22 +1,17 @@
 ﻿EnableExplicit
-
-Global Window_0=-1, 
-Window_0=-1, 
-Window_0_Container_0=-1, 
-Window_0_Container_0_Button_0=-1, 
-Window_0_Button_0=-1, 
-Window_0_Container_0_Button_1=-1
+Global Window_0=-1, 
+       Window_0_Button_0=-1, 
+       Window_0_Button_1=-1, 
+       Window_0_Button_2=-1
 
 Declare Window_0_Events()
 
 Procedure Window_0_Open(Flag.i=#PB_Window_SystemMenu|#PB_Window_ScreenCentered)
   If Not IsWindow(Window_0)
     Window_0 = OpenWindow(#PB_Any, 550, 300, 300, 200, "Window_0", Flag)
-    Window_0_Container_0 = ContainerGadget(#PB_Any, 25, 20, 100, 120, #PB_Container_Flat)
-    Window_0_Container_0_Button_0 = ButtonGadget(#PB_Any, 54, 42, 80, 20, "Button_0")
-    Window_0_Container_0_Button_1 = ButtonGadget(#PB_Any, 40, 79, 80, 20, "Button_1")
-    CloseGadgetList()
-    Window_0_Button_0 = ButtonGadget(#PB_Any, 153, 34, 80, 20, "Button_0")
+    Window_0_Button_0 = ButtonGadget(#PB_Any, 134, 56, 80, 20, "Button_0")
+    Window_0_Button_1 = ButtonGadget(#PB_Any, 140, 99, 80, 20, "Button_1")
+    Window_0_Button_2 = ButtonGadget(#PB_Any, 158, 141, 80, 20, "Button_2")
     
     BindEvent(#PB_Event_Gadget, @Window_0_Events(), Window_0)
   EndIf

@@ -886,15 +886,27 @@ Procedure CO_Insert(*ThisParse.ParseStruct)
     ; 
     Static VariablePosition
     If VariablePosition = 0
-      VariablePosition = 37
+      VariablePosition = 18 ; 37
     EndIf
-    Protected Variable$ = ", "+#CRLF$+\Object\Argument$+"=-1"
-    Protected VariableLength = Len(Variable$)
+    Protected Variable$, VariableLength
+    
+    If \Type\Argument$ = "OpenWindow"
+      Variable$ = "Global "+\Object\Argument$+"=-1"
+    Else
+      Variable$ = ", "+#CRLF$+Space(Len("Global "))+\Object\Argument$+"=-1"
+    EndIf
+    
+    VariableLength = Len(Variable$)
     ; *This\Content\Text$ = InsertString(*This\Content\Text$, Space(7), VariablePosition) : VariablePosition + Len(Space(7))
-    *This\Content\Text$ = InsertString(*This\Content\Text$, Variable$, VariablePosition) : VariablePosition + VariableLength
+    *This\Content\Text$ = InsertString(*This\Content\Text$, Variable$, VariablePosition) 
+    VariablePosition + VariableLength
     
     ;
-    \Content\Position = (*This\Content\Position+*This\Content\Length)+Len(#CRLF$)+VariableLength
+    If \Type\Argument$ = "OpenWindow"
+      \Content\Position = (*This\Content\Position+*This\Content\Length)
+    Else
+      \Content\Position = (*This\Content\Position+*This\Content\Length)+Len(#CRLF$)+VariableLength
+    EndIf
     *This\Content\Text$ = InsertString(*This\Content\Text$, Space(4), \Content\Position) : \Content\Position + Len(Space(4))
     
     
@@ -1062,6 +1074,11 @@ Procedure CO_Create(Type$, X, Y, Parent)
         UseGadgetList(GadgetList)
       EndIf
     EndIf
+    
+    ClearDebugOutput()
+    Debug "-------------create----------------"
+    Debug *This\Content\Text$
+    
   EndWith
   
   DataSection
@@ -1212,14 +1229,14 @@ Procedure CO_Create(Type$, X, Y, Parent)
     ;{
     Data.s "EnableExplicit"+#CRLF$+
            ""+#CRLF$+
-           "Global Window_0=-1"+#CRLF$+
+           ;"Global Window_0=-1"+#CRLF$+
            ""+#CRLF$+
            "Declare Window_0_Events()"+#CRLF$+
            ""+#CRLF$+
            "Procedure Window_0_Open(Flag.i=#PB_Window_SystemMenu|#PB_Window_ScreenCentered)"+#CRLF$+
            "  If Not IsWindow(Window_0)"+#CRLF$+
            ;~"    OpenWindow(Window_0,230,230,240,200,\"Window_0\", Flag)"+#CRLF$+  
-    "    "+#CRLF$+    
+           "    "+#CRLF$+    
            "    BindEvent(#PB_Event_Gadget, @Window_0_Events(), Window_0)"+#CRLF$+
            "  EndIf"+#CRLF$+
            ""+#CRLF$+  
@@ -1971,8 +1988,6 @@ Procedure WE_Tree_0_Update(Gadget, Position=-1)
 EndProcedure 
 
 Procedure WE_OpenFile(Path$) ; Открытие файла
-  Protected I
-  
   If Path$
     Debug "Открываю файл '"+Path$+"'"
     
@@ -1986,8 +2001,6 @@ Procedure WE_OpenFile(Path$) ; Открытие файла
     *This\Content\File$=Path$
     Debug "..успешно"
   EndIf 
-  
-  ProcedureReturn Bool(*This\Content\File$)
 EndProcedure
 
 Procedure WE_SaveFile(Path$) ; Процедура сохранения файла
@@ -2193,47 +2206,43 @@ Procedure WE_Events()
                 ForEach ParsePBGadget()
                   If \Object\Argument$ = GetGadgetText(WE_Tree_0)
                     \Object\Argument$ = GetGadgetText(EventGadget())
+                    Break
                   EndIf
                 Next
               EndWith
               PopListPosition(ParsePBGadget())  
               
-              Debug ParsePBGadget()\Content\String$
-;               If GetGadgetState(WE_Tree_0)=-1
-;                 SetGadgetState(WE_Tree_0,0)
-;               EndIf
-              
-              Debug GetGadgetState(WE_Tree_0);GetGadgetText(WE_Tree_0);GetGadgetItemText(WE_Tree_0, GetGadgetState(WE_Tree_0)) ; ReplaceMapData_Index
               replace_map_key(GetGadgetText(WE_Tree_0), GetGadgetText(EventGadget()))
-              ;Trim(GetRegExString("[^\w]("+WE_Button_0+")[^\w]", 1), #CR$)
-              ;Debug *This\get(GetGadgetText(EventGadget()))\Adress
-              
-              Debug ParsePBGadget()\Content\String$
-              
-              
-              Protected Result$, Group=1, _Pattern$ = "[^\w]("+GetGadgetText(WE_Tree_0)+")[^\w]"
+                
+              Protected _Pattern$ = "(?<!\w)"+GetGadgetText(WE_Tree_0)+"(?!\w|\s*"+~"\")" 
               Protected Create_Reg_Flag = #PB_RegularExpression_NoCase | #PB_RegularExpression_MultiLine | #PB_RegularExpression_DotAll    
               Protected RegExID = CreateRegularExpression(#PB_Any, _Pattern$, Create_Reg_Flag)
               
               If RegExID
                 If ExamineRegularExpression(RegExID, *This\Content\Text$)
                   While NextRegularExpressionMatch(RegExID)
-                    If Group
-                      Result$ = RegularExpressionGroup(RegExID, Group)
-                      ; ParsePBGadget()\Content\String$ = ReplaceRegularExpression(RegExID, ParsePBGadget()\Content\String$, GetGadgetText(EventGadget()))
-                      ; *This\Content\Text$ = ReplaceRegularExpression(RegExID, *This\Content\Text$, GetGadgetText(EventGadget()))
-                    Else
-                      Result$ = RegularExpressionMatchString(RegExID)
-                    EndIf
+                    *This\Content\Text$ = ReplaceRegularExpression(RegExID, *This\Content\Text$, GetGadgetText(EventGadget()))
+                    Break
                   Wend
                 EndIf
                 
                 FreeRegularExpression(RegExID)
               EndIf
               
+              
+              Debug "------------------------------------"
+              
+                ClearDebugOutput()
+                Debug *This\Content\Text$
+                
+              ;Debug *This\Content\Text$
+              
+              
               SetGadgetText(WE_Tree_0, GetGadgetText(EventGadget()))
               
           EndSelect
+          
+          
           
         Case Properties_Flag ;- Event(_Properties_Flag_)
           
@@ -2293,9 +2302,7 @@ Procedure WE_Events()
           CO_Free(GetGadgetItemData(WE_Tree_0, GetGadgetState(WE_Tree_0)))
           
         Case WE_Menu_Open ;- Event(_WE_Menu_Open_) 
-          If Not WE_OpenFile(OpenFileRequester("Выберите файл с описанием окон", *This\Content\File$, "Все файлы|*", 0))
-            MessageRequester("Ошибка", "Не удалось открыть файл.", #PB_MessageRequester_Error)
-          EndIf
+          WE_OpenFile(OpenFileRequester("Выберите файл с описанием окон", *This\Content\File$, "Все файлы|*", 0))
           
         Case WE_Menu_Save_as ;- Event(_WE_Menu_Save_as_) 
           If Not WE_SaveFile("Test_0.pb") ; SaveFileRequester("Сохранить файл как ..", *This\Content\File$, "PureBasic (*.pb)|*.pb;*.pbi;*.pbf|All files (*.*)|*.*", 0))

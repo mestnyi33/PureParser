@@ -95,20 +95,11 @@ Macro ReplaceMapKey1(FindReplaceMapKey, ReplaceMapKey)
 EndMacro
 
 Macro ReplaceMapKey(_find_mapkey, _replace_mapkey)
-  CopyStructure(@*This\get(_find_mapkey), @*This\get(_replace_mapkey), ObjectStruct)
-  DeleteMapElement(*This\get(), _find_mapkey)
+  CopyStructure(*This\get(_find_mapkey), *This\get(_replace_mapkey), ObjectStruct)
   ChangeCurrentElement(ParsePBGadget(), *This\get(_replace_mapkey)\Adress)
+  DeleteMapElement(*This\get(), _find_mapkey)
 EndMacro
 
-Macro ReplaceMapKey3(_find_mapkey, _replace_mapkey)
-  Define *Source.ObjectStruct=*This\get(_find_mapkey)
-  Define *Destination.ObjectStruct=*This\get(_replace_mapkey)
-
-  CopyStructure(*Source, *Destination, ThisStruct)
-
-  DeleteMapElement(*This\get(), _find_mapkey)
-  ChangeCurrentElement(ParsePBGadget(), *This\get(_replace_mapkey)\Adress)
-EndMacro
 
 Macro Parent(Object)
   *This\get(Str(Object))\Parent\Argument)
