@@ -30,16 +30,45 @@ XIncludeFile "include/Flag.pbi"
 XIncludeFile "include/Transformation.pbi"
 XIncludeFile "include/Properties.pbi"
 
+
+XIncludeFile "include/Scintilla.pbi"
+Global WE_Code=-1
+
+Procedure WE_Code_CallBack()
+  Select Event()
+    Case #PB_Event_DeactivateWindow
+      ; HideWindow(EventWindow(), #True)
+    Case #PB_Event_SizeWindow
+      ResizeGadget(GetWindowData(EventWindow()), #PB_Ignore, #PB_Ignore, WindowWidth(EventWindow()), WindowHeight(EventWindow()))
+  EndSelect
+EndProcedure
+
+Procedure WE_Code_Init(owner_handle)
+  Protected UseGadgetList = UseGadgetList(0)
+  WE_Code = OpenWindow(#PB_Any, 0, 0, 420, 600, "(WE) - code", #PB_Window_TitleBar|#PB_Window_SizeGadget|#PB_Window_Invisible, owner_handle)
+  StickyWindow(WE_Code, #True)
+  SetWindowData(WE_Code, Scintilla::Gadget(#PB_Any, 0, 0, 420, 600))
+  BindEvent(#PB_Event_SizeWindow, @WE_Code_CallBack(), WE_Code)
+  BindEvent(#PB_Event_DeactivateWindow, @WE_Code_CallBack(), WE_Code)
+  UseGadgetList(UseGadgetList)
+EndProcedure
+
+Procedure WE_Code_Show(Text$)
+  HideWindow(WE_Code, #False)
+  Scintilla::SetText(GetWindowData(WE_Code), Text$)
+EndProcedure
+
+
 ;-
 ;- GLOBAL
 Global MainWindow=-1
 Global WE=-1, 
-       WE_Menu_0, 
-       WE_PopupMenu_0,
-       WE_Tree_0, 
-       WE_Tree_1, 
-       WE_Panel_0,
-       WE_Splitter_0
+       WE_Menu_0=-1, 
+       WE_PopupMenu_0=-1,
+       WE_Tree_0=-1, 
+       WE_Tree_1=-1, 
+       WE_Panel_0=-1,
+       WE_Splitter_0=-1
 
 Global WE_Properties
 Global Properties_ID 
@@ -981,7 +1010,21 @@ Procedure CO_Create(Type$, X, Y, Parent)
     Select Type$
       Case "Window" : \Type\Argument$ = "OpenWindow"
       Case "Menu", "ToolBar" : \Type\Argument$ = Type$
-      Default : \Type\Argument$=ULCase(Type$) + "Gadget"
+      Default 
+        \Type\Argument$=ULCase(Type$) + "Gadget"
+        
+        \Type\Argument$ = ReplaceString(\Type\Argument$, "box","Box")
+        \Type\Argument$ = ReplaceString(\Type\Argument$, "link","Link")
+        \Type\Argument$ = ReplaceString(\Type\Argument$, "bar","Bar")
+        \Type\Argument$ = ReplaceString(\Type\Argument$, "area","Area")
+        \Type\Argument$ = ReplaceString(\Type\Argument$, "Ipa","IPA")
+        
+        \Type\Argument$ = ReplaceString(\Type\Argument$, "view","View")
+        \Type\Argument$ = ReplaceString(\Type\Argument$, "icon","Icon")
+        \Type\Argument$ = ReplaceString(\Type\Argument$, "image","Image")
+        \Type\Argument$ = ReplaceString(\Type\Argument$, "combo","Combo")
+        \Type\Argument$ = ReplaceString(\Type\Argument$, "list","List")
+        \Type\Argument$ = ReplaceString(\Type\Argument$, "tree","Tree")
     EndSelect
     
     Protected *ThisParse.ParseStruct = AddElement(ParsePBGadget())
@@ -995,9 +1038,9 @@ Procedure CO_Create(Type$, X, Y, Parent)
         *This\Content\Position = 178 ; 281
         *This\Content\Length = 0     ;54
       EndIf
-      
+              
       Restore Model 
-      For i=1 To 14
+      For i=1 To 1+33 ; gadget count
         For j=1 To 7 ; argument count
           Read.s Buffer
           
@@ -1017,6 +1060,7 @@ Procedure CO_Create(Type$, X, Y, Parent)
                 Else
                   \Caption\Argument$=ReplaceString(Buffer, "Gadget","_")
                 EndIf
+                
               Case 2 : ParsePBGadget()\Width\Argument$=Buffer
               Case 3 : ParsePBGadget()\Height\Argument$=Buffer
               Case 4 : ParsePBGadget()\Param1\Argument$=Buffer
@@ -1029,12 +1073,11 @@ Procedure CO_Create(Type$, X, Y, Parent)
         BuffType$ = ""
       Next  
       
-      \Parent\Argument = Parent
-      \Caption\Argument$+*This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count
+      \Caption\Argument$+*This\get(Str(Parent)+"_"+\Type\Argument$)\Count
       ParsePBGadget()\Caption\Argument$ = \Caption\Argument$
       
-      If *This\get(Str(\Parent\Argument))\Object\Argument$
-        \Object\Argument$ = *This\get(Str(\Parent\Argument))\Object\Argument$+"_"+\Caption\Argument$
+      If *This\get(Str(Parent))\Object\Argument$
+        \Object\Argument$ = *This\get(Str(Parent))\Object\Argument$+"_"+\Caption\Argument$
       Else
         \Object\Argument$ = \Caption\Argument$
         ParsePBGadget()\Flag\Argument$="Flag"
@@ -1051,7 +1094,42 @@ Procedure CO_Create(Type$, X, Y, Parent)
       ParsePBGadget()\Type\Argument$ = \Type\Argument$
       ParsePBGadget()\Object\Argument$ = \Object\Argument$
       
+    ;ClearDebugOutput()
+    
+     Static pos,plus
+     
+     If \Parent\Argument = Parent
+       Debug 1111
+;        If plus
+;          Debug 888888
+;         ; pos = \Content\Position + Len(#CRLF$+Space(4)+"CloseGadgetList()")
+;        EndIf
+     Else
+       If IsGadget(\Parent\Argument)
+         Debug 999
+         pos = \Content\Position 
+         \Content\Position+Len(#CRLF$+Space(4))
+         \Content\Position +Len("CloseGadgetList()")
+       ElseIf IsWindow(\Parent\Argument)
+         Debug 777777777
+         \Content\Position = pos+Len(", "+Space(Len("Global "))+\Object\Argument$+"=-1")
+       EndIf
+     EndIf
+     
       CO_Insert(*ThisParse) 
+     
+     Select \Type\Argument$
+       Case "PanelGadget",
+            "ContainerGadget", 
+            "ScrollAreaGadget"
+         ;pos = \Content\Position+\Content\Length
+         ;Debug "Position "
+         *This\Content\Text$ = InsertString(*This\Content\Text$, #CRLF$+Space(4)+"CloseGadgetList()", \Content\Position+\Content\Length) ;: \Content\Position + Len(#CRLF$+Space(4)+"CloseGadgetList()")
+       
+     EndSelect
+     
+    
+      \Parent\Argument = Parent
     EndIf
     
     
@@ -1079,32 +1157,51 @@ Procedure CO_Create(Type$, X, Y, Parent)
       EndIf
     EndIf
     
-    ClearDebugOutput()
-    Debug "-------------create----------------"
-    Debug *This\Content\Text$
+;     Debug "-------------create----------------"
+;     Debug *This\Content\Text$
+    WE_Code_Show(*This\Content\Text$)
     
   EndWith
   
   DataSection
     Model:
     ;{
-    Data.s "OpenWindow","300","200","0","0","1", "#PB_Window_SystemMenu"
-    Data.s "ButtonGadget","80","20","0","0","1",""
-    Data.s "StringGadget","80","20","0","0","1",""
-    Data.s "TextGadget","80","20","1","0","0","#PB_Text_Border"
-    Data.s "CheckBoxGadget","80","20","0","0","1",""
-    Data.s "OptionGadget","80","20","0","0","1",""
-    Data.s "ListViewGadget","150","150","0","0","1",""
-    Data.s "FrameGadget","180","150","1","0","1",""
-    Data.s "ComboBoxGadget","100","20","0","0","1",""
-    Data.s "ImageGadget","150","200","0","0","1",""
-    Data.s "HyperLinkGadget","150","200","0","0","1",""
-    Data.s "ContainerGadget","150","150","0","0","1", "#PB_Container_Flat"
-    Data.s "ListIconGadget","180","180","0","1","1",""
-    Data.s "CanvasGadget","150","150","0","0","1",""
-    Data.s "ImageGadget","150", "150","0","0","1","#PB_Image_Border"
-           
+    Data.s "OpenWindow","300","200","0","0","0", "#PB_Window_SystemMenu"
+    Data.s "ButtonGadget","80","20","0","0","0",""
+    Data.s "StringGadget","80","20","0","0","0",""
+    Data.s "TextGadget","80","20","0","0","0","#PB_Text_Border"
+    Data.s "CheckBoxGadget","80","20","0","0","0",""
+    Data.s "OptionGadget","80","20","0","0","0",""
+    Data.s "ListViewGadget","150","150","0","0","0",""
+    Data.s "FrameGadget","150","150","0","0","0",""
+    Data.s "ComboBoxGadget","100","20","0","0","0",""
+    Data.s "ImageGadget","120","120","0","0","0","#PB_Image_Border"
+    Data.s "HyperLinkGadget","150","200","$0000FF","0","0",""
+    Data.s "ContainerGadget","150","150","0","0","0", "#PB_Container_Flat"
+    Data.s "ListIconGadget","180","180","0","0","0",""
+    Data.s "IPAddressGadget","80", "20","0","0","0",""
+    Data.s "ProgressBarGadget","80","20","0","0","0",""
+    Data.s "ScrollBarGadget","80","20","0","0","0",""
+    Data.s "ScrollAreaGadget","150","150","0","0","0",""
+    Data.s "TrackBarGadget","180","150","0","0","0",""
+    Data.s "WebGadget","100","20","0","0","0",""
+    Data.s "ButtonImageGadget","20","20","0","0","0",""
+    Data.s "CalendarGadget","150","200","0","0","0",""
+    Data.s "DateGadget","80","20","0","0","0",""
+    Data.s "EditorGadget","80","20","0","0","0",""
+    Data.s "ExplorerListGadget","150","150","0","0","0",""
+    Data.s "ExplorerTreeGadget","180","150","0","0","0",""
+    Data.s "ExplorerComboGadget","100","20","0","0","0",""
+    Data.s "SpinGadget","80","20","-1000","1000","0","#PB_Spin_Numeric"
+    Data.s "TreeGadget","150","180","0","0","0",""
+    Data.s "PanelGadget","80","20","0","0","0",""
+    Data.s "SplitterGadget","80","20","0","0","0",""
+    Data.s "MDIGadget","150","150","0","0","0",""
+    Data.s "ScintillaGadget","180","150","0","0","0",""
+    Data.s "ShortcutGadget","100","20","0","0","0",""
+    Data.s "CanvasGadget","150","150","0","0","0",""
     ;}
+    
     
     Content:
     ;{
@@ -1800,15 +1897,15 @@ Procedure LoadControls()
               If GadgetImage
                 Select GadgetName
                   Case "buttongadget",
-                       "stringgadget",
-                       "textgadget",
+;                        "stringgadget",
+                        "textgadget",
 ;                        "checkboxgadget",
-                       "optiongadget",
+;                        "optiongadget",
 ;                        "listviewgadget",
 ;                        "framegadget",
-;                        "comboboxgadget",
+; ;                        "comboboxgadget",
 ;                        "imagegadget",
-;                        "hyperlinkgadget",
+; ;                        "hyperlinkgadget",
                        "containergadget",
 ;                        "listicongadget",
 ;                        "ipaddressgadget",
@@ -1825,14 +1922,14 @@ Procedure LoadControls()
 ;                        "explorertreegadget",
 ;                        "explorercombogadget",
 ;                        "spingadget",
-;                        "treegadget",
-;                        "panelgadget",
+                       "treegadget",
+                       "panelgadget",
 ;                        "splittergadget",
 ;                        "mdigadget",
 ;                        "scintillagadget",
 ;                        "shortcutgadget",
-                        "canvasgadget"
-                    
+;                         "canvasgadget,"
+                    "gadget"
                     AddGadgetItem(WE_Tree_1, -1, GadgetName, ImageID(GadgetImage))
                 EndSelect
                 
@@ -1932,10 +2029,7 @@ Procedure WE_Tree_0_Replace(Gadget)
   
   SetGadgetText(Gadget, Replace$)
   
-  Debug "---------------replace---------------------"
-  ClearDebugOutput()
-  Debug *This\Content\Text$
-  
+  WE_Code_Show(*This\Content\Text$)
 EndProcedure
 
 Procedure WE_OpenFile(Path$) ; Открытие файла
@@ -2044,6 +2138,8 @@ Procedure WE_OpenWindow(Flag.i=#PB_Window_SystemMenu, ParentID=0)
     WE = OpenWindow(#PB_Any, 900, 100, 320, 600, "(WE) - Редактор объектов", Flag, ParentID)
     StickyWindow(WE, #True)
     
+    WE_Code_Init(ParentID)
+    
     WE_Menu_0 = CreateMenu(#PB_Any, WindowID(WE))
     If WE_Menu_0
       MenuTitle("Project")
@@ -2086,8 +2182,8 @@ Procedure WE_OpenWindow(Flag.i=#PB_Window_SystemMenu, ParentID=0)
     Properties::AddItem( WE_Properties, "Puth", #PB_GadgetType_String|#PB_GadgetType_Button )
     Properties::AddItem( WE_Properties, "Color:", #PB_GadgetType_String|#PB_GadgetType_Button )
     
-    AddGadgetItem(WE_Panel_0, -1, "Events")
-    
+    ; 
+    AddGadgetItem(WE_Panel_0, -1, "?") ; Events")
     CloseGadgetList()
     
     WE_Splitter_0 = SplitterGadget(#PB_Any, 5, 5, 320-10, 600-MenuHeight()-10, WE_Tree_0, WE_Panel_0, #PB_Splitter_FirstFixed)
