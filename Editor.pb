@@ -43,9 +43,9 @@ Procedure WE_Code_CallBack()
   EndSelect
 EndProcedure
 
-Procedure WE_Code_Init(owner_handle)
+Procedure WE_Code_Init(Parent)
   Protected UseGadgetList = UseGadgetList(0)
-  WE_Code = OpenWindow(#PB_Any, 0, 0, 420, 600, "(WE) - code", #PB_Window_TitleBar|#PB_Window_SizeGadget|#PB_Window_Invisible, owner_handle)
+  WE_Code = OpenWindow(#PB_Any, WindowX(Parent)-800, (WindowY(Parent)+WindowHeight(Parent))-300, 800, 300, "(WE) - code", #PB_Window_TitleBar|#PB_Window_SizeGadget|#PB_Window_Invisible, WindowID(Parent))
   StickyWindow(WE_Code, #True)
   SetWindowData(WE_Code, Scintilla::Gadget(#PB_Any, 0, 0, 420, 600))
   BindEvent(#PB_Event_SizeWindow, @WE_Code_CallBack(), WE_Code)
@@ -1618,7 +1618,6 @@ Procedure ParsePBFile(FileName.s)
                                 Case "ScrollBarGadget","ScrollAreaGadget","ScintillaGadget"
                                   If Index=6 : Index+1 : EndIf
                                   
-                                  
                                 Case "TrackBarGadget","SpinGadget","SplitterGadget","ProgressBarGadget"
                                   Select Index 
                                     Case 6,8 : Index+1
@@ -1647,7 +1646,16 @@ Procedure ParsePBFile(FileName.s)
                             Select Index
                               Case 1
                                 If Bool(Arg$<>"#PB_Any" And Arg$<>"#PB_All" And Arg$<>"#PB_Default" And Asc(Arg$)<>'-')
-                                  \Object\Argument$ = Arg$
+                                  ; Если идентификаторы окон цыфри
+                                  If Val(Arg$)
+                                    If \Type\Argument$="OpenWindow"
+                                      \Object\Argument$ = Arg$+"_Window"
+                                    Else
+                                      \Object\Argument$ = Arg$+"_"+ReplaceString(\Type\Argument$, "Gadget","")
+                                    EndIf
+                                  Else
+                                    \Object\Argument$ = Arg$
+                                  EndIf
                                 EndIf
                                 ParsePBGadget()\Object\Argument$ = \Object\Argument$
                                 
@@ -1669,8 +1677,16 @@ Procedure ParsePBFile(FileName.s)
                               Case 7 : ParsePBGadget()\Param1\Argument$ = Arg$
                                Select \Type\Argument$ 
                                  Case "OpenWindow"      
-                                   \Param1\Argument$ = Arg$
-                                   \Param1\Argument = *This\get(get_argument_string(\Param1\Argument$))\Object\Argument
+                                   \Param1\Argument$ = get_argument_string(Arg$)
+                                   
+                                   ; Если идентификаторы окон цыфри
+                                   If Val(\Param1\Argument$)
+                                     \Param1\Argument$+"_Window"
+                                   Else
+                                     \Param1\Argument$ = Arg$
+                                   EndIf
+                                   
+                                   \Param1\Argument = *This\get(\Param1\Argument$)\Object\Argument
                                    
                                    If \Param1\Argument
                                      \Param1\Argument = WindowID(\Param1\Argument)
@@ -1741,8 +1757,16 @@ Procedure ParsePBFile(FileName.s)
                       \Flag\Argument = 0
                       
                     Case "UseGadgetList"
-                      \Param1\Argument$ = \Args$
-                      \Param1\Argument = *This\get(get_argument_string(\Param1\Argument$))\Object\Argument
+                      \Param1\Argument$ = get_argument_string(\Args$)
+                      
+                      ; Если идентификаторы окон цыфри
+                      If Val(\Param1\Argument$)
+                        \Param1\Argument$+"_Window"
+                      Else
+                        \Param1\Argument$ = \Args$
+                      EndIf
+                      
+                      \Param1\Argument = *This\get(\Param1\Argument$)\Object\Argument
                       
                       If \Param1\Argument
                        *This\get(\Object\Argument$)\Object\Argument = *This\get(Str(\Param1\Argument))\Window\Argument
@@ -2138,7 +2162,7 @@ Procedure WE_OpenWindow(Flag.i=#PB_Window_SystemMenu, ParentID=0)
     WE = OpenWindow(#PB_Any, 900, 100, 320, 600, "(WE) - Редактор объектов", Flag, ParentID)
     StickyWindow(WE, #True)
     
-    WE_Code_Init(ParentID)
+    WE_Code_Init(WE)
     
     WE_Menu_0 = CreateMenu(#PB_Any, WindowID(WE))
     If WE_Menu_0
