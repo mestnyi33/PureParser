@@ -8,6 +8,9 @@ DeclareModule Transformation
   #Alles = 9
   #Arrows = 9
   
+  #MenuItem_Delete = 61001
+  #MenuItem_Block = 61002
+  
   EnumerationBinary 1
     #Anchor_Position
     #Anchor_Horizontally
@@ -26,7 +29,7 @@ DeclareModule Transformation
   Declare Free(Object.i)
   Declare Create(Object.i, Parent.i, Window.i=-1, Item.i=0, Grid.i=1, Flags.i=#Anchor_All)
   
-  Declare Menu(Window, Object)
+  Declare Menu(Object)
   
 EndDeclareModule
 
@@ -40,6 +43,7 @@ Module Transformation
     Object.i
     Parent.i
     Item.i
+    PopupMenu.i
     
     Grid.i
     Pos.i
@@ -50,7 +54,7 @@ Module Transformation
   Global NewMap Index.i()
   Global NewList AnChor.Transformation()
   
-  Global WE_PopupMenu_0, CallMenuObject
+  Global CallMenuObject
   Declare CallBack()
   
   Procedure CanvasColorCallback()
@@ -434,7 +438,7 @@ Module Transformation
       If Bool(IsGadget(Object)|IsWindow(Object)) 
         ForEach AnChor()
           If AnChor()\Object = Object
-            For I = 1 To #Arrows
+            For I = 1 To 8;#Arrows
               If AnChor()\ID[I]
                 DisableGadget(AnChor()\ID[I], State)
               EndIf
@@ -443,7 +447,7 @@ Module Transformation
         Next
       Else
         ForEach AnChor()
-          For I = 1 To #Arrows
+          For I = 1 To 8;#Arrows
             If IsGadget(AnChor()\ID[I])
               DisableGadget(AnChor()\ID[I], State)
             EndIf
@@ -578,15 +582,34 @@ Module Transformation
     EndWith
   EndProcedure
   
-  Procedure Menu(Window, Object)
-    If IsWindow(Window)
-      CallMenuObject = Object
-      DisplayPopupMenu(WE_PopupMenu_0, WindowID(Window))
+  Procedure Menu(Object)
+    Protected I.i
+    
+    If Bool(IsGadget(Object)|IsWindow(Object))
+      With AnChor()
+        ForEach AnChor()
+          If AnChor()\Object = Object
+            CallMenuObject = AnChor()\ID[#Arrows]
+            DisplayPopupMenu(\PopupMenu, WindowID(\Window))
+            Break
+          Else
+            For I = 1 To #Arrows
+              If AnChor()\ID[I] = Object
+                CallMenuObject = Object
+                DisplayPopupMenu(\PopupMenu, WindowID(\Window))
+                Break
+              EndIf
+            Next
+          EndIf
+        Next
+      EndWith
     EndIf
   EndProcedure
   
   
   Procedure CallBack()
+    Static Click
+    Protected *This.Transformation
     
     Select Event()
       Case #PB_Event_LeftClick ; #PB_Event_ActivateWindow, 
@@ -599,19 +622,36 @@ Module Transformation
         EndIf
         
       Case #PB_Event_Menu
-        Select EventMenu()
-          Case 12 : Disable(CallMenuObject, 1)
-          Case 5 : Free(CallMenuObject)
-            PostEvent(#PB_Event_Gadget, EventWindow(), CallMenuObject, #PB_EventType_CloseItem) ; EventGadget())
-            
-        EndSelect
+        *This.Transformation = GetGadgetData(CallMenuObject)
+        With *This
+          Select EventMenu()
+            Case #MenuItem_Block : Click!1
+              If Click
+                Disable(\Object, #True)
+                SetMenuItemText(\PopupMenu, EventMenu(), "Block (on)")
+                UnbindGadgetEvent(CallMenuObject, @CallBack())
+                BindGadgetEvent(CallMenuObject, @CallBack(), #PB_EventType_RightClick)
+                SetGadgetAttribute(CallMenuObject, #PB_Canvas_Cursor, #PB_Cursor_Default)
+              Else
+                Disable(\Object, #False)
+                SetMenuItemText(\PopupMenu, EventMenu(), "Block (off)")
+                UnbindGadgetEvent(CallMenuObject, @CallBack(), #PB_EventType_RightClick)
+                BindGadgetEvent(CallMenuObject, @CallBack())
+                SetGadgetAttribute(CallMenuObject, #PB_Canvas_Cursor, #PB_Cursor_Hand)
+              EndIf
+              
+            Case #MenuItem_Delete : Free(\Object)
+              PostEvent(#PB_Event_Gadget, \Window, \Object, #PB_EventType_CloseItem)
+              
+          EndSelect
+        EndWith
         
       Case #PB_Event_Gadget
         Protected change.b
         Static left_x1.i, left_x2.i, top_y1.i, top_y2.i
         Static Selected.b, X.i, Y.i, OffsetX.i, OffsetY.i
         Static GadgetX0.i, GadgetX1.i, GadgetY0.i, GadgetY1.i
-        Protected *This.Transformation = GetGadgetData(EventGadget())
+        *This.Transformation = GetGadgetData(EventGadget())
         Protected iX.i=#PB_Ignore,iY.i=#PB_Ignore,iWidth.i=#PB_Ignore,iHeight.i=#PB_Ignore
         
         With *This
@@ -623,7 +663,7 @@ Module Transformation
               
             Case #PB_EventType_RightClick
               If *This And \ID[#Arrows] = EventGadget()
-                Menu(EventWindow(), \Object)
+                Menu(EventGadget())
                 ;PostEvent(#PB_Event_Gadget, EventWindow(), \Object, #PB_EventType_CloseItem, *This) ; EventGadget())
               EndIf
               
@@ -827,7 +867,7 @@ Module Transformation
   EndProcedure
   
   Procedure Create(Object.i, Parent.i, Window.i=-1, Item.i=0, Grid.i=1, Flags.i=#Anchor_All)
-    Static ParentGrid=1
+    Static PopupMenu, ParentGrid=1
     If Grid<1 : Grid=1 : EndIf
     Protected *This.Transformation
     Protected *Flags.DataBuffer = ?FlagsBuffer
@@ -862,7 +902,21 @@ Module Transformation
           \Object = Object
           \Item = Item
           \Size = 5
+             
+          If Not PopupMenu
+            PopupMenu = CreatePopupMenu(#PB_Any)
             
+            If PopupMenu
+              MenuItem(#MenuItem_Block, "Changes (block)"          ) ; +Chr(9)+"Ctrl+B"
+              MenuItem(#MenuItem_Delete, "Transformations (delete)") ; +Chr(9)+"Ctrl+D"
+              
+              UnbindEvent(#PB_Event_Menu, @CallBack(), \Window)
+              BindEvent(#PB_Event_Menu, @CallBack(), \Window)
+            EndIf
+          EndIf
+          
+          \PopupMenu = PopupMenu
+          
           If IsGadget(Object)
             \Pos = 3
             \Grid = ParentGrid
@@ -894,17 +948,6 @@ Module Transformation
             CompilerIf #PB_Compiler_OS = #PB_OS_Windows
               Points(Object, Grid)
             CompilerEndIf 
-            
-            If Not WE_PopupMenu_0
-              WE_PopupMenu_0 = CreatePopupMenu(#PB_Any)
-              If WE_PopupMenu_0
-                MenuItem(5, "Delete"          +Chr(9)+"Ctrl+D")
-                MenuItem(12, "Block changes"   +Chr(9)+"Ctrl+B")
-              EndIf
-              BindMenuEvent(WE_PopupMenu_0, 5, @CallBack())
-              BindMenuEvent(WE_PopupMenu_0, 12, @CallBack())
-;               BindEvent(#PB_Event_Menu, @CallBack(), \Window, WE_PopupMenu_0)
-            EndIf
           EndIf
           
           For I = 1 To #Alles

@@ -884,9 +884,8 @@ Procedure CO_Events()
     Case #PB_Event_Gadget
       
       Select EventType()
-        Case #PB_EventType_CloseItem
+        Case #PB_EventType_CloseItem ; Delete
           CO_Free(EventGadget())
-          ; DisplayPopupMenu(WE_PopupMenu_0, WindowID(WE))
           
         Case #PB_EventType_StatusChange
           
@@ -2343,7 +2342,8 @@ Procedure WE_Events()
           
           Select EventType()
             Case #PB_EventType_RightClick    
-              DisplayPopupMenu(WE_PopupMenu_0, WindowID(EventWindow()))
+              ;DisplayPopupMenu(WE_PopupMenu_0, WindowID(EventWindow()))
+              Transformation::Menu(GetGadgetItemData(WE_Tree_0, GetGadgetState(WE_Tree_0)))
               
             Case #PB_EventType_Change     
               ; Для удобства выбираем вкладку свойства 
