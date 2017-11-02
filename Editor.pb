@@ -885,7 +885,7 @@ Procedure CO_Events()
       
       Select EventType()
         Case #PB_EventType_CloseItem ; Delete
-          CO_Free(EventGadget())
+          CO_Free(Object)
           
         Case #PB_EventType_StatusChange
           
@@ -1264,7 +1264,7 @@ Procedure CO_Open() ; Ok
   With *This
     ;
     Select \Type\Argument$
-      Case "OpenWindow"          : \Type\Argument =- 1                           : \Object\Argument = OpenWindow          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument|#PB_Window_SizeGadget, \Param1\Argument)
+      Case "OpenWindow"          : \Type\Argument =- 1  : \Window\Argument =- 1  : \Object\Argument = OpenWindow          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument|#PB_Window_SizeGadget, \Param1\Argument)
        ; CanvasGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, #PB_Canvas_Container) : CloseGadgetList()
       Case "ButtonGadget"        : \Type\Argument = #PB_GadgetType_Button        : \Object\Argument = ButtonGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
       Case "StringGadget"        : \Type\Argument = #PB_GadgetType_String        : \Object\Argument = StringGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)

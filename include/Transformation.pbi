@@ -583,25 +583,20 @@ Module Transformation
   EndProcedure
   
   Procedure Menu(Object)
-    Protected I.i, Result, WindowID
+    Protected I.i, Result, Window
     
     With AnChor()
       If Is(Object)
         Result = \PopupMenu
         CallMenuObject = Object
-        WindowID = WindowID(\Window)
+        Window = \Window
       ElseIf Bool(IsGadget(Object)|IsWindow(Object))
         PushListPosition(AnChor())
         ForEach AnChor()
           If \Object = Object
             Result = \PopupMenu
             CallMenuObject = \ID[#Arrows]
-            If IsWindow(\Window)
-              WindowID = WindowID(\Window)
-            ElseIf IsWindow(Object)
-              WindowID = WindowID(Object)
-              \Window = Object
-            EndIf
+            Window = \Window
             Break
           EndIf
         Next
@@ -609,8 +604,8 @@ Module Transformation
       EndIf
     EndWith
     
-    If WindowID
-      DisplayPopupMenu(Result, WindowID)
+    If IsWindow(Window)
+      DisplayPopupMenu(Result, WindowID(Window))
     EndIf
     
     ProcedureReturn Result
@@ -651,8 +646,12 @@ Module Transformation
               EndIf
               
             Case #MenuItem_Delete : Free(\Object)
-              PostEvent(#PB_Event_Gadget, \Window, \Object, #PB_EventType_CloseItem)
-              
+;               If IsGadget(\Object)
+                PostEvent(#PB_Event_Gadget, \Window, \Object, #PB_EventType_CloseItem)
+;               ElseIf IsWindow(\Object)
+;                 PostEvent(#PB_Event_Gadget, \Window, \Object, #PB_EventType_CloseItem)
+;               EndIf
+;               
           EndSelect
         EndWith
         
@@ -906,9 +905,15 @@ Module Transformation
       *This = AddElement(AnChor())
       If *This
         With *This
-          \Window = Window
-          \Parent = Parent
           \Object = Object
+          If IsWindow(Object)
+            If Not IsWindow(Window)
+              \Window = Object
+            EndIf
+          Else
+            \Window = Window
+          EndIf
+          \Parent = Parent
           \Item = Item
           \Size = 5
              
@@ -916,9 +921,12 @@ Module Transformation
             PopupMenu = CreatePopupImageMenu(#PB_Any)
             
             If PopupMenu
-              MenuItem(#MenuItem_Block, "block"          ) ; +Chr(9)+"Ctrl+B"
-              MenuItem(#MenuItem_Delete, "delete") ; +Chr(9)+"Ctrl+D"
+              MenuItem(#MenuItem_Block, "Block"          ) ; +Chr(9)+"Ctrl+B"
+              MenuItem(#MenuItem_Delete, "Delete") ; +Chr(9)+"Ctrl+D"
             EndIf
+            
+            UnbindEvent(#PB_Event_Menu, @CallBack(), Object)
+            BindEvent(#PB_Event_Menu, @CallBack(), Object)
           EndIf
           
           \PopupMenu = PopupMenu
@@ -954,9 +962,6 @@ Module Transformation
             CompilerIf #PB_Compiler_OS = #PB_OS_Windows
               Points(Object, Grid)
             CompilerEndIf 
-            
-            UnbindEvent(#PB_Event_Menu, @CallBack(), Object)
-            BindEvent(#PB_Event_Menu, @CallBack(), Object)
           EndIf
           
           For I = 1 To #Alles
