@@ -583,27 +583,37 @@ Module Transformation
   EndProcedure
   
   Procedure Menu(Object)
-    Protected I.i
+    Protected I.i, Result, WindowID
     
-    If Bool(IsGadget(Object)|IsWindow(Object))
-      With AnChor()
+    With AnChor()
+      If Is(Object)
+        Result = \PopupMenu
+        CallMenuObject = Object
+        WindowID = WindowID(\Window)
+      ElseIf Bool(IsGadget(Object)|IsWindow(Object))
+        PushListPosition(AnChor())
         ForEach AnChor()
-          If AnChor()\Object = Object
-            CallMenuObject = AnChor()\ID[#Arrows]
-            DisplayPopupMenu(\PopupMenu, WindowID(\Window))
+          If \Object = Object
+            Result = \PopupMenu
+            CallMenuObject = \ID[#Arrows]
+            If IsWindow(\Window)
+              WindowID = WindowID(\Window)
+            ElseIf IsWindow(Object)
+              WindowID = WindowID(Object)
+              \Window = Object
+            EndIf
             Break
-          Else
-            For I = 1 To #Arrows
-              If AnChor()\ID[I] = Object
-                CallMenuObject = Object
-                DisplayPopupMenu(\PopupMenu, WindowID(\Window))
-                Break
-              EndIf
-            Next
           EndIf
         Next
-      EndWith
+        PopListPosition(AnChor())
+      EndIf
+    EndWith
+    
+    If WindowID
+      DisplayPopupMenu(Result, WindowID)
     EndIf
+    
+    ProcedureReturn Result
   EndProcedure
   
   
@@ -628,13 +638,13 @@ Module Transformation
             Case #MenuItem_Block : Click!1
               If Click
                 Disable(\Object, #True)
-                SetMenuItemText(\PopupMenu, EventMenu(), "Block (on)")
+;                 SetMenuItemText(\PopupMenu, EventMenu(), "Block (on)")
                 UnbindGadgetEvent(CallMenuObject, @CallBack())
                 BindGadgetEvent(CallMenuObject, @CallBack(), #PB_EventType_RightClick)
                 SetGadgetAttribute(CallMenuObject, #PB_Canvas_Cursor, #PB_Cursor_Default)
               Else
                 Disable(\Object, #False)
-                SetMenuItemText(\PopupMenu, EventMenu(), "Block (off)")
+;                 SetMenuItemText(\PopupMenu, EventMenu(), "Block (off)")
                 UnbindGadgetEvent(CallMenuObject, @CallBack(), #PB_EventType_RightClick)
                 BindGadgetEvent(CallMenuObject, @CallBack())
                 SetGadgetAttribute(CallMenuObject, #PB_Canvas_Cursor, #PB_Cursor_Hand)
@@ -664,7 +674,6 @@ Module Transformation
             Case #PB_EventType_RightClick
               If *This And \ID[#Arrows] = EventGadget()
                 Menu(EventGadget())
-                ;PostEvent(#PB_Event_Gadget, EventWindow(), \Object, #PB_EventType_CloseItem, *This) ; EventGadget())
               EndIf
               
             Case #PB_EventType_KeyDown
@@ -904,14 +913,11 @@ Module Transformation
           \Size = 5
              
           If Not PopupMenu
-            PopupMenu = CreatePopupMenu(#PB_Any)
+            PopupMenu = CreatePopupImageMenu(#PB_Any)
             
             If PopupMenu
-              MenuItem(#MenuItem_Block, "Changes (block)"          ) ; +Chr(9)+"Ctrl+B"
-              MenuItem(#MenuItem_Delete, "Transformations (delete)") ; +Chr(9)+"Ctrl+D"
-              
-              UnbindEvent(#PB_Event_Menu, @CallBack(), \Window)
-              BindEvent(#PB_Event_Menu, @CallBack(), \Window)
+              MenuItem(#MenuItem_Block, "block"          ) ; +Chr(9)+"Ctrl+B"
+              MenuItem(#MenuItem_Delete, "delete") ; +Chr(9)+"Ctrl+D"
             EndIf
           EndIf
           
@@ -948,6 +954,9 @@ Module Transformation
             CompilerIf #PB_Compiler_OS = #PB_OS_Windows
               Points(Object, Grid)
             CompilerEndIf 
+            
+            UnbindEvent(#PB_Event_Menu, @CallBack(), Object)
+            BindEvent(#PB_Event_Menu, @CallBack(), Object)
           EndIf
           
           For I = 1 To #Alles
