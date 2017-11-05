@@ -47,7 +47,7 @@ DeclareModule Properties
   Declare$ GetPBFlags( Type=#PB_GadgetType_Unknown )
   Declare$ Help(Gadget)
   
-  Declare Initialize( Object, Class$="", Flag$="" )
+  Declare Init( Object, Class$="", Flag$="" )
   
   Declare SetCheckedText(Gadget, Text$)
   Declare$ GetCheckedText(Gadget)
@@ -138,7 +138,7 @@ Module Properties
 ;     ProcedureReturn Flag
   EndProcedure
       
-   Procedure$ GetPBFlags( Type=#PB_GadgetType_Unknown ) ; 
+  Procedure$ GetPBFlags( Type=#PB_GadgetType_Unknown ) ; 
     Protected Flags.S
     
     Select Type
@@ -820,7 +820,7 @@ Module Properties
     
   EndProcedure
   
-  Procedure Initialize( Object, Class$="", Flag$="" )
+  Procedure Init( Object, Class$="", Flag$="" )
     Static CheckObject =- 1
     
     With Properties()
@@ -1409,9 +1409,9 @@ EndProcedure
                 Object = GetGadgetItemData(EventGadget(), GetGadgetState(EventGadget()))
                 
                 If IsGadget(Object)
-                  Properties::Initialize(Object, GetGadgetText(EventGadget()), Properties::GetPBFlags(GadgetType(EventGadget())))
+                  Properties::Init(Object, GetGadgetText(EventGadget()), Properties::GetPBFlags(GadgetType(EventGadget())))
                 ElseIf IsWindow(Object)
-                  Properties::Initialize(Object, GetWindowTitle(EventWindow()), Properties::GetPBFlags())
+                  Properties::Init(Object, GetWindowTitle(EventWindow()), Properties::GetPBFlags())
                 EndIf
             EndSelect
         EndSelect

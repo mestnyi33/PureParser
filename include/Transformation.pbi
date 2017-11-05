@@ -19,17 +19,18 @@ DeclareModule Transformation
   
   #Anchor_Size = #Anchor_Horizontally|#Anchor_Vertically
   #Anchor_All  = #Anchor_Position|#Anchor_Horizontally|#Anchor_Vertically
+  Global PopupMenu
   
   Declare Count()
   Declare Object()
   Declare Is(Gadget.i)
+  Declare PopupMenu(Object.i)
   Declare Change(Object.i)
   Declare Gadget(Gadget.i)
   Declare Update(Object.i)
   Declare Free(Object.i)
   Declare Create(Object.i, Parent.i, Window.i=-1, Item.i=0, Grid.i=1, Flags.i=#Anchor_All)
   
-  Declare Menu(Object)
   
 EndDeclareModule
 
@@ -43,43 +44,18 @@ Module Transformation
     Object.i
     Parent.i
     Item.i
-    PopupMenu.i
     
     Grid.i
     Pos.i
     Size.i
   EndStructure
   
-  Global ActivateObject =- 1
+  Global ChangedObject =- 1
   Global NewMap Index.i()
   Global NewList AnChor.Transformation()
   
-  Global CallMenuObject
+  Global PopupMenuCallObject
   Declare CallBack()
-  
-  Procedure CanvasColorCallback()
-    Protected Gadget = EventGadget()
-    
-    If IsGadget(Gadget) And StartDrawing (CanvasOutput (Gadget))
-      Box(0, 0, OutputWidth(), OutputHeight(), GetGadgetData(Gadget))
-      StopDrawing()
-    EndIf
-    
-  EndProcedure
-  
-  Procedure SetCanvasColor(Gadget, ColorType, Color)
-    If IsGadget(Gadget) 
-      If ColorType = #PB_Gadget_BackColor And GadgetType(Gadget) = #PB_GadgetType_Canvas
-        SetGadgetData(Gadget, Color) 
-        PostEvent(#PB_Event_Gadget, GetActiveWindow(), Gadget, #PB_EventType_Resize)
-        BindGadgetEvent(Gadget, @CanvasColorCallback(), #PB_EventType_Resize)
-      Else
-        SetGadgetColor(Gadget, ColorType, Color) 
-      EndIf
-    EndIf
-  EndProcedure
-  
-  Macro SetGadgetColor(Gadget, ColorType, Color) : SetCanvasColor(Gadget, ColorType, Color) : EndMacro
   
   CompilerIf #PB_Compiler_OS = #PB_OS_Windows
     Procedure GadgetsClipCallBack( GadgetID, lParam )
@@ -139,15 +115,17 @@ Module Transformation
     CompilerEndIf
   EndProcedure
   
-  Macro Clip(Gadget)
+  Macro Clip(_gadget_)
     CompilerSelect #PB_Compiler_OS
       CompilerCase #PB_OS_Windows
-        Define ___ClipMacroGadgetHeight___ = GadgetHeight( Gadget )
-        SetWindowLongPtr_( GadgetID( Gadget ), #GWL_STYLE, GetWindowLongPtr_( GadgetID( Gadget ), #GWL_STYLE )|#WS_CLIPSIBLINGS )
-        If ___ClipMacroGadgetHeight___ And GadgetType( Gadget ) = #PB_GadgetType_ComboBox
-          ResizeGadget( Gadget, #PB_Ignore, #PB_Ignore, #PB_Ignore, ___ClipMacroGadgetHeight___ )
+        If IsGadget(_gadget_)
+          Define ___ClipMacroGadgetHeight___ = GadgetHeight( _gadget_ )
         EndIf
-        SetWindowPos_( GadgetID( Gadget ), #GW_HWNDFIRST, 0,0,0,0, #SWP_NOMOVE|#SWP_NOSIZE )
+        SetWindowLongPtr_( GadgetID( _gadget_ ), #GWL_STYLE, GetWindowLongPtr_( GadgetID( _gadget_ ), #GWL_STYLE )|#WS_CLIPSIBLINGS )
+        If ___ClipMacroGadgetHeight___ And GadgetType( _gadget_ ) = #PB_GadgetType_ComboBox
+          ResizeGadget( _gadget_, #PB_Ignore, #PB_Ignore, #PB_Ignore, ___ClipMacroGadgetHeight___ )
+        EndIf
+        SetWindowPos_( GadgetID( _gadget_ ), #GW_HWNDFIRST, 0,0,0,0, #SWP_NOMOVE|#SWP_NOSIZE )
     CompilerEndSelect
   EndMacro
   
@@ -175,6 +153,44 @@ Module Transformation
       If This\ID[#Arrows] : ResizeGadget(This\ID[#Arrows], (This\Pos+2), -This\Size+This\Pos, #PB_Ignore, #PB_Ignore) : EndIf
     EndIf
   EndMacro
+  
+  Macro Delete()
+    For I = 1 To #Alles
+      If AnChor()\ID[I]
+        FreeGadget(AnChor()\ID[I])
+      EndIf
+    Next
+    
+    DeleteMapElement(Index(), Str(AnChor()\Object))
+    DeleteElement(AnChor())
+  EndMacro
+  
+  Procedure PopupMenu(Object.i)
+    Protected I.i, Result, Window
+    
+    With AnChor()
+      If Is(Object)
+        PopupMenuCallObject = Object
+        Window = \Window
+      ElseIf Bool(IsGadget(Object)|IsWindow(Object))
+        PushListPosition(AnChor())
+        ForEach AnChor()
+          If \Object = Object
+            PopupMenuCallObject = \ID[#Arrows]
+            Window = \Window
+            Break
+          EndIf
+        Next
+        PopListPosition(AnChor())
+      EndIf
+    EndWith
+    
+    If IsWindow(Window)
+      DisplayPopupMenu(PopupMenu, WindowID(Window))
+    EndIf
+    
+    ProcedureReturn PopupMenu
+  EndProcedure
   
   Procedure Points(Window=-1, Steps=6, BoxColor=0, PlotColor=0)
     Protected hDC, x,y, ID
@@ -283,7 +299,7 @@ Module Transformation
               If left_y2 < relative_y2 : left_y2 = relative_y2 : EndIf
               
               Show_line(left_gadget, left_in, \Object, \Parent, \Item, #True, checked_x1,left_y1,ls,left_y2-left_y1, $0000FF)
-            ElseIf checked_y1 <> relative_y1
+            Else
               Show_line(left_gadget, left_in, \Object)
             EndIf
             
@@ -293,7 +309,7 @@ Module Transformation
               If right_y2 < relative_y2 : right_y2 = relative_y2 : EndIf
               
               Show_line(right_gadget, right_in, \Object, \Parent, \Item, #True, checked_x2-ls,right_y1,ls,right_y2-right_y1, $0000FF)
-            ElseIf checked_y2 <> relative_y2 
+            Else 
               Show_line(right_gadget, right_in, \Object)
             EndIf
             
@@ -303,7 +319,7 @@ Module Transformation
               If top_x2 < relative_x2 : top_x2 = relative_x2: EndIf
               
               Show_line(top_gadget, top_in, \Object, \Parent, \Item, #True, top_x1,checked_y1,top_x2-top_x1,ls, $FF0000)
-            ElseIf checked_x1 <> relative_x1
+            Else
               Show_line(top_gadget, top_in, \Object)
             EndIf
             
@@ -313,51 +329,9 @@ Module Transformation
               If bottom_x2 < relative_x2 : bottom_x2 = relative_x2: EndIf
               
               Show_line(bottom_gadget, bottom_in, \Object, \Parent, \Item, #True, bottom_x1,checked_y2-ls,bottom_x2-bottom_x1,ls, $FF0000)
-            ElseIf checked_x2 <> relative_x2
+            Else
               Show_line(bottom_gadget, bottom_in, \Object)
             EndIf
-            
-            
-            ;Left_cross
-            If checked_x1 = relative_x2+distance And 
-               (checked_y2 >= relative_y1 And checked_y1 =< relative_y2)
-              left_y1 = relative_y1+((checked_y2-relative_y1))/2-ls ; relative_y1+((checked_y2-(checked_y2-checked_y1)/2)-(relative_y1-(relative_y2-relative_y1)/2))/2-ls
-              
-              Show_line(left_cross_gadget, left_cross_in, \Object, \Parent, \Item, #True, relative_x2,left_y1,checked_x1-relative_x2,ls*2, $0094FE)
-            ElseIf checked_y1 <> relative_y1
-              Show_line(left_cross_gadget, left_cross_in, \Object)
-            EndIf
-            
-            ;Right_cross
-            If checked_x2 = relative_x1-distance And 
-               (checked_y2 >= relative_y1 And checked_y1 =< relative_y2)
-              right_y1 = relative_y1+(checked_y2-relative_y1)/2-ls
-              
-              Show_line(right_cross_gadget, right_cross_in, \Object, \Parent, \Item, #True, checked_x2, right_y1, relative_x1-checked_x2, ls*2, $0094FE)
-            ElseIf checked_y2 <> relative_y2
-              Show_line(right_cross_gadget, right_cross_in, \Object)
-            EndIf
-            
-            ;Top_cross
-            If checked_y1 = relative_y2+distance And 
-               (checked_x2 >= relative_x1 And checked_x1 =< relative_x2) 
-              top_x1 = relative_x1+(checked_x2-relative_x1)/2-ls
-              
-              Show_line(top_cross_gadget, top_cross_in, \Object, \Parent, \Item, #True, top_x1, relative_y2,ls*2,checked_y1-relative_y2, $FE00E1)
-            ElseIf checked_x1 <> relative_x1
-              Show_line(top_cross_gadget, top_cross_in, \Object)
-            EndIf
-            
-            ;Bottom_cross
-            If checked_y2 = relative_y1-distance And 
-               (checked_x2 >= relative_x1 And checked_x1 =< relative_x2)
-              bottom_x1 = relative_x1+(checked_x2-relative_x1)/2-ls
-              
-              Show_line(bottom_cross_gadget, bottom_cross_in, \Object, \Parent, \Item, #True, bottom_x1, checked_y2, ls*2,relative_y1-checked_y2, $FE00E1)
-            ElseIf checked_x2 <> relative_x2
-              Show_line(bottom_cross_gadget, bottom_cross_in, \Object)
-            EndIf
-            
           EndIf
         Next
         PopListPosition(AnChor())
@@ -377,7 +351,7 @@ Module Transformation
   EndProcedure
   
   Procedure Object()
-    ProcedureReturn ActivateObject
+    ProcedureReturn ChangedObject
   EndProcedure
   
   Procedure Is(Gadget.i)
@@ -410,7 +384,7 @@ Module Transformation
         ForEach AnChor()
           If AnChor()\Object = Object
             For I = 1 To 8
-              If AnChor()\ID[I]
+              If IsGadget(AnChor()\ID[I])
                 HideGadget(AnChor()\ID[I], State)
               EndIf
             Next
@@ -472,307 +446,224 @@ Module Transformation
   
   Procedure Change(Object.i) ; 
     If ListSize(AnChor()) 
-      If IsGadget(Object)
-        ForEach AnChor()
-          With AnChor()
+      If Bool(IsGadget(Object))
+        With AnChor()
+          ForEach AnChor()
             If \Object = Object
               Hide(#PB_Default, #True)
               Hide(\Object, #False)
-              Lines(\Object, \Parent, \Item, \Grid)
               Move(AnChor())
+              Lines(\Object, \Parent, \Item, \Grid)
+              Break
             EndIf
-          EndWith
-        Next
+          Next
+        EndWith
       ElseIf IsWindow(Object)
         Lines() ; Reset show all lines
         Hide(#PB_Default, #True)
+        Hide(Object, #False)
       EndIf
     EndIf
-  EndProcedure
-  
-  
-  Procedure sel_top(Gadget.i, Parent.i, Item.i, change.b=0, distance=0)
-    Protected ls=1
-    
-    Static left_in=-1, right_in=-1, top_in=-1, bottom_in=-1
-    Static left_gadget=-1,right_gadget=-1,top_gadget=-1,bottom_gadget=-1
-    
-    Static left_cross_in=-1, right_cross_in=-1, top_cross_in=-1, bottom_cross_in=-1
-    Static left_cross_gadget=-1,right_cross_gadget=-1,top_cross_gadget=-1,bottom_cross_gadget=-1
-    
-    Protected top_x1,left_y2,top_x2,left_y1,bottom_x1,right_y2,bottom_x2,right_y1
-    Protected checked_x1,checked_y1,checked_x2,checked_y2, relative_x1,relative_y1,relative_x2,relative_y2
-    
-    
-    With AnChor()
-      If IsGadget(Gadget)
-        checked_x1 = GadgetX(Gadget)
-        checked_y1 = GadgetY(Gadget)
-        checked_x2 = checked_x1+GadgetWidth(Gadget)
-        checked_y2 = checked_y1+GadgetHeight(Gadget)
-        
-        ;If change = 0 
-        top_x1 = checked_x1 : top_x2 = checked_x2 : bottom_x1 = checked_x1 : bottom_x2 = checked_x2
-        left_y1 = checked_y1 : left_y2 = checked_y2 : right_y1 = checked_y1 : right_y2 = checked_y2
-        
-        PushListPosition(AnChor())
-        ForEach AnChor()
-          If Bool(\Object <> Gadget And \Parent = Parent And \Item = Item)   
-            relative_x1 = GadgetX(\Object)
-            relative_y1 = GadgetY(\Object)
-            relative_x2 = relative_x1+GadgetWidth(\Object)
-            relative_y2 = relative_y1+GadgetHeight(\Object)
-            
-            If checked_y1 >= relative_y2
-              PostEvent(#PB_Event_Gadget, EventWindow(), \ID[#Arrows], #PB_EventType_LeftButtonDown)
-              PostEvent(#PB_Event_Gadget, EventWindow(), \ID[#Arrows], #PB_EventType_LeftButtonUp)
-            EndIf
-          EndIf
-        Next
-        PopListPosition(AnChor())
-        
-        ;EndIf
-      EndIf
-    EndWith
-  EndProcedure
-  
-  Procedure sel_bottom(Gadget.i, Parent.i, Item.i, change.b=0, distance=0)
-    Protected ls=1
-    
-    Static left_in=-1, right_in=-1, top_in=-1, bottom_in=-1
-    Static left_gadget=-1,right_gadget=-1,top_gadget=-1,bottom_gadget=-1
-    
-    Static left_cross_in=-1, right_cross_in=-1, top_cross_in=-1, bottom_cross_in=-1
-    Static left_cross_gadget=-1,right_cross_gadget=-1,top_cross_gadget=-1,bottom_cross_gadget=-1
-    
-    Protected top_x1,left_y2,top_x2,left_y1,bottom_x1,right_y2,bottom_x2,right_y1
-    Protected checked_x1,checked_y1,checked_x2,checked_y2, relative_x1,relative_y1,relative_x2,relative_y2
-    
-    
-    With AnChor()
-      If IsGadget(Gadget)
-        checked_x1 = GadgetX(Gadget)
-        checked_y1 = GadgetY(Gadget)
-        checked_x2 = checked_x1+GadgetWidth(Gadget)
-        checked_y2 = checked_y1+GadgetHeight(Gadget)
-        
-        ;If change = 0 
-        top_x1 = checked_x1 : top_x2 = checked_x2 : bottom_x1 = checked_x1 : bottom_x2 = checked_x2
-        left_y1 = checked_y1 : left_y2 = checked_y2 : right_y1 = checked_y1 : right_y2 = checked_y2
-        
-        PushListPosition(AnChor())
-        ForEach AnChor()
-          If Bool(\Object <> Gadget And \Parent = Parent And \Item = Item)   
-            relative_x1 = GadgetX(\Object)
-            relative_y1 = GadgetY(\Object)
-            relative_x2 = relative_x1+GadgetWidth(\Object)
-            relative_y2 = relative_y1+GadgetHeight(\Object)
-            
-            ;If top_x1
-            If checked_y2 =< relative_y1
-              PostEvent(#PB_Event_Gadget, EventWindow(), \ID[#Arrows], #PB_EventType_LeftButtonDown)
-              PostEvent(#PB_Event_Gadget, EventWindow(), \ID[#Arrows], #PB_EventType_LeftButtonUp)
-            EndIf
-          EndIf
-        Next
-        PopListPosition(AnChor())
-        
-        ;EndIf
-      EndIf
-    EndWith
-  EndProcedure
-  
-  Procedure Menu(Object)
-    Protected I.i, Result, Window
-    
-    With AnChor()
-      If Is(Object)
-        Result = \PopupMenu
-        CallMenuObject = Object
-        Window = \Window
-      ElseIf Bool(IsGadget(Object)|IsWindow(Object))
-        PushListPosition(AnChor())
-        ForEach AnChor()
-          If \Object = Object
-            Result = \PopupMenu
-            CallMenuObject = \ID[#Arrows]
-            Window = \Window
-            Break
-          EndIf
-        Next
-        PopListPosition(AnChor())
-      EndIf
-    EndWith
-    
-    If IsWindow(Window)
-      DisplayPopupMenu(Result, WindowID(Window))
-    EndIf
-    
-    ProcedureReturn Result
   EndProcedure
   
   
   Procedure CallBack()
     Static Click
+    Protected Change.b
     Protected *This.Transformation
+    Static left_x1.i, left_x2.i, top_y1.i, top_y2.i
+    Static Selected.b, X.i, Y.i, OffsetX.i, OffsetY.i
+    Static ObjectX0.i, ObjectX1.i, ObjectY0.i, ObjectY1.i, ObjectWidth.i, ObjectHeight.i
+    Protected iX.i=#PB_Ignore,iY.i=#PB_Ignore,iWidth.i=#PB_Ignore,iHeight.i=#PB_Ignore
+        
+    Macro SetCoordinate(This)
+      If top_y1<>iY : top_y1=iY : Change=3 : EndIf
+      If left_x1<>iX : left_x1=iX : Change=1 : EndIf
+      If left_x2<>iWidth : left_x2=iWidth : Change=2 : EndIf
+      If top_y2<>iHeight : top_y2=iHeight : Change=4 : EndIf
+      
+      If Change
+        If IsGadget(This\Object)
+          ResizeGadget(This\Object, iX,iY,iWidth,iHeight)
+          CompilerIf #PB_Compiler_OS = #PB_OS_Windows
+            UpdateWindow_(GetAncestor_( GadgetID( This\Object ), #GA_ROOT ))
+          CompilerEndIf 
+        ElseIf IsWindow(This\Object)
+          ResizeWindow(This\Object, iX,iY,iWidth,iHeight)
+        EndIf
+        Lines(This\Object, This\Parent, This\Item, This\Grid)
+        Move(This)
+      EndIf
+    EndMacro
+    
+    Macro GetCoordinate(This)
+      OffsetX = GetGadgetAttribute(EventGadget(), #PB_Canvas_MouseX)
+      OffsetY = GetGadgetAttribute(EventGadget(), #PB_Canvas_MouseY)
+      
+      If IsGadget(This\Object)
+        ObjectX0 = GadgetX(This\Object)
+        ObjectY0 = GadgetY(This\Object)
+        ObjectWidth = GadgetWidth(This\Object)
+        ObjectHeight = GadgetHeight(This\Object)
+      ElseIf IsWindow(This\Object)
+        ObjectX0 = WindowX(This\Object, #PB_Window_FrameCoordinate)
+        ObjectY0 = WindowY(This\Object, #PB_Window_FrameCoordinate)
+        ObjectWidth = WindowWidth(This\Object, #PB_Window_InnerCoordinate)
+        ObjectHeight = WindowHeight(This\Object, #PB_Window_InnerCoordinate)
+        OffsetX+(WindowX(This\Object, #PB_Window_InnerCoordinate)-WindowX(This\Object, #PB_Window_FrameCoordinate))
+        OffsetY+(WindowY(This\Object, #PB_Window_InnerCoordinate)-WindowY(This\Object, #PB_Window_FrameCoordinate))
+      EndIf
+      
+      ObjectX1 = ObjectX0 + ObjectWidth
+      ObjectY1 = ObjectY0 + ObjectHeight
+    EndMacro
     
     Select Event()
-      Case #PB_Event_LeftClick ; #PB_Event_ActivateWindow, 
-        If ActivateObject <> EventWindow() 
-          ActivateObject = EventWindow()
+      Case #PB_Event_LeftClick
+        If ChangedObject<>EventWindow() 
+          ChangedObject=EventWindow()
           Hide(#PB_Default, #True)
+          Hide(ChangedObject, #False)
           Lines() ; Reset show all lines
-          PostEvent(#PB_Event_Gadget, EventWindow(), #PB_Ignore, #PB_EventType_StatusChange);, \Object) ; EventGadget())
-          Hide(EventWindow(), #False)
+          PostEvent(#PB_Event_Gadget, ChangedObject, #PB_Ignore, #PB_EventType_StatusChange)
         EndIf
         
       Case #PB_Event_Menu
-        *This.Transformation = GetGadgetData(CallMenuObject)
-        With *This
-          Select EventMenu()
-            Case #MenuItem_Block : Click!1
-              If Click
-                Disable(\Object, #True)
-;                 SetMenuItemText(\PopupMenu, EventMenu(), "Block (on)")
-                UnbindGadgetEvent(CallMenuObject, @CallBack())
-                BindGadgetEvent(CallMenuObject, @CallBack(), #PB_EventType_RightClick)
-                SetGadgetAttribute(CallMenuObject, #PB_Canvas_Cursor, #PB_Cursor_Default)
-              Else
-                Disable(\Object, #False)
-;                 SetMenuItemText(\PopupMenu, EventMenu(), "Block (off)")
-                UnbindGadgetEvent(CallMenuObject, @CallBack(), #PB_EventType_RightClick)
-                BindGadgetEvent(CallMenuObject, @CallBack())
-                SetGadgetAttribute(CallMenuObject, #PB_Canvas_Cursor, #PB_Cursor_Hand)
-              EndIf
-              
-            Case #MenuItem_Delete : Free(\Object)
-;               If IsGadget(\Object)
+        *This = GetGadgetData(PopupMenuCallObject)
+        If *This
+          With *This
+            Select EventMenu()
+              Case #MenuItem_Block : Click!1
+                If Click
+                  Disable(\Object, #True)
+                  UnbindGadgetEvent(PopupMenuCallObject, @CallBack())
+                  BindGadgetEvent(PopupMenuCallObject, @CallBack(), #PB_EventType_RightClick)
+                  SetGadgetAttribute(PopupMenuCallObject, #PB_Canvas_Cursor, #PB_Cursor_Default)
+                Else
+                  Disable(\Object, #False)
+                  UnbindGadgetEvent(PopupMenuCallObject, @CallBack(), #PB_EventType_RightClick)
+                  BindGadgetEvent(PopupMenuCallObject, @CallBack())
+                  SetGadgetAttribute(PopupMenuCallObject, #PB_Canvas_Cursor, #PB_Cursor_Hand)
+                EndIf
+                
+              Case #MenuItem_Delete : Free(\Object)
                 PostEvent(#PB_Event_Gadget, \Window, \Object, #PB_EventType_CloseItem)
-;               ElseIf IsWindow(\Object)
-;                 PostEvent(#PB_Event_Gadget, \Window, \Object, #PB_EventType_CloseItem)
-;               EndIf
-;               
-          EndSelect
-        EndWith
+                
+            EndSelect
+          EndWith
+        EndIf
         
       Case #PB_Event_Gadget
-        Protected change.b
-        Static left_x1.i, left_x2.i, top_y1.i, top_y2.i
-        Static Selected.b, X.i, Y.i, OffsetX.i, OffsetY.i
-        Static GadgetX0.i, GadgetX1.i, GadgetY0.i, GadgetY1.i
-        *This.Transformation = GetGadgetData(EventGadget())
-        Protected iX.i=#PB_Ignore,iY.i=#PB_Ignore,iWidth.i=#PB_Ignore,iHeight.i=#PB_Ignore
-        
+        *This = GetGadgetData(EventGadget())
         With *This
           Select EventType()
+            Case #PB_EventType_MouseEnter
+              If Is(EventGadget()) And StartDrawing(CanvasOutput(EventGadget()))
+                Box(0, 0, OutputWidth(), OutputHeight(), $000000)
+                Box(1, 1, OutputWidth()-2, OutputHeight()-2, $FFFFFF)
+                StopDrawing()
+              EndIf
+              
+              
+            Case #PB_EventType_MouseLeave
+              If Is(EventGadget()) And StartDrawing(CanvasOutput(EventGadget()))
+                Box(0, 0, OutputWidth(), OutputHeight(), $999999)
+                Box(1, 1, OutputWidth()-2, OutputHeight()-2, $FFFFFF)
+                StopDrawing()
+              EndIf
+              
+              
             Case #PB_EventType_LeftClick
               If Not *This
-                PostEvent(#PB_Event_LeftClick, EventWindow(), #PB_Ignore)
+                PostEvent(#PB_Event_LeftClick, EventWindow(), #PB_Ignore, EventGadget())
               EndIf
               
             Case #PB_EventType_RightClick
               If *This And \ID[#Arrows] = EventGadget()
-                Menu(EventGadget())
+                PopupMenu(EventGadget())
               EndIf
               
-            Case #PB_EventType_KeyDown
-              GadgetX0 = GadgetX(\Object)
-              GadgetY0 = GadgetY(\Object)
+            Case #PB_EventType_KeyUp
+              Selected = #False
               
+            Case #PB_EventType_KeyDown
               If IsGadget(\ID[#Arrows]) 
+                GetCoordinate(*This)
+                Selected = #True
+                
                 Select GetGadgetAttribute(\ID[#Arrows], #PB_Canvas_Key)
                   Case #PB_Shortcut_Left
                     Select GetGadgetAttribute(\ID[#Arrows], #PB_Canvas_Modifiers)
                       Case #PB_Canvas_Shift 
                         If \ID[1] 
-                          iWidth = Match(GadgetWidth(\Object)-\Grid, \Grid)
+                          iWidth = Match(ObjectWidth-\Grid, \Grid)
                         EndIf
-                      Case #PB_Canvas_Control : iX = Match(GadgetX0-\Grid, \Grid)
-                      Default
-                        
+                      Case #PB_Canvas_Control
+;                       Debug ObjectX0
+;                         iX = ObjectX0-10;\Grid ; 
+;                       Debug iX
+                        iX = Match(ObjectX0-\Grid, \Grid)
+                    Default
+                          Selected = #False
+                    
                     EndSelect
                     
                   Case #PB_Shortcut_Up
                     Select GetGadgetAttribute(\ID[#Arrows], #PB_Canvas_Modifiers)
                       Case #PB_Canvas_Shift 
                         If \ID[2] 
-                          iHeight = Match(GadgetHeight(\Object)-\Grid, \Grid) 
+                          iHeight = Match(ObjectHeight-\Grid, \Grid) 
                         EndIf
-                      Case #PB_Canvas_Control : iY = Match(GadgetY0-\Grid, \Grid)
+                      Case #PB_Canvas_Control : iY = Match(ObjectY0-\Grid, \Grid)
                       Default
-                        sel_top(\Object, \Parent, \Item, change, \Grid)
-                        
+                         Selected = #False
+                     
                     EndSelect
                     
                   Case #PB_Shortcut_Right
                     Select GetGadgetAttribute(\ID[#Arrows], #PB_Canvas_Modifiers)
                       Case #PB_Canvas_Shift   
                         If \ID[3] 
-                          iWidth = Match(GadgetWidth(\Object)+\Grid, \Grid)
+                          iWidth = Match(ObjectWidth+\Grid, \Grid)
                         EndIf
-                      Case #PB_Canvas_Control : iX = Match(GadgetX0+\Grid, \Grid)
+                      Case #PB_Canvas_Control : iX = Match(ObjectX0+\Grid, \Grid)
                       Default
-                        
+                        Selected = #False
+                      
                     EndSelect
                     
                   Case #PB_Shortcut_Down
                     Select GetGadgetAttribute(\ID[#Arrows], #PB_Canvas_Modifiers)
                       Case #PB_Canvas_Shift   
                         If \ID[4] 
-                          iHeight = Match(GadgetHeight(\Object)+\Grid, \Grid)
+                          iHeight = Match(ObjectHeight+\Grid, \Grid)
                         EndIf
-                      Case #PB_Canvas_Control : iY = Match(GadgetY0+\Grid, \Grid)
+                      Case #PB_Canvas_Control : iY = Match(ObjectY0+\Grid, \Grid)
                       Default
-                        sel_bottom(\Object, \Parent, \Item, change, \Grid)
-                        
+                      Selected = #False
+                      
                     EndSelect
                     
                 EndSelect
                 
-                If left_x1<>iX : left_x1=iX : change=1 : EndIf
-                If left_x2<>iWidth : left_x2=iWidth : change=2 : EndIf
-                If top_y1<>iY : top_y1=iY : change=3 : EndIf
-                If top_y2<>iHeight : top_y2=iHeight : change=4 : EndIf
-                
-                If change
-                  ResizeGadget(\Object, iX,iY,iWidth,iHeight)
-                  CompilerIf #PB_Compiler_OS = #PB_OS_Windows
-                    UpdateWindow_(GetAncestor_( GadgetID( \Object ), #GA_ROOT ))
-                  CompilerEndIf 
-                  Lines(\Object, \Parent, \Item, \Grid)
-                  Move(*This)
+                If Selected
+                  SetCoordinate(*This)
                 EndIf
               EndIf
               
             Case #PB_EventType_LeftButtonDown
               If *This
+                GetCoordinate(*This)
                 Selected = #True
-                If IsGadget(\Object)
-                  GadgetX0 = GadgetX(\Object)
-                  GadgetY0 = GadgetY(\Object)
-                  GadgetX1 = GadgetX0 + GadgetWidth(\Object)
-                  GadgetY1 = GadgetY0 + GadgetHeight(\Object)
-                  OffsetX = GetGadgetAttribute(EventGadget(), #PB_Canvas_MouseX)
-                  OffsetY = GetGadgetAttribute(EventGadget(), #PB_Canvas_MouseY)
-                ElseIf IsWindow(\Object)
-                  GadgetX0 = WindowX(\Object,#PB_Window_FrameCoordinate)
-                  GadgetY0 = WindowY(\Object,#PB_Window_FrameCoordinate)
-                  GadgetX1 = GadgetX0 + WindowWidth(\Object, #PB_Window_InnerCoordinate)
-                  GadgetY1 = GadgetY0 + WindowHeight(\Object, #PB_Window_InnerCoordinate)
-                  OffsetX = GetGadgetAttribute(EventGadget(), #PB_Canvas_MouseX)+(WindowX(\Object,#PB_Window_InnerCoordinate)-WindowX(\Object,#PB_Window_FrameCoordinate))
-                  OffsetY = GetGadgetAttribute(EventGadget(), #PB_Canvas_MouseY)+(WindowY(\Object,#PB_Window_InnerCoordinate)-WindowY(\Object,#PB_Window_FrameCoordinate))
-                EndIf
-                
                 
                 If \ID[#Arrows] = EventGadget()
                   If GetGadgetAttribute(EventGadget(), #PB_Canvas_Cursor) = #PB_Cursor_Hand
                     SetGadgetAttribute(EventGadget(), #PB_Canvas_Cursor, #PB_Cursor_Arrows)
                   EndIf
                   
-                  If ActivateObject <> \Object 
-                    ActivateObject = \Object 
+                  If ChangedObject<>\Object : ChangedObject=\Object 
                     Hide(#PB_Default, #True)
-                    PostEvent(#PB_Event_Gadget, EventWindow(), \Object, #PB_EventType_StatusChange, *This) ; EventGadget())
+                    PostEvent(#PB_Event_Gadget, EventWindow(), \Object, #PB_EventType_StatusChange, EventGadget())
                   EndIf
                   
                   Lines(\Object, \Parent, \Item, \Grid)
@@ -808,38 +699,38 @@ Module Transformation
                 ; Object resize
                 Select EventGadget()
                   Case \ID[1]
-                    iX=Match(X+(\Size-\Pos), \Grid, GadgetX1)
-                    iWidth=GadgetX1-Match(X+(\Size-\Pos), \Grid, GadgetX1)
+                    iX=Match(X+(\Size-\Pos), \Grid, ObjectX1)
+                    iWidth=ObjectX1-Match(X+(\Size-\Pos), \Grid, ObjectX1)
                     
                   Case \ID[2] 
-                    iY=Match(Y+(\Size-\Pos), \Grid, GadgetY1)
-                    iHeight=GadgetY1-Match(Y+(\Size-\Pos), \Grid, GadgetY1)
+                    iY=Match(Y+(\Size-\Pos), \Grid, ObjectY1)
+                    iHeight=ObjectY1-Match(Y+(\Size-\Pos), \Grid, ObjectY1)
                     
                   Case \ID[3] 
-                    iWidth=Match(X+\Pos, \Grid)-GadgetX0+Bool(\Grid>1)
+                    iWidth=Match(X+\Pos, \Grid)-ObjectX0+Bool(\Grid>1)
                     
                   Case \ID[4] 
-                    iHeight=Match(Y+\Pos, \Grid)-GadgetY0+Bool(\Grid>1)
+                    iHeight=Match(Y+\Pos, \Grid)-ObjectY0+Bool(\Grid>1)
                     
                   Case \ID[5]
-                    iX=Match(X+(\Size-\Pos), \Grid, GadgetX1)
-                    iY=Match(Y+(\Size-\Pos), \Grid, GadgetY1)
-                    iWidth=GadgetX1-Match(X+(\Size-\Pos), \Grid, GadgetX1)
-                    iHeight=GadgetY1-Match(Y+(\Size-\Pos), \Grid, GadgetY1)
+                    iX=Match(X+(\Size-\Pos), \Grid, ObjectX1)
+                    iY=Match(Y+(\Size-\Pos), \Grid, ObjectY1)
+                    iWidth=ObjectX1-Match(X+(\Size-\Pos), \Grid, ObjectX1)
+                    iHeight=ObjectY1-Match(Y+(\Size-\Pos), \Grid, ObjectY1)
                     
                   Case \ID[6] 
-                    iY=Match(Y+(\Size-\Pos), \Grid, GadgetY1)
-                    iWidth=Match(X+\Pos, \Grid)-GadgetX0+Bool(\Grid>1)
-                    iHeight=GadgetY1-Match(Y+(\Size-\Pos), \Grid, GadgetY1)
+                    iY=Match(Y+(\Size-\Pos), \Grid, ObjectY1)
+                    iWidth=Match(X+\Pos, \Grid)-ObjectX0+Bool(\Grid>1)
+                    iHeight=ObjectY1-Match(Y+(\Size-\Pos), \Grid, ObjectY1)
                     
                   Case \ID[7] 
-                    iWidth=Match(X+\Pos, \Grid)-GadgetX0+Bool(\Grid>1)
-                    iHeight=Match(Y+\Pos, \Grid)-GadgetY0+Bool(\Grid>1)
+                    iWidth=Match(X+\Pos, \Grid)-ObjectX0+Bool(\Grid>1)
+                    iHeight=Match(Y+\Pos, \Grid)-ObjectY0+Bool(\Grid>1)
                     
                   Case \ID[8] 
-                    iX=Match(X+(\Size-\Pos), \Grid, GadgetX1)
-                    iHeight=Match(Y+\Pos, \Grid)-GadgetY0+Bool(\Grid>1)
-                    iWidth=GadgetX1-Match(X+(\Size-\Pos), \Grid, GadgetX1)
+                    iX=Match(X+(\Size-\Pos), \Grid, ObjectX1)
+                    iHeight=Match(Y+\Pos, \Grid)-ObjectY0+Bool(\Grid>1)
+                    iWidth=ObjectX1-Match(X+(\Size-\Pos), \Grid, ObjectX1)
                     
                   Case \ID[#Arrows] 
                     iX=Match((X-\Pos-2), \Grid)
@@ -847,23 +738,7 @@ Module Transformation
                     
                 EndSelect
                 
-                If left_x1<>iX : left_x1=iX : change=1 : EndIf
-                If left_x2<>iWidth : left_x2=iWidth : change=2 : EndIf
-                If top_y1<>iY : top_y1=iY : change=3 : EndIf
-                If top_y2<>iHeight : top_y2=iHeight : change=4 : EndIf
-                
-                If change
-                  If IsGadget(\Object)
-                    ResizeGadget(\Object, iX,iY,iWidth,iHeight)
-                    CompilerIf #PB_Compiler_OS = #PB_OS_Windows
-                      UpdateWindow_(GetAncestor_( GadgetID( \Object ), #GA_ROOT ))
-                    CompilerEndIf 
-                  ElseIf IsWindow(\Object)
-                    ResizeWindow(\Object, iX,iY,iWidth,iHeight)
-                  EndIf
-                  Lines(\Object, \Parent, \Item, \Grid)
-                  Move(*This)
-                EndIf
+                SetCoordinate(*This)
               Else
                 ; PostEvent(#PB_Event_MouseMove, EventWindow(), #PB_Ignore)
                 PostEvent(#PB_Event_Gadget, EventWindow(), #PB_Ignore, #PB_EventType_MouseMove, EventGadget())
@@ -875,7 +750,7 @@ Module Transformation
   EndProcedure
   
   Procedure Create(Object.i, Parent.i, Window.i=-1, Item.i=0, Grid.i=1, Flags.i=#Anchor_All)
-    Static PopupMenu, ParentGrid=1
+    Static ParentGrid=1
     If Grid<1 : Grid=1 : EndIf
     Protected *This.Transformation
     Protected *Flags.DataBuffer = ?FlagsBuffer
@@ -891,14 +766,7 @@ Module Transformation
     If Bool(IsGadget(Object)|IsWindow(Object))
       ForEach AnChor()
         If AnChor()\Object = Object
-          For I = 1 To #Alles
-            If AnChor()\ID[I]
-              FreeGadget(AnChor()\ID[I])
-            EndIf
-          Next
-          
-          DeleteMapElement(Index(), Str(Object))
-          DeleteElement(AnChor())
+          Delete()
         EndIf
       Next
       
@@ -928,8 +796,6 @@ Module Transformation
             UnbindEvent(#PB_Event_Menu, @CallBack(), Object)
             BindEvent(#PB_Event_Menu, @CallBack(), Object)
           EndIf
-          
-          \PopupMenu = PopupMenu
           
           If IsGadget(Object)
             \Pos = 3
@@ -978,7 +844,7 @@ Module Transformation
               SetGadgetAttribute(ID, #PB_Canvas_Cursor, *Cursors\ID[I])
               
               If StartDrawing(CanvasOutput(ID))
-                Box(0, 0, OutputWidth(), OutputHeight(), $000000)
+                Box(0, 0, OutputWidth(), OutputHeight(), $999999)
                 Box(1, 1, OutputWidth()-2, OutputHeight()-2, $FFFFFF)
                 StopDrawing()
               EndIf
@@ -1055,40 +921,30 @@ Module Transformation
       If Container
         ForEach AnChor()
           If AnChor()\Parent = Object 
-            Select GadgetType(AnChor()\Object)
-              Case #PB_GadgetType_Panel, 
-                   #PB_GadgetType_Container, 
-                   #PB_GadgetType_ScrollArea
-                
-                Free(AnChor()\Object)
-              Default
-                ; TODO
-                For I = 1 To #Alles
-                  If AnChor()\ID[I]
-                    FreeGadget(AnChor()\ID[I])
-                  EndIf
-                Next
-                
-                DeleteMapElement(Index(), Str(Object))
-                DeleteElement(AnChor())
-            EndSelect
+            If IsGadget(Object)
+              Select GadgetType(AnChor()\Object)
+                Case #PB_GadgetType_Panel,
+                     #PB_GadgetType_Container, 
+                     #PB_GadgetType_ScrollArea
+                  Free(AnChor()\Object)
+                Default
+                  Delete()
+              EndSelect
+            Else
+              Delete()
+            EndIf
           EndIf
         Next
       EndIf
       
       ForEach AnChor()
         If AnChor()\Object = Object
-          For I = 1 To #Alles
-            If AnChor()\ID[I]
-              FreeGadget(AnChor()\ID[I])
-            EndIf
-          Next
-          
-          DeleteMapElement(Index(), Str(Object))
-          DeleteElement(AnChor())
-          Lines() ; Reset show all lines
+          Delete()
+          Break
         EndIf
       Next
+      
+      Lines() ; Reset show all lines
     EndIf
     
   EndProcedure
@@ -1178,6 +1034,7 @@ CompilerIf #PB_Compiler_IsMainFile
             Select GetGadgetState(#Transformation)
               Case #False
                 SetGadgetText(#Transformation, "Enable Transformation")
+                Free(#Window)
                 Free(#EditorGadget)
                 Free(#ButtonGadget)
                 Free(#TrackBarGadget)
