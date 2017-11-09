@@ -57,7 +57,7 @@ DeclareModule Properties
 EndDeclareModule
 
 Module Properties
-  Declare Events()
+  Declare CallBack()
   
   Macro Clip(Gadget)
     CompilerSelect #PB_Compiler_OS
@@ -843,7 +843,7 @@ Module Properties
     
   EndProcedure
   
-  Procedure Events()
+  Procedure CallBack()
     Static Window=-1, Gadget=-1, Click
     
     Select Event()
@@ -876,6 +876,42 @@ Module Properties
                     Update( \Object )
                     
                   Case #PB_EventType_Change
+                    ;If GetGadgetText(\String) = "" : SetGadgetText(\String, \Str) : EndIf
+                    
+                    ; Вводить только английские буквы
+                    If Trim(\Info.S)="ID:" 
+                      Static LastText.s
+                      Protected ChangeText=#True
+                      If Len(LastText)<Len(GetGadgetText(\String))
+                        Select Asc(ReplaceString(GetGadgetText(\String), LastText, "", #PB_String_CaseSensitive ,1,1))
+                          Case 'A' To 'Z', 'a' To 'z', '0' To '9', '_'
+                            SetGadgetColor(\String, #PB_Gadget_BackColor, $FFFFFF)
+                          Default 
+                            SetGadgetColor(\String, #PB_Gadget_BackColor, $0000FF)
+                            If Len(GetGadgetText(\String)) = 1
+                              SetGadgetText(\String, \Str )
+                            Else
+                              ChangeText=#False
+                            EndIf
+                        EndSelect
+                      Else
+                        Select Asc(GetGadgetText(\String))
+                          Case 'A' To 'Z', 'a' To 'z', '0' To '9', '_'
+                            Select Asc(ReverseString(GetGadgetText(\String)))
+                              Case 'A' To 'Z', 'a' To 'z', '0' To '9', '_'
+                                SetGadgetColor(\String, #PB_Gadget_BackColor, $FFFFFF)
+                            EndSelect
+                          Default 
+                            SetGadgetColor(\String, #PB_Gadget_BackColor, $0000FF)
+                            SetGadgetText(\String, \Str )
+                        EndSelect
+                      EndIf
+                      
+                      If ChangeText 
+                        LastText=GetGadgetText(\String) 
+                      EndIf
+                    EndIf
+                    
                     Change( \Object )
                     
                     ;                Case  #PB_EventType_LeftClick ;: PostEvent(#PB_Event_Gadget, EventWindow(), \Gadget, #PB_EventType_Change, \String )
@@ -884,8 +920,10 @@ Module Properties
                     
                   Case #PB_EventType_LostFocus ; : PostEvent(#PB_Event_Gadget, EventWindow(), \Gadget, #PB_EventType_LostFocus, \String )
                     If GetGadgetText(\String) = "" : SetGadgetText(\String, \Str ) : EndIf ; Вот тут и понадобятся данные
-                    
-                    
+                    If Trim(\Info.S)="ID:" 
+                      SetGadgetColor(\String, #PB_Gadget_BackColor, $FFFFFF)
+                    EndIf
+                  
                 EndSelect
                 
               Case \ComboBox
@@ -970,8 +1008,10 @@ Module Properties
                     Else
                       SetGadgetText(GetGadgetData(\CheckBox), Trim(GetGadgetText(GetGadgetData(\CheckBox)), "#"))
                     EndIf
+                    SetActiveGadget(GetGadgetData(\CheckBox))
                     PostEvent(#PB_Event_Gadget, EventWindow(), GetGadgetData(\CheckBox), #PB_EventType_Change, \CheckBox )
-                EndSelect
+                    SetActiveGadget(\CheckBox)
+                  EndSelect
             EndSelect
           EndWith
         Next
@@ -1211,10 +1251,10 @@ Module Properties
           \TreeWindow = OpenWindow(#PB_Any, \LinePos,Y + 1,Width, 100, "", #PB_Window_BorderLess|#PB_Window_NoActivate|#PB_Window_Invisible, UseGadgetList)
           \Tree = TreeGadget(#PB_Any, 0,0,0,0, #PB_Tree_NoLines|#PB_Tree_NoButtons|#PB_Tree_CheckBoxes) : Result = \Tree
           If IsFont(\Font) : SetGadgetFont(\Tree, FontID(\Font)) : EndIf
-          BindEvent(#PB_Event_DeactivateWindow, @Events(), \TreeWindow)
+          BindEvent(#PB_Event_DeactivateWindow, @CallBack(), \TreeWindow)
           
-          BindEvent(#PB_Event_Gadget, @Events(), GetActiveWindow(), \Tree)
-          BindGadgetEvent(\Tree, @Events(), #PB_EventType_Change)
+          BindEvent(#PB_Event_Gadget, @CallBack(), GetActiveWindow(), \Tree)
+          BindGadgetEvent(\Tree, @CallBack(), #PB_EventType_Change)
           
           StickyWindow(\TreeWindow, #True)
           UseGadgetList(UseGadgetList)
@@ -1223,7 +1263,7 @@ Module Properties
           
           \String = StringGadget(#PB_Any, \LinePos,Y + 1,Width,\ItemHeight - 1,\Text.S) :Clip(\String)
           If IsFont(\Font) : SetGadgetFont(\String, FontID(\Font)) : EndIf
-          BindGadgetEvent(\String,@Events())
+          BindGadgetEvent(\String,@CallBack())
           
         ElseIf ((GadgetType & #PB_GadgetType_Spin) = #PB_GadgetType_Spin)
           \Spin = SpinGadget(#PB_Any, \LinePos,Y + 1,Width,\ItemHeight - 1,-32767,32767,#PB_Spin_Numeric) : Result = \Spin
@@ -1233,7 +1273,7 @@ Module Properties
               SetWindowLongPtr_( GetWindow_(GadgetID( \Spin ), #GW_HWNDNEXT), #GWL_STYLE, GetWindowLongPtr_( GetWindow_(GadgetID( \Spin ), #GW_HWNDNEXT), #GWL_STYLE )|#WS_CLIPSIBLINGS )
               SetWindowLongPtr_( GadgetID( \Spin ), #GWL_STYLE, GetWindowLongPtr_( GadgetID( \Spin ), #GWL_STYLE )|#WS_CLIPSIBLINGS|#SS_CENTER )
           CompilerEndSelect
-          BindGadgetEvent(\Spin, @Events())
+          BindGadgetEvent(\Spin, @CallBack())
           
         
         ElseIf ((GadgetType & #PB_GadgetType_ComboBox) = #PB_GadgetType_ComboBox)
@@ -1246,13 +1286,13 @@ Module Properties
             EndIf
           Next
           SetGadgetState(\ComboBox, 0)
-          BindGadgetEvent(\ComboBox,@Events())
+          BindGadgetEvent(\ComboBox,@CallBack())
           
         
         ElseIf Bool((GadgetType & #PB_GadgetType_String) = #PB_GadgetType_String)
           \String = StringGadget(#PB_Any, \LinePos,Y + 1,Width,\ItemHeight - 1,\Text.S) :Clip(\String): Result = \String
           If IsFont(\Font) : SetGadgetFont(\String, FontID(\Font)) : EndIf
-          BindGadgetEvent(\String,@Events())
+          BindGadgetEvent(\String,@CallBack())
         Else
           \Seperator = ListIndex(Properties())
         EndIf
@@ -1260,7 +1300,7 @@ Module Properties
         If Bool((GadgetType & #PB_GadgetType_CheckBox) = #PB_GadgetType_CheckBox)
           \CheckBox = CheckBoxGadget(#PB_Any, 19,Y + 2,25,\ItemHeight - 3,"#") :Clip(\CheckBox)
           If IsFont(\Font) : SetGadgetFont(\CheckBox, FontID(\Font)) : EndIf
-          BindGadgetEvent(\CheckBox,@Events())
+          BindGadgetEvent(\CheckBox,@CallBack())
           SetGadgetData(\CheckBox, Result)
         EndIf
         
@@ -1272,7 +1312,7 @@ Module Properties
             \Button = ButtonGadget(#PB_Any, (\LinePos+Width-Bw),Y,Bw + 1,\ItemHeight + 1,"...") :Clip(\Button)
           EndIf
           
-          BindGadgetEvent(\Button, @Events())
+          BindGadgetEvent(\Button, @CallBack())
           SetGadgetData(\Button, Result)
         EndIf
         

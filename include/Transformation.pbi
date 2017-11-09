@@ -110,7 +110,9 @@ Module Transformation
   Procedure ClipGadgets( WindowID )
     CompilerIf #PB_Compiler_OS = #PB_OS_Windows
       WindowID = GetAncestor_( WindowID, #GA_ROOT )
-      SetWindowLongPtr_( WindowID, #GWL_STYLE, GetWindowLongPtr_( WindowID, #GWL_STYLE )|#WS_CLIPCHILDREN )
+      If Not (GetWindowLongPtr_(WindowID, #GWL_STYLE)&#WS_CLIPCHILDREN)
+        SetWindowLongPtr_( WindowID, #GWL_STYLE, GetWindowLongPtr_( WindowID, #GWL_STYLE )|#WS_CLIPCHILDREN )
+      EndIf
       EnumChildWindows_( WindowID, @GadgetsClipCallBack(), 0 )
     CompilerEndIf
   EndProcedure
@@ -193,35 +195,39 @@ Module Transformation
   EndProcedure
   
   Procedure Points(Window=-1, Steps=6, BoxColor=0, PlotColor=0)
-    Protected hDC, x,y, ID
-    If PlotColor=0 :PlotColor=RGB(1,1,1) :EndIf
-    If BoxColor=0 :BoxColor=RGB(236,236,236) :EndIf
+    Static ID
+    Protected hDC, x,y
     
-    Steps-1
-    ExamineDesktops()
-    hDC=CreateImage(#PB_Any,DesktopWidth(0), DesktopHeight(0))
-    If hDC And StartDrawing(ImageOutput(hDC))
-      Box(0, 0, OutputWidth(), OutputHeight(), BoxColor)
+    If Not ID
+      Steps-1
+      ExamineDesktops()
+      ID=CanvasGadget(#PB_Any,0,0,DesktopWidth(0), DesktopHeight(0))
+      HideGadget(ID, 1)
       
-      For x = 0 To OutputWidth()-1
-        For y = 0 To OutputHeight()-1
-          Plot(x,y,PlotColor)
-          y+Steps
+      If PlotColor=0 :PlotColor=RGB(1,1,1) :EndIf
+      If BoxColor=0 :BoxColor=RGB(236,236,236) :EndIf
+      
+      If StartDrawing(CanvasOutput(ID))
+        Box(0, 0, OutputWidth(), OutputHeight(), BoxColor)
+        
+        For x = 0 To OutputWidth()-1
+          For y = 0 To OutputHeight()-1
+            Plot(x,y,PlotColor)
+            y+Steps
+          Next
+          x+Steps
         Next
-        x+Steps
-      Next
-      StopDrawing()
+        StopDrawing()
+      EndIf
+     
+      CompilerSelect #PB_Compiler_OS
+        CompilerCase #PB_OS_Windows
+          SetWindowLongPtr_( GadgetID( ID ), #GWL_STYLE, GetWindowLongPtr_( GadgetID( ID ), #GWL_STYLE )|#WS_CLIPSIBLINGS )
+      CompilerEndSelect
+      BindGadgetEvent(ID, @Callback())
+      HideGadget(ID, 0)
     EndIf
     
-    ID=CanvasGadget(#PB_Any,0,0,DesktopWidth(0), DesktopHeight(0))
-    SetGadgetAttribute(ID, #PB_Canvas_Image, ImageID(hdc))
-    CompilerSelect #PB_Compiler_OS
-      CompilerCase #PB_OS_Windows
-        SetWindowLongPtr_( GadgetID( ID ), #GWL_STYLE, GetWindowLongPtr_( GadgetID( ID ), #GWL_STYLE )|#WS_CLIPSIBLINGS )
-    CompilerEndSelect
-            
-    BindGadgetEvent(ID, @Callback())
-    If  hDC : FreeImage(hDC) : EndIf
     ProcedureReturn ID
   EndProcedure
   
@@ -560,14 +566,14 @@ Module Transformation
             Case #PB_EventType_MouseEnter
               If Is(EventGadget()) And StartDrawing(CanvasOutput(EventGadget()))
                 Box(0, 0, OutputWidth(), OutputHeight(), $000000)
-                Box(1, 1, OutputWidth()-2, OutputHeight()-2, $FFFFFF)
+                Box(1, 1, OutputWidth()-2, OutputHeight()-2, $4DFF00)
                 StopDrawing()
               EndIf
               
               
             Case #PB_EventType_MouseLeave
               If Is(EventGadget()) And StartDrawing(CanvasOutput(EventGadget()))
-                Box(0, 0, OutputWidth(), OutputHeight(), $999999)
+                Box(0, 0, OutputWidth(), OutputHeight(), $000000)
                 Box(1, 1, OutputWidth()-2, OutputHeight()-2, $FFFFFF)
                 StopDrawing()
               EndIf
@@ -844,7 +850,7 @@ Module Transformation
               SetGadgetAttribute(ID, #PB_Canvas_Cursor, *Cursors\ID[I])
               
               If StartDrawing(CanvasOutput(ID))
-                Box(0, 0, OutputWidth(), OutputHeight(), $999999)
+                Box(0, 0, OutputWidth(), OutputHeight(), $000000)
                 Box(1, 1, OutputWidth()-2, OutputHeight()-2, $FFFFFF)
                 StopDrawing()
               EndIf

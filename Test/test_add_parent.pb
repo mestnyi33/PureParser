@@ -1,17 +1,16 @@
 ﻿EnableExplicit
 
-Global Window_0=-1, 
-       Window_0_Canvas_0=-1, 
-       Window_0_Canvas_0_Button_0=-1, 
+Global Window_0=-1,
+       Window_0_Canvas_0=-1,
+       Window_0_Canvas_0_Button_0=-1,
        Window_0_Button_0=-1,
-       Window_0_Container_1=-1, 
-       Window_0_Container_1_Button_0=-1, 
+       Window_0_Container_1=-1,
+       Window_0_Container_1_Button_0=-1,
        Window_0_Panel_0=-1,
        Window_0_Panel_0_Panel_0=-1,
        Window_0_Panel_0_Panel_0_Button_0=-1,
        Window_0_Panel_0_Button_0=-1,
        Window_0_Button_1=-1
-         
 
 Declare Window_0_Events()
 

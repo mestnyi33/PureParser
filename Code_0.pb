@@ -9,8 +9,8 @@ Declare Window_0_Events()
 Procedure Window_0_Open(Flag.i=#PB_Window_SystemMenu|#PB_Window_ScreenCentered)
   If Not IsWindow(Window_0)
     Window_0 = OpenWindow(#PB_Any, 468, 257, 300, 200, "Window_0", #PB_Window_SystemMenu|#PB_Window_ScreenCentered)
-    Window_0_String_0 = StringGadget(#PB_Any, 5, 5, 290, 165, "")                                                                    
-    Window_0_Button_Close = ButtonGadget(#PB_Any, 210, 175, 85, 20, "Закрыть")   
+    Window_0_String_0 = StringGadget(#PB_Any, 5, 5, 290, 165, "")                                                                 
+    Window_0_Button_Close = ButtonGadget(#PB_Any, 210, 175, 85, 20, "Закрыть")
     
     BindEvent(#PB_Event_Gadget, @Window_0_Events(), Window_0)
   EndIf

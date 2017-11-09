@@ -255,8 +255,7 @@ Global *This.ThisStruct = AllocateStructure(ThisStruct)
 ;
 *This\Index=-1
 ; *This\Item=-1
-
-Global Indent = 2
+Global VariablePosition
     
 ;-
 ;- ENUMERATION
@@ -940,10 +939,10 @@ Procedure CO_Insert(*ThisParse.ParseStruct, Parent)
     If \Type\Argument$ = "OpenWindow"
       Variable$ = #CRLF$+"Global "+\Object\Argument$+"=-1"
     Else
-      Variable$ = ","+#CRLF$+Space(Len("Global "))+\Object\Argument$+"=-1"
+      Variable$ = ", "+#CRLF$+Space(Len("Global "))+\Object\Argument$+"=-1"
     EndIf
-    VariableLength = Len(Variable$)
     
+    VariableLength = Len(Variable$)
     Debug "  Code_Global" + *This\get(*This\Window\Argument$)\Code("Code_Global")\Position
     *This\Content\Text$ = InsertString(*This\Content\Text$, Variable$, *This\get(*This\Window\Argument$)\Code("Code_Global")\Position) 
     *This\get(*This\Window\Argument$)\Code("Code_Global")\Position + VariableLength
@@ -1011,26 +1010,26 @@ Procedure CO_Insert(*ThisParse.ParseStruct, Parent)
     
     *This\Content\Length = \Content\Length
     *This\Content\Position = \Content\Position
-    *This\Content\Text$ = InsertString(*This\Content\Text$, \Content\String$+#CRLF$+Space(Indent), \Content\Position) 
+    *This\Content\Text$ = InsertString(*This\Content\Text$, \Content\String$+#CRLF$+Space(4), \Content\Position) 
     
     
     ; У окна меняем последную позицию.
-    *This\get(*This\Window\Argument$)\Code("Code_Object")\Position + (*This\Content\Length + Len(#CRLF$+Space(Indent)))
+    *This\get(*This\Window\Argument$)\Code("Code_Object")\Position + (*This\Content\Length + Len(#CRLF$+Space(4)))
     
     ; 
     If *This\Container
       ; Сохряняем у объект-а последную позицию.
-      *This\get(\Object\Argument$)\Code("Code_Object")\Position = *This\Content\Position+*This\Content\Length+Len(#CRLF$+Space(Indent))
+      *This\get(\Object\Argument$)\Code("Code_Object")\Position = *This\Content\Position+*This\Content\Length+Len(#CRLF$+Space(4))
       Debug \Object\Argument$ +" "+ *This\get(\Object\Argument$)\Code("Code_Object")\Position 
       
       Select *This\Type\Argument$
         Case "PanelGadget", "ContainerGadget", "ScrollAreaGadget", "CanvasGadget"
           ; 
-          *This\Content\Text$ = InsertString(*This\Content\Text$, "CloseGadgetList()"+#CRLF$+Space(Indent), *This\Content\Position+*This\Content\Length+Len(#CRLF$+Space(Indent))) 
-          *This\Content\Position+Len("CloseGadgetList()"+#CRLF$+Space(Indent))
+          *This\Content\Text$ = InsertString(*This\Content\Text$, "CloseGadgetList()"+#CRLF$+Space(4), *This\Content\Position+*This\Content\Length+Len(#CRLF$+Space(4))) 
+          *This\Content\Position+Len("CloseGadgetList()"+#CRLF$+Space(4))
           
           ; У окна меняем последную позицию.
-          *This\get(*This\Window\Argument$)\Code("Code_Object")\Position + Len("CloseGadgetList()"+#CRLF$+Space(Indent))
+          *This\get(*This\Window\Argument$)\Code("Code_Object")\Position + Len("CloseGadgetList()"+#CRLF$+Space(4))
           
       EndSelect
     
@@ -1043,7 +1042,7 @@ Procedure CO_Insert(*ThisParse.ParseStruct, Parent)
             ; Проверяем позицию родителя в генерируемом коде
             If *This\get(ParsePBGadget()\Object\Argument$)\Code("Code_Object")\Position>*This\Content\Position
               ; У родителя меняем последную позицию.
-              *This\get(ParsePBGadget()\Object\Argument$)\Code("Code_Object")\Position + (*This\Content\Length + Len(#CRLF$+Space(Indent)))
+              *This\get(ParsePBGadget()\Object\Argument$)\Code("Code_Object")\Position + (*This\Content\Length + Len(#CRLF$+Space(4)))
             EndIf
         EndSelect
       Next
@@ -1053,7 +1052,7 @@ Procedure CO_Insert(*ThisParse.ParseStruct, Parent)
     EndIf
     
     ; Записываем у родителя позицию конца добавления объекта
-    *This\get(*This\get(Str(Parent))\Object\Argument$)\Code("Code_Object")\Position = *This\Content\Position+*This\Content\Length+Len(#CRLF$+Space(Indent))
+    *This\get(*This\get(Str(Parent))\Object\Argument$)\Code("Code_Object")\Position = *This\Content\Position+*This\Content\Length+Len(#CRLF$+Space(4))
   EndWith
 EndProcedure
 
@@ -1183,7 +1182,7 @@ Procedure CO_Create(Type$, X, Y, Parent=-1)
         Read.s Buffer
         \Content\Text$ = Buffer
         \get(\Window\Argument$)\Code("Code_Global")\Position = 16
-        \get(\get(Str(Parent))\Object\Argument$)\Code("Code_Object")\Position = 249 ; 176+5
+        \get(\get(Str(Parent))\Object\Argument$)\Code("Code_Object")\Position = 176
       EndIf
       
       CO_Insert(*ThisParse, Parent) 
@@ -1270,23 +1269,19 @@ Procedure CO_Create(Type$, X, Y, Parent=-1)
     ;{
     Data.s "EnableExplicit"+#CRLF$+
            ""+#CRLF$+
-           "Declare Window_0_Events(Event)"+#CRLF$+
+           "Declare Window_0_Events()"+#CRLF$+
            ""+#CRLF$+
            "Procedure Window_0_Open(Flag.i=#PB_Window_SystemMenu|#PB_Window_ScreenCentered, ParentID.i=0)"+#CRLF$+
-           "  If IsWindow(Window_0)"+#CRLF$+
-           "    SetActiveWindow(Window_0)"+#CRLF$+    
-           "    ProcedureReturn Window_0"+#CRLF$+    
+           "  If Not IsWindow(Window_0)"+#CRLF$+
+           "    "+#CRLF$+    
+           "    BindEvent(#PB_Event_Gadget, @Window_0_Events(), Window_0)"+#CRLF$+
            "  EndIf"+#CRLF$+
-           "  "+#CRLF$+  
-           "  "+#CRLF$+  
+           ""+#CRLF$+  
            "  ProcedureReturn Window_0"+#CRLF$+
            "EndProcedure"+#CRLF$+
            ""+#CRLF$+
-           "Procedure Window_0_Events(Event)"+#CRLF$+
-           "  Select Event"+#CRLF$+
-           "    Case #PB_Event_CloseWindow"+#CRLF$+
-           "      CloseWindow(EventWindow())"+#CRLF$+
-           "      "+#CRLF$+
+           "Procedure Window_0_Events()"+#CRLF$+
+           "  Select Event()"+#CRLF$+
            "    Case #PB_Event_Gadget"+#CRLF$+
            "      Select EventType()"+#CRLF$+
            "        Case #PB_EventType_LeftClick"+#CRLF$+
@@ -1295,15 +1290,22 @@ Procedure CO_Create(Type$, X, Y, Parent=-1)
            "          EndSelect"+#CRLF$+
            "      EndSelect"+#CRLF$+
            "  EndSelect"+#CRLF$+
-           "  "+#CRLF$+
-           "  ProcedureReturn Window_0"+#CRLF$+
            "EndProcedure"+#CRLF$+
            ""+#CRLF$+
            ""+#CRLF$+
            "CompilerIf #PB_Compiler_IsMainFile"+#CRLF$+
            "  Window_0_Open()"+#CRLF$+
            ""+#CRLF$+  
-           "  While IsWindow(Window_0_Events(WaitWindowEvent())) : Wend"+#CRLF$+
+           "  While IsWindow(Window_0)"+#CRLF$+
+           "    Select WaitWindowEvent()"+#CRLF$+
+           "      Case #PB_Event_CloseWindow"+#CRLF$+
+           "        If IsWindow(EventWindow())"+#CRLF$+
+           "          CloseWindow(EventWindow())"+#CRLF$+
+           "        Else"+#CRLF$+
+           "          CloseWindow(Window_0)"+#CRLF$+
+           "        EndIf"+#CRLF$+
+           "    EndSelect"+#CRLF$+
+           "  Wend"+#CRLF$+
            "CompilerEndIf"
     ;}
     
@@ -1863,87 +1865,40 @@ Procedure ParsePBFile(FileName.s)
                         Wend
                       EndIf
                       
-                      ; Сначала определять кто есть кто.
-                      Select *This\Type\Argument$
-                        Case "OpenWindow" 
-                          *This\Container =- 1 
-                          *This\Window\Argument$ = *This\Object\Argument$ 
-                          *This\Parent\Argument$ = *This\Object\Argument$
-                        Case "PanelGadget" : *This\Container = #PB_GadgetType_Panel
-                          *This\Parent\Argument$ = *This\Object\Argument$
-                        Case "ContainerGadget" : *This\Container = #PB_GadgetType_Container
-                          *This\Parent\Argument$ = *This\Object\Argument$
-                        Case "ScrollAreaGadget" : *This\Container = #PB_GadgetType_ScrollArea
-                          *This\Parent\Argument$ = *This\Object\Argument$
-                        Case "CanvasGadget"
-                          If ((*This\Flag\Argument&#PB_Canvas_Container)=#PB_Canvas_Container)
-                            *This\Container = #PB_GadgetType_Canvas
-                            *This\Parent\Argument$ = *This\Object\Argument$
-                          EndIf
-                        Default
-                          *This\Container = #PB_GadgetType_Unknown
-                      EndSelect
-                      
-; ;                       ; Первый вариант
-; ;                       ; Ищем Declare и затем отходим на 4 шага (на две концы сторки)
-; ;                       Protected RegExID = CreateRegularExpression(#PB_Any, "(?<![\w\.\\])"+"Declare"+"(?=[_]|(?![\w\.\\]|\s*"+~"\"))")
-; ;                       
-; ;                       If RegExID
-; ; ;                      ; Получаем позицию идентификаторов в файле
-; ;                         If ExamineRegularExpression(RegExID, *This\Content\Text$)
-; ;                           While NextRegularExpressionMatch(RegExID)
-; ;                            *This\get(*This\Window\Argument$)\Code("Code_Global")\Position = RegularExpressionMatchPosition(RegExID)-Len(#CRLF$)*2 ;*This\Content\Text$ = ReplaceRegularExpression(RegExID, *This\Content\Text$, Trim(Replace$, "#"))
-; ;                             Break
-; ;                           Wend
-; ;                         EndIf
-; ;                         
-; ;                         FreeRegularExpression(RegExID)
-; ;                       EndIf
-                      
-                      ; Второй вариант
-                      ; Ищем идентификатор и затем добавлаем его длину
-                      Protected Identific$ = *This\Object\Argument$+"=-1"
-                      Protected RegExID = CreateRegularExpression(#PB_Any, "(?<![\w\.\\])"+Identific$+"(?=[_]|(?![\w\.\\]|\s*"+~"\"))")
-                      
-                      If RegExID
-;                      ; Получаем позицию идентификаторов в файле
-                        If ExamineRegularExpression(RegExID, *This\Content\Text$)
-                          While NextRegularExpressionMatch(RegExID)
-                            *This\get(*This\Window\Argument$)\Code("Code_Global")\Position = RegularExpressionMatchPosition(RegExID)+Len(Identific$)
-                            Break
-                          Wend
-                        EndIf
-                        
-                        FreeRegularExpression(RegExID)
-                      EndIf
-                      Debug *This\get(*This\Window\Argument$)\Code("Code_Global")\Position
-                      
-                      ; Запоминаем последнюю позицию
-                      If *This\Container
-                        *This\get(*This\Object\Argument$)\Code("Code_Object")\Position = *This\Content\Position+*This\Content\Length +Len(#CRLF$+Space(Indent))
-                        
-                        Select *This\Type\Argument$
-                          Case "PanelGadget", "ContainerGadget", "ScrollAreaGadget", "CanvasGadget"
-                            *This\get(*This\Window\Argument$)\Code("Code_Object")\Position = *This\Content\Position+*This\Content\Length +Len(#CRLF$+Space(Indent))+Len("CloseGadgetList()"+#CRLF$+Space(Indent))
-                        EndSelect
-                      Else
-                        *This\get(*This\Window\Argument$)\Code("Code_Object")\Position = *This\Content\Position+*This\Content\Length +Len(#CRLF$+Space(Indent))
-                      EndIf
-                      
-; ; ;                       ; Записываем у родителя позицию конца добавления объекта
-; ; ;                      ; *This\get(*This\get(Str(*This\Parent\Argument))\Object\Argument$)\Code("Code_Object")\Position = *This\Content\Position+*This\Content\Length +Len(#CRLF$+Space(Indent))
-; ; ;                       Debug "Load Code_Global"+ *This\get(Str(*This\Window\Argument))\Object\Argument$ +" "+ *This\get(*This\get(Str(*This\Window\Argument))\Object\Argument$)\Code("Code_Global")\Position
-; ; ;                       Debug "w Code_Object"+ *This\Window\Argument$ +" "+ *This\get(*This\Window\Argument$)\Code("Code_Object")\Position
-; ; ;                       Debug "Load Code_Object"+ *This\get(Str(*This\Parent\Argument))\Object\Argument$ +" "+ *This\get(*This\get(Str(*This\Parent\Argument))\Object\Argument$)\Code("Code_Object")\Position
-; ; ;                       ;     Debug "    Code_Global"+ *This\get(*This\get(Replace$)\Window\Argument$)\Code("Code_Global")\Position
-; ; ;                       ;     Debug "    Code_Object"+ *This\get(*This\get(Replace$)\Parent\Argument$)\Code("Code_Object")\Position
-                      
-                      
+;                       ; 
+;                       Select \Type\Argument$
+;                         Case "OpenWindow" : \Container =- 1
+;                         Case "PanelGadget" : \Container = #PB_GadgetType_Panel
+;                         Case "ContainerGadget" : \Container = #PB_GadgetType_Container
+;                         Case "ScrollAreaGadget" : \Container = #PB_GadgetType_ScrollArea
+;                         Case "CanvasGadget"
+;                           If ((\Flag\Argument&#PB_Canvas_Container)=#PB_Canvas_Container)
+;                             \Container = #PB_GadgetType_Canvas
+;                           EndIf
+;                         Default
+;                           \Container = #PB_GadgetType_Unknown
+;                       EndSelect
+;                       
                       
                       
                       
                       Protected win = CallFunctionFast(@CO_Open())
                       
+                      ; 
+                      If *This\Container
+                        *This\get(*This\Object\Argument$)\Code("Code_Object")\Position = *This\Content\Position+*This\Content\Length +Len(#CRLF$+Space(4))
+                        
+                        Select *This\Type\Argument$
+                          Case "PanelGadget", "ContainerGadget", "ScrollAreaGadget", "CanvasGadget"
+                            *This\get(*This\Window\Argument$)\Code("Code_Object")\Position = *This\Content\Position+*This\Content\Length +Len(#CRLF$+Space(4))+Len("CloseGadgetList()"+#CRLF$+Space(4))
+                        EndSelect
+                      Else
+                        *This\get(*This\Window\Argument$)\Code("Code_Object")\Position = *This\Content\Position+*This\Content\Length +Len(#CRLF$+Space(4))
+                      EndIf
+                      
+                      ; Записываем у родителя позицию конца добавления объекта
+                      *This\get(*This\get(Str(*This\Parent\Argument))\Object\Argument$)\Code("Code_Object")\Position = *This\Content\Position+*This\Content\Length +Len(#CRLF$+Space(4))
+                      ;Debug *This\get(Str(*This\Parent\Argument))\Object\Argument$ +" "+ *This\get(*This\get(Str(*This\Parent\Argument))\Object\Argument$)\Code("Code_Object")\Position
                       
                       \Object\Argument=-1
                       \Object\Argument$=""
@@ -2246,6 +2201,13 @@ Procedure WE_Tree_0_Replace(Gadget)
   
   Macro replace_map_key(_find_mapkey, _replace_mapkey)
     CopyStructure(*This\get(_find_mapkey), *This\get(_replace_mapkey), ObjectStruct)
+    
+;     If *This\get(_replace_mapkey)\Adress
+;       ChangeCurrentElement(ParsePBGadget(), *This\get(_replace_mapkey)\Adress)
+      
+      
+;     EndIf
+    
     DeleteMapElement(*This\get(), _find_mapkey)
   EndMacro
   
@@ -2261,24 +2223,13 @@ Procedure WE_Tree_0_Replace(Gadget)
           SetGadgetText(EventGadget(), Replace$)
         EndIf
         
-        ;
-        If Find$=*This\get(Find$)\Window\Argument$
-          *This\get(Find$)\Window\Argument$=Replace$
-        EndIf
-        If Find$=*This\get(Find$)\Parent\Argument$
-          *This\get(Find$)\Parent\Argument$=Replace$
-        EndIf
-        
         *This\get(ParsePBGadget()\Object\Argument$)\Object\Argument$ = Replace$
         *This\get(Str(ParsePBGadget()\Object\Argument))\Object\Argument$ = Replace$
         
         ParsePBGadget()\Class\Argument$ = ReplaceString(Replace$, *This\get(Str(ParsePBGadget()\Parent\Argument))\Object\Argument$+"_", "")
         
         ; Меняем map ключ объекта
-        CopyStructure(*This\get(ParsePBGadget()\Object\Argument$), *This\get(Replace$), ObjectStruct)
-        ; И удаляем старый
-        DeleteMapElement(*This\get(), ParsePBGadget()\Object\Argument$)
-        
+        replace_map_key(ParsePBGadget()\Object\Argument$, Replace$)
         ParsePBGadget()\Object\Argument$ = Replace$ 
         
         ; По умалчанию 
@@ -2289,8 +2240,12 @@ Procedure WE_Tree_0_Replace(Gadget)
           *This\Container = ParsePBGadget()\Container
           *This\Parent\Argument$ = ParsePBGadget()\Object\Argument$
         EndIf
-        ParsePBGadget()\Window\Argument$ = *This\Window\Argument$
-        ParsePBGadget()\Parent\Argument$ = *This\Parent\Argument$
+        
+        ; Меняем последнюю позицию для идентификаторов
+        If Len(Find$)>Len(Replace$)
+          len = (Len(Find$)-Len(Replace$))
+          *This\get(ParsePBGadget()\Window\Argument$)\Code("Code_Global")\Position - len
+        EndIf
       Else
         ; Формируем имя объекта снова так как изменили имя родителя
         If *This\get(Str(ParsePBGadget()\Parent\Argument))\Object\Argument$
@@ -2300,10 +2255,7 @@ Procedure WE_Tree_0_Replace(Gadget)
           *This\get(Str(ParsePBGadget()\Object\Argument))\Object\Argument$ = ParentClass$+"_"+ParsePBGadget()\Class\Argument$
           
           ; Меняем map ключ объекта
-          CopyStructure(*This\get(ParsePBGadget()\Object\Argument$), *This\get(ParentClass$+"_"+ParsePBGadget()\Class\Argument$), ObjectStruct)
-          ; И удаляем старый
-          DeleteMapElement(*This\get(), ParsePBGadget()\Object\Argument$)
-          
+          replace_map_key(ParsePBGadget()\Object\Argument$, ParentClass$+"_"+ParsePBGadget()\Class\Argument$)
           ParsePBGadget()\Object\Argument$ = ParentClass$+"_"+ParsePBGadget()\Class\Argument$ 
           
           ; Обнавляем инспектор объектов
@@ -2318,32 +2270,29 @@ Procedure WE_Tree_0_Replace(Gadget)
     Next
     PopListPosition(ParsePBGadget())  
     
-    ; 
+    
+    ;   If Asc(Replace$)='#'
+    ;     RegExID = CreateRegularExpression(#PB_Any, "(?<!\w)"+Find$+"(?!\w|\s*"+~"\")")
+    ;   Else
     RegExID = CreateRegularExpression(#PB_Any, "(?<![\w\.\\])"+Trim(Find$, "#")+"(?=[_]|(?![\w\.\\]|\s*"+~"\"))")
+    ;   EndIf
+    ;   
+    
     
     If RegExID
-      Protected NbFound, String$, Dim Result$(0) 
-      ; Разница между словами
-      len = (Len(Replace$)-Len(Find$))
+      Protected k, Dim Result$(0), NbFound = ExtractRegularExpression(RegExID, Mid(*This\Content\Text$, 1, *This\get(Replace$)\Code("Code_Object")\Position), Result$())
+;       Debug *This\get(Replace$)\Parent\Argument$
+;       Debug *This\Window\Argument$+" "+*This\get(Replace$)\Window\Argument$
       
-      ; Делаем разницу столько раз сколько слов заменено
-      String$ = Mid(*This\Content\Text$, 1, *This\get(Replace$)\Code("Code_Global")\Position)
-      NbFound = len*ExtractRegularExpression(RegExID, String$, Result$())
-      *This\get(*This\Window\Argument$)\Code("Code_Global")\Position + NbFound
-      
-      ; Делаем разницу столько раз сколько слов заменено
-      String$ = Mid(*This\Content\Text$, 1, *This\get(Replace$)\Code("Code_Object")\Position)
-      NbFound = len*ExtractRegularExpression(RegExID, String$, Result$())
-      
-      PushListPosition(ParsePBGadget())
-      ForEach ParsePBGadget()
-        If ParsePBGadget()\Container 
-          *This\get(ParsePBGadget()\Object\Argument$)\Code("Code_Object")\Position + NbFound
+      For k=0 To NbFound-1
+        If *This\get(Replace$)\Code("Code_Object")\Position
+          *This\get(Replace$)\Code("Code_Object")\Position - len
+          If *This\Window\Argument$<>Replace$
+            *This\get(*This\get(Replace$)\Window\Argument$)\Code("Code_Object")\Position - len
+          EndIf
         EndIf
       Next
-      PopListPosition(ParsePBGadget())
       
-      ; Заменям слова в файле
       If ExamineRegularExpression(RegExID, *This\Content\Text$)
         While NextRegularExpressionMatch(RegExID)
           *This\Content\Text$ = ReplaceRegularExpression(RegExID, *This\Content\Text$, Trim(Replace$, "#"))
@@ -2354,8 +2303,8 @@ Procedure WE_Tree_0_Replace(Gadget)
       FreeRegularExpression(RegExID)
     EndIf
     
-;     Debug "    Code_Global"+ *This\get(*This\get(Replace$)\Window\Argument$)\Code("Code_Global")\Position
-;     Debug "    Code_Object"+ *This\get(*This\get(Replace$)\Parent\Argument$)\Code("Code_Object")\Position
+    Debug "    Code_Global"+ *This\get(*This\get(Replace$)\Window\Argument$)\Code("Code_Global")\Position
+    Debug "    Code_Object"+ *This\get(Replace$)\Code("Code_Object")\Position
     
     SetGadgetText(Gadget, Replace$)
     
