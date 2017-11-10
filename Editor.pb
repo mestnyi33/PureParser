@@ -34,34 +34,7 @@ XIncludeFile "include/Properties.pbi"
 XIncludeFile "include/Scintilla.pbi"
 Global WE_Code=-1, CodeShow.b
 
-Procedure WE_Code_CallBack()
-  Select Event()
-    Case #PB_Event_DeactivateWindow
-      ; HideWindow(EventWindow(), #True)
-    Case #PB_Event_SizeWindow
-      ResizeGadget(GetWindowData(EventWindow()), #PB_Ignore, #PB_Ignore, WindowWidth(EventWindow()), WindowHeight(EventWindow()))
-  EndSelect
-EndProcedure
 
-Procedure WE_Code_Init(Parent)
-  Protected UseGadgetList = UseGadgetList(0)
-  WE_Code = OpenWindow(#PB_Any, WindowX(Parent)-800, (WindowY(Parent)+WindowHeight(Parent))-300, 800, 300, "(WE) - code", #PB_Window_TitleBar|#PB_Window_SizeGadget|#PB_Window_Invisible, WindowID(Parent))
-  StickyWindow(WE_Code, #True)
-  SetWindowData(WE_Code, Scintilla::Gadget(#PB_Any, 0, 0, 420, 600))
-  BindEvent(#PB_Event_SizeWindow, @WE_Code_CallBack(), WE_Code)
-  BindEvent(#PB_Event_DeactivateWindow, @WE_Code_CallBack(), WE_Code)
-  UseGadgetList(UseGadgetList)
-EndProcedure
-
-Procedure WE_Code_Show(Text$)
-  If CodeShow
-    HideWindow(WE_Code, #False)
-  EndIf
-  Scintilla::SetText(GetWindowData(WE_Code), Text$)
-EndProcedure
-
-
-;-
 ;- GLOBAL
 Global MainWindow=-1
 Global WE=-1, 
@@ -70,7 +43,10 @@ Global WE=-1,
        WE_Tree_0=-1, 
        WE_Tree_1=-1, 
        WE_Panel_0=-1,
-       WE_Splitter_0=-1
+       WE_Panel_1=-1,
+       WE_Splitter_0=-1,
+       WE_Scintilla_0=-1,
+       WE_Splitter_1=-1
 
 Global WE_Properties
 Global Properties_ID 
@@ -93,6 +69,7 @@ Declare WE_Events()
 Declare WE_CloseWindow()
 Declare WE_ResizeWindow()
 Declare WE_ResizePanel_0()
+Declare WE_ResizePanel_1()
 Declare WE_Tree_0_Position(Gadget, Parent)
 Declare WE_Tree_0_Update(Gadget, Position=-1)
 Declare WE_OpenWindow(Flag.i=#PB_Window_SystemMenu, ParentID=0)
@@ -289,6 +266,10 @@ EndEnumeration
 ;- OTHERS
 Runtime Procedure$ GetObjectClass(Object)
   ProcedureReturn *This\get(Str(Object))\Object\Argument$
+EndProcedure
+
+Procedure WE_Code_Show(Text$)
+  Scintilla::SetText(WE_Scintilla_0, Text$)
 EndProcedure
 
 
@@ -2080,6 +2061,8 @@ Procedure ParsePBFile(FileName.s)
     
     CloseFile(#File)
     Result = #True
+    
+    
   EndIf
   
   ProcedureReturn Result
@@ -2372,6 +2355,8 @@ Procedure WE_OpenFile(Path$) ; Открытие файла
       
       WE_Tree_0_Update(WE_Tree_0)
       
+      WE_Code_Show(*This\Content\Text$)
+    
     EndIf
     
     *This\Content\File$=Path$
@@ -2466,10 +2451,8 @@ EndProcedure
 ;-
 Procedure WE_OpenWindow(Flag.i=#PB_Window_SystemMenu, ParentID=0)
   If Not IsWindow(WE)
-    WE = OpenWindow(#PB_Any, 900, 100, 320, 600, "(WE) - Редактор объектов", Flag, ParentID)
+    WE = OpenWindow(#PB_Any, 100, 100, 900, 600, "(WE) - Редактор объектов", Flag, ParentID)
     StickyWindow(WE, #True)
-    
-    WE_Code_Init(WE)
     
     WE_Menu_0 = CreateMenu(#PB_Any, WindowID(WE))
     If WE_Menu_0
@@ -2513,11 +2496,22 @@ Procedure WE_OpenWindow(Flag.i=#PB_Window_SystemMenu, ParentID=0)
     AddGadgetItem(WE_Panel_0, -1, "Events")
     CloseGadgetList()
     
-    WE_Splitter_0 = SplitterGadget(#PB_Any, 5, 5, 320-10, 600-MenuHeight()-10, WE_Tree_0, WE_Panel_0, #PB_Splitter_FirstFixed)
+    WE_Splitter_0 = SplitterGadget(#PB_Any, 5, 5, 900-10, 600-MenuHeight()-10, WE_Tree_0, WE_Panel_0, #PB_Splitter_FirstFixed)
     SetGadgetState(WE_Splitter_0, 145)
+    
+    
+    WE_Panel_1 = PanelGadget(#PB_Any, 5, 159, 315, 261)
+    
+    AddGadgetItem(WE_Panel_1, -1, "Code")
+    WE_Scintilla_0 = Scintilla::Gadget(#PB_Any, 0, 0, 420, 600)
+    CloseGadgetList()
+    
+    WE_Splitter_1 = SplitterGadget(#PB_Any, 5, 5, 900-10, 600-MenuHeight()-10, WE_Panel_1, WE_Splitter_0, #PB_Splitter_SecondFixed|#PB_Splitter_Vertical)
+    SetGadgetState(WE_Splitter_1, 900-300)
     
     LoadControls()
     WE_ResizePanel_0()
+    WE_ResizePanel_1()
     
     ;;;WE_OpenFile("Ссылкодел.pb")
     
@@ -2526,6 +2520,7 @@ Procedure WE_OpenWindow(Flag.i=#PB_Window_SystemMenu, ParentID=0)
     BindEvent(#PB_Event_SizeWindow, @WE_ResizeWindow(), WE)
     
     BindGadgetEvent(WE_Panel_0, @WE_ResizePanel_0(), #PB_EventType_Resize)
+    BindGadgetEvent(WE_Panel_1, @WE_ResizePanel_1(), #PB_EventType_Resize)
     BindEvent(#PB_Event_CloseWindow, @WE_CloseWindow(), WE)
   EndIf
   
@@ -2543,10 +2538,20 @@ Procedure WE_ResizePanel_0()
   EndSelect
 EndProcedure
 
+Procedure WE_ResizePanel_1()
+  Protected GadgetWidth = GetGadgetAttribute(WE_Panel_1, #PB_Panel_ItemWidth)
+  Protected GadgetHeight = GetGadgetAttribute(WE_Panel_1, #PB_Panel_ItemHeight)
+  
+  Select GetGadgetItemText(WE_Panel_1, GetGadgetState(WE_Panel_1))
+    Case "Code" : ResizeGadget(WE_Scintilla_0, #PB_Ignore, #PB_Ignore, GadgetWidth, GadgetHeight)
+  EndSelect
+EndProcedure
+
 Procedure WE_ResizeWindow()
   Protected WindowWidth = WindowWidth(WE)
   Protected WindowHeight = WindowHeight(WE)-MenuHeight()
-  ResizeGadget(WE_Splitter_0, 5, 5, WindowWidth - 10, WindowHeight - 10)
+  ResizeGadget(WE_Splitter_1, 5, 5, WindowWidth - 10, WindowHeight - 10)
+  WE_ResizePanel_1()
   WE_ResizePanel_0()
 EndProcedure
 
@@ -2647,13 +2652,6 @@ Procedure WE_Events()
       Select EventMenu()
         Case WE_Menu_Quit
           End
-        Case WE_Menu_Code
-          CodeShow ! 1
-          If CodeShow
-            HideWindow(WE_Code, #False)
-          Else
-            HideWindow(WE_Code, #True)
-          EndIf
           
         Case WE_Menu_Delete ;- Event(_WE_Menu_Delete_) 
                             ; Debug EventGadget()
