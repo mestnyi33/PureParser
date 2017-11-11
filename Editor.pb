@@ -45,6 +45,7 @@ Global WE=-1,
        WE_Panel_0=-1,
        WE_Panel_1=-1,
        WE_Splitter_0=-1,
+       WE_ScrollArea_0=-1,
        WE_Scintilla_0=-1,
        WE_Splitter_1=-1
 
@@ -1210,7 +1211,8 @@ Procedure CO_Create(Type$, X, Y, Parent=-1)
   DataSection
     Model:
     ;{
-    Data.s "OpenWindow","500","400","ParentID","0","0", "#PB_Window_SystemMenu"
+    Data.s "FormGadget","300","200","ParentID","0","0", "#PB_Window_SystemMenu"
+    Data.s "OpenWindow","400","300","ParentID","0","0", "#PB_Window_SystemMenu"
     Data.s "ButtonGadget","80","20","0","0","0",""
     Data.s "StringGadget","80","20","0","0","0",""
     Data.s "TextGadget","80","20","0","0","0","#PB_Text_Border"
@@ -1299,8 +1301,11 @@ Procedure CO_Open() ; Ok
   With *This
     ;
     Select \Type\Argument$
-      Case "OpenWindow"          : \Type\Argument =- 1  : \Window\Argument =- 1  : \Object\Argument = OpenWindow          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument, \Param1\Argument)
-        ; CanvasGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, #PB_Canvas_Container) : CloseGadgetList()
+      Case "FormGadget"          : \Type\Argument =- 1  : \Window\Argument =- 1  : \Object\Argument = CanvasGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, #PB_Canvas_Container) : CloseGadgetList()
+      Case "OpenWindow"          : \Type\Argument =- 1  : \Window\Argument =- 1  
+      \Object\Argument = AddGadgetItem(WE_ScrollArea_0, #PB_Any, \Caption\Argument$)
+      ResizeWindow(\Object\Argument, 20,20,\Width\Argument,\Height\Argument); , \Flag\Argument, \Param1\Argument)
+      ;Case "OpenWindow"          : \Type\Argument =- 1  : \Window\Argument =- 1  : \Object\Argument = OpenWindow          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument, \Param1\Argument)
       Case "ButtonGadget"        : \Type\Argument = #PB_GadgetType_Button        : \Object\Argument = ButtonGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
       Case "StringGadget"        : \Type\Argument = #PB_GadgetType_String        : \Object\Argument = StringGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
       Case "TextGadget"          : \Type\Argument = #PB_GadgetType_Text          : \Object\Argument = TextGadget          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
@@ -2502,6 +2507,11 @@ Procedure WE_OpenWindow(Flag.i=#PB_Window_SystemMenu, ParentID=0)
     
     WE_Panel_1 = PanelGadget(#PB_Any, 5, 159, 315, 261)
     
+    AddGadgetItem(WE_Panel_1, -1, "Form")
+    WE_ScrollArea_0 = MDIGadget(#PB_Any, 0, 0, 150, 150, 0, 0)
+    UseGadgetList(WindowID(WE)) ; вернёмся к списку гаджетов главного окна
+                                ;CloseGadgetList()
+    
     AddGadgetItem(WE_Panel_1, -1, "Code")
     WE_Scintilla_0 = Scintilla::Gadget(#PB_Any, 0, 0, 420, 600)
     CloseGadgetList()
@@ -2544,6 +2554,7 @@ Procedure WE_ResizePanel_1()
   
   Select GetGadgetItemText(WE_Panel_1, GetGadgetState(WE_Panel_1))
     Case "Code" : ResizeGadget(WE_Scintilla_0, #PB_Ignore, #PB_Ignore, GadgetWidth, GadgetHeight)
+    Case "Form" : ResizeGadget(WE_ScrollArea_0, #PB_Ignore, #PB_Ignore, GadgetWidth, GadgetHeight)
   EndSelect
 EndProcedure
 
