@@ -50,14 +50,27 @@ Module Flag
   EndProcedure   
   
   Procedure SetStyle(Handle, Style) 
-    CompilerIf #PB_Compiler_OS = #PB_OS_Windows
-      SetWindowLongPtr_(Handle, #GWL_STYLE, GetWindowLong_(Handle, #GWL_STYLE)|Style)
-      
-      If (Style & #WS_SIZEBOX | #WS_BORDER | #WS_VISIBLE)
-        SetWindowPos_(Handle, 0,0,0,0,0, #SWP_FRAMECHANGED|#SWP_DRAWFRAME|#SWP_NOMOVE|#SWP_NOSIZE|#SWP_NOZORDER)
-        InvalidateRect_(Handle,0,#True)
-      EndIf
-    CompilerEndIf
+    CompilerSelect #PB_Compiler_OS  
+      CompilerCase #PB_OS_Windows
+        SetWindowLongPtr_(Handle, #GWL_STYLE, GetWindowLong_(Handle, #GWL_STYLE)|Style)
+        
+        If (Style & #WS_SIZEBOX | #WS_BORDER | #WS_VISIBLE)
+          SetWindowPos_(Handle, 0,0,0,0,0, #SWP_FRAMECHANGED|#SWP_DRAWFRAME|#SWP_NOMOVE|#SWP_NOSIZE|#SWP_NOZORDER)
+          InvalidateRect_(Handle,0,#True)
+        EndIf
+        
+      CompilerCase #PB_OS_Linux
+;         If (Style & #WINDOW_TITLEBAR)
+;           gtk_window_set_decorated_(Handle, (Style & #WINDOW_TITLEBAR))
+;         EndIf
+;         If (Style & #WINDOW_RESIZABLE)
+;           gtk_window_set_resizable_(Handle, (Style & #WINDOW_RESIZABLE))
+;         EndIf
+;         If (Style & #WINDOW_TOOL)
+;           gtk_window_set_type_hint_(Handle, #GDK_WINDOW_TYPE_HINT_UTILITY)
+;         EndIf
+        
+    CompilerEndSelect
   EndProcedure
   
   Procedure RemoveStyle(Handle,Style)
@@ -1387,8 +1400,40 @@ Module Flag
       ;-  
     CompilerDefault
       Procedure.q GetWindow( Window ) : EndProcedure
-      Procedure SetWindow( Window, Flags.q, Value=0 ) : EndProcedure
-      Procedure RemoveWindow( Window, Flags.q ) : EndProcedure
+      Procedure SetWindow( Window, Flags.q, Value=0 ) 
+        Protected Handle = WindowID(Window)
+        
+        If IsFlag(Flags,#PB_Window_SizeGadget)     ;Ok
+          gtk_window_set_resizable_(Handle, #True)
+          Flags&~#PB_Window_TitleBar
+        EndIf
+        If IsFlag(Flags,#PB_Window_TitleBar)       ;Ok
+          gtk_window_set_decorated_(Handle, #True)
+        EndIf
+        If IsFlag(Flags,#PB_Window_Tool)           ;Ok
+          gtk_window_set_type_hint_(Handle, #GDK_WINDOW_TYPE_HINT_UTILITY)
+        EndIf
+        
+;         gtk_window_maximize(handle)
+;         gtk_window_iconify(handle)
+;         gtk_window_deiconify(handle)
+;         gtk_window_unmaximize(handle)
+;         gtk_window_present(handle)
+      EndProcedure
+      Procedure RemoveWindow( Window, Flags.q ) 
+        Protected Handle = WindowID(Window)
+        
+        If IsFlag(Flags,#PB_Window_SizeGadget)     ;Ok
+          gtk_window_set_resizable_(Handle, #False)
+          Flags&~#PB_Window_TitleBar
+        EndIf
+        If IsFlag(Flags,#PB_Window_TitleBar)       ;Ok
+          gtk_window_set_decorated_(Handle, #False)
+        EndIf
+        If IsFlag(Flags,#PB_Window_Tool)           ;Ok
+          gtk_window_set_type_hint_(Handle, #GDK_WINDOW_TYPE_HINT_UTILITY)
+        EndIf
+      EndProcedure
       Procedure.q GetGadget( Gadget ) : EndProcedure
       Procedure SetGadget( Gadget, Flags.q, Value=0 ): EndProcedure
       Procedure RemoveGadget( Gadget, Flags.q ) : EndProcedure

@@ -1760,6 +1760,8 @@ Procedure ParsePBFile(FileName.s)
                                     \Object\Argument$ = Arg$
                                   EndIf
                                 EndIf
+                                \Class\Argument$ = \Object\Argument$ 
+                                ParsePBGadget()\Class\Argument$ = \Class\Argument$
                                 ParsePBGadget()\Object\Argument$ = \Object\Argument$
                                 
                               Case 2 : ParsePBGadget()\X\Argument$ = Arg$
@@ -2282,6 +2284,7 @@ Procedure WE_Tree_0_Replace(Gadget)
       Else
         ; Формируем имя объекта снова так как изменили имя родителя
         If *This\get(Str(ParsePBGadget()\Parent\Argument))\Object\Argument$
+          Debug ParsePBGadget()\Class\Argument$
           ParentClass$ = *This\get(Str(ParsePBGadget()\Parent\Argument))\Object\Argument$
          
           *This\get(ParsePBGadget()\Object\Argument$)\Object\Argument$ = ParentClass$+"_"+ParsePBGadget()\Class\Argument$
