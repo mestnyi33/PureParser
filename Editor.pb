@@ -2158,6 +2158,7 @@ Procedure LoadControls()
                        "canvasgadget",
                     "gadget"
                     AddGadgetItem(WE_Tree_1, -1, GadgetName, ImageID(GadgetImage))
+                    SetGadgetItemData(WE_Tree_1, CountGadgetItems(WE_Tree_1)-1, GadgetImage)
                 EndSelect
                 
                 
@@ -2200,19 +2201,29 @@ Procedure WE_Tree_0_Position(Gadget, Parent)
 EndProcedure
 
 Procedure WE_Tree_0_Update(Gadget, Position=-1)
-  Protected i
+  Protected i, Img, ImageID 
+  img = GetGadgetItemData(WE_Tree_1, GetGadgetState(WE_Tree_1))
+  Protected img_form = CatchImage(#PB_Any, ?form_png, ?form_png_end-?form_png)
+
+  If IsImage(Img)
+    ImageID = ImageID(Img)
+  EndIf
+  
+  If ImageID = 0
+    ImageID = ImageID(img_form)
+  EndIf
   
   ; Добавляем объекты к списку
   If Position=-1
     PushListPosition(ParsePBGadget())
     ForEach ParsePBGadget()
       Position = CountGadgetItems(Gadget)
-      AddGadgetItem (Gadget, -1, ParsePBGadget()\Object\Argument$, 0, ParsePBGadget()\SubLevel)
+      AddGadgetItem (Gadget, -1, ParsePBGadget()\Object\Argument$, ImageID, ParsePBGadget()\SubLevel)
       SetGadgetItemData(Gadget, Position, ParsePBGadget()\Object\Argument)
     Next
     PopListPosition(ParsePBGadget())
   Else
-    AddGadgetItem(Gadget, Position, ParsePBGadget()\Object\Argument$, 0, ParsePBGadget()\SubLevel)
+    AddGadgetItem(Gadget, Position, ParsePBGadget()\Object\Argument$, ImageID, ParsePBGadget()\SubLevel)
     SetGadgetItemData(Gadget, Position, ParsePBGadget()\Object\Argument)
     ;     SetGadgetItemImage(Gadget, Position, ImageID())
   EndIf
@@ -2227,6 +2238,26 @@ Procedure WE_Tree_0_Update(Gadget, Position=-1)
   ; Выбыраем последный объект списка
   SetGadgetState(Gadget, Position) ; Bug
   SetGadgetItemState(Gadget, Position, #PB_Tree_Selected)
+  
+  
+  DataSection ; form
+    form_png:
+    ;   Size : 438 bytes
+    Data.q $0A1A0A0D474E5089,$524448490D000000,$1000000010000000,$FFF31F0000000608,$4144497D01000061
+    Data.q $024B4F93A55E7854,$8E8410B157871841,$27D0839FD0EC45F5,$51468E82222A2290,$074BA221D0449162
+    Data.q $444460454444BA51,$604BA22ADD104110,$DDB092D0C2DD0458,$61DF7D9A6671DD1D,$BFB0F2ECBE6D3AC2
+    Data.q $1084FAFB037E1F65,$BD6364CE8BE33346,$71702116D95AF091,$C18524CE3379086E,$7C9900524C667C85
+    Data.q $FE75FE7CAD4AD6D7,$5384F70813307D68,$40A9E823BF90C12D,$A9B013324A59B2C8,$BF227573D365DBF0
+    Data.q $1529DC2CF7B92083,$2C6185C2F56271BD,$A92075A358413EEC,$022F8FC038856051,$1C02A14BE02C942C
+    Data.q $766D479D8257395F,$590498941DB128EA,$C60DD127E2C0AB36,$6100FDB73050CF96,$ACC8D5122894319D
+    Data.q $D1B282BDF21646AA,$01BA72B6241453A5,$B1F4B23555668945,$BE20A09E2C8CEE90,$28906CD7380D8F79
+    Data.q $A31E4A1A34368712,$2D4860374EE37A60,$206772354B1F7E71,$7F862DF4A9828871,$C7F4929AC5328D25
+    Data.q $7FD7F9BA9930500F,$503D0E816ACD9D10,$5BDCABCBFDE97C0B,$5CC1B8C30BBB8BA0,$62EE44B0814A4972
+    Data.q $D7D197933258B531,$BD37748E1B1D7ED9,$3AF9E3AA9C7BDFCE,$4549000000008891
+    Data.b $4E,$44,$AE,$42,$60,$82
+    form_png_end:
+  EndDataSection
+  
 EndProcedure 
 
 Procedure WE_Tree_0_Replace(Gadget)
@@ -2516,7 +2547,11 @@ Procedure WE_OpenWindow(Flag.i=#PB_Window_SystemMenu, ParentID=0)
                                 ;CloseGadgetList()
     
     AddGadgetItem(WE_Panel_1, -1, "Code")
-    WE_Scintilla_0 = Scintilla::Gadget(#PB_Any, 0, 0, 420, 600)
+    CompilerIf #PB_Compiler_Processor = #PB_Processor_x86
+      WE_Scintilla_0 = Scintilla::Gadget(#PB_Any, 0, 0, 420, 600, 0, "x86_scintilla.dll", "x86_SyntaxHilighting.dll")
+    CompilerElseIf #PB_Compiler_Processor = #PB_Processor_x64
+      WE_Scintilla_0 = Scintilla::Gadget(#PB_Any, 0, 0, 420, 600, 0, "x64_scintilla.dll", "x64_SyntaxHilighting.dll")
+    CompilerEndIf
     CloseGadgetList()
     
     WE_Splitter_1 = SplitterGadget(#PB_Any, 5, 5, 900-10, 600-MenuHeight()-10, WE_Panel_1, WE_Splitter_0, #PB_Splitter_SecondFixed|#PB_Splitter_Vertical)
@@ -2702,7 +2737,7 @@ EndProcedure
 
 CompilerIf #PB_Compiler_IsMainFile
   ; Инициализация окна редактора
-  MainWindow = WE_OpenWindow(#PB_Window_SystemMenu|#PB_Window_MinimizeGadget|#PB_Window_SizeGadget)
+  MainWindow = WE_OpenWindow(#PB_Window_SystemMenu|#PB_Window_MinimizeGadget|#PB_Window_MaximizeGadget|#PB_Window_SizeGadget)
   
   If CountProgramParameters()=1 
     WE_OpenFile(ProgramParameter(0))

@@ -20,8 +20,13 @@ Procedure W_Window_1_Open(ParentID.i=0, Flag.i=#PB_Window_SystemMenu|#PB_Window_
     ProcedureReturn W_Window_1
   EndIf
   
-  W_Window_1 = OpenWindow(#PB_Any, 0, 0, 259, 157, "Window_1", Flag, ParentID)
-  G_Window_1_Image_0 = ImageGadget(#PB_Any, 45, 25, 251, 121, ImageID(I_Window_1_0), #PB_Image_Border)                                                     
+  W_Window_1 = OpenWindow(#PB_Any, 0, 0, 261, 156, "Window_1", #PB_Window_SystemMenu|#PB_Window_ScreenCentered)
+  If IsWindow(W_Window_1)
+    SetActiveWindow(W_Window_1)
+    ProcedureReturn W_Window_1
+  EndIf
+)                                                                             
+  G_Window_1_Image_0 = ImageGadget(#PB_Any, 5, 5, 251, 121, ImageID(I_Window_1_0), #PB_Image_Border)                                                       
   G_Window_1_Button_0 = ButtonGadget(#PB_Any, 90, 130, 81, 21, "Button_0") 
   
   ProcedureReturn W_Window_1
