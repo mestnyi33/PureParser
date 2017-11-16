@@ -2177,7 +2177,8 @@ EndProcedure
 ;- PI Редактора
 Procedure WE_Tree_0_Position(Gadget, Parent)
   Protected i, Position=-1 ; 
-  
+  ;Position = CountGadgetItems(Gadget)
+    
   ; Определяем позицию в списке
   If IsGadget(Parent) 
     For i=0 To CountGadgetItems(Gadget)-1

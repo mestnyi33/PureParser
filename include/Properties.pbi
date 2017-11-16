@@ -1216,7 +1216,7 @@ Module Properties
         \GadgetType = GadgetType
         
         \LinePos = GadgetWidth(LineGadget)
-        \Font = LoadFont(#PB_Any,"Consolas",8 ) 
+        \Font = LoadFont(#PB_Any,"MS Shell Dlg",8 ) 
         \ItemHeight = GetGadgetAttribute(\Gadget,#PB_ScrollArea_ScrollStep)
         
         SetGadgetAttribute(\Gadget, #PB_ScrollArea_InnerHeight, ListSize(Properties()) * \ItemHeight)
