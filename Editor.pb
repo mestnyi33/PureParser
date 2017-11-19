@@ -2755,3 +2755,9 @@ CompilerIf #PB_Compiler_IsMainFile
     EndSelect
   Wend
 CompilerEndIf
+
+; IDE Options = PureBasic 5.60 (Windows - x86)
+; Folding = ---------
+; EnableXP
+; Executable = ..\..\Programs\PureBasic\PureParser.exe
+; CompileSourceDirectory
