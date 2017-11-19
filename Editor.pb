@@ -896,6 +896,7 @@ Procedure CO_Events()
           For I=0 To CountGadgetItems(WE_Tree_0)-1
             If Object = GetGadgetItemData(WE_Tree_0, I) : SetGadgetState(WE_Tree_0, I)
               PostEvent(#PB_Event_Gadget, WE, WE_Tree_0, #PB_EventType_Change)
+              Transformation::Change(Object)
               Break
             EndIf
           Next  
@@ -1303,7 +1304,7 @@ Procedure CO_Open() ; Ok
     Select \Type\Argument$
       Case "FormGadget"          : \Type\Argument =- 1  : \Window\Argument =- 1  : \Object\Argument = CanvasGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, #PB_Canvas_Container) : CloseGadgetList()
       Case "OpenWindow"          : \Type\Argument =- 1  : \Window\Argument =- 1  
-      \Object\Argument = AddGadgetItem(WE_ScrollArea_0, #PB_Any, \Caption\Argument$)
+      \Object\Argument = AddGadgetItem(WE_ScrollArea_0, #PB_Any, \Caption\Argument$, 0, \Flag\Argument)
       ResizeWindow(\Object\Argument, 20,20,\Width\Argument,\Height\Argument); , \Flag\Argument, \Param1\Argument)
       ;Case "OpenWindow"          : \Type\Argument =- 1  : \Window\Argument =- 1  : \Object\Argument = OpenWindow          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument, \Param1\Argument)
       Case "ButtonGadget"        : \Type\Argument = #PB_GadgetType_Button        : \Object\Argument = ButtonGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
@@ -1954,7 +1955,19 @@ Procedure ParsePBFile(FileName.s)
                       \Param1\Argument = *This\get(\Param1\Argument$)\Object\Argument
                       
                       If \Param1\Argument
-                        *This\get(\Object\Argument$)\Object\Argument = *This\get(Str(\Param1\Argument))\Window\Argument
+;                         *This\get(\Object\Argument$)\Object\Argument = *This\get(Str(\Param1\Argument))\Window\Argument
+                        Protected UseGadgetList = UseGadgetList(WindowID(\Param1\Argument))
+                        PushListPosition(ParsePBGadget())
+                        ForEach ParsePBGadget()
+                          If ParsePBGadget()\Type\Argument$ = "OpenWindow"
+                            If IsWindow(ParsePBGadget()\Object\Argument) And 
+                               WindowID(ParsePBGadget()\Object\Argument) = UseGadgetList
+                              *This\get(\Object\Argument$)\Object\Argument = ParsePBGadget()\Object\Argument
+                            EndIf
+                          EndIf
+                        Next
+                        PopListPosition(ParsePBGadget())
+                        UseGadgetList(UseGadgetList)
                       Else
                         \Param1\Argument = *This\get(\Param1\Argument$)\Object\Argument
                       EndIf
@@ -2157,6 +2170,23 @@ Procedure LoadControls()
                        "shortcutgadget",
                        "canvasgadget",
                     "gadget"
+                       
+                       
+                       GadgetName=ULCase(ReplaceString(GadgetName, "gadget",""))
+                    
+                    GadgetName = ReplaceString(GadgetName, "box","Box")
+                    GadgetName = ReplaceString(GadgetName, "link","Link")
+                    GadgetName = ReplaceString(GadgetName, "bar","Bar")
+                    GadgetName = ReplaceString(GadgetName, "area","Area")
+                    GadgetName = ReplaceString(GadgetName, "Ipa","IPA")
+                    
+                    GadgetName = ReplaceString(GadgetName, "view","View")
+                    GadgetName = ReplaceString(GadgetName, "icon","Icon")
+                    GadgetName = ReplaceString(GadgetName, "image","Image")
+                    GadgetName = ReplaceString(GadgetName, "combo","Combo")
+                    GadgetName = ReplaceString(GadgetName, "list","List")
+                    GadgetName = ReplaceString(GadgetName, "tree","Tree")
+                    
                     AddGadgetItem(WE_Tree_1, -1, GadgetName, ImageID(GadgetImage))
                     SetGadgetItemData(WE_Tree_1, CountGadgetItems(WE_Tree_1)-1, GadgetImage)
                 EndSelect
@@ -2177,7 +2207,7 @@ EndProcedure
 ;- PI Редактора
 Procedure WE_Tree_0_Position(Gadget, Parent)
   Protected i, Position=-1 ; 
-  ;Position = CountGadgetItems(Gadget)
+  Position = CountGadgetItems(Gadget)
     
   ; Определяем позицию в списке
   If IsGadget(Parent) 
