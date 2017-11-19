@@ -102,7 +102,7 @@ Macro MacroCoordinate(MacroValue, MacroArg) ;
 EndMacro
 
 Macro change_current_object_from_class(_class_)
-  ChangeCurrentElement(ParsePBGadget(), *This\get(_class_)\Adress)
+  ChangeCurrentElement(ParsePBObject(), *This\get(_class_)\Adress)
 EndMacro
 
 Macro change_current_object_from_id(_object_)
@@ -228,7 +228,7 @@ Structure ThisStruct Extends ParseStruct
   Map get.ObjectStruct()
 EndStructure
 
-Global NewList ParsePBGadget.ParseStruct() 
+Global NewList ParsePBObject.ParseStruct() 
 Global *This.ThisStruct = AllocateStructure(ThisStruct)
 ;
 *This\Index=-1
@@ -750,15 +750,15 @@ EndProcedure
 
 Procedure CF_Free(Object.i)
   
-  If ListSize(ParsePBGadget())
-    With ParsePBGadget()
+  If ListSize(ParsePBObject())
+    With ParsePBObject()
       If IsGadget(Object)
         Select GadgetType(Object)
           Case #PB_GadgetType_Panel, 
                #PB_GadgetType_Container, 
                #PB_GadgetType_ScrollArea
             
-            ForEach ParsePBGadget()
+            ForEach ParsePBObject()
               If \Parent\Argument = Object 
                 Select GadgetType(\Object\Argument)
                   Case #PB_GadgetType_Panel, 
@@ -776,7 +776,7 @@ Procedure CF_Free(Object.i)
                     EndIf
                     DeleteMapElement(*This\get(), \Object\Argument$)
                     DeleteMapElement(*This\get(), Str(\Object\Argument))
-                    DeleteElement(ParsePBGadget())
+                    DeleteElement(ParsePBObject())
                     
                 EndSelect
               EndIf
@@ -784,7 +784,7 @@ Procedure CF_Free(Object.i)
         EndSelect
       EndIf
       
-      If ChangeCurrentElement(ParsePBGadget(), *This\get(Str(Object))\Adress)
+      If ChangeCurrentElement(ParsePBObject(), *This\get(Str(Object))\Adress)
         ;         Debug 666666666666
         ;         Debug "Text$ "+\Content\String$
         ReplaceString(*This\Content\Text$, \Content\String$, Space(Len(\Content\String$)), #PB_String_InPlace, \Content\Position, 1)
@@ -799,7 +799,7 @@ Procedure CF_Free(Object.i)
         EndIf
         DeleteMapElement(*This\get(), \Object\Argument$)
         DeleteMapElement(*This\get(), Str(Object))
-        DeleteElement(ParsePBGadget())
+        DeleteElement(ParsePBObject())
         
       EndIf
     EndWith  
@@ -812,9 +812,187 @@ EndProcedure
 Declare CO_Create(Type$, X, Y, Parent=-1)
 Declare CO_Open()
 
-Macro CO_Flag(Flag) ; Ok
-  Properties::GetPBFlag(Flag)
-EndMacro
+Procedure.q Flag(Flag_String$)
+  Protected i, Flag.q, String$
+  
+  If Flag_String$
+    For I = 0 To CountString(Flag_String$,"|")
+      String$ = Trim(StringField(Flag_String$,(I+1),"|"))
+      
+      Select String$
+          ; window
+        Case "#PB_Window_BorderLess"              : Flag = Flag | #PB_Window_BorderLess
+        Case "#PB_Window_Invisible"               : Flag = Flag | #PB_Window_Invisible
+        Case "#PB_Window_Maximize"                : Flag = Flag | #PB_Window_Maximize
+        Case "#PB_Window_Minimize"                : Flag = Flag | #PB_Window_Minimize
+        Case "#PB_Window_MaximizeGadget"          : Flag = Flag | #PB_Window_MaximizeGadget
+        Case "#PB_Window_MinimizeGadget"          : Flag = Flag | #PB_Window_MinimizeGadget
+        Case "#PB_Window_NoActivate"              : Flag = Flag | #PB_Window_NoActivate
+        Case "#PB_Window_NoGadgets"               : Flag = Flag | #PB_Window_NoGadgets
+        Case "#PB_Window_SizeGadget"              : Flag = Flag | #PB_Window_SizeGadget
+        Case "#PB_Window_SystemMenu"              : Flag = Flag | #PB_Window_SystemMenu
+        Case "#PB_Window_TitleBar"                : Flag = Flag | #PB_Window_TitleBar
+        Case "#PB_Window_Tool"                    : Flag = Flag | #PB_Window_Tool
+        Case "#PB_Window_ScreenCentered"          : Flag = Flag | #PB_Window_ScreenCentered
+        Case "#PB_Window_WindowCentered"          : Flag = Flag | #PB_Window_WindowCentered
+          ; buttonimage 
+        Case "#PB_Button_Image"                   : Flag = Flag | #PB_Button_Image
+        Case "#PB_Button_PressedImage"            : Flag = Flag | #PB_Button_PressedImage
+          ; button  
+        Case "#PB_Button_Default"                 : Flag = Flag | #PB_Button_Default
+        Case "#PB_Button_Left"                    : Flag = Flag | #PB_Button_Left
+        Case "#PB_Button_MultiLine"               : Flag = Flag | #PB_Button_MultiLine
+        Case "#PB_Button_Right"                   : Flag = Flag | #PB_Button_Right
+        Case "#PB_Button_Toggle"                  : Flag = Flag | #PB_Button_Toggle
+          ; string
+        Case "#PB_String_BorderLess"              : Flag = Flag | #PB_String_BorderLess
+        Case "#PB_String_LowerCase"               : Flag = Flag | #PB_String_LowerCase
+        Case "#PB_String_MaximumLength"           : Flag = Flag | #PB_String_MaximumLength
+        Case "#PB_String_Numeric"                 : Flag = Flag | #PB_String_Numeric
+        Case "#PB_String_Password"                : Flag = Flag | #PB_String_Password
+        Case "#PB_String_ReadOnly"                : Flag = Flag | #PB_String_ReadOnly
+        Case "#PB_String_UpperCase"               : Flag = Flag | #PB_String_UpperCase
+          ; text
+        Case "#PB_Text_Border"                    : Flag = Flag | #PB_Text_Border
+        Case "#PB_Text_Center"                    : Flag = Flag | #PB_Text_Center
+        Case "#PB_Text_Right"                     : Flag = Flag | #PB_Text_Right
+          ; option
+          ; checkbox
+        Case "#PB_CheckBox_Center"                : Flag = Flag | #PB_CheckBox_Center
+        Case "#PB_CheckBox_Right"                 : Flag = Flag | #PB_CheckBox_Right
+        Case "#PB_CheckBox_ThreeState"            : Flag = Flag | #PB_CheckBox_ThreeState
+          ; listview
+        Case "#PB_ListView_ClickSelect"           : Flag = Flag | #PB_ListView_ClickSelect
+        Case "#PB_ListView_MultiSelect"           : Flag = Flag | #PB_ListView_MultiSelect
+          ; frame
+        Case "#PB_Frame_Double"                   : Flag = Flag | #PB_Frame_Double
+        Case "#PB_Frame_Flat"                     : Flag = Flag | #PB_Frame_Flat
+        Case "#PB_Frame_Single"                   : Flag = Flag | #PB_Frame_Single
+          ; combobox
+        Case "#PB_ComboBox_Editable"              : Flag = Flag | #PB_ComboBox_Editable
+        Case "#PB_ComboBox_Image"                 : Flag = Flag | #PB_ComboBox_Image
+        Case "#PB_ComboBox_LowerCase"             : Flag = Flag | #PB_ComboBox_LowerCase
+        Case "#PB_ComboBox_UpperCase"             : Flag = Flag | #PB_ComboBox_UpperCase
+          ; image 
+        Case "#PB_Image_Border"                   : Flag = Flag | #PB_Image_Border
+        Case "#PB_Image_Raised"                   : Flag = Flag | #PB_Image_Raised
+          ; hyperlink 
+        Case "#PB_HyperLink_Underline"            : Flag = Flag | #PB_HyperLink_Underline
+          ; container 
+        Case "#PB_Container_BorderLess"           : Flag = Flag | #PB_Container_BorderLess
+        Case "#PB_Container_Double"               : Flag = Flag | #PB_Container_Double
+        Case "#PB_Container_Flat"                 : Flag = Flag | #PB_Container_Flat
+        Case "#PB_Container_Raised"               : Flag = Flag | #PB_Container_Raised
+        Case "#PB_Container_Single"               : Flag = Flag | #PB_Container_Single
+          ; listicon
+        Case "#PB_ListIcon_AlwaysShowSelection"   : Flag = Flag | #PB_ListIcon_AlwaysShowSelection
+        Case "#PB_ListIcon_CheckBoxes"            : Flag = Flag | #PB_ListIcon_CheckBoxes
+        Case "#PB_ListIcon_ColumnWidth"           : Flag = Flag | #PB_ListIcon_ColumnWidth
+        Case "#PB_ListIcon_DisplayMode"           : Flag = Flag | #PB_ListIcon_DisplayMode
+        Case "#PB_ListIcon_GridLines"             : Flag = Flag | #PB_ListIcon_GridLines
+        Case "#PB_ListIcon_FullRowSelect"         : Flag = Flag | #PB_ListIcon_FullRowSelect
+        Case "#PB_ListIcon_HeaderDragDrop"        : Flag = Flag | #PB_ListIcon_HeaderDragDrop
+        Case "#PB_ListIcon_LargeIcon"             : Flag = Flag | #PB_ListIcon_LargeIcon
+        Case "#PB_ListIcon_List"                  : Flag = Flag | #PB_ListIcon_List
+        Case "#PB_ListIcon_MultiSelect"           : Flag = Flag | #PB_ListIcon_MultiSelect
+        Case "#PB_ListIcon_Report"                : Flag = Flag | #PB_ListIcon_Report
+        Case "#PB_ListIcon_SmallIcon"             : Flag = Flag | #PB_ListIcon_SmallIcon
+        Case "#PB_ListIcon_ThreeState"            : Flag = Flag | #PB_ListIcon_ThreeState
+          ; ipaddress
+          ; progressbar 
+        Case "#PB_ProgressBar_Smooth"             : Flag = Flag | #PB_ProgressBar_Smooth
+        Case "#PB_ProgressBar_Vertical"           : Flag = Flag | #PB_ProgressBar_Vertical
+          ; scrollbar 
+        Case "#PB_ScrollBar_Vertical"             : Flag = Flag | #PB_ScrollBar_Vertical
+          ; scrollarea 
+        Case "#PB_ScrollArea_BorderLess"          : Flag = Flag | #PB_ScrollArea_BorderLess
+        Case "#PB_ScrollArea_Center"              : Flag = Flag | #PB_ScrollArea_Center
+        Case "#PB_ScrollArea_Flat"                : Flag = Flag | #PB_ScrollArea_Flat
+        Case "#PB_ScrollArea_Raised"              : Flag = Flag | #PB_ScrollArea_Raised
+        Case "#PB_ScrollArea_Single"              : Flag = Flag | #PB_ScrollArea_Single
+          ; trackbar
+        Case "#PB_TrackBar_Ticks"                 : Flag = Flag | #PB_TrackBar_Ticks
+        Case "#PB_TrackBar_Vertical"              : Flag = Flag | #PB_TrackBar_Vertical
+          ; web
+          ; calendar
+        Case "#PB_Calendar_Borderless"            : Flag = Flag | #PB_Calendar_Borderless
+          
+          ; date
+        Case "#PB_Date_CheckBox"                  : Flag = Flag | #PB_Date_CheckBox
+        Case "#PB_Date_UpDown"                    : Flag = Flag | #PB_Date_UpDown
+          
+          ; editor
+        Case "#PB_Editor_ReadOnly"                : Flag = Flag | #PB_Editor_ReadOnly
+        Case "#PB_Editor_WordWrap"                : Flag = Flag | #PB_Editor_WordWrap
+          
+          ; explorerlist
+        Case "#PB_Explorer_BorderLess"            : Flag = Flag | #PB_Explorer_BorderLess          ; Создать гаджет без границ.
+        Case "#PB_Explorer_AlwaysShowSelection"   : Flag = Flag | #PB_Explorer_AlwaysShowSelection ; Выделение отображается даже если гаджет не активирован.
+        Case "#PB_Explorer_MultiSelect"           : Flag = Flag | #PB_Explorer_MultiSelect         ; Разрешить множественное выделение элементов в гаджете.
+        Case "#PB_Explorer_GridLines"             : Flag = Flag | #PB_Explorer_GridLines           ; Отображать разделительные линии между строками и колонками.
+        Case "#PB_Explorer_HeaderDragDrop"        : Flag = Flag | #PB_Explorer_HeaderDragDrop      ; В режиме таблицы заголовки можно перетаскивать (Drag'n'Drop).
+        Case "#PB_Explorer_FullRowSelect"         : Flag = Flag | #PB_Explorer_FullRowSelect       ; Выделение охватывает всю строку, а не первую колонку.
+        Case "#PB_Explorer_NoFiles"               : Flag = Flag | #PB_Explorer_NoFiles             ; Не показывать файлы.
+        Case "#PB_Explorer_NoFolders"             : Flag = Flag | #PB_Explorer_NoFolders           ; Не показывать каталоги.
+        Case "#PB_Explorer_NoParentFolder"        : Flag = Flag | #PB_Explorer_NoParentFolder      ; Не показывать ссылку на родительский каталог [..].
+        Case "#PB_Explorer_NoDirectoryChange"     : Flag = Flag | #PB_Explorer_NoDirectoryChange   ; Пользователь не может сменить директорию.
+        Case "#PB_Explorer_NoDriveRequester"      : Flag = Flag | #PB_Explorer_NoDriveRequester    ; Не показывать запрос 'пожалуйста, вставьте диск X:'.
+        Case "#PB_Explorer_NoSort"                : Flag = Flag | #PB_Explorer_NoSort              ; Пользователь не может сортировать содержимое по клику на заголовке колонки.
+        Case "#PB_Explorer_AutoSort"              : Flag = Flag | #PB_Explorer_AutoSort            ; Содержимое автоматически упорядочивается по имени.
+        Case "#PB_Explorer_HiddenFiles"           : Flag = Flag | #PB_Explorer_HiddenFiles         ; Будет отображать скрытые файлы (поддерживается только в Linux и OS X).
+        Case "#PB_Explorer_NoMyDocuments"         : Flag = Flag | #PB_Explorer_NoMyDocuments       ; Не показывать каталог 'Мои документы' в виде отдельного элемента.
+          
+          ; explorercombo
+        Case "#PB_Explorer_DrivesOnly"            : Flag = Flag | #PB_Explorer_DrivesOnly          ; Гаджет будет отображать только диски, которые вы можете выбрать.
+        Case "#PB_Explorer_Editable"              : Flag = Flag | #PB_Explorer_Editable            ; Гаджет будет доступен для редактирования с функцией автозаполнения.  			      С этим флагом он действует точно так же, как тот что в Windows Explorer.
+          
+          ; explorertree
+        Case "#PB_Explorer_NoLines"               : Flag = Flag | #PB_Explorer_NoLines             ; Скрыть линии, соединяющие узлы дерева.
+        Case "#PB_Explorer_NoButtons"             : Flag = Flag | #PB_Explorer_NoButtons           ; Скрыть кнопки разворачивания узлов в виде символов '+'.
+          
+          ; spin
+        Case "#PB_Spin_Numeric"                   : Flag = Flag | #PB_Spin_Numeric
+        Case "#PB_Spin_ReadOnly"                  : Flag = Flag | #PB_Spin_ReadOnly
+          ; tree
+        Case "#PB_Tree_AlwaysShowSelection"       : Flag = Flag | #PB_Tree_AlwaysShowSelection
+        Case "#PB_Tree_CheckBoxes"                : Flag = Flag | #PB_Tree_CheckBoxes
+        Case "#PB_Tree_NoButtons"                 : Flag = Flag | #PB_Tree_NoButtons
+        Case "#PB_Tree_NoLines"                   : Flag = Flag | #PB_Tree_NoLines
+        Case "#PB_Tree_ThreeState"                : Flag = Flag | #PB_Tree_ThreeState
+          ; panel
+          ; splitter
+        Case "#PB_Splitter_Separator"             : Flag = Flag | #PB_Splitter_Separator
+        Case "#PB_Splitter_Vertical"              : Flag = Flag | #PB_Splitter_Vertical
+        Case "#PB_Splitter_FirstFixed"            : Flag = Flag | #PB_Splitter_FirstFixed
+        Case "#PB_Splitter_SecondFixed"           : Flag = Flag | #PB_Splitter_SecondFixed
+          ; mdi
+        Case "#PB_MDI_AutoSize"                   : Flag = Flag | #PB_MDI_AutoSize
+        Case "#PB_MDI_BorderLess"                 : Flag = Flag | #PB_MDI_BorderLess
+        Case "#PB_MDI_NoScrollBars"               : Flag = Flag | #PB_MDI_NoScrollBars
+          ; scintilla
+          ; shortcut
+          ; canvas
+        Case "#PB_Canvas_Border"                  : Flag = Flag | #PB_Canvas_Border
+        Case "#PB_Canvas_ClipMouse"               : Flag = Flag | #PB_Canvas_ClipMouse
+        Case "#PB_Canvas_Container"               : Flag = Flag | #PB_Canvas_Container
+        Case "#PB_Canvas_DrawFocus"               : Flag = Flag | #PB_Canvas_DrawFocus
+        Case "#PB_Canvas_Keyboard"                : Flag = Flag | #PB_Canvas_Keyboard
+          
+        Default
+          Select Asc(String$)
+            Case '0' To '9'
+              Flag = Flag | Val(String$)
+            Default
+              Flag = Flag | Flag(GetVarValue(String$))
+          EndSelect
+      EndSelect
+      
+    Next
+  EndIf
+  
+  ProcedureReturn Flag
+EndProcedure
+
 
 Procedure CO_Free(Object)
   Protected i
@@ -827,15 +1005,15 @@ Procedure CO_Free(Object)
     EndIf
   Next 
   
-  With ParsePBGadget()
-    ;     ChangeCurrentElement(ParsePBGadget(), *This\get(Str(Object))\Adress)
+  With ParsePBObject()
+    ;     ChangeCurrentElement(ParsePBObject(), *This\get(Str(Object))\Adress)
     ;     *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count-1 
     ;     If *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count =< 0
     ;       DeleteMapElement(*This\get(), Str(\Parent\Argument)+"_"+\Type\Argument$)
     ;     EndIf
     ;     DeleteMapElement(*This\get(), \Object\Argument$)
     ;     DeleteMapElement(*This\get(), Str(Object))
-    ;     DeleteElement(ParsePBGadget())
+    ;     DeleteElement(ParsePBObject())
     CF_Free(Object)
     
     Transformation::Free(Object)
@@ -859,9 +1037,9 @@ Procedure CO_Events()
   
   Select Event()
     Case #PB_Event_Create
-      With ParsePBGadget()
-        ;         PushListPosition(ParsePBGadget())
-        ;         ForEach ParsePBGadget()
+      With ParsePBObject()
+        ;         PushListPosition(ParsePBObject())
+        ;         ForEach ParsePBObject()
         ;           If Object = \Object\Argument
         change_current_object_from_id(Object)
         Transformation::Create(\Object\Argument, \Parent\Argument, \Window\Argument, \Item, 5)
@@ -873,7 +1051,7 @@ Procedure CO_Events()
         ;             Break
         ;           EndIf
         ;         Next
-        ;         PopListPosition(ParsePBGadget())
+        ;         PopListPosition(ParsePBObject())
       EndWith
       
       ; 
@@ -935,13 +1113,13 @@ Procedure CO_Insert(*ThisParse.ParseStruct, Parent)
     \Content\Position = *This\get(*This\get(Str(Parent))\Object\Argument$)\Code("Code_Object")\Position  + VariableLength
     
     If VariableLength
-      PushListPosition(ParsePBGadget())
-      ForEach ParsePBGadget()
-        If ParsePBGadget()\Container 
-          *This\get(ParsePBGadget()\Object\Argument$)\Code("Code_Object")\Position + VariableLength
+      PushListPosition(ParsePBObject())
+      ForEach ParsePBObject()
+        If ParsePBObject()\Container 
+          *This\get(ParsePBObject()\Object\Argument$)\Code("Code_Object")\Position + VariableLength
         EndIf
       Next
-      PopListPosition(ParsePBGadget())
+      PopListPosition(ParsePBObject())
     EndIf
     
     If Asc(\Object\Argument$) = '#'
@@ -1019,18 +1197,18 @@ Procedure CO_Insert(*ThisParse.ParseStruct, Parent)
       
     Else
       If IsGadget(Parent)
-        PushListPosition(ParsePBGadget())
-        ForEach ParsePBGadget()
-          Select ParsePBGadget()\Container
+        PushListPosition(ParsePBObject())
+        ForEach ParsePBObject()
+          Select ParsePBObject()\Container
             Case #PB_GadgetType_Panel, #PB_GadgetType_Container, #PB_GadgetType_ScrollArea, #PB_GadgetType_Canvas
               ; Проверяем позицию родителя в генерируемом коде
-              If *This\get(ParsePBGadget()\Object\Argument$)\Code("Code_Object")\Position>*This\Content\Position
+              If *This\get(ParsePBObject()\Object\Argument$)\Code("Code_Object")\Position>*This\Content\Position
                 ; У родителя меняем последную позицию.
-                *This\get(ParsePBGadget()\Object\Argument$)\Code("Code_Object")\Position + (*This\Content\Length + Len(#CRLF$+Space(Indent)))
+                *This\get(ParsePBObject()\Object\Argument$)\Code("Code_Object")\Position + (*This\Content\Length + Len(#CRLF$+Space(Indent)))
               EndIf
           EndSelect
         Next
-        PopListPosition(ParsePBGadget())
+        PopListPosition(ParsePBObject())
       EndIf
       
     EndIf
@@ -1079,7 +1257,7 @@ Procedure CO_Create(Type$, X, Y, Parent=-1)
         \Type\Argument$ = ReplaceString(\Type\Argument$, "tree","Tree")
     EndSelect
     
-    Protected *ThisParse.ParseStruct = AddElement(ParsePBGadget())
+    Protected *ThisParse.ParseStruct = AddElement(ParsePBObject())
     If  *ThisParse
       Restore Model 
       For i=1 To 1+33 ; gadget count
@@ -1096,48 +1274,48 @@ Procedure CO_Create(Type$, X, Y, Parent=-1)
           If BuffType$ = \Type\Argument$
             Select j
               Case 1 
-                ParsePBGadget()\Type\Argument$=Buffer
+                ParsePBObject()\Type\Argument$=Buffer
                 If Buffer = "OpenWindow"
                   \Class\Argument$=ReplaceString(Buffer, "Open","")+"_"
                 Else
                   \Class\Argument$=ReplaceString(Buffer, "Gadget","")+"_"
                 EndIf
                 
-              Case 2 : ParsePBGadget()\Width\Argument$=Buffer
-              Case 3 : ParsePBGadget()\Height\Argument$=Buffer
-              Case 4 : ParsePBGadget()\Param1\Argument$=Buffer
-              Case 5 : ParsePBGadget()\Param2\Argument$=Buffer
-              Case 6 : ParsePBGadget()\Param3\Argument$=Buffer
-              Case 7 : ParsePBGadget()\Flag\Argument$=Buffer
+              Case 2 : ParsePBObject()\Width\Argument$=Buffer
+              Case 3 : ParsePBObject()\Height\Argument$=Buffer
+              Case 4 : ParsePBObject()\Param1\Argument$=Buffer
+              Case 5 : ParsePBObject()\Param2\Argument$=Buffer
+              Case 6 : ParsePBObject()\Param3\Argument$=Buffer
+              Case 7 : ParsePBObject()\Flag\Argument$=Buffer
             EndSelect
           EndIf
         Next  
         BuffType$ = ""
       Next  
       
-      \Flag\Argument=CO_Flag(ParsePBGadget()\Flag\Argument$)
+      \Flag\Argument=Flag(ParsePBObject()\Flag\Argument$)
       \Class\Argument$+\get(Str(Parent)+"_"+\Type\Argument$)\Count
       \Caption\Argument$ = \Class\Argument$
       
       ; Формируем имя объекта
-      ParsePBGadget()\Class\Argument$ = \Class\Argument$
+      ParsePBObject()\Class\Argument$ = \Class\Argument$
       If \get(Str(Parent))\Object\Argument$
         \Object\Argument$ = \get(Str(Parent))\Object\Argument$+"_"+\Class\Argument$
       Else
         \Object\Argument$ = \Class\Argument$
-        ParsePBGadget()\Flag\Argument$="Flag"
+        ParsePBObject()\Flag\Argument$="Flag"
       EndIf
       
       \X\Argument = X
       \Y\Argument = Y
-      \Width\Argument = Val(ParsePBGadget()\Width\Argument$)
-      \Height\Argument = Val(ParsePBGadget()\Height\Argument$)
+      \Width\Argument = Val(ParsePBObject()\Width\Argument$)
+      \Height\Argument = Val(ParsePBObject()\Height\Argument$)
       
-      ParsePBGadget()\X\Argument$ = Str(\X\Argument)
-      ParsePBGadget()\Y\Argument$ = Str(\Y\Argument)
-      ParsePBGadget()\Type\Argument$ = \Type\Argument$
-      ParsePBGadget()\Object\Argument$ = \Object\Argument$
-      ParsePBGadget()\Caption\Argument$ = \Caption\Argument$
+      ParsePBObject()\X\Argument$ = Str(\X\Argument)
+      ParsePBObject()\Y\Argument$ = Str(\Y\Argument)
+      ParsePBObject()\Type\Argument$ = \Type\Argument$
+      ParsePBObject()\Object\Argument$ = \Object\Argument$
+      ParsePBObject()\Caption\Argument$ = \Caption\Argument$
       
       ; Сначала определять кто есть кто.
       Select \Type\Argument$
@@ -1357,24 +1535,29 @@ Procedure CO_Open() ; Ok
       Case "CanvasGadget"        : \Type\Argument = #PB_GadgetType_Canvas        : \Object\Argument = CanvasGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Flag\Argument)
     EndSelect
     
+    If \Object\Argument$=""
+      \Object\Argument$=Str(\Object\Argument)
+      ParsePBObject()\Object\Argument$=\Object\Argument$
+    EndIf
+    
     ; Заносим данные объекта в памят
     If Bool(IsGadget(\Object\Argument) | IsWindow(\Object\Argument))
-      ParsePBGadget()\Type\Argument = \Type\Argument
-      ParsePBGadget()\Object\Argument = \Object\Argument
+      ParsePBObject()\Type\Argument = \Type\Argument
+      ParsePBObject()\Object\Argument = \Object\Argument
       
-      If ParsePBGadget()\Parent\Argument<>\Parent\Argument
+      If ParsePBObject()\Parent\Argument<>\Parent\Argument
         If \get(Str(\Parent\Argument))\Object\Argument$
           \Parent\Argument$ = \get(Str(\Parent\Argument))\Object\Argument$
         EndIf
-        ParsePBGadget()\Parent\Argument=\Parent\Argument
-        ParsePBGadget()\Parent\Argument$=\Parent\Argument$
+        ParsePBObject()\Parent\Argument=\Parent\Argument
+        ParsePBObject()\Parent\Argument$=\Parent\Argument$
       EndIf
-      If ParsePBGadget()\Window\Argument<>\Window\Argument
+      If ParsePBObject()\Window\Argument<>\Window\Argument
         If \get(Str(\Window\Argument))\Object\Argument$
           \Window\Argument$ = \get(Str(\Window\Argument))\Object\Argument$
         EndIf
-        ParsePBGadget()\Window\Argument=\Window\Argument
-        ParsePBGadget()\Window\Argument$=\Window\Argument$
+        ParsePBObject()\Window\Argument=\Window\Argument
+        ParsePBObject()\Window\Argument$=\Window\Argument$
       EndIf
       
       ; TODO -----------------------------------------
@@ -1384,8 +1567,8 @@ Procedure CO_Open() ; Ok
       
       Macro Init_object_data(_object_, _object_key_)
         If FindMapElement(*This\get(), _object_key_)
-          *This\get(_object_key_)\Index=ListIndex(ParsePBGadget())
-          *This\get(_object_key_)\Adress=@ParsePBGadget()
+          *This\get(_object_key_)\Index=ListIndex(ParsePBObject())
+          *This\get(_object_key_)\Adress=@ParsePBObject()
           
           *This\get(_object_key_)\Object\Argument=_object_ 
           *This\get(_object_key_)\Object\Argument$=*This\Object\Argument$ 
@@ -1400,8 +1583,8 @@ Procedure CO_Open() ; Ok
           *This\get(_object_key_)\Parent\Argument$=*This\Parent\Argument$ 
         Else
           AddMapElement(*This\get(), _object_key_)
-          *This\get()\Index=ListIndex(ParsePBGadget())
-          *This\get()\Adress=@ParsePBGadget()
+          *This\get()\Index=ListIndex(ParsePBObject())
+          *This\get()\Adress=@ParsePBObject()
           
           *This\get()\Object\Argument=_object_ 
           *This\get()\Object\Argument$=*This\Object\Argument$ 
@@ -1421,8 +1604,8 @@ Procedure CO_Open() ; Ok
       ; Количество однотипных объектов
       If Not FindMapElement(\get(), Str(\Parent\Argument)+"_"+\Type\Argument$)
         AddMapElement(\get(), Str(\Parent\Argument)+"_"+\Type\Argument$)
-        \get()\Index=ListIndex(ParsePBGadget())
-        \get()\Adress=@ParsePBGadget()
+        \get()\Index=ListIndex(ParsePBObject())
+        \get()\Adress=@ParsePBObject()
         \get()\Count+1 
       Else
         \get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count+1 
@@ -1502,33 +1685,33 @@ Procedure CO_Open() ; Ok
     If IsGadget(\Object\Argument)
       ; Если объект контейнер, то есть (Panel;ScrollArea;Container;Canvas)
       If \Container
-        ParsePBGadget()\Container = \Container
-        ParsePBGadget()\SubLevel = \SubLevel - 1
+        ParsePBObject()\Container = \Container
+        ParsePBObject()\SubLevel = \SubLevel - 1
         EnableGadgetDrop(\Object\Argument, #PB_Drop_Text, #PB_Drag_Copy)
-        BindEvent(#PB_Event_GadgetDrop, @CO_Events(), ParsePBGadget()\Window\Argument, \Object\Argument)
+        BindEvent(#PB_Event_GadgetDrop, @CO_Events(), ParsePBObject()\Window\Argument, \Object\Argument)
       Else
-        ParsePBGadget()\SubLevel = \SubLevel
+        ParsePBObject()\SubLevel = \SubLevel
       EndIf
       
       ; Итем родителя для создания в нем гаджетов
-      If \Item : ParsePBGadget()\Item=\Item-1 : EndIf
+      If \Item : ParsePBObject()\Item=\Item-1 : EndIf
       
       ; Открываем гаджет лист на том родителе где создан данный объект.
       If \Object\Argument = \Parent\Argument
         If IsWindow(GetParent) : CloseGadgetList() : UseGadgetList(WindowID(GetParent)) : EndIf
-        If IsGadget(GetParent) : OpenGadgetList = OpenGadgetList(GetParent, ParsePBGadget()\Item) : EndIf
+        If IsGadget(GetParent) : OpenGadgetList = OpenGadgetList(GetParent, ParsePBObject()\Item) : EndIf
       EndIf
       
-      ;       Transformation::Create(ParsePBGadget()\Object\Argument, ParsePBGadget()\Window\Argument, ParsePBGadget()\Parent\Argument, ParsePBGadget()\Item, 5)
-      ;        Transformation::Create(ParsePBGadget()\Object\Argument, ParsePBGadget()\Parent\Argument, -1, 0, 5)
+      ;       Transformation::Create(ParsePBObject()\Object\Argument, ParsePBObject()\Window\Argument, ParsePBObject()\Parent\Argument, ParsePBObject()\Item, 5)
+      ;        Transformation::Create(ParsePBObject()\Object\Argument, ParsePBObject()\Parent\Argument, -1, 0, 5)
       ;       ButtonGadget(-1,0,0,160,20,Str(Random(5))+" "+\Parent\Argument$+"-"+Str(\Parent\Argument))
       ;       CallFunctionFast(@CO_Events())
       
       ; Посылаем сообщение, что создали гаджет.
       PostEvent(#PB_Event_Create,
-                ParsePBGadget()\Window\Argument,
-                ParsePBGadget()\Object\Argument, #PB_All,
-                ParsePBGadget()\Parent\Argument)
+                ParsePBObject()\Window\Argument,
+                ParsePBObject()\Object\Argument, #PB_All,
+                ParsePBObject()\Parent\Argument)
       
       ; Закрываем ранее открытий гаджет лист.
       If \Object\Argument = \Parent\Argument
@@ -1540,8 +1723,8 @@ Procedure CO_Open() ; Ok
     ;
     If IsWindow(\Object\Argument)
       StickyWindow(\Object\Argument, #True)
-      ParsePBGadget()\Container = \Container
-      ;       Transformation::Create(ParsePBGadget()\Object\Argument, ParsePBGadget()\Window\Argument, ParsePBGadget()\Parent\Argument, ParsePBGadget()\Item, 5)
+      ParsePBObject()\Container = \Container
+      ;       Transformation::Create(ParsePBObject()\Object\Argument, ParsePBObject()\Window\Argument, ParsePBObject()\Parent\Argument, ParsePBObject()\Item, 5)
       PostEvent(#PB_Event_Create, \Object\Argument, #PB_Ignore)
       EnableWindowDrop(\Object\Argument, #PB_Drop_Text, #PB_Drag_Copy)
       
@@ -1630,187 +1813,6 @@ Procedure CO_Save(*ThisParse.ParseStruct) ; Ok
 EndProcedure
 
 
-Procedure.q Flag(Flag_String$)
-  Protected i, Flag.q, String$
-  
-  If Flag_String$
-    For I = 0 To CountString(Flag_String$,"|")
-      String$ = Trim(StringField(Flag_String$,(I+1),"|"))
-      
-      Select String$
-          ; window
-        Case "#PB_Window_BorderLess"              : Flag = Flag | #PB_Window_BorderLess
-        Case "#PB_Window_Invisible"               : Flag = Flag | #PB_Window_Invisible
-        Case "#PB_Window_Maximize"                : Flag = Flag | #PB_Window_Maximize
-        Case "#PB_Window_Minimize"                : Flag = Flag | #PB_Window_Minimize
-        Case "#PB_Window_MaximizeGadget"          : Flag = Flag | #PB_Window_MaximizeGadget
-        Case "#PB_Window_MinimizeGadget"          : Flag = Flag | #PB_Window_MinimizeGadget
-        Case "#PB_Window_NoActivate"              : Flag = Flag | #PB_Window_NoActivate
-        Case "#PB_Window_NoGadgets"               : Flag = Flag | #PB_Window_NoGadgets
-        Case "#PB_Window_SizeGadget"              : Flag = Flag | #PB_Window_SizeGadget
-        Case "#PB_Window_SystemMenu"              : Flag = Flag | #PB_Window_SystemMenu
-        Case "#PB_Window_TitleBar"                : Flag = Flag | #PB_Window_TitleBar
-        Case "#PB_Window_Tool"                    : Flag = Flag | #PB_Window_Tool
-        Case "#PB_Window_ScreenCentered"          : Flag = Flag | #PB_Window_ScreenCentered
-        Case "#PB_Window_WindowCentered"          : Flag = Flag | #PB_Window_WindowCentered
-          ; buttonimage 
-        Case "#PB_Button_Image"                   : Flag = Flag | #PB_Button_Image
-        Case "#PB_Button_PressedImage"            : Flag = Flag | #PB_Button_PressedImage
-          ; button  
-        Case "#PB_Button_Default"                 : Flag = Flag | #PB_Button_Default
-        Case "#PB_Button_Left"                    : Flag = Flag | #PB_Button_Left
-        Case "#PB_Button_MultiLine"               : Flag = Flag | #PB_Button_MultiLine
-        Case "#PB_Button_Right"                   : Flag = Flag | #PB_Button_Right
-        Case "#PB_Button_Toggle"                  : Flag = Flag | #PB_Button_Toggle
-          ; string
-        Case "#PB_String_BorderLess"              : Flag = Flag | #PB_String_BorderLess
-        Case "#PB_String_LowerCase"               : Flag = Flag | #PB_String_LowerCase
-        Case "#PB_String_MaximumLength"           : Flag = Flag | #PB_String_MaximumLength
-        Case "#PB_String_Numeric"                 : Flag = Flag | #PB_String_Numeric
-        Case "#PB_String_Password"                : Flag = Flag | #PB_String_Password
-        Case "#PB_String_ReadOnly"                : Flag = Flag | #PB_String_ReadOnly
-        Case "#PB_String_UpperCase"               : Flag = Flag | #PB_String_UpperCase
-          ; text
-        Case "#PB_Text_Border"                    : Flag = Flag | #PB_Text_Border
-        Case "#PB_Text_Center"                    : Flag = Flag | #PB_Text_Center
-        Case "#PB_Text_Right"                     : Flag = Flag | #PB_Text_Right
-          ; option
-          ; checkbox
-        Case "#PB_CheckBox_Center"                : Flag = Flag | #PB_CheckBox_Center
-        Case "#PB_CheckBox_Right"                 : Flag = Flag | #PB_CheckBox_Right
-        Case "#PB_CheckBox_ThreeState"            : Flag = Flag | #PB_CheckBox_ThreeState
-          ; listview
-        Case "#PB_ListView_ClickSelect"           : Flag = Flag | #PB_ListView_ClickSelect
-        Case "#PB_ListView_MultiSelect"           : Flag = Flag | #PB_ListView_MultiSelect
-          ; frame
-        Case "#PB_Frame_Double"                   : Flag = Flag | #PB_Frame_Double
-        Case "#PB_Frame_Flat"                     : Flag = Flag | #PB_Frame_Flat
-        Case "#PB_Frame_Single"                   : Flag = Flag | #PB_Frame_Single
-          ; combobox
-        Case "#PB_ComboBox_Editable"              : Flag = Flag | #PB_ComboBox_Editable
-        Case "#PB_ComboBox_Image"                 : Flag = Flag | #PB_ComboBox_Image
-        Case "#PB_ComboBox_LowerCase"             : Flag = Flag | #PB_ComboBox_LowerCase
-        Case "#PB_ComboBox_UpperCase"             : Flag = Flag | #PB_ComboBox_UpperCase
-          ; image 
-        Case "#PB_Image_Border"                   : Flag = Flag | #PB_Image_Border
-        Case "#PB_Image_Raised"                   : Flag = Flag | #PB_Image_Raised
-          ; hyperlink 
-        Case "#PB_HyperLink_Underline"            : Flag = Flag | #PB_HyperLink_Underline
-          ; container 
-        Case "#PB_Container_BorderLess"           : Flag = Flag | #PB_Container_BorderLess
-        Case "#PB_Container_Double"               : Flag = Flag | #PB_Container_Double
-        Case "#PB_Container_Flat"                 : Flag = Flag | #PB_Container_Flat
-        Case "#PB_Container_Raised"               : Flag = Flag | #PB_Container_Raised
-        Case "#PB_Container_Single"               : Flag = Flag | #PB_Container_Single
-          ; listicon
-        Case "#PB_ListIcon_AlwaysShowSelection"   : Flag = Flag | #PB_ListIcon_AlwaysShowSelection
-        Case "#PB_ListIcon_CheckBoxes"            : Flag = Flag | #PB_ListIcon_CheckBoxes
-        Case "#PB_ListIcon_ColumnWidth"           : Flag = Flag | #PB_ListIcon_ColumnWidth
-        Case "#PB_ListIcon_DisplayMode"           : Flag = Flag | #PB_ListIcon_DisplayMode
-        Case "#PB_ListIcon_GridLines"             : Flag = Flag | #PB_ListIcon_GridLines
-        Case "#PB_ListIcon_FullRowSelect"         : Flag = Flag | #PB_ListIcon_FullRowSelect
-        Case "#PB_ListIcon_HeaderDragDrop"        : Flag = Flag | #PB_ListIcon_HeaderDragDrop
-        Case "#PB_ListIcon_LargeIcon"             : Flag = Flag | #PB_ListIcon_LargeIcon
-        Case "#PB_ListIcon_List"                  : Flag = Flag | #PB_ListIcon_List
-        Case "#PB_ListIcon_MultiSelect"           : Flag = Flag | #PB_ListIcon_MultiSelect
-        Case "#PB_ListIcon_Report"                : Flag = Flag | #PB_ListIcon_Report
-        Case "#PB_ListIcon_SmallIcon"             : Flag = Flag | #PB_ListIcon_SmallIcon
-        Case "#PB_ListIcon_ThreeState"            : Flag = Flag | #PB_ListIcon_ThreeState
-          ; ipaddress
-          ; progressbar 
-        Case "#PB_ProgressBar_Smooth"             : Flag = Flag | #PB_ProgressBar_Smooth
-        Case "#PB_ProgressBar_Vertical"           : Flag = Flag | #PB_ProgressBar_Vertical
-          ; scrollbar 
-        Case "#PB_ScrollBar_Vertical"             : Flag = Flag | #PB_ScrollBar_Vertical
-          ; scrollarea 
-        Case "#PB_ScrollArea_BorderLess"          : Flag = Flag | #PB_ScrollArea_BorderLess
-        Case "#PB_ScrollArea_Center"              : Flag = Flag | #PB_ScrollArea_Center
-        Case "#PB_ScrollArea_Flat"                : Flag = Flag | #PB_ScrollArea_Flat
-        Case "#PB_ScrollArea_Raised"              : Flag = Flag | #PB_ScrollArea_Raised
-        Case "#PB_ScrollArea_Single"              : Flag = Flag | #PB_ScrollArea_Single
-          ; trackbar
-        Case "#PB_TrackBar_Ticks"                 : Flag = Flag | #PB_TrackBar_Ticks
-        Case "#PB_TrackBar_Vertical"              : Flag = Flag | #PB_TrackBar_Vertical
-          ; web
-          ; calendar
-        Case "#PB_Calendar_Borderless"            : Flag = Flag | #PB_Calendar_Borderless
-          
-          ; date
-        Case "#PB_Date_CheckBox"                  : Flag = Flag | #PB_Date_CheckBox
-        Case "#PB_Date_UpDown"                    : Flag = Flag | #PB_Date_UpDown
-          
-          ; editor
-        Case "#PB_Editor_ReadOnly"                : Flag = Flag | #PB_Editor_ReadOnly
-        Case "#PB_Editor_WordWrap"                : Flag = Flag | #PB_Editor_WordWrap
-          
-          ; explorerlist
-        Case "#PB_Explorer_BorderLess"            : Flag = Flag | #PB_Explorer_BorderLess          ; Создать гаджет без границ.
-        Case "#PB_Explorer_AlwaysShowSelection"   : Flag = Flag | #PB_Explorer_AlwaysShowSelection ; Выделение отображается даже если гаджет не активирован.
-        Case "#PB_Explorer_MultiSelect"           : Flag = Flag | #PB_Explorer_MultiSelect         ; Разрешить множественное выделение элементов в гаджете.
-        Case "#PB_Explorer_GridLines"             : Flag = Flag | #PB_Explorer_GridLines           ; Отображать разделительные линии между строками и колонками.
-        Case "#PB_Explorer_HeaderDragDrop"        : Flag = Flag | #PB_Explorer_HeaderDragDrop      ; В режиме таблицы заголовки можно перетаскивать (Drag'n'Drop).
-        Case "#PB_Explorer_FullRowSelect"         : Flag = Flag | #PB_Explorer_FullRowSelect       ; Выделение охватывает всю строку, а не первую колонку.
-        Case "#PB_Explorer_NoFiles"               : Flag = Flag | #PB_Explorer_NoFiles             ; Не показывать файлы.
-        Case "#PB_Explorer_NoFolders"             : Flag = Flag | #PB_Explorer_NoFolders           ; Не показывать каталоги.
-        Case "#PB_Explorer_NoParentFolder"        : Flag = Flag | #PB_Explorer_NoParentFolder      ; Не показывать ссылку на родительский каталог [..].
-        Case "#PB_Explorer_NoDirectoryChange"     : Flag = Flag | #PB_Explorer_NoDirectoryChange   ; Пользователь не может сменить директорию.
-        Case "#PB_Explorer_NoDriveRequester"      : Flag = Flag | #PB_Explorer_NoDriveRequester    ; Не показывать запрос 'пожалуйста, вставьте диск X:'.
-        Case "#PB_Explorer_NoSort"                : Flag = Flag | #PB_Explorer_NoSort              ; Пользователь не может сортировать содержимое по клику на заголовке колонки.
-        Case "#PB_Explorer_AutoSort"              : Flag = Flag | #PB_Explorer_AutoSort            ; Содержимое автоматически упорядочивается по имени.
-        Case "#PB_Explorer_HiddenFiles"           : Flag = Flag | #PB_Explorer_HiddenFiles         ; Будет отображать скрытые файлы (поддерживается только в Linux и OS X).
-        Case "#PB_Explorer_NoMyDocuments"         : Flag = Flag | #PB_Explorer_NoMyDocuments       ; Не показывать каталог 'Мои документы' в виде отдельного элемента.
-          
-          ; explorercombo
-        Case "#PB_Explorer_DrivesOnly"            : Flag = Flag | #PB_Explorer_DrivesOnly          ; Гаджет будет отображать только диски, которые вы можете выбрать.
-        Case "#PB_Explorer_Editable"              : Flag = Flag | #PB_Explorer_Editable            ; Гаджет будет доступен для редактирования с функцией автозаполнения.  			      С этим флагом он действует точно так же, как тот что в Windows Explorer.
-          
-          ; explorertree
-        Case "#PB_Explorer_NoLines"               : Flag = Flag | #PB_Explorer_NoLines             ; Скрыть линии, соединяющие узлы дерева.
-        Case "#PB_Explorer_NoButtons"             : Flag = Flag | #PB_Explorer_NoButtons           ; Скрыть кнопки разворачивания узлов в виде символов '+'.
-          
-          ; spin
-        Case "#PB_Spin_Numeric"                   : Flag = Flag | #PB_Spin_Numeric
-        Case "#PB_Spin_ReadOnly"                  : Flag = Flag | #PB_Spin_ReadOnly
-          ; tree
-        Case "#PB_Tree_AlwaysShowSelection"       : Flag = Flag | #PB_Tree_AlwaysShowSelection
-        Case "#PB_Tree_CheckBoxes"                : Flag = Flag | #PB_Tree_CheckBoxes
-        Case "#PB_Tree_NoButtons"                 : Flag = Flag | #PB_Tree_NoButtons
-        Case "#PB_Tree_NoLines"                   : Flag = Flag | #PB_Tree_NoLines
-        Case "#PB_Tree_ThreeState"                : Flag = Flag | #PB_Tree_ThreeState
-          ; panel
-          ; splitter
-        Case "#PB_Splitter_Separator"             : Flag = Flag | #PB_Splitter_Separator
-        Case "#PB_Splitter_Vertical"              : Flag = Flag | #PB_Splitter_Vertical
-        Case "#PB_Splitter_FirstFixed"            : Flag = Flag | #PB_Splitter_FirstFixed
-        Case "#PB_Splitter_SecondFixed"           : Flag = Flag | #PB_Splitter_SecondFixed
-          ; mdi
-        Case "#PB_MDI_AutoSize"                   : Flag = Flag | #PB_MDI_AutoSize
-        Case "#PB_MDI_BorderLess"                 : Flag = Flag | #PB_MDI_BorderLess
-        Case "#PB_MDI_NoScrollBars"               : Flag = Flag | #PB_MDI_NoScrollBars
-          ; scintilla
-          ; shortcut
-          ; canvas
-        Case "#PB_Canvas_Border"                  : Flag = Flag | #PB_Canvas_Border
-        Case "#PB_Canvas_ClipMouse"               : Flag = Flag | #PB_Canvas_ClipMouse
-        Case "#PB_Canvas_Container"               : Flag = Flag | #PB_Canvas_Container
-        Case "#PB_Canvas_DrawFocus"               : Flag = Flag | #PB_Canvas_DrawFocus
-        Case "#PB_Canvas_Keyboard"                : Flag = Flag | #PB_Canvas_Keyboard
-          
-        Default
-          Select Asc(String$)
-            Case '0' To '9'
-              Flag = Flag | Val(String$)
-            Default
-              Flag = Flag | Flag(GetVarValue(String$))
-          EndSelect
-      EndSelect
-      
-    Next
-  EndIf
-  
-  ProcedureReturn Flag
-EndProcedure
-
 ;-
 Procedure ParsePBFile(FileName.s)
   Protected i,Result, Texts.S, Text.S, Find.S, String.S, Count, Position, Index, Args$, Arg$
@@ -1868,19 +1870,19 @@ Procedure ParsePBFile(FileName.s)
                          "ExplorerComboGadget","SpinGadget","TreeGadget","PanelGadget",
                          "SplitterGadget","MDIGadget","ScintillaGadget","ShortcutGadget","CanvasGadget"
                       
-                      AddElement(ParsePBGadget()) 
-                      ParsePBGadget()\Type\Argument$ = \Type\Argument$
-                      ParsePBGadget()\Content\String$ = \Content\String$ + RegularExpressionMatchString(#RegEx_Function)
-                      ParsePBGadget()\Content\Length = \Content\Length + RegularExpressionMatchLength(#RegEx_Function)
+                      AddElement(ParsePBObject()) 
+                      ParsePBObject()\Type\Argument$ = \Type\Argument$
+                      ParsePBObject()\Content\String$ = \Content\String$ + RegularExpressionMatchString(#RegEx_Function)
+                      ParsePBObject()\Content\Length = \Content\Length + RegularExpressionMatchLength(#RegEx_Function)
                       If \Content\Position
-                        ParsePBGadget()\Content\Position = \Content\Position
+                        ParsePBObject()\Content\Position = \Content\Position
                       Else
-                        ParsePBGadget()\Content\Position = RegularExpressionMatchPosition(#RegEx_Function)
+                        ParsePBObject()\Content\Position = RegularExpressionMatchPosition(#RegEx_Function)
                       EndIf
                       
                       ; Границы для добавления объектов
-                      \Content\Position=ParsePBGadget()\Content\Position
-                      \Content\Length=ParsePBGadget()\Content\Length
+                      \Content\Position=ParsePBObject()\Content\Position
+                      \Content\Length=ParsePBObject()\Content\Length
                       
                       If ExamineRegularExpression(#RegEx_Arguments, \Args$) : Index=0
                         While NextRegularExpressionMatch(#RegEx_Arguments)
@@ -1943,25 +1945,25 @@ Procedure ParsePBFile(FileName.s)
                                 EndIf
                                 
                                 \Class\Argument$ = \Object\Argument$ 
-                                ParsePBGadget()\Class\Argument$ = \Class\Argument$
-                                ParsePBGadget()\Object\Argument$ = \Object\Argument$
+                                ParsePBObject()\Class\Argument$ = \Class\Argument$
+                                ParsePBObject()\Object\Argument$ = \Object\Argument$
                                 
-                              Case 2 : ParsePBGadget()\X\Argument$ = Arg$
+                              Case 2 : ParsePBObject()\X\Argument$ = Arg$
                                 MacroCoordinate(\X\Argument, Arg$)
                                 
-                              Case 3 : ParsePBGadget()\Y\Argument$ = Arg$
+                              Case 3 : ParsePBObject()\Y\Argument$ = Arg$
                                 MacroCoordinate(\Y\Argument, Arg$)
                                 
-                              Case 4 : ParsePBGadget()\Width\Argument$ = Arg$
+                              Case 4 : ParsePBObject()\Width\Argument$ = Arg$
                                 MacroCoordinate(\Width\Argument, Arg$)
                                 
-                              Case 5 : ParsePBGadget()\Height\Argument$ = Arg$
+                              Case 5 : ParsePBObject()\Height\Argument$ = Arg$
                                 MacroCoordinate(\Height\Argument, Arg$)
                                 
-                              Case 6 : ParsePBGadget()\Caption\Argument$ = Arg$
+                              Case 6 : ParsePBObject()\Caption\Argument$ = Arg$
                                 \Caption\Argument$ = GetStr(Arg$) 
                                 
-                              Case 7 : ParsePBGadget()\Param1\Argument$ = Arg$
+                              Case 7 : ParsePBObject()\Param1\Argument$ = Arg$
                                 Select \Type\Argument$ 
                                   Case "OpenWindow"      
                                     \Param1\Argument$ = get_argument_string(Arg$)
@@ -1996,7 +1998,7 @@ Procedure ParsePBFile(FileName.s)
                                     EndSelect
                                 EndSelect
                                 
-                              Case 8 : ParsePBGadget()\Param2\Argument$ = Arg$
+                              Case 8 : ParsePBObject()\Param2\Argument$ = Arg$
                                 Select \Type\Argument$ 
                                   Case "SplitterGadget"      
                                     \Param2\Argument = *This\get(Arg$)\Object\Argument
@@ -2009,7 +2011,7 @@ Procedure ParsePBFile(FileName.s)
                                     EndSelect
                                 EndSelect
                                 
-                              Case 9 : ParsePBGadget()\Param3\Argument$ = Arg$
+                              Case 9 : ParsePBObject()\Param3\Argument$ = Arg$
                                 \Param3\Argument = Val(Arg$)
                                 
                               Case 10 
@@ -2027,7 +2029,7 @@ Procedure ParsePBFile(FileName.s)
                                 ;                                     EndIf
                                 ;                                 EndSelect
                                 \Flag\Argument = Flag(Arg$)
-                                ParsePBGadget()\Flag\Argument$ = Arg$
+                                ParsePBObject()\Flag\Argument$ = Arg$
                             EndSelect
                             
                           EndIf
@@ -2139,16 +2141,16 @@ Procedure ParsePBFile(FileName.s)
                       If \Param1\Argument
                         ;                         *This\get(\Object\Argument$)\Object\Argument = *This\get(Str(\Param1\Argument))\Window\Argument
                         Protected UseGadgetList = UseGadgetList(WindowID(\Param1\Argument))
-                        PushListPosition(ParsePBGadget())
-                        ForEach ParsePBGadget()
-                          If ParsePBGadget()\Type\Argument$ = "OpenWindow"
-                            If IsWindow(ParsePBGadget()\Object\Argument) And 
-                               WindowID(ParsePBGadget()\Object\Argument) = UseGadgetList
-                              *This\get(\Object\Argument$)\Object\Argument = ParsePBGadget()\Object\Argument
+                        PushListPosition(ParsePBObject())
+                        ForEach ParsePBObject()
+                          If ParsePBObject()\Type\Argument$ = "OpenWindow"
+                            If IsWindow(ParsePBObject()\Object\Argument) And 
+                               WindowID(ParsePBObject()\Object\Argument) = UseGadgetList
+                              *This\get(\Object\Argument$)\Object\Argument = ParsePBObject()\Object\Argument
                             EndIf
                           EndIf
                         Next
-                        PopListPosition(ParsePBGadget())
+                        PopListPosition(ParsePBObject())
                         UseGadgetList(UseGadgetList)
                       Else
                         \Param1\Argument = *This\get(\Param1\Argument$)\Object\Argument
@@ -2168,13 +2170,13 @@ Procedure ParsePBFile(FileName.s)
                               Case 1 
                                 \Object\Argument$ = Arg$
                                 If Val(Arg$)
-                                  PushListPosition(ParsePBGadget())
-                                  ForEach ParsePBGadget()
-                                    If Val(ParsePBGadget()\Object\Argument$) = Val(Arg$)
-                                      \Object\Argument$ = ParsePBGadget()\Object\Argument$
+                                  PushListPosition(ParsePBObject())
+                                  ForEach ParsePBObject()
+                                    If Val(ParsePBObject()\Object\Argument$) = Val(Arg$)
+                                      \Object\Argument$ = ParsePBObject()\Object\Argument$
                                     EndIf
                                   Next
-                                  PopListPosition(ParsePBGadget())
+                                  PopListPosition(ParsePBObject())
                                 EndIf
                                 
                                 ;*This\get(Str(\Parent\Argument))\Object\Argument$
@@ -2185,14 +2187,8 @@ Procedure ParsePBFile(FileName.s)
                               Case 3 : \Caption\Argument$=GetStr(Arg$)
                               Case 4 : \Param2\Argument = Val(Arg$)
                               Case 5 : \Flag\Argument$ = Arg$
-                                \Flag\Argument = CO_Flag(Arg$)
-                                If Not \Flag\Argument
-                                  Select Asc(\Flag\Argument$)
-                                    Case '0' To '9'
-                                    Default
-                                      \Flag\Argument = CO_Flag(GetVarValue(Arg$))
-                                  EndSelect
-                                EndIf
+                                \Flag\Argument = Flag(Arg$)
+                                
                             EndSelect
                           EndIf
                         Wend
@@ -2437,17 +2433,17 @@ Procedure WE_Tree_0_Update(Gadget, Position=-1)
   
   ; Добавляем объекты к списку
   If Position=-1
-    PushListPosition(ParsePBGadget())
-    ForEach ParsePBGadget()
+    PushListPosition(ParsePBObject())
+    ForEach ParsePBObject()
       Position = CountGadgetItems(Gadget)
-      generate_image(ParsePBGadget()\Type\Argument$)
-      AddGadgetItem (Gadget, -1, ParsePBGadget()\Object\Argument$, ImageID, ParsePBGadget()\SubLevel)
-      SetGadgetItemData(Gadget, Position, ParsePBGadget()\Object\Argument)
+      generate_image(ParsePBObject()\Type\Argument$)
+      AddGadgetItem (Gadget, -1, ParsePBObject()\Object\Argument$, ImageID, ParsePBObject()\SubLevel)
+      SetGadgetItemData(Gadget, Position, ParsePBObject()\Object\Argument)
     Next
-    PopListPosition(ParsePBGadget())
+    PopListPosition(ParsePBObject())
   Else
-    AddGadgetItem(Gadget, Position, ParsePBGadget()\Object\Argument$, ImageID, ParsePBGadget()\SubLevel)
-    SetGadgetItemData(Gadget, Position, ParsePBGadget()\Object\Argument)
+    AddGadgetItem(Gadget, Position, ParsePBObject()\Object\Argument$, ImageID, ParsePBObject()\SubLevel)
+    SetGadgetItemData(Gadget, Position, ParsePBObject()\Object\Argument)
     ;     SetGadgetItemImage(Gadget, Position, ImageID())
   EndIf
   
@@ -2497,13 +2493,13 @@ Procedure WE_Tree_0_Replace(Gadget)
   
   ; 
   If Replace$ And Find$ <> Replace$
-    PushListPosition(ParsePBGadget())
-    ForEach ParsePBGadget()
-      If ParsePBGadget()\Object\Argument$ = Find$
+    PushListPosition(ParsePBObject())
+    ForEach ParsePBObject()
+      If ParsePBObject()\Object\Argument$ = Find$
         ; Включаем и имя родителя при формировании имени объекта
-        If *This\get(Str(ParsePBGadget()\Parent\Argument))\Object\Argument$ And 
-           Not FindString(Replace$, *This\get(Str(ParsePBGadget()\Parent\Argument))\Object\Argument$)
-          Replace$ = *This\get(Str(ParsePBGadget()\Parent\Argument))\Object\Argument$+"_"+Replace$
+        If *This\get(Str(ParsePBObject()\Parent\Argument))\Object\Argument$ And 
+           Not FindString(Replace$, *This\get(Str(ParsePBObject()\Parent\Argument))\Object\Argument$)
+          Replace$ = *This\get(Str(ParsePBObject()\Parent\Argument))\Object\Argument$+"_"+Replace$
           SetGadgetText(EventGadget(), Replace$)
         EndIf
         
@@ -2515,55 +2511,55 @@ Procedure WE_Tree_0_Replace(Gadget)
           *This\get(Find$)\Parent\Argument$=Replace$
         EndIf
         
-        *This\get(ParsePBGadget()\Object\Argument$)\Object\Argument$ = Replace$
-        *This\get(Str(ParsePBGadget()\Object\Argument))\Object\Argument$ = Replace$
+        *This\get(ParsePBObject()\Object\Argument$)\Object\Argument$ = Replace$
+        *This\get(Str(ParsePBObject()\Object\Argument))\Object\Argument$ = Replace$
         
-        ParsePBGadget()\Class\Argument$ = ReplaceString(Replace$, *This\get(Str(ParsePBGadget()\Parent\Argument))\Object\Argument$+"_", "")
+        ParsePBObject()\Class\Argument$ = ReplaceString(Replace$, *This\get(Str(ParsePBObject()\Parent\Argument))\Object\Argument$+"_", "")
         
         ; Меняем map ключ объекта
-        CopyStructure(*This\get(ParsePBGadget()\Object\Argument$), *This\get(Replace$), ObjectStruct)
+        CopyStructure(*This\get(ParsePBObject()\Object\Argument$), *This\get(Replace$), ObjectStruct)
         ; И удаляем старый
-        DeleteMapElement(*This\get(), ParsePBGadget()\Object\Argument$)
+        DeleteMapElement(*This\get(), ParsePBObject()\Object\Argument$)
         
-        ParsePBGadget()\Object\Argument$ = Replace$ 
+        ParsePBObject()\Object\Argument$ = Replace$ 
         
         ; По умалчанию 
-        If ParsePBGadget()\Container
-          If ParsePBGadget()\Container =- 1
-            *This\Window\Argument$ = ParsePBGadget()\Object\Argument$ 
+        If ParsePBObject()\Container
+          If ParsePBObject()\Container =- 1
+            *This\Window\Argument$ = ParsePBObject()\Object\Argument$ 
           EndIf
-          *This\Container = ParsePBGadget()\Container
-          *This\Parent\Argument$ = ParsePBGadget()\Object\Argument$
+          *This\Container = ParsePBObject()\Container
+          *This\Parent\Argument$ = ParsePBObject()\Object\Argument$
         EndIf
-        ParsePBGadget()\Window\Argument$ = *This\Window\Argument$
-        ParsePBGadget()\Parent\Argument$ = *This\Parent\Argument$
+        ParsePBObject()\Window\Argument$ = *This\Window\Argument$
+        ParsePBObject()\Parent\Argument$ = *This\Parent\Argument$
       Else
         ; Формируем имя объекта снова так как изменили имя родителя
-        If *This\get(Str(ParsePBGadget()\Parent\Argument))\Object\Argument$
-          Debug ParsePBGadget()\Class\Argument$
-          ParentClass$ = *This\get(Str(ParsePBGadget()\Parent\Argument))\Object\Argument$
+        If *This\get(Str(ParsePBObject()\Parent\Argument))\Object\Argument$
+          Debug ParsePBObject()\Class\Argument$
+          ParentClass$ = *This\get(Str(ParsePBObject()\Parent\Argument))\Object\Argument$
           
-          *This\get(ParsePBGadget()\Object\Argument$)\Object\Argument$ = ParentClass$+"_"+ParsePBGadget()\Class\Argument$
-          *This\get(Str(ParsePBGadget()\Object\Argument))\Object\Argument$ = ParentClass$+"_"+ParsePBGadget()\Class\Argument$
+          *This\get(ParsePBObject()\Object\Argument$)\Object\Argument$ = ParentClass$+"_"+ParsePBObject()\Class\Argument$
+          *This\get(Str(ParsePBObject()\Object\Argument))\Object\Argument$ = ParentClass$+"_"+ParsePBObject()\Class\Argument$
           
           ; Меняем map ключ объекта
-          CopyStructure(*This\get(ParsePBGadget()\Object\Argument$), *This\get(ParentClass$+"_"+ParsePBGadget()\Class\Argument$), ObjectStruct)
+          CopyStructure(*This\get(ParsePBObject()\Object\Argument$), *This\get(ParentClass$+"_"+ParsePBObject()\Class\Argument$), ObjectStruct)
           ; И удаляем старый
-          DeleteMapElement(*This\get(), ParsePBGadget()\Object\Argument$)
+          DeleteMapElement(*This\get(), ParsePBObject()\Object\Argument$)
           
-          ParsePBGadget()\Object\Argument$ = ParentClass$+"_"+ParsePBGadget()\Class\Argument$ 
+          ParsePBObject()\Object\Argument$ = ParentClass$+"_"+ParsePBObject()\Class\Argument$ 
           
           ; Обнавляем инспектор объектов
           For i=0 To CountGadgetItems(WE_Tree_0)-1
-            If ParsePBGadget()\Object\Argument=GetGadgetItemData(WE_Tree_0, i) 
-              SetGadgetItemText(WE_Tree_0, i, ParsePBGadget()\Object\Argument$)
+            If ParsePBObject()\Object\Argument=GetGadgetItemData(WE_Tree_0, i) 
+              SetGadgetItemText(WE_Tree_0, i, ParsePBObject()\Object\Argument$)
               Break
             EndIf
           Next 
         EndIf
       EndIf
     Next
-    PopListPosition(ParsePBGadget())  
+    PopListPosition(ParsePBObject())  
     
     ; 
     RegExID = CreateRegularExpression(#PB_Any, "(?<![\w\.\\])"+Trim(Find$, "#")+"(?=[_]|(?![\w\.\\]|\s*"+~"\"))")
@@ -2582,13 +2578,13 @@ Procedure WE_Tree_0_Replace(Gadget)
       String$ = Mid(*This\Content\Text$, 1, *This\get(Replace$)\Code("Code_Object")\Position)
       NbFound = len*ExtractRegularExpression(RegExID, String$, Result$())
       
-      PushListPosition(ParsePBGadget())
-      ForEach ParsePBGadget()
-        If ParsePBGadget()\Container 
-          *This\get(ParsePBGadget()\Object\Argument$)\Code("Code_Object")\Position + NbFound
+      PushListPosition(ParsePBObject())
+      ForEach ParsePBObject()
+        If ParsePBObject()\Container 
+          *This\get(ParsePBObject()\Object\Argument$)\Code("Code_Object")\Position + NbFound
         EndIf
       Next
-      PopListPosition(ParsePBGadget())
+      PopListPosition(ParsePBObject())
       
       ; Заменям слова в файле
       If ExamineRegularExpression(RegExID, *This\Content\Text$)
@@ -2640,29 +2636,29 @@ Procedure WE_SaveFile(Path$) ; Процедура сохранения файл�
     
     len = 0
     
-    PushListPosition(ParsePBGadget())
-    ForEach ParsePBGadget()
-      Object = ParsePBGadget()\Object\Argument ; *This\get(ParsePBGadget()\Object\Argument$)\Object\Argument
+    PushListPosition(ParsePBObject())
+    ForEach ParsePBObject()
+      Object = ParsePBObject()\Object\Argument ; *This\get(ParsePBObject()\Object\Argument$)\Object\Argument
       
       If IsWindow(Object)
-        ParsePBGadget()\X\Argument$ = Str(WindowX(Object))
-        ParsePBGadget()\Y\Argument$ = Str(WindowY(Object))
-        ParsePBGadget()\Width\Argument$ = Str(WindowWidth(Object))
-        ParsePBGadget()\Height\Argument$ = Str(WindowHeight(Object))
-        ParsePBGadget()\Caption\Argument$ = GetWindowTitle(Object)
+        ParsePBObject()\X\Argument$ = Str(WindowX(Object))
+        ParsePBObject()\Y\Argument$ = Str(WindowY(Object))
+        ParsePBObject()\Width\Argument$ = Str(WindowWidth(Object))
+        ParsePBObject()\Height\Argument$ = Str(WindowHeight(Object))
+        ParsePBObject()\Caption\Argument$ = GetWindowTitle(Object)
       EndIf
       If IsGadget(Object)
-        ParsePBGadget()\X\Argument$ = Str(GadgetX(Object))
-        ParsePBGadget()\Y\Argument$ = Str(GadgetY(Object))
-        ParsePBGadget()\Width\Argument$ = Str(GadgetWidth(Object))
-        ParsePBGadget()\Height\Argument$ = Str(GadgetHeight(Object))
-        ParsePBGadget()\Caption\Argument$ = GetGadgetText(Object)
+        ParsePBObject()\X\Argument$ = Str(GadgetX(Object))
+        ParsePBObject()\Y\Argument$ = Str(GadgetY(Object))
+        ParsePBObject()\Width\Argument$ = Str(GadgetWidth(Object))
+        ParsePBObject()\Height\Argument$ = Str(GadgetHeight(Object))
+        ParsePBObject()\Caption\Argument$ = GetGadgetText(Object)
       EndIf
       
     Next
     
-    With ParsePBGadget()
-      ForEach ParsePBGadget()
+    With ParsePBObject()
+      ForEach ParsePBObject()
         ;         If \Content\String$=""
         ;           \Length = 53
         ;           \Position = 409
@@ -2671,7 +2667,7 @@ Procedure WE_SaveFile(Path$) ; Процедура сохранения файл�
         
         
         Text$ = \Content\String$
-        Length = CO_Save(ParsePBGadget())
+        Length = CO_Save(ParsePBObject())
         
         ;         If Text$= ""
         ;           Text$=\Content\String$
@@ -2694,7 +2690,7 @@ Procedure WE_SaveFile(Path$) ; Процедура сохранения файл�
         ;Replace(\Content\String$, Text$, \Content\Position)
       Next
     EndWith
-    PopListPosition(ParsePBGadget())
+    PopListPosition(ParsePBObject())
     
     Debug *This\Content\Text$
     
@@ -2854,12 +2850,12 @@ Procedure WE_Events()
           If EventType() = #PB_EventType_Change
             If GetGadgetText(EventGadget())="Events"
               Debug ""
-              PushListPosition(ParsePBGadget())
-              ForEach ParsePBGadget()
-                Debug ParsePBGadget()\Object\Argument$ +" "+ *This\get(ParsePBGadget()\Object\Argument$)\Code("Code_Object")\Position 
+              PushListPosition(ParsePBObject())
+              ForEach ParsePBObject()
+                Debug ParsePBObject()\Object\Argument$ +" "+ *This\get(ParsePBObject()\Object\Argument$)\Code("Code_Object")\Position 
                 
               Next
-              PopListPosition(ParsePBGadget())
+              PopListPosition(ParsePBObject())
             EndIf
           EndIf
           
@@ -2876,14 +2872,14 @@ Procedure WE_Events()
           
           Select EventType()
             Case #PB_EventType_LostFocus   
-              PushListPosition(ParsePBGadget())
-              ForEach ParsePBGadget()
-                If ParsePBGadget()\Object\Argument$ = GetGadgetText(WE_Tree_0)
-                  ParsePBGadget()\Flag\Argument$ = Properties::GetCheckedText(EventGadget()) 
+              PushListPosition(ParsePBObject())
+              ForEach ParsePBObject()
+                If ParsePBObject()\Object\Argument$ = GetGadgetText(WE_Tree_0)
+                  ParsePBObject()\Flag\Argument$ = Properties::GetCheckedText(EventGadget()) 
                   Break
                 EndIf
               Next
-              PopListPosition(ParsePBGadget())
+              PopListPosition(ParsePBObject())
               
           EndSelect
           
@@ -2898,9 +2894,9 @@ Procedure WE_Events()
               ; Для удобства выбираем вкладку свойства 
               If GetGadgetState(WE_Panel_0) <> 1 : SetGadgetState(WE_Panel_0, 1) : EndIf
               
-              PushListPosition(ParsePBGadget())
-              With ParsePBGadget()
-                ForEach ParsePBGadget()
+              PushListPosition(ParsePBObject())
+              With ParsePBObject()
+                ForEach ParsePBObject()
                   If GetGadgetText(WE_Tree_0) = \Object\Argument$
                     Properties::Init(\Object\Argument, \Object\Argument$, \Flag\Argument$)
                     Transformation::Change(\Object\Argument)
@@ -2908,7 +2904,7 @@ Procedure WE_Events()
                   EndIf
                 Next
               EndWith
-              PopListPosition(ParsePBGadget())
+              PopListPosition(ParsePBObject())
               
           EndSelect
           
