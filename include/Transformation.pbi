@@ -452,6 +452,8 @@ Module Transformation
   
   Procedure Change(Object.i) ; 
     If ListSize(AnChor()) 
+      ChangedObject=Object
+      
       If Bool(IsGadget(Object))
         With AnChor()
           ForEach AnChor()
