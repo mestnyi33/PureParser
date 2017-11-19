@@ -2244,11 +2244,21 @@ Procedure WE_Tree_0_Update(Gadget, Position=-1)
     ImageID = ImageID(img_form)
   EndIf
   
+  Macro generate_image(_class_)
+    For I=0 To CountGadgetItems(WE_Tree_1)-1
+      If _class_ = GetGadgetItemText(WE_Tree_1, I)+"Gadget"
+        ImageID = ImageID(GetGadgetItemData(WE_Tree_1, I))
+        Break
+      EndIf
+    Next  
+  EndMacro
+  
   ; Добавляем объекты к списку
   If Position=-1
     PushListPosition(ParsePBGadget())
     ForEach ParsePBGadget()
       Position = CountGadgetItems(Gadget)
+      generate_image(ParsePBGadget()\Type\Argument$)
       AddGadgetItem (Gadget, -1, ParsePBGadget()\Object\Argument$, ImageID, ParsePBGadget()\SubLevel)
       SetGadgetItemData(Gadget, Position, ParsePBGadget()\Object\Argument)
     Next
