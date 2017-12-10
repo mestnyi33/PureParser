@@ -1,0 +1,63 @@
+﻿EnableExplicit
+
+Define Event
+
+Global Window_0=-1
+
+Global Window_0_Frame_0=-1
+Global Window_0_Frame_1=-1
+Global Window_0_Option_0=-1
+Global Window_0_Option_1=-1
+Global Window_0_Frame_2=-1
+Global Window_0_Frame_3=-1
+Global Window_0_CheckBox_0=-1
+Global Window_0_CheckBox_1=-1
+Global Window_0_CheckBox_2=-1
+Global Window_0_CheckBox_3=-1
+Global Window_0_Spin_0=-1
+Global Window_0_Spin_1=-1
+Global Window_0_Text_0=-1
+Global Window_0_Text_1=-1
+
+Procedure Open_Window_0()
+  Window_0 = OpenWindow(#PB_Any, 59, 157, 446, 321, "")
+  Window_0_Frame_0 = FrameGadget(#PB_Any, 5, 5, 436, 311, "Параметры выравнивания")
+  Window_0_Frame_1 = FrameGadget(#PB_Any, 10, 35, 426, 76, "Режим выравнивания")
+  Window_0_Option_0 = OptionGadget(#PB_Any, 16, 67, 414, 19, "Выровнять по сетке")
+  SetGadgetState(Window_0_Option_0, #True)
+  Window_0_Option_1 = OptionGadget(#PB_Any, 16, 86, 414, 19, "Выровнять по линии")
+  Window_0_Frame_2 = FrameGadget(#PB_Any, 10, 115, 426, 96, "Параметры сетки")
+  Window_0_Frame_3 = FrameGadget(#PB_Any, 10, 215, 426, 96, "Параметры линии")
+  Window_0_CheckBox_0 = CheckBoxGadget(#PB_Any, 16, 146, 414, 19, "Показать сетку")
+  SetGadgetState(Window_0_CheckBox_0, #PB_Checkbox_Checked)
+  Window_0_CheckBox_1 = CheckBoxGadget(#PB_Any, 16, 166, 414, 19, "привязать к сетке")
+  Window_0_CheckBox_2 = CheckBoxGadget(#PB_Any, 16, 246, 414, 19, "Показать линию")
+  SetGadgetState(Window_0_CheckBox_2, #PB_Checkbox_Checked)
+  Window_0_CheckBox_3 = CheckBoxGadget(#PB_Any, 16, 266, 414, 19, "Привязать к линии")
+  Window_0_Spin_0 = SpinGadget(#PB_Any, 385, 185, 46, 21, 0, 25, #PB_Spin_Numeric)
+  SetGadgetState(Window_0_Spin_0, 5)
+  Window_0_Spin_1 = SpinGadget(#PB_Any, 385, 285, 46, 21, 0, 25, #PB_Spin_Numeric)
+  SetGadgetState(Window_0_Spin_1, 1)
+  Window_0_Text_0 = TextGadget(#PB_Any, 290, 185, 91, 21, "Размеры сетки:", #PB_Text_Right)
+  Window_0_Text_1 = TextGadget(#PB_Any, 290, 285, 91, 21, "Размеры линии:", #PB_Text_Right)
+
+EndProcedure
+
+CompilerIf #PB_Compiler_IsMainFile
+  Open_Window_0()
+
+  While IsWindow(Window_0)
+    Event = WaitWindowEvent()
+
+    Select Event
+       Case #PB_Event_CloseWindow
+         CloseWindow(EventWindow())
+    EndSelect
+
+    Select EventWindow()
+      Case Window_0
+    EndSelect
+  Wend
+
+  End
+CompilerEndIf

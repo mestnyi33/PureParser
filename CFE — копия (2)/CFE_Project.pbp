@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://www.purebasic.com/namespace" version="1.0" creator="PureBasic 5.60 (Windows - x64)">
+  <section name="config">
+    <options closefiles="1" openmode="0" name="CreateElements"/>
+  </section>
+  <section name="data">
+    <explorer view="" pattern="0"/>
+    <log show="1"/>
+    <lastopen date="2017-03-16 09:31" user="mestnyi" host="MESTNYIPC"/>
+  </section>
+  <section name="files">
+    <file name="CFE.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="60e2ac9ee8b4b228a7085a8647d8f87a"/>
+    </file>
+    <file name="CFE_CodeCreate(example).pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" panelstate="+"/>
+      <fingerprint md5="7b7d97ab6581f7302ab299e5db19778c"/>
+    </file>
+    <file name="CFE_ComboBox(example).pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="06444acdfea8a98922d932c6e835876d"/>
+    </file>
+    <file name="CFE_Container(example).pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="1e1bc49f30fc61a264798b0125899bf4"/>
+    </file>
+    <file name="CFE_Editor(example).pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="21b7ef709e96e7d0db82b618bc76c1b1"/>
+    </file>
+    <file name="CFE_ListView(example).pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="88d3ed806baedd76578bc860586974d4"/>
+    </file>
+    <file name="CFE_Menu(example).pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="6249e4af36a97a7caf3da16d98678418"/>
+    </file>
+    <file name="CFE_Message(example).pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="45a74a1c8f5f9e2663e582e8542ff7dc"/>
+    </file>
+    <file name="CFE_Panel(example).pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="ba396e11ee28f480eb26718536d72ecf"/>
+    </file>
+    <file name="CFE_Properties(example).pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="c13bf0e2b1fb7517b865ae36708df595"/>
+    </file>
+    <file name="CFE_Splitter(example).pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="8b180e3d0dd18a2e26b79fbf339ea3ec"/>
+    </file>
+    <file name="CFE_StatusBar(example).pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="1d85a4e7fa627a35abb1a51e2401f4b2"/>
+    </file>
+    <file name="CFE_StickyWindow(example).pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="09955ec6b82c2f6ad4569f66c0f3b8f7"/>
+    </file>
+    <file name="CFE_String(example).pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="7608d920e8bfcd05dfd8ec5d461258d8"/>
+    </file>
+    <file name="CFE_Text(example).pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="3ba6232f3d8c92b19c83fa2ededa98de"/>
+    </file>
+    <file name="CFE_ToolBar(example).pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="285950677925724eb05dc511928badfa"/>
+    </file>
+    <file name="CFE_Window(example).pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="85b73e36e7d3b6972d35b527b12d0e6c"/>
+    </file>
+    <file name="CFE_ScrollBar(example).pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="09a646d5138c499e68480e2c607b1c55"/>
+    </file>
+    <file name="CFE_ScrollArea(example).pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="7e37778b95e48df11952730c2a52b900"/>
+    </file>
+  </section>
+  <section name="targets">
+    <target name="IDE" enabled="1" default="1">
+      <inputfile value="CFE_(IDE).pb"/>
+      <outputfile value="IDE.exe"/>
+      <options xpskin="1" onerror="1" debug="1"/>
+      <purifier enable="1"/>
+      <temporaryexe value="source"/>
+      <compilecount enable="1" value="2464"/>
+      <buildcount enable="1" value="0"/>
+      <execonstant enable="1"/>
+    </target>
+  </section>
+</project>
