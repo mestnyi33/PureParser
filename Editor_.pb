@@ -72,7 +72,8 @@ Declare WE_ResizeWindow()
 Declare WE_ResizePanel_0()
 Declare WE_ResizePanel_1()
 Declare WE_Tree_0_SubLevel(Gadget, Parent)
-Declare WE_Tree_0_Update(Gadget, Parent=-1)
+Declare WE_Tree_0_Position(Object, Parent)
+Declare WE_Tree_0_Update(Gadget, Position=-1)
 Declare WE_OpenWindow(Flag.i=#PB_Window_SystemMenu, ParentID=0)
 
 Declare$ GetObjectClass(Object)
@@ -1378,8 +1379,6 @@ Procedure CO_Create(Type$, X, Y, Parent=-1)
     
     Object=CallFunctionFast(@CO_Open())
     
-    
-   
     If IsGadget(Object)
       ;       Select \Type\Argument
       ;         Case #PB_GadgetType_Panel
@@ -1395,7 +1394,7 @@ Procedure CO_Create(Type$, X, Y, Parent=-1)
       EndSelect
     EndIf
     
-    WE_Tree_0_Update(WE_Tree_0, Parent)
+    WE_Tree_0_Update(WE_Tree_0, WE_Tree_0_Position(Object, Parent))
     
     
     If GadgetList 
@@ -1496,38 +1495,6 @@ Procedure CO_Create(Type$, X, Y, Parent=-1)
     
   EndDataSection
   
-EndProcedure
-
-Procedure.b IsChildElement(Object, Parent)
-  Protected Result.b, *Adress
-  
-  With ParsePBObject()
-    *Adress = *This\get(Str(Parent))\Adress
-    
-    PushListPosition(ParsePBObject()) 
-    ForEach ParsePBObject()
-      If ParsePBObject()\Object\Argument=Object Or ParsePBObject()\Parent\Argument=Parent 
-        Continue
-      EndIf
-      
-      If *This\get(Str(ParsePBObject()\Object\Argument))\Index>*This\get(Str(Parent))\Index
-        *This\get(Str(ParsePBObject()\Object\Argument))\Position + 1
-      EndIf
-    Next
-    
-    While *Adress
-      If ChangeCurrentElement(ParsePBObject(), *Adress)
-        Debug "g "+ParsePBObject()\Object\Argument$
-        *This\get(Str(ParsePBObject()\Object\Argument))\Position + 1
-        *This\get(Str(Object))\Position = *This\get(Str(Parent))\Position
-        *Adress = *This\get(Str(ParsePBObject()\Parent\Argument))\Adress
-      EndIf
-    Wend
-    PopListPosition(ParsePBObject())
-   
-  EndWith
-  
-  ProcedureReturn Result
 EndProcedure
 
 Procedure CO_Open() ; Ok
@@ -1673,8 +1640,6 @@ Procedure CO_Open() ; Ok
       ; Чтобы по классу
       ; объекта получить все остальное
       Init_object_data(\Object\Argument$)
-      
-      IsChildElement(\Object\Argument, \Parent\Argument)
     EndIf
     
     ; 
@@ -2453,8 +2418,36 @@ Procedure WE_Tree_0_SubLevel(Gadget, Parent)
   ProcedureReturn SubLevel
 EndProcedure
 
-Procedure WE_Tree_0_Update(Gadget, Parent=-1)
-  Protected i, Img, ImageID, Position 
+Procedure WE_Tree_0_Position(Object, Parent)
+  Protected *Adress
+  
+  *Adress = *This\get(Str(Parent))\Adress
+  
+  PushListPosition(ParsePBObject()) 
+  ForEach ParsePBObject()
+    If ParsePBObject()\Object\Argument=Object Or ParsePBObject()\Parent\Argument=Parent 
+      Continue
+    EndIf
+    
+    If *This\get(Str(ParsePBObject()\Object\Argument))\Index>*This\get(Str(Parent))\Index
+      *This\get(Str(ParsePBObject()\Object\Argument))\Position + 1
+    EndIf
+  Next
+  
+  While *Adress
+    If ChangeCurrentElement(ParsePBObject(), *Adress)
+      *This\get(Str(ParsePBObject()\Object\Argument))\Position + 1
+      *This\get(Str(Object))\Position = *This\get(Str(Parent))\Position
+      *Adress = *This\get(Str(ParsePBObject()\Parent\Argument))\Adress
+    EndIf
+  Wend
+  PopListPosition(ParsePBObject())
+  
+  ProcedureReturn *This\get(Str(Parent))\Position
+EndProcedure
+
+Procedure WE_Tree_0_Update(Gadget, Position=-1)
+  Protected i, Img, ImageID 
   img = GetGadgetItemData(WE_Tree_1, GetGadgetState(WE_Tree_1))
   Protected img_form = CatchImage(#PB_Any, ?form_png, ?form_png_end-?form_png)
   
@@ -2476,7 +2469,7 @@ Procedure WE_Tree_0_Update(Gadget, Parent=-1)
   EndMacro
   
   ; Добавляем объекты к списку
-  If Parent=-1
+  If Position=-1
     ClearGadgetItems(Gadget)
     PushListPosition(ParsePBObject())
     ForEach ParsePBObject()
@@ -2487,7 +2480,6 @@ Procedure WE_Tree_0_Update(Gadget, Parent=-1)
     Next
     PopListPosition(ParsePBObject())
   Else
-    Position = *This\get(Str(Parent))\Position
     AddGadgetItem(Gadget, Position, ParsePBObject()\Object\Argument$, ImageID, ParsePBObject()\SubLevel)
     SetGadgetItemData(Gadget, Position, ParsePBObject()\Object\Argument)
   EndIf
