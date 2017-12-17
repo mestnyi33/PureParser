@@ -71,7 +71,8 @@ Declare WE_CloseWindow()
 Declare WE_ResizeWindow()
 Declare WE_ResizePanel_0()
 Declare WE_ResizePanel_1()
-Declare WE_Tree_0_Position(Gadget, Parent)
+Declare WE_Tree_0_SubLevel(Gadget, Parent)
+Declare WE_Tree_0_Position(Object, Parent)
 Declare WE_Tree_0_Update(Gadget, Position=-1)
 Declare WE_OpenWindow(Flag.i=#PB_Window_SystemMenu, ParentID=0)
 
@@ -145,7 +146,25 @@ Macro get_class_id(_class_)
   *This\get(_class_)\Object\Argument
 EndMacro
 
-
+Macro Init_object_data(_object_key_)
+  *This\get(_object_key_)
+  *This\get()\Index=ListIndex(ParsePBObject())
+  *This\get()\Adress=@ParsePBObject()
+  
+  *This\get()\Object\Argument=*This\Object\Argument 
+  *This\get()\Object\Argument$=*This\Object\Argument$ 
+  
+  *This\get()\Type\Argument=*This\Type\Argument 
+  *This\get()\Type\Argument$=*This\Type\Argument$ 
+  
+  *This\get()\Window\Argument=*This\Window\Argument 
+  *This\get()\Parent\Argument=*This\Parent\Argument 
+  
+  *This\get()\Window\Argument$=*This\Window\Argument$ 
+  *This\get()\Parent\Argument$=*This\Parent\Argument$ 
+EndMacro
+      
+      
 ; Macro is_container(Object)
 ;   *This\get(Str(Object))\container)
 ; EndMacro
@@ -1356,7 +1375,7 @@ Procedure CO_Create(Type$, X, Y, Parent=-1)
       \Parent\Argument = Parent
     EndIf
     
-    Position = WE_Tree_0_Position(WE_Tree_0, Parent)
+    WE_Tree_0_SubLevel(WE_Tree_0, Parent)
     
     Object=CallFunctionFast(@CO_Open())
     
@@ -1375,7 +1394,7 @@ Procedure CO_Create(Type$, X, Y, Parent=-1)
       EndSelect
     EndIf
     
-    WE_Tree_0_Update(WE_Tree_0, Position)
+    WE_Tree_0_Update(WE_Tree_0, WE_Tree_0_Position(Object, Parent))
     
     
     If GadgetList 
@@ -1570,60 +1589,57 @@ Procedure CO_Open() ; Ok
         \Parent\Argument =- 1
       EndIf
       
-      Macro Init_object_data(_object_, _object_key_)
-        If FindMapElement(*This\get(), _object_key_)
-          *This\get(_object_key_)\Index=ListIndex(ParsePBObject())
-          *This\get(_object_key_)\Adress=@ParsePBObject()
-          
-          *This\get(_object_key_)\Object\Argument=_object_ 
-          *This\get(_object_key_)\Object\Argument$=*This\Object\Argument$ 
-          
-          *This\get(_object_key_)\Type\Argument=*This\Type\Argument 
-          *This\get(_object_key_)\Type\Argument$=*This\Type\Argument$ 
-          
-          *This\get(_object_key_)\Window\Argument=*This\Window\Argument 
-          *This\get(_object_key_)\Parent\Argument=*This\Parent\Argument 
-          
-          *This\get(_object_key_)\Window\Argument$=*This\Window\Argument$ 
-          *This\get(_object_key_)\Parent\Argument$=*This\Parent\Argument$ 
-        Else
-          AddMapElement(*This\get(), _object_key_)
-          *This\get()\Index=ListIndex(ParsePBObject())
-          *This\get()\Adress=@ParsePBObject()
-          
-          *This\get()\Object\Argument=_object_ 
-          *This\get()\Object\Argument$=*This\Object\Argument$ 
-          
-          *This\get()\Type\Argument=*This\Type\Argument 
-          *This\get()\Type\Argument$=*This\Type\Argument$ 
-          
-          *This\get()\Window\Argument=*This\Window\Argument 
-          *This\get()\Parent\Argument=*This\Parent\Argument 
-          
-          *This\get()\Window\Argument$=*This\Window\Argument$ 
-          *This\get()\Parent\Argument$=*This\Parent\Argument$ 
-        EndIf
-        
-      EndMacro
-      
-      ; Количество однотипных объектов
+      ; Количество однотипных объектов родителя
       If Not FindMapElement(\get(), Str(\Parent\Argument)+"_"+\Type\Argument$)
         AddMapElement(\get(), Str(\Parent\Argument)+"_"+\Type\Argument$)
         \get()\Index=ListIndex(ParsePBObject())
         \get()\Adress=@ParsePBObject()
-        \get()\Count+1 
-      Else
-        \get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count+1 
       EndIf
+        \get()\Count+1 
+        
+        ; Количество однотипных объектов
+      If Not FindMapElement(\get(), \Type\Argument$)
+        AddMapElement(\get(), \Type\Argument$)
+        \get()\Index=ListIndex(ParsePBObject())
+        \get()\Adress=@ParsePBObject()
+      EndIf
+        \get()\Count+1 
+        
+        
+;         PushListPosition(ParsePBObject())
+;         ForEach ParsePBObject()
+;           
+;           If 
+;             *This\get(Str(ParsePBObject()\Object\Argument))\Count + 1
+;           EndIf
+;         Next
+;         PopListPosition(ParsePBObject())
+
+;         ; Количество объектов 
+;       If Not FindMapElement(\get(), Str(\Parent\Argument))
+;         AddMapElement(\get(), Str(\Parent\Argument))
+;         \get()\Index=ListIndex(ParsePBObject())
+;         \get()\Adress=@ParsePBObject()
+;       EndIf
+;       \get()\Count+1 
       
+;           ; Количество объектов 
+;       If Not FindMapElement(\get(), Str(\Object\Argument))
+;         AddMapElement(\get(), Str(\Object\Argument))
+;         \get()\Index=ListIndex(ParsePBObject())
+;         \get()\Adress=@ParsePBObject()
+;       EndIf
+;         \get()\Count+1 
+        
+        
+        
       ; Чтобы по идентификатору 
       ; объекта получить все остальное
-      Init_object_data(\Object\Argument, Str(\Object\Argument))
+      Init_object_data(Str(\Object\Argument))
       
       ; Чтобы по классу
       ; объекта получить все остальное
-      Init_object_data(\Object\Argument, \Object\Argument$)
-      
+      Init_object_data(\Object\Argument$)
     EndIf
     
     ; 
@@ -2388,30 +2404,46 @@ EndProcedure
 
 ;-
 ;- PI Редактора
-Procedure WE_Tree_0_Position(Gadget, Parent)
-  Protected i, Position=-1 ; 
-  Position = CountGadgetItems(Gadget)
+Procedure WE_Tree_0_SubLevel(Gadget, Parent)
+  Protected i, SubLevel
   
-  ; Определяем позицию в списке
-  If IsGadget(Parent) 
-    For i=0 To CountGadgetItems(Gadget)-1
-      If Parent=GetGadgetItemData(Gadget, i) 
-        *This\SubLevel=GetGadgetItemAttribute(Gadget, i, #PB_Tree_SubLevel)+1
-        Position=(i+1)
-        Break
-      EndIf
-    Next 
-    For i=Position To CountGadgetItems(Gadget)-1
-      If *This\SubLevel=<GetGadgetItemAttribute(Gadget, i, #PB_Tree_SubLevel)
-        Position+1
-      EndIf
-    Next 
-  ElseIf IsWindow(Parent)
-    Position = CountGadgetItems(Gadget)
-    *This\SubLevel = 1
-  EndIf
+  For i=0 To CountGadgetItems(Gadget)-1
+    If Parent=GetGadgetItemData(Gadget, i) 
+      SubLevel=GetGadgetItemAttribute(Gadget, i, #PB_Tree_SubLevel)+1
+      Break
+    EndIf
+  Next 
   
-  ProcedureReturn Position
+  *This\SubLevel = SubLevel
+  ProcedureReturn SubLevel
+EndProcedure
+
+Procedure WE_Tree_0_Position(Object, Parent)
+  Protected *Adress
+  
+  *Adress = *This\get(Str(Parent))\Adress
+  
+  PushListPosition(ParsePBObject()) 
+  ForEach ParsePBObject()
+    If ParsePBObject()\Object\Argument=Object Or ParsePBObject()\Parent\Argument=Parent 
+      Continue
+    EndIf
+    
+    If *This\get(Str(ParsePBObject()\Object\Argument))\Index>*This\get(Str(Parent))\Index
+      *This\get(Str(ParsePBObject()\Object\Argument))\Position + 1
+    EndIf
+  Next
+  
+  While *Adress
+    If ChangeCurrentElement(ParsePBObject(), *Adress)
+      *This\get(Str(ParsePBObject()\Object\Argument))\Position + 1
+      *This\get(Str(Object))\Position = *This\get(Str(Parent))\Position
+      *Adress = *This\get(Str(ParsePBObject()\Parent\Argument))\Adress
+    EndIf
+  Wend
+  PopListPosition(ParsePBObject())
+  
+  ProcedureReturn *This\get(Str(Parent))\Position
 EndProcedure
 
 Procedure WE_Tree_0_Update(Gadget, Position=-1)
