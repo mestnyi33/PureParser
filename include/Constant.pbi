@@ -1,5 +1,5 @@
-﻿CompilerIf Not Defined(Const, #PB_Module)
-  DeclareModule Const
+﻿CompilerIf Not Defined(Constant, #PB_Module)
+  DeclareModule Constant
     Enumeration #PB_Event_FirstCustomValue
       #PB_Event_Create
       #PB_Event_MouseMove
@@ -13,11 +13,12 @@
       #PB_EventType_Move
       #PB_EventType_Size
       #PB_EventType_Destroy
+      #PB_EventType_Repaint
     EndEnumeration
   EndDeclareModule
   
-  Module Const 
+  Module Constant
   EndModule 
   
-  UseModule Const
+  UseModule Constant
 CompilerEndIf

@@ -2,6 +2,30 @@
 ; http://www.purebasic.fr/english/viewtopic.php?f=12&t=64700
 ; http://forums.purebasic.com/german/viewtopic.php?f=8&t=29423&sid=c3d8ea4c76dac2b34b9a49b639f06911
 
+CompilerIf Not Defined(Constant, #PB_Module)
+  DeclareModule Constant
+    Enumeration #PB_Event_FirstCustomValue
+      #PB_Event_Create
+      #PB_Event_MouseMove
+      #PB_Event_LeftButtonDown
+      #PB_Event_LeftButtonUp
+      #PB_Event_Destroy
+    EndEnumeration
+    
+    Enumeration #PB_EventType_FirstCustomValue
+      #PB_EventType_Create
+      #PB_EventType_Move
+      #PB_EventType_Size
+      #PB_EventType_Destroy
+    EndEnumeration
+  EndDeclareModule
+  
+  Module Constant 
+  EndModule 
+  
+  UseModule Constant
+CompilerEndIf
+
 DeclareModule Transformation
   EnableExplicit
   
@@ -24,7 +48,7 @@ DeclareModule Transformation
   Declare Count()
   Declare Object()
   Declare Is(Gadget.i)
-  Declare PopupMenu(Object.i)
+  Declare DisplayMenu(Object.i)
   Declare Change(Object.i)
   Declare Gadget(Gadget.i)
   Declare Update(Object.i)
@@ -35,6 +59,8 @@ DeclareModule Transformation
 EndDeclareModule
 
 Module Transformation
+  UseModule Constant
+  
   Structure DataBuffer
     ID.i[#Alles+1]
   EndStructure
@@ -167,7 +193,7 @@ Module Transformation
     DeleteElement(AnChor())
   EndMacro
   
-  Procedure PopupMenu(Object.i)
+  Procedure DisplayMenu(Object.i)
     Protected I.i, Result, Window
     
     With AnChor()
@@ -588,7 +614,7 @@ Module Transformation
               
             Case #PB_EventType_RightClick
               If *This And \ID[#Arrows] = EventGadget()
-                PopupMenu(EventGadget())
+                DisplayMenu(EventGadget())
               EndIf
               
             Case #PB_EventType_KeyUp
