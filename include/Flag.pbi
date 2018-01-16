@@ -17,7 +17,7 @@ DeclareModule Flag
   
   Macro IsFlag(GetFlag, IsFlag)
     Bool((GetFlag & IsFlag) = IsFlag)
-  EndMacro
+  EndMacro 
   
   Declare.q GetWindow(Window)
   Declare RemoveWindow(Window, Flags.q)
@@ -34,6 +34,10 @@ DeclareModule Flag
   Declare SetExStyle(Handle, ExStyle)
   Declare RemoveStyle(Handle, Style)
   Declare RemoveExStyle(Handle, ExStyle)
+  
+  Declare.q Value(Flag_Str.s)
+  Declare.s String(Type, Flag_Value.q)
+  Declare.s Gets( Type=#PB_Default )
 EndDeclareModule
 
 Module Flag
@@ -50,27 +54,14 @@ Module Flag
   EndProcedure   
   
   Procedure SetStyle(Handle, Style) 
-    CompilerSelect #PB_Compiler_OS  
-      CompilerCase #PB_OS_Windows
-        SetWindowLongPtr_(Handle, #GWL_STYLE, GetWindowLong_(Handle, #GWL_STYLE)|Style)
-        
-        If (Style & #WS_SIZEBOX | #WS_BORDER | #WS_VISIBLE)
-          SetWindowPos_(Handle, 0,0,0,0,0, #SWP_FRAMECHANGED|#SWP_DRAWFRAME|#SWP_NOMOVE|#SWP_NOSIZE|#SWP_NOZORDER)
-          InvalidateRect_(Handle,0,#True)
-        EndIf
-        
-      CompilerCase #PB_OS_Linux
-;         If (Style & #WINDOW_TITLEBAR)
-;           gtk_window_set_decorated_(Handle, (Style & #WINDOW_TITLEBAR))
-;         EndIf
-;         If (Style & #WINDOW_RESIZABLE)
-;           gtk_window_set_resizable_(Handle, (Style & #WINDOW_RESIZABLE))
-;         EndIf
-;         If (Style & #WINDOW_TOOL)
-;           gtk_window_set_type_hint_(Handle, #GDK_WINDOW_TYPE_HINT_UTILITY)
-;         EndIf
-        
-    CompilerEndSelect
+    CompilerIf #PB_Compiler_OS = #PB_OS_Windows
+      SetWindowLongPtr_(Handle, #GWL_STYLE, GetWindowLong_(Handle, #GWL_STYLE)|Style)
+      
+      If (Style & #WS_SIZEBOX | #WS_BORDER | #WS_VISIBLE)
+        SetWindowPos_(Handle, 0,0,0,0,0, #SWP_FRAMECHANGED|#SWP_DRAWFRAME|#SWP_NOMOVE|#SWP_NOSIZE|#SWP_NOZORDER)
+        InvalidateRect_(Handle,0,#True)
+      EndIf
+    CompilerEndIf
   EndProcedure
   
   Procedure RemoveStyle(Handle,Style)
@@ -118,11 +109,12 @@ Module Flag
   EndProcedure   
   
   CompilerSelect #PB_Compiler_OS  
+      ;- Windows
     CompilerCase #PB_OS_Windows
       #PBM_GETPOS = $0408
       #CBS_UPPERCASE = $2000   ;
       #CBS_LOWERCASE = $4000   ;
-                               ;-
+      
       Procedure.q GetWindow( Window )
         Protected Flag.q
         Protected Handle = WindowID(Window)
@@ -346,7 +338,6 @@ Module Flag
         EndIf
       EndProcedure
       
-      ;-
       Procedure.q GetGadget( Gadget )
         Protected Flag.q
         Protected Handle = GadgetID(Gadget)
@@ -997,6 +988,7 @@ Module Flag
             EndIf
             If IsFlag(Flags,#PB_Tree_ThreeState)
               SetStyle(Handle, (#BS_RIGHT))
+              ;SendMessage_(Handle, #tvm_, 1, 0) ; Чтобы видет эфект сразу
             EndIf
             
           Case #PB_GadgetType_Panel
@@ -1397,132 +1389,691 @@ Module Flag
         EndSelect
       EndProcedure
       
-      ;-  
-    CompilerDefault
+      ;- Linux
+    CompilerCase #PB_OS_Linux
       Procedure.q GetWindow( Window ) : EndProcedure
-      Procedure SetWindow( Window, Flags.q, Value=0 ) 
-        Protected Handle = WindowID(Window)
+      Procedure SetWindow( Window, Flags.q, Value=0 ) : EndProcedure
+      Procedure RemoveWindow( Window, Flags.q ) : EndProcedure
+      Procedure.q GetGadget( Gadget ) 
+        Protected i, Handle = GadgetID(Gadget)
+        Protected Flags ;= GetStyle(Handle)
         
-        If IsFlag(Flags,#PB_Window_SizeGadget)     ;Ok
-          gtk_window_set_resizable_(Handle, #True)
-          Flags&~#PB_Window_TitleBar
-        EndIf
-        If IsFlag(Flags,#PB_Window_TitleBar)       ;Ok
-          gtk_window_set_decorated_(Handle, #True)
-        EndIf
-        If IsFlag(Flags,#PB_Window_Tool)           ;Ok
-          gtk_window_set_type_hint_(Handle, #GDK_WINDOW_TYPE_HINT_UTILITY)
-        EndIf
-        
-;         gtk_window_maximize(handle)
-;         gtk_window_iconify(handle)
-;         gtk_window_deiconify(handle)
-;         gtk_window_unmaximize(handle)
-;         gtk_window_present(handle)
+        Select GadgetType(Gadget)
+          Case #PB_GadgetType_String
+            If IsFlag(Flags,#PB_String_BorderLess)      ;Ok
+              ProcedureReturn gtk_entry_get_has_frame_(Handle)
+            EndIf
+            If IsFlag(Flags,#PB_String_Password)        ;Ok
+              ProcedureReturn Bool(gtk_entry_get_visibility_(Handle) = 0)
+            EndIf
+            If IsFlag(Flags,#PB_String_ReadOnly)        ;Ok
+              ProcedureReturn gtk_editable_get_editable_(Handle)
+            EndIf
+            ;             If IsFlag(Flags,#PB_String_Numeric)         ;Ok
+            ;             EndIf
+            ;             If IsFlag(Flags,#PB_String_LowerCase)       ;?
+            ;             EndIf
+            ;             If IsFlag(Flags,#PB_String_UpperCase)       ;? 
+            ;             EndIf
+            
+        EndSelect
       EndProcedure
-      Procedure RemoveWindow( Window, Flags.q ) 
-        Protected Handle = WindowID(Window)
+      Procedure SetGadget( Gadget, Flags.q, Value=0 )
+        Protected i, Handle = GadgetID(Gadget)
         
-        If IsFlag(Flags,#PB_Window_SizeGadget)     ;Ok
-          gtk_window_set_resizable_(Handle, #False)
-          Flags&~#PB_Window_TitleBar
-        EndIf
-        If IsFlag(Flags,#PB_Window_TitleBar)       ;Ok
-          gtk_window_set_decorated_(Handle, #False)
-        EndIf
-        If IsFlag(Flags,#PB_Window_Tool)           ;Ok
-          gtk_window_set_type_hint_(Handle, #GDK_WINDOW_TYPE_HINT_UTILITY)
-        EndIf
+        Select GadgetType(Gadget)
+          Case #PB_GadgetType_String
+            If IsFlag(Flags,#PB_String_BorderLess)      ;Ok
+              gtk_entry_set_has_frame_(Handle, #False)
+            EndIf
+            If IsFlag(Flags,#PB_String_Password)        ;Ok
+              gtk_entry_set_visibility_(Handle, #False) 
+            EndIf
+            If IsFlag(Flags,#PB_String_ReadOnly)        ;Ok
+              gtk_editable_set_editable_(Handle, #False)
+            EndIf
+            ;             If IsFlag(Flags,#PB_String_Numeric)         ;Ok
+            ;             EndIf
+            ;             If IsFlag(Flags,#PB_String_LowerCase)       ;?
+            ;             EndIf
+            ;             If IsFlag(Flags,#PB_String_UpperCase)       ;? 
+            ;             EndIf
+            
+        EndSelect
       EndProcedure
+      Procedure RemoveGadget( Gadget, Flags.q ) 
+        Protected i, Handle = GadgetID(Gadget)
+        
+        Select GadgetType(Gadget)
+          Case #PB_GadgetType_String
+            If IsFlag(Flags,#PB_String_BorderLess)      ;Ok
+              gtk_entry_set_has_frame_(Handle, #True)
+            EndIf
+            If IsFlag(Flags,#PB_String_Password)        ;Ok
+              gtk_entry_set_visibility_(Handle, #True) 
+            EndIf
+            If IsFlag(Flags,#PB_String_ReadOnly)        ;Ok
+              gtk_editable_set_editable_(Handle, #True)
+            EndIf
+            ;             If IsFlag(Flags,#PB_String_Numeric)         ;Ok
+            ;             EndIf
+            ;             If IsFlag(Flags,#PB_String_LowerCase)       ;?
+            ;             EndIf
+            ;             If IsFlag(Flags,#PB_String_UpperCase)       ;? 
+            ;             EndIf
+            
+        EndSelect
+      EndProcedure
+      
+      ;- MacOS
+    CompilerCase #PB_OS_MacOS
+      Procedure.q GetWindow( Window ) : EndProcedure
+      Procedure SetWindow( Window, Flags.q, Value=0 ) : EndProcedure
+      Procedure RemoveWindow( Window, Flags.q ) : EndProcedure
       Procedure.q GetGadget( Gadget ) : EndProcedure
-      Procedure SetGadget( Gadget, Flags.q, Value=0 ): EndProcedure
-      Procedure RemoveGadget( Gadget, Flags.q ) : EndProcedure
+      Procedure SetGadget( Gadget, Flags.q, Value=0 )
+        Protected i, Handle = GadgetID(Gadget)
+        Protected ReadOnlyState
+        
+        Select GadgetType(Gadget)
+          Case #PB_GadgetType_String
+            ;             If IsFlag(Flags,#PB_String_BorderLess)      ;Ok
+            ;             EndIf
+            ;             If IsFlag(Flags,#PB_String_Password)        ;Ok
+            ;             EndIf
+            If IsFlag(Flags,#PB_String_ReadOnly)        ;Ok
+              CocoaMessage(0, Handle, "setSelectable:", ReadOnlyState)
+              CocoaMessage(0, Handle, "setEditable:", ReadOnlyState ! 1)
+            EndIf
+            ;             If IsFlag(Flags,#PB_String_Numeric)         ;Ok
+            ;             EndIf
+            ;             If IsFlag(Flags,#PB_String_LowerCase)       ;?
+            ;             EndIf
+            ;             If IsFlag(Flags,#PB_String_UpperCase)       ;? 
+            ;             EndIf
+            
+        EndSelect
+      EndProcedure
+      Procedure RemoveGadget( Gadget, Flags.q ) 
+        Protected i, Handle = GadgetID(Gadget)
+        Protected ReadOnlyState
+        
+        Select GadgetType(Gadget)
+          Case #PB_GadgetType_String
+            ;             If IsFlag(Flags,#PB_String_BorderLess)      ;Ok
+            ;             EndIf
+            ;             If IsFlag(Flags,#PB_String_Password)        ;Ok
+            ;             EndIf
+            If IsFlag(Flags,#PB_String_ReadOnly)        ;Ok
+              CocoaMessage(0, GadgetID(0), "setSelectable:", ReadOnlyState)
+              CocoaMessage(0, GadgetID(0), "setEditable:", ReadOnlyState ! 1)
+            EndIf
+            ;             If IsFlag(Flags,#PB_String_Numeric)         ;Ok
+            ;             EndIf
+            ;             If IsFlag(Flags,#PB_String_LowerCase)       ;?
+            ;             EndIf
+            ;             If IsFlag(Flags,#PB_String_UpperCase)       ;? 
+            ;             EndIf
+            
+        EndSelect
+      EndProcedure
   CompilerEndSelect
   
-EndModule
-
-;- >>>> Example demo
-CompilerIf #PB_Compiler_IsMainFile
-  EnableExplicit
-  
-  Procedure Create( Object, Type$, Caption$="",Width=200,Height=100, X=5,Y=5, Param1=0, Param2=1, Param3=1000, Flag=0)
-    Protected a
+  ;-
+  Procedure.q Value(Flag_Str.s)
+    Protected i, Flag.q, String$
     
-    Select Type$
-      Case "OpenWindow"          : OpenWindow          (Object, X,Y,Width,Height, Caption$, Flag) 
-      Case "ButtonGadget"        : ButtonGadget        (Object, X,Y,Width,Height, Caption$, Flag)
-      Case "StringGadget"        : StringGadget        (Object, X,Y,Width,Height, Caption$, Flag)
-      Case "TextGadget"          : TextGadget          (Object, X,Y,Width,Height, Caption$, Flag)
-      Case "CheckBoxGadget"      : CheckBoxGadget      (Object, X,Y,Width,Height, Caption$, Flag)
-      Case "OptionGadget"        : OptionGadget        (Object, X,Y,Width,Height, Caption$)
-      Case "ListViewGadget"      : ListViewGadget      (Object, X,Y,Width,Height, Flag)
-        For a = 1 To 12
-          AddGadgetItem (Object, -1, "Элемент  " + Str(a) + "  Списка") ; Определить содержимое списка.
-        Next
-        SetGadgetState(Object, 9) ; Установить (начиная с 0) десятый элемент как активный.
+    If Flag_Str
+      For I = 0 To CountString(Flag_Str,"|")
+        String$ = Trim(StringField(Flag_Str,(I+1),"|"))
         
-      Case "FrameGadget"         : FrameGadget         (Object, X,Y,Width,Height, Caption$, Flag)
-      Case "ComboBoxGadget"      : ComboBoxGadget      (Object, X,Y,Width,Height, Flag)
-      Case "ImageGadget"         : ImageGadget         (Object, X,Y,Width,Height, Param1, Flag)
-      Case "HyperLinkGadget"     : HyperLinkGadget     (Object, X,Y,Width,Height, Caption$, Param1, Flag)
-      Case "ContainerGadget"     : ContainerGadget     (Object, X,Y,Width,Height, Flag) : CloseGadgetList()
-      Case "ListIconGadget"      : ListIconGadget      (Object, X,Y,Width,Height, Caption$, Param1, Flag)
-        AddGadgetColumn(Object, 0, "Name", 100)
-        AddGadgetColumn(Object, 1, "Address", 250)
-        AddGadgetItem(Object, -1, "Harry Rannit"+Chr(10)+"12 Parliament Way, Battle Street, By the Bay")
-        AddGadgetItem(Object, -1, "Ginger Brokeit"+Chr(10)+"130 PureBasic Road, BigTown, CodeCity")
+        Select String$
+            ; window
+          Case "#PB_Window_BorderLess"              : Flag = Flag | #PB_Window_BorderLess
+          Case "#PB_Window_Invisible"               : Flag = Flag | #PB_Window_Invisible
+          Case "#PB_Window_Maximize"                : Flag = Flag | #PB_Window_Maximize
+          Case "#PB_Window_Minimize"                : Flag = Flag | #PB_Window_Minimize
+          Case "#PB_Window_MaximizeGadget"          : Flag = Flag | #PB_Window_MaximizeGadget
+          Case "#PB_Window_MinimizeGadget"          : Flag = Flag | #PB_Window_MinimizeGadget
+          Case "#PB_Window_NoActivate"              : Flag = Flag | #PB_Window_NoActivate
+          Case "#PB_Window_NoGadgets"               : Flag = Flag | #PB_Window_NoGadgets
+          Case "#PB_Window_SizeGadget"              : Flag = Flag | #PB_Window_SizeGadget
+          Case "#PB_Window_SystemMenu"              : Flag = Flag | #PB_Window_SystemMenu
+          Case "#PB_Window_TitleBar"                : Flag = Flag | #PB_Window_TitleBar
+          Case "#PB_Window_Tool"                    : Flag = Flag | #PB_Window_Tool
+          Case "#PB_Window_ScreenCentered"          : Flag = Flag | #PB_Window_ScreenCentered
+          Case "#PB_Window_WindowCentered"          : Flag = Flag | #PB_Window_WindowCentered
+            ; buttonimage 
+          Case "#PB_Button_Image"                   : Flag = Flag | #PB_Button_Image
+          Case "#PB_Button_PressedImage"            : Flag = Flag | #PB_Button_PressedImage
+            ; button  
+          Case "#PB_Button_Default"                 : Flag = Flag | #PB_Button_Default
+          Case "#PB_Button_Left"                    : Flag = Flag | #PB_Button_Left
+          Case "#PB_Button_MultiLine"               : Flag = Flag | #PB_Button_MultiLine
+          Case "#PB_Button_Right"                   : Flag = Flag | #PB_Button_Right
+          Case "#PB_Button_Toggle"                  : Flag = Flag | #PB_Button_Toggle
+            ; string
+          Case "#PB_String_BorderLess"              : Flag = Flag | #PB_String_BorderLess
+          Case "#PB_String_LowerCase"               : Flag = Flag | #PB_String_LowerCase
+          Case "#PB_String_MaximumLength"           : Flag = Flag | #PB_String_MaximumLength
+          Case "#PB_String_Numeric"                 : Flag = Flag | #PB_String_Numeric
+          Case "#PB_String_Password"                : Flag = Flag | #PB_String_Password
+          Case "#PB_String_ReadOnly"                : Flag = Flag | #PB_String_ReadOnly
+          Case "#PB_String_UpperCase"               : Flag = Flag | #PB_String_UpperCase
+            ; text
+          Case "#PB_Text_Border"                    : Flag = Flag | #PB_Text_Border
+          Case "#PB_Text_Center"                    : Flag = Flag | #PB_Text_Center
+          Case "#PB_Text_Right"                     : Flag = Flag | #PB_Text_Right
+            ; option
+            ; checkbox
+          Case "#PB_CheckBox_Center"                : Flag = Flag | #PB_CheckBox_Center
+          Case "#PB_CheckBox_Right"                 : Flag = Flag | #PB_CheckBox_Right
+          Case "#PB_CheckBox_ThreeState"            : Flag = Flag | #PB_CheckBox_ThreeState
+            ; listview
+          Case "#PB_ListView_ClickSelect"           : Flag = Flag | #PB_ListView_ClickSelect
+          Case "#PB_ListView_MultiSelect"           : Flag = Flag | #PB_ListView_MultiSelect
+            ; frame
+          Case "#PB_Frame_Double"                   : Flag = Flag | #PB_Frame_Double
+          Case "#PB_Frame_Flat"                     : Flag = Flag | #PB_Frame_Flat
+          Case "#PB_Frame_Single"                   : Flag = Flag | #PB_Frame_Single
+            ; combobox
+          Case "#PB_ComboBox_Editable"              : Flag = Flag | #PB_ComboBox_Editable
+          Case "#PB_ComboBox_Image"                 : Flag = Flag | #PB_ComboBox_Image
+          Case "#PB_ComboBox_LowerCase"             : Flag = Flag | #PB_ComboBox_LowerCase
+          Case "#PB_ComboBox_UpperCase"             : Flag = Flag | #PB_ComboBox_UpperCase
+            ; image 
+          Case "#PB_Image_Border"                   : Flag = Flag | #PB_Image_Border
+          Case "#PB_Image_Raised"                   : Flag = Flag | #PB_Image_Raised
+            ; hyperlink 
+          Case "#PB_HyperLink_Underline"            : Flag = Flag | #PB_HyperLink_Underline
+            ; container 
+          Case "#PB_Container_BorderLess"           : Flag = Flag | #PB_Container_BorderLess
+          Case "#PB_Container_Double"               : Flag = Flag | #PB_Container_Double
+          Case "#PB_Container_Flat"                 : Flag = Flag | #PB_Container_Flat
+          Case "#PB_Container_Raised"               : Flag = Flag | #PB_Container_Raised
+          Case "#PB_Container_Single"               : Flag = Flag | #PB_Container_Single
+            ; listicon
+          Case "#PB_ListIcon_AlwaysShowSelection"   : Flag = Flag | #PB_ListIcon_AlwaysShowSelection
+          Case "#PB_ListIcon_CheckBoxes"            : Flag = Flag | #PB_ListIcon_CheckBoxes
+          Case "#PB_ListIcon_ColumnWidth"           : Flag = Flag | #PB_ListIcon_ColumnWidth
+          Case "#PB_ListIcon_DisplayMode"           : Flag = Flag | #PB_ListIcon_DisplayMode
+          Case "#PB_ListIcon_GridLines"             : Flag = Flag | #PB_ListIcon_GridLines
+          Case "#PB_ListIcon_FullRowSelect"         : Flag = Flag | #PB_ListIcon_FullRowSelect
+          Case "#PB_ListIcon_HeaderDragDrop"        : Flag = Flag | #PB_ListIcon_HeaderDragDrop
+          Case "#PB_ListIcon_LargeIcon"             : Flag = Flag | #PB_ListIcon_LargeIcon
+          Case "#PB_ListIcon_List"                  : Flag = Flag | #PB_ListIcon_List
+          Case "#PB_ListIcon_MultiSelect"           : Flag = Flag | #PB_ListIcon_MultiSelect
+          Case "#PB_ListIcon_Report"                : Flag = Flag | #PB_ListIcon_Report
+          Case "#PB_ListIcon_SmallIcon"             : Flag = Flag | #PB_ListIcon_SmallIcon
+          Case "#PB_ListIcon_ThreeState"            : Flag = Flag | #PB_ListIcon_ThreeState
+            ; ipaddress
+            ; progressbar 
+          Case "#PB_ProgressBar_Smooth"             : Flag = Flag | #PB_ProgressBar_Smooth
+          Case "#PB_ProgressBar_Vertical"           : Flag = Flag | #PB_ProgressBar_Vertical
+            ; scrollbar 
+          Case "#PB_ScrollBar_Vertical"             : Flag = Flag | #PB_ScrollBar_Vertical
+            ; scrollarea 
+          Case "#PB_ScrollArea_BorderLess"          : Flag = Flag | #PB_ScrollArea_BorderLess
+          Case "#PB_ScrollArea_Center"              : Flag = Flag | #PB_ScrollArea_Center
+          Case "#PB_ScrollArea_Flat"                : Flag = Flag | #PB_ScrollArea_Flat
+          Case "#PB_ScrollArea_Raised"              : Flag = Flag | #PB_ScrollArea_Raised
+          Case "#PB_ScrollArea_Single"              : Flag = Flag | #PB_ScrollArea_Single
+            ; trackbar
+          Case "#PB_TrackBar_Ticks"                 : Flag = Flag | #PB_TrackBar_Ticks
+          Case "#PB_TrackBar_Vertical"              : Flag = Flag | #PB_TrackBar_Vertical
+            ; web
+            ; calendar
+          Case "#PB_Calendar_Borderless"            : Flag = Flag | #PB_Calendar_Borderless
+            
+            ; date
+          Case "#PB_Date_CheckBox"                  : Flag = Flag | #PB_Date_CheckBox
+          Case "#PB_Date_UpDown"                    : Flag = Flag | #PB_Date_UpDown
+            
+            ; editor
+          Case "#PB_Editor_ReadOnly"                : Flag = Flag | #PB_Editor_ReadOnly
+          Case "#PB_Editor_WordWrap"                : Flag = Flag | #PB_Editor_WordWrap
+            
+            ; explorerlist
+          Case "#PB_Explorer_BorderLess"            : Flag = Flag | #PB_Explorer_BorderLess         
+          Case "#PB_Explorer_AlwaysShowSelection"   : Flag = Flag | #PB_Explorer_AlwaysShowSelection
+          Case "#PB_Explorer_MultiSelect"           : Flag = Flag | #PB_Explorer_MultiSelect
+          Case "#PB_Explorer_GridLines"             : Flag = Flag | #PB_Explorer_GridLines
+          Case "#PB_Explorer_HeaderDragDrop"        : Flag = Flag | #PB_Explorer_HeaderDragDrop
+          Case "#PB_Explorer_FullRowSelect"         : Flag = Flag | #PB_Explorer_FullRowSelect
+          Case "#PB_Explorer_NoFiles"               : Flag = Flag | #PB_Explorer_NoFiles
+          Case "#PB_Explorer_NoFolders"             : Flag = Flag | #PB_Explorer_NoFolders
+          Case "#PB_Explorer_NoParentFolder"        : Flag = Flag | #PB_Explorer_NoParentFolder 
+          Case "#PB_Explorer_NoDirectoryChange"     : Flag = Flag | #PB_Explorer_NoDirectoryChange
+          Case "#PB_Explorer_NoDriveRequester"      : Flag = Flag | #PB_Explorer_NoDriveRequester
+          Case "#PB_Explorer_NoSort"                : Flag = Flag | #PB_Explorer_NoSort
+          Case "#PB_Explorer_AutoSort"              : Flag = Flag | #PB_Explorer_AutoSort
+          Case "#PB_Explorer_HiddenFiles"           : Flag = Flag | #PB_Explorer_HiddenFiles
+          Case "#PB_Explorer_NoMyDocuments"         : Flag = Flag | #PB_Explorer_NoMyDocuments
+            
+            ; explorercombo
+          Case "#PB_Explorer_DrivesOnly"            : Flag = Flag | #PB_Explorer_DrivesOnly
+          Case "#PB_Explorer_Editable"              : Flag = Flag | #PB_Explorer_Editable
+            
+            ; explorertree
+          Case "#PB_Explorer_NoLines"               : Flag = Flag | #PB_Explorer_NoLines
+          Case "#PB_Explorer_NoButtons"             : Flag = Flag | #PB_Explorer_NoButtons
+            
+            ; spin
+          Case "#PB_Spin_Numeric"                   : Flag = Flag | #PB_Spin_Numeric
+          Case "#PB_Spin_ReadOnly"                  : Flag = Flag | #PB_Spin_ReadOnly
+            ; tree
+          Case "#PB_Tree_AlwaysShowSelection"       : Flag = Flag | #PB_Tree_AlwaysShowSelection
+          Case "#PB_Tree_CheckBoxes"                : Flag = Flag | #PB_Tree_CheckBoxes
+          Case "#PB_Tree_NoButtons"                 : Flag = Flag | #PB_Tree_NoButtons
+          Case "#PB_Tree_NoLines"                   : Flag = Flag | #PB_Tree_NoLines
+          Case "#PB_Tree_ThreeState"                : Flag = Flag | #PB_Tree_ThreeState
+            ; panel
+            ; splitter
+          Case "#PB_Splitter_Separator"             : Flag = Flag | #PB_Splitter_Separator
+          Case "#PB_Splitter_Vertical"              : Flag = Flag | #PB_Splitter_Vertical
+          Case "#PB_Splitter_FirstFixed"            : Flag = Flag | #PB_Splitter_FirstFixed
+          Case "#PB_Splitter_SecondFixed"           : Flag = Flag | #PB_Splitter_SecondFixed
+            ; mdi
+          Case "#PB_MDI_AutoSize"                   : Flag = Flag | #PB_MDI_AutoSize
+          Case "#PB_MDI_BorderLess"                 : Flag = Flag | #PB_MDI_BorderLess
+          Case "#PB_MDI_NoScrollBars"               : Flag = Flag | #PB_MDI_NoScrollBars
+            ; scintilla
+            ; shortcut
+            ; canvas
+          Case "#PB_Canvas_Border"                  : Flag = Flag | #PB_Canvas_Border
+          Case "#PB_Canvas_ClipMouse"               : Flag = Flag | #PB_Canvas_ClipMouse
+          Case "#PB_Canvas_Container"               : Flag = Flag | #PB_Canvas_Container
+          Case "#PB_Canvas_DrawFocus"               : Flag = Flag | #PB_Canvas_DrawFocus
+          Case "#PB_Canvas_Keyboard"                : Flag = Flag | #PB_Canvas_Keyboard
+            
+          Default
+            ;             Select Asc(String$)
+            ;               Case '0' To '9'
+            Flag = Flag | Val(String$)
+            ;             EndSelect
+        EndSelect
         
-      Case "IPAddressGadget"     : IPAddressGadget     (Object, X,Y,Width,Height)
-      Case "ProgressBarGadget"   : ProgressBarGadget   (Object, X,Y,Width,Height, Param1, Param2+100, Flag)
-        SetGadgetState   (Object, 50)  
-        
-      Case "ScrollBarGadget"     : ScrollBarGadget     (Object, X,Y,Width,Height, Param1, Param2, Param3, Flag)
-      Case "ScrollAreaGadget"    : ScrollAreaGadget    (Object, X,Y,Width,Height, Param1, Param2, Param3, Flag)  : CloseGadgetList()
-      Case "TrackBarGadget"      : TrackBarGadget      (Object, X,Y,Width,Height, Param1, Param2, Flag)
-      Case "WebGadget"           : WebGadget           (Object, X,Y,Width,Height, Caption$)
-      Case "ButtonImageGadget"   : ButtonImageGadget   (Object, X,Y,Width,Height, Param1, Flag)
-      Case "CalendarGadget"      : CalendarGadget      (Object, X,Y,Width,Height, Param1, Flag)
-      Case "DateGadget"          : DateGadget          (Object, X,Y,Width,Height, Caption$, Param1, Flag)
-      Case "EditorGadget"        : EditorGadget        (Object, X,Y,Width,Height, Flag)
-        For a = 0 To 5
-          AddGadgetItem(Object, a, "Строка "+Str(a))
-        Next
-        
-      Case "ExplorerListGadget"  : ExplorerListGadget  (Object, X,Y,Width,Height, Caption$, Flag)
-      Case "ExplorerTreeGadget"  : ExplorerTreeGadget  (Object, X,Y,Width,Height, Caption$, Flag)
-      Case "ExplorerComboGadget" : ExplorerComboGadget (Object, X,Y,Width,Height, Caption$, Flag)
-      Case "SpinGadget"          : SpinGadget          (Object, X,Y,Width,Height, Param1, Param2, Flag)
-      Case "TreeGadget"          : TreeGadget          (Object, X,Y,Width,Height, Flag)
-      Case "PanelGadget"         : PanelGadget         (Object, X,Y,Width,Height)  : CloseGadgetList()
-      Case "SplitterGadget"      
-        If IsGadget(Param1) And IsGadget(Param2)
-          SplitterGadget      (Object, X,Y,Width,Height, Param1, Param2, Flag)
-        EndIf
-      Case "MDIGadget"          
-        CompilerIf #PB_Compiler_OS = #PB_OS_Windows
-          MDIGadget           (Object, X,Y,Width,Height, Param1, Param2, Flag) 
-        CompilerEndIf
-      Case "ScintillaGadget"     : ScintillaGadget     (Object, X,Y,Width,Height, Param1)
-      Case "ShortcutGadget"      : ShortcutGadget      (Object, X,Y,Width,Height, Param1)
-      Case "CanvasGadget"        : CanvasGadget        (Object, X,Y,Width,Height, Flag)
-    EndSelect
-  EndProcedure  
+      Next
+    EndIf
+    
+    ProcedureReturn Flag
+  EndProcedure
   
-  Procedure$ GetPBFlags( Type=#PB_GadgetType_Unknown ) ; 
+  Procedure.s String(Type, Flag_Value.q)
+    Protected i, Flag.S
+    
+    If Flag_Value
+      
+      Select Type
+        Case #PB_Default        
+          ;{- Ok
+          Select Flag_Value
+              ; window
+            Case #PB_Window_BorderLess              : Flag = Flag +"|#PB_Window_BorderLess"
+            Case #PB_Window_Invisible               : Flag = Flag +"|#PB_Window_Invisible"
+            Case #PB_Window_Maximize                : Flag = Flag +"|#PB_Window_Maximize"
+            Case #PB_Window_Minimize                : Flag = Flag +"|#PB_Window_Minimize"
+            Case #PB_Window_MaximizeGadget          : Flag = Flag +"|#PB_Window_MaximizeGadget"
+            Case #PB_Window_MinimizeGadget          : Flag = Flag +"|#PB_Window_MinimizeGadget"
+            Case #PB_Window_NoActivate              : Flag = Flag +"|#PB_Window_NoActivate"
+            Case #PB_Window_NoGadgets               : Flag = Flag +"|#PB_Window_NoGadgets"
+            Case #PB_Window_SizeGadget              : Flag = Flag +"|#PB_Window_SizeGadget"
+            Case #PB_Window_SystemMenu              : Flag = Flag +"|#PB_Window_SystemMenu"
+            Case #PB_Window_TitleBar                : Flag = Flag +"|#PB_Window_TitleBar"
+            Case #PB_Window_Tool                    : Flag = Flag +"|#PB_Window_Tool"
+            Case #PB_Window_ScreenCentered          : Flag = Flag +"|#PB_Window_ScreenCentered"
+            Case #PB_Window_WindowCentered          : Flag = Flag +"|#PB_Window_WindowCentered"
+          EndSelect
+          
+          ;}
+          
+        Case #PB_GadgetType_Button         
+          ;{- Ok
+          Select Flag_Value
+              ; button  
+            Case #PB_Button_Default                 : Flag = Flag +"|#PB_Button_Default"
+            Case #PB_Button_Left                    : Flag = Flag +"|#PB_Button_Left"
+            Case #PB_Button_MultiLine               : Flag = Flag +"|#PB_Button_MultiLine"
+            Case #PB_Button_Right                   : Flag = Flag +"|#PB_Button_Right"
+            Case #PB_Button_Toggle                  : Flag = Flag +"|#PB_Button_Toggle"
+          EndSelect
+          ;}
+          
+        Case #PB_GadgetType_String         
+          ;{- Ok
+          Select Flag_Value
+              ; string
+            Case #PB_String_BorderLess              : Flag = Flag +"|#PB_String_BorderLess"
+            Case #PB_String_LowerCase               : Flag = Flag +"|#PB_String_LowerCase"
+            Case #PB_String_MaximumLength           : Flag = Flag +"|#PB_String_MaximumLength"
+            Case #PB_String_Numeric                 : Flag = Flag +"|#PB_String_Numeric"
+            Case #PB_String_Password                : Flag = Flag +"|#PB_String_Password"
+            Case #PB_String_ReadOnly                : Flag = Flag +"|#PB_String_ReadOnly"
+            Case #PB_String_UpperCase               : Flag = Flag +"|#PB_String_UpperCase"
+          EndSelect
+          ;}
+          
+        Case #PB_GadgetType_Text           
+          ;{- Ok
+          Select Flag_Value
+              ; text
+            Case #PB_Text_Border                    : Flag = Flag +"|#PB_Text_Border"
+            Case #PB_Text_Center                    : Flag = Flag +"|#PB_Text_Center"
+            Case #PB_Text_Right                     : Flag = Flag +"|#PB_Text_Right"
+          EndSelect
+          ;}
+          
+        Case #PB_GadgetType_CheckBox       
+          ;{- Ok
+          Select Flag_Value
+              ; checkbox
+            Case #PB_CheckBox_Center                : Flag = Flag +"|#PB_CheckBox_Center"
+            Case #PB_CheckBox_Right                 : Flag = Flag +"|#PB_CheckBox_Right"
+            Case #PB_CheckBox_ThreeState            : Flag = Flag +"|#PB_CheckBox_ThreeState"
+          EndSelect
+          ;}
+          
+        Case #PB_GadgetType_Option         
+          Select Flag_Value
+              ; option
+          EndSelect
+          
+        Case #PB_GadgetType_ListView       
+          ;{- Ok
+          Select Flag_Value
+              ; listview
+            Case #PB_ListView_ClickSelect           : Flag = Flag +"|#PB_ListView_ClickSelect"
+            Case #PB_ListView_MultiSelect           : Flag = Flag +"|#PB_ListView_MultiSelect"
+          EndSelect
+          ;}
+          
+        Case #PB_GadgetType_Frame          
+          ;{- Ok
+          Select Flag_Value
+              ; frame
+            Case #PB_Frame_Double                   : Flag = Flag +"|#PB_Frame_Double"
+            Case #PB_Frame_Flat                     : Flag = Flag +"|#PB_Frame_Flat"
+            Case #PB_Frame_Single                   : Flag = Flag +"|#PB_Frame_Single"
+          EndSelect
+          ;}
+          
+        Case #PB_GadgetType_ComboBox       
+          ;{- Ok
+          Select Flag_Value
+              ; combobox
+            Case #PB_ComboBox_Editable              : Flag = Flag +"|#PB_ComboBox_Editable"
+            Case #PB_ComboBox_Image                 : Flag = Flag +"|#PB_ComboBox_Image"
+            Case #PB_ComboBox_LowerCase             : Flag = Flag +"|#PB_ComboBox_LowerCase"
+            Case #PB_ComboBox_UpperCase             : Flag = Flag +"|#PB_ComboBox_UpperCase"
+          EndSelect
+          ;}
+          
+        Case #PB_GadgetType_Image          
+          ;{- Ok
+          Select Flag_Value
+              ; image 
+            Case #PB_Image_Border                   : Flag = Flag +"|#PB_Image_Border"
+            Case #PB_Image_Raised                   : Flag = Flag +"|#PB_Image_Raised"
+          EndSelect
+          ;}
+          
+        Case #PB_GadgetType_HyperLink      
+          ;{- Ok
+          Select Flag_Value
+              ; hyperlink 
+            Case #PB_HyperLink_Underline            : Flag = Flag +"|#PB_HyperLink_Underline"
+          EndSelect
+          ;}
+          
+        Case #PB_GadgetType_Container      
+          ;{- Ok
+          Select Flag_Value
+              ; container 
+            Case #PB_Container_BorderLess           : Flag = Flag +"|#PB_Container_BorderLess"
+            Case #PB_Container_Double               : Flag = Flag +"|#PB_Container_Double"
+            Case #PB_Container_Flat                 : Flag = Flag +"|#PB_Container_Flat"
+            Case #PB_Container_Raised               : Flag = Flag +"|#PB_Container_Raised"
+            Case #PB_Container_Single               : Flag = Flag +"|#PB_Container_Single"
+          EndSelect
+          ;}
+          
+        Case #PB_GadgetType_ListIcon       
+          ;{- Ok
+          Select Flag_Value
+              ; listicon
+            Case #PB_ListIcon_AlwaysShowSelection   : Flag = Flag +"|#PB_ListIcon_AlwaysShowSelection"
+            Case #PB_ListIcon_CheckBoxes            : Flag = Flag +"|#PB_ListIcon_CheckBoxes"
+            Case #PB_ListIcon_ColumnWidth           : Flag = Flag +"|#PB_ListIcon_ColumnWidth"
+            Case #PB_ListIcon_DisplayMode           : Flag = Flag +"|#PB_ListIcon_DisplayMode"
+            Case #PB_ListIcon_GridLines             : Flag = Flag +"|#PB_ListIcon_GridLines"
+            Case #PB_ListIcon_FullRowSelect         : Flag = Flag +"|#PB_ListIcon_FullRowSelect"
+            Case #PB_ListIcon_HeaderDragDrop        : Flag = Flag +"|#PB_ListIcon_HeaderDragDrop"
+            Case #PB_ListIcon_LargeIcon             : Flag = Flag +"|#PB_ListIcon_LargeIcon"
+            Case #PB_ListIcon_List                  : Flag = Flag +"|#PB_ListIcon_List"
+            Case #PB_ListIcon_MultiSelect           : Flag = Flag +"|#PB_ListIcon_MultiSelect"
+            Case #PB_ListIcon_Report                : Flag = Flag +"|#PB_ListIcon_Report"
+            Case #PB_ListIcon_SmallIcon             : Flag = Flag +"|#PB_ListIcon_SmallIcon"
+            Case #PB_ListIcon_ThreeState            : Flag = Flag +"|#PB_ListIcon_ThreeState"
+          EndSelect
+          ;}
+          
+        Case #PB_GadgetType_IPAddress      
+          Select Flag_Value
+              ; ipaddress
+          EndSelect
+          
+        Case #PB_GadgetType_ProgressBar    
+          ;{- Ok
+          Select Flag_Value
+              ; progressbar 
+            Case #PB_ProgressBar_Smooth             : Flag = Flag +"|#PB_ProgressBar_Smooth"
+            Case #PB_ProgressBar_Vertical           : Flag = Flag +"|#PB_ProgressBar_Vertical"
+          EndSelect
+          ;}
+          
+        Case #PB_GadgetType_ScrollBar      
+          ;{- Ok
+          Select Flag_Value
+              ; scrollbar 
+            Case #PB_ScrollBar_Vertical             : Flag = Flag +"|#PB_ScrollBar_Vertical"
+          EndSelect
+          ;}
+          
+        Case #PB_GadgetType_ScrollArea     
+          ;{- Ok
+          Select Flag_Value
+              ; scrollarea 
+            Case #PB_ScrollArea_BorderLess          : Flag = Flag +"|#PB_ScrollArea_BorderLess"
+            Case #PB_ScrollArea_Center              : Flag = Flag +"|#PB_ScrollArea_Center"
+            Case #PB_ScrollArea_Flat                : Flag = Flag +"|#PB_ScrollArea_Flat"
+            Case #PB_ScrollArea_Raised              : Flag = Flag +"|#PB_ScrollArea_Raised"
+            Case #PB_ScrollArea_Single              : Flag = Flag +"|#PB_ScrollArea_Single"
+          EndSelect
+          ;}
+          
+        Case #PB_GadgetType_TrackBar       
+          ;{- Ok
+          Select Flag_Value
+              ; trackbar
+            Case #PB_TrackBar_Ticks                 : Flag = Flag +"|#PB_TrackBar_Ticks"
+            Case #PB_TrackBar_Vertical              : Flag = Flag +"|#PB_TrackBar_Vertical"
+          EndSelect
+          ;}
+          
+        Case #PB_GadgetType_Web            
+          Select Flag_Value
+              ; web
+          EndSelect
+          
+        Case #PB_GadgetType_ButtonImage    
+          ;{- Ok
+          Select Flag_Value
+              ; buttonimage 
+            Case #PB_Button_Image                   : Flag = Flag +"|#PB_Button_Image"
+            Case #PB_Button_PressedImage            : Flag = Flag +"|#PB_Button_PressedImage"
+          EndSelect
+          ;}
+          
+        Case #PB_GadgetType_Calendar       
+          ;{- Ok
+          Select Flag_Value
+              ; calendar
+            Case #PB_Calendar_Borderless            : Flag = Flag +"|#PB_Calendar_Borderless"
+              
+          EndSelect
+          ;}
+          
+        Case #PB_GadgetType_Date           
+          ;{- Ok
+          Select Flag_Value
+              ; date
+            Case #PB_Date_CheckBox                  : Flag = Flag +"|#PB_Date_CheckBox"
+            Case #PB_Date_UpDown                    : Flag = Flag +"|#PB_Date_UpDown"
+              
+          EndSelect
+          ;}
+          
+        Case #PB_GadgetType_Editor         
+          ;{- Ok
+          Select Flag_Value
+              ; editor
+            Case #PB_Editor_ReadOnly                : Flag = Flag +"|#PB_Editor_ReadOnly"
+            Case #PB_Editor_WordWrap                : Flag = Flag +"|#PB_Editor_WordWrap"
+              
+          EndSelect
+          ;}
+          
+        Case #PB_GadgetType_ExplorerList   
+          ;{- Ok
+          Select Flag_Value
+              ; explorerlist
+            Case #PB_Explorer_BorderLess            : Flag = Flag +"|#PB_Explorer_BorderLess"          ; Создать гаджет без границ.
+            Case #PB_Explorer_AlwaysShowSelection   : Flag = Flag +"|#PB_Explorer_AlwaysShowSelection" ; Выделение отображается даже если гаджет не активирован.
+            Case #PB_Explorer_MultiSelect           : Flag = Flag +"|#PB_Explorer_MultiSelect"         ; Разрешить множественное выделение элементов в гаджете.
+            Case #PB_Explorer_GridLines             : Flag = Flag +"|#PB_Explorer_GridLines"           ; Отображать разделительные линии между строками и колонками.
+            Case #PB_Explorer_HeaderDragDrop        : Flag = Flag +"|#PB_Explorer_HeaderDragDrop"      ; В режиме таблицы заголовки можно перетаскивать (Drag'n'Drop).
+            Case #PB_Explorer_FullRowSelect         : Flag = Flag +"|#PB_Explorer_FullRowSelect"       ; Выделение охватывает всю строку, а не первую колонку.
+            Case #PB_Explorer_NoFiles               : Flag = Flag +"|#PB_Explorer_NoFiles"             ; Не показывать файлы.
+            Case #PB_Explorer_NoFolders             : Flag = Flag +"|#PB_Explorer_NoFolders"           ; Не показывать каталоги.
+            Case #PB_Explorer_NoParentFolder        : Flag = Flag +"|#PB_Explorer_NoParentFolder"      ; Не показывать ссылку на родительский каталог [..].
+            Case #PB_Explorer_NoDirectoryChange     : Flag = Flag +"|#PB_Explorer_NoDirectoryChange"   ; Пользователь не может сменить директорию.
+            Case #PB_Explorer_NoDriveRequester      : Flag = Flag +"|#PB_Explorer_NoDriveRequester"    ; Не показывать запрос 'пожалуйста, вставьте диск X:'.
+            Case #PB_Explorer_NoSort                : Flag = Flag +"|#PB_Explorer_NoSort"              ; Пользователь не может сортировать содержимое по клику на заголовке колонки.
+            Case #PB_Explorer_AutoSort              : Flag = Flag +"|#PB_Explorer_AutoSort"            ; Содержимое автоматически упорядочивается по имени.
+            Case #PB_Explorer_HiddenFiles           : Flag = Flag +"|#PB_Explorer_HiddenFiles"         ; Будет отображать скрытые файлы (поддерживается только в Linux и OS X).
+            Case #PB_Explorer_NoMyDocuments         : Flag = Flag +"|#PB_Explorer_NoMyDocuments"       ; Не показывать каталог 'Мои документы' в виде отдельного элемента.
+              
+          EndSelect
+          ;}
+          
+        Case #PB_GadgetType_ExplorerTree   
+          Select Flag_Value
+              ; explorertree
+            Case #PB_Explorer_NoLines               : Flag = Flag +"|#PB_Explorer_NoLines"             ; Скрыть линии, соединяющие узлы дерева.
+            Case #PB_Explorer_NoButtons             : Flag = Flag +"|#PB_Explorer_NoButtons"           ; Скрыть кнопки разворачивания узлов в виде символов '+'.
+              
+          EndSelect
+          
+        Case #PB_GadgetType_ExplorerCombo  
+          Select Flag_Value
+              ; explorercombo
+            Case #PB_Explorer_DrivesOnly            : Flag = Flag +"|#PB_Explorer_DrivesOnly"          ; Гаджет будет отображать только диски, которые вы можете выбрать.
+            Case #PB_Explorer_Editable              : Flag = Flag +"|#PB_Explorer_Editable"            ; Гаджет будет доступен для редактирования с функцией автозаполнения.  			      С этим флагом он действует точно так же, как тот что в Windows Explorer.
+              
+          EndSelect
+          
+        Case #PB_GadgetType_Spin           
+          Select Flag_Value
+              ; spin
+            Case #PB_Spin_Numeric                   : Flag = Flag +"|#PB_Spin_Numeric"
+            Case #PB_Spin_ReadOnly                  : Flag = Flag +"|#PB_Spin_ReadOnly"
+              
+          EndSelect
+          
+        Case #PB_GadgetType_Tree           
+          ;{- Ok
+          Select Flag_Value
+              ; tree
+            Case #PB_Tree_AlwaysShowSelection       : Flag = Flag +"|#PB_Tree_AlwaysShowSelection"
+            Case #PB_Tree_CheckBoxes                : Flag = Flag +"|#PB_Tree_CheckBoxes"
+            Case #PB_Tree_NoButtons                 : Flag = Flag +"|#PB_Tree_NoButtons"
+            Case #PB_Tree_NoLines                   : Flag = Flag +"|#PB_Tree_NoLines"
+            Case #PB_Tree_ThreeState                : Flag = Flag +"|#PB_Tree_ThreeState"
+          EndSelect
+          ;}
+          
+        Case #PB_GadgetType_Panel          
+          Select Flag_Value
+              ; panel
+          EndSelect
+          
+        Case #PB_GadgetType_Splitter       
+          ;{- Ok
+          Select Flag_Value
+              ; splitter
+            Case #PB_Splitter_Separator             : Flag = Flag +"|#PB_Splitter_Separator"
+            Case #PB_Splitter_Vertical              : Flag = Flag +"|#PB_Splitter_Vertical"
+            Case #PB_Splitter_FirstFixed            : Flag = Flag +"|#PB_Splitter_FirstFixed"
+            Case #PB_Splitter_SecondFixed           : Flag = Flag +"|#PB_Splitter_SecondFixed"
+          EndSelect
+          ;}
+          
+          CompilerIf #PB_Compiler_OS = #PB_OS_Windows
+          Case #PB_GadgetType_MDI           
+            Select Flag_Value
+                ; mdi
+              Case #PB_MDI_AutoSize                   : Flag = Flag +"|#PB_MDI_AutoSize"
+              Case #PB_MDI_BorderLess                 : Flag = Flag +"|#PB_MDI_BorderLess"
+              Case #PB_MDI_NoScrollBars               : Flag = Flag +"|#PB_MDI_NoScrollBars"
+            EndSelect
+          CompilerEndIf
+          
+        Case #PB_GadgetType_Scintilla      
+          Select Flag_Value
+              ; scintilla
+          EndSelect
+          
+        Case #PB_GadgetType_Shortcut       
+          
+          Select Flag_Value
+              ; shortcut
+          EndSelect
+          
+        Case #PB_GadgetType_Canvas 
+          ;{- Ok
+          Select Flag_Value
+              ; canvas
+            Case #PB_Canvas_Border                  : Flag = Flag +"|#PB_Canvas_Border"
+            Case #PB_Canvas_ClipMouse               : Flag = Flag +"|#PB_Canvas_ClipMouse"
+            Case #PB_Canvas_Container               : Flag = Flag +"|#PB_Canvas_Container"
+            Case #PB_Canvas_DrawFocus               : Flag = Flag +"|#PB_Canvas_DrawFocus"
+            Case #PB_Canvas_Keyboard                : Flag = Flag +"|#PB_Canvas_Keyboard"
+          EndSelect
+          ;}
+          
+      EndSelect
+      
+    EndIf
+    
+    ProcedureReturn Trim(Flag, "|")
+  EndProcedure
+  
+  Procedure.s Gets( Type=#PB_Default ) ; 
     Protected Flags.S
     
     Select Type
-      Case #PB_GadgetType_Unknown        
+      Case #PB_Default        
         ;{- Ok
-        Flags.S = "#PB_Window_BorderLess|"+
-                  "#PB_Window_TitleBar|"+
+        Flags.S = "#PB_Window_TitleBar|"+
+                  "#PB_Window_BorderLess|"+
                   "#PB_Window_SystemMenu|"+
                   "#PB_Window_MaximizeGadget|"+
                   "#PB_Window_MinimizeGadget|"+
-                  "#PB_Window_SizeGadget|"+
                   "#PB_Window_ScreenCentered|"+
+                  "#PB_Window_SizeGadget|"+
                   "#PB_Window_WindowCentered|"+
                   "#PB_Window_Tool|"+
+                  "#PB_Window_Normal|"+
                   "#PB_Window_Minimize|"+
                   "#PB_Window_Maximize|"+
                   "#PB_Window_Invisible|"+
@@ -1552,9 +2103,9 @@ CompilerIf #PB_Compiler_IsMainFile
         
       Case #PB_GadgetType_Text           
         ;{- Ok
-        Flags.S = "#PB_Text_Border|"+
+        Flags.S = "#PB_Text_Center|"+
                   "#PB_Text_Right|"+
-                  "#PB_Text_Center"
+                  "#PB_Text_Border"
         ;}
         
       Case #PB_GadgetType_CheckBox       
@@ -1575,9 +2126,9 @@ CompilerIf #PB_Compiler_IsMainFile
         
       Case #PB_GadgetType_Frame          
         ;{- Ok
-        Flags.S = "#PB_Frame_Flat|"+
-                  "#PB_Frame_Single|"+
-                  "#PB_Frame_Double"
+        Flags.S = "#PB_Frame_Single|"+
+                  "#PB_Frame_Double|"+
+                  "#PB_Frame_Flat"
         ;}
         
       Case #PB_GadgetType_ComboBox       
@@ -1603,9 +2154,9 @@ CompilerIf #PB_Compiler_IsMainFile
         ;{- Ok
         Flags.S = "#PB_Container_BorderLess|"+
                   "#PB_Container_Flat|"+
+                  "#PB_Container_Raised|"+
                   "#PB_Container_Single|"+
-                  "#PB_Container_Double|"+
-                  "#PB_Container_Raised"
+                  "#PB_Container_Double"
         ;}
         
       Case #PB_GadgetType_ListIcon       
@@ -1635,10 +2186,10 @@ CompilerIf #PB_Compiler_IsMainFile
         
       Case #PB_GadgetType_ScrollArea     
         ;{- Ok
-        Flags.S = "#PB_ScrollArea_BorderLess|"+
-                  "#PB_ScrollArea_Flat|"+
-                  "#PB_ScrollArea_Single|"+
+        Flags.S = "#PB_ScrollArea_Flat|"+
                   "#PB_ScrollArea_Raised|"+
+                  "#PB_ScrollArea_Single|"+
+                  "#PB_ScrollArea_BorderLess|"+
                   "#PB_ScrollArea_Center"
         ;}
         
@@ -1745,178 +2296,250 @@ CompilerIf #PB_Compiler_IsMainFile
     ProcedureReturn Flags.S
   EndProcedure
   
-  Procedure.q GetPBFlag(Flags$)
-    Protected i, Flag.q
+  Procedure.s _String(Flag_Value.q)
+    Protected i, Flag.S
     
-    If Flags$
-      For I = 0 To CountString(Flags$,"|")
-        
-        Select Trim(StringField(Flags$,(I+1),"|"))
-            ; window
-          Case "#PB_Window_BorderLess"              : Flag = Flag | #PB_Window_BorderLess
-          Case "#PB_Window_Invisible"               : Flag = Flag | #PB_Window_Invisible
-          Case "#PB_Window_Maximize"                : Flag = Flag | #PB_Window_Maximize
-          Case "#PB_Window_Minimize"                : Flag = Flag | #PB_Window_Minimize
-          Case "#PB_Window_MaximizeGadget"          : Flag = Flag | #PB_Window_MaximizeGadget
-          Case "#PB_Window_MinimizeGadget"          : Flag = Flag | #PB_Window_MinimizeGadget
-          Case "#PB_Window_NoActivate"              : Flag = Flag | #PB_Window_NoActivate
-          Case "#PB_Window_NoGadgets"               : Flag = Flag | #PB_Window_NoGadgets
-          Case "#PB_Window_SizeGadget"                    : Flag = Flag | #PB_Window_SizeGadget
-          Case "#PB_Window_SystemMenu"              : Flag = Flag | #PB_Window_SystemMenu
-          Case "#PB_Window_TitleBar"                : Flag = Flag | #PB_Window_TitleBar
-          Case "#PB_Window_Tool"                    : Flag = Flag | #PB_Window_Tool
-          Case "#PB_Window_ScreenCentered"          : Flag = Flag | #PB_Window_ScreenCentered
-          Case "#PB_Window_WindowCentered"          : Flag = Flag | #PB_Window_WindowCentered
-            ; buttonimage 
-          Case "#PB_Button_Image"                   : Flag = Flag | #PB_Button_Image
-          Case "#PB_Button_PressedImage"            : Flag = Flag | #PB_Button_PressedImage
-            ; button  
-          Case "#PB_Button_Default"                 : Flag = Flag | #PB_Button_Default
-          Case "#PB_Button_Left"                    : Flag = Flag | #PB_Button_Left
-          Case "#PB_Button_MultiLine"               : Flag = Flag | #PB_Button_MultiLine
-          Case "#PB_Button_Right"                   : Flag = Flag | #PB_Button_Right
-          Case "#PB_Button_Toggle"                  : Flag = Flag | #PB_Button_Toggle
-            ; string
-          Case "#PB_String_BorderLess"              : Flag = Flag | #PB_String_BorderLess
-          Case "#PB_String_LowerCase"               : Flag = Flag | #PB_String_LowerCase
-          Case "#PB_String_MaximumLength"           : Flag = Flag | #PB_String_MaximumLength
-          Case "#PB_String_Numeric"                 : Flag = Flag | #PB_String_Numeric
-          Case "#PB_String_Password"                : Flag = Flag | #PB_String_Password
-          Case "#PB_String_ReadOnly"                : Flag = Flag | #PB_String_ReadOnly
-          Case "#PB_String_UpperCase"               : Flag = Flag | #PB_String_UpperCase
-            ; text
-          Case "#PB_Text_Border"                    : Flag = Flag | #PB_Text_Border
-          Case "#PB_Text_Center"                    : Flag = Flag | #PB_Text_Center
-          Case "#PB_Text_Right"                     : Flag = Flag | #PB_Text_Right
-            ; option
-            ; checkbox
-          Case "#PB_CheckBox_Center"                : Flag = Flag | #PB_CheckBox_Center
-          Case "#PB_CheckBox_Right"                 : Flag = Flag | #PB_CheckBox_Right
-          Case "#PB_CheckBox_ThreeState"            : Flag = Flag | #PB_CheckBox_ThreeState
-            ; listview
-          Case "#PB_ListView_ClickSelect"           : Flag = Flag | #PB_ListView_ClickSelect
-          Case "#PB_ListView_MultiSelect"           : Flag = Flag | #PB_ListView_MultiSelect
-            ; frame
-          Case "#PB_Frame_Double"                   : Flag = Flag | #PB_Frame_Double
-          Case "#PB_Frame_Flat"                     : Flag = Flag | #PB_Frame_Flat
-          Case "#PB_Frame_Single"                   : Flag = Flag | #PB_Frame_Single
-            ; combobox
-          Case "#PB_ComboBox_Editable"              : Flag = Flag | #PB_ComboBox_Editable
-          Case "#PB_ComboBox_Image"                 : Flag = Flag | #PB_ComboBox_Image
-          Case "#PB_ComboBox_LowerCase"             : Flag = Flag | #PB_ComboBox_LowerCase
-          Case "#PB_ComboBox_UpperCase"             : Flag = Flag | #PB_ComboBox_UpperCase
-            ; image 
-          Case "#PB_Image_Border"                   : Flag = Flag | #PB_Image_Border
-          Case "#PB_Image_Raised"                   : Flag = Flag | #PB_Image_Raised
-            ; hyperlink 
-          Case "#PB_HyperLink_Underline"            : Flag = Flag | #PB_HyperLink_Underline
-            ; container 
-          Case "#PB_Container_BorderLess"           : Flag = Flag | #PB_Container_BorderLess
-          Case "#PB_Container_Double"               : Flag = Flag | #PB_Container_Double
-          Case "#PB_Container_Flat"                 : Flag = Flag | #PB_Container_Flat
-          Case "#PB_Container_Raised"               : Flag = Flag | #PB_Container_Raised
-          Case "#PB_Container_Single"               : Flag = Flag | #PB_Container_Single
-            ; listicon
-          Case "#PB_ListIcon_AlwaysShowSelection"   : Flag = Flag | #PB_ListIcon_AlwaysShowSelection
-          Case "#PB_ListIcon_CheckBoxes"            : Flag = Flag | #PB_ListIcon_CheckBoxes
-          Case "#PB_ListIcon_ColumnWidth"           : Flag = Flag | #PB_ListIcon_ColumnWidth
-          Case "#PB_ListIcon_DisplayMode"           : Flag = Flag | #PB_ListIcon_DisplayMode
-          Case "#PB_ListIcon_GridLines"             : Flag = Flag | #PB_ListIcon_GridLines
-          Case "#PB_ListIcon_FullRowSelect"         : Flag = Flag | #PB_ListIcon_FullRowSelect
-          Case "#PB_ListIcon_HeaderDragDrop"        : Flag = Flag | #PB_ListIcon_HeaderDragDrop
-          Case "#PB_ListIcon_LargeIcon"             : Flag = Flag | #PB_ListIcon_LargeIcon
-          Case "#PB_ListIcon_List"                  : Flag = Flag | #PB_ListIcon_List
-          Case "#PB_ListIcon_MultiSelect"           : Flag = Flag | #PB_ListIcon_MultiSelect
-          Case "#PB_ListIcon_Report"                : Flag = Flag | #PB_ListIcon_Report
-          Case "#PB_ListIcon_SmallIcon"             : Flag = Flag | #PB_ListIcon_SmallIcon
-          Case "#PB_ListIcon_ThreeState"            : Flag = Flag | #PB_ListIcon_ThreeState
-            ; ipaddress
-            ; progressbar 
-          Case "#PB_ProgressBar_Smooth"             : Flag = Flag | #PB_ProgressBar_Smooth
-          Case "#PB_ProgressBar_Vertical"           : Flag = Flag | #PB_ProgressBar_Vertical
-            ; scrollbar 
-          Case "#PB_ScrollBar_Vertical"             : Flag = Flag | #PB_ScrollBar_Vertical
-            ; scrollarea 
-          Case "#PB_ScrollArea_BorderLess"          : Flag = Flag | #PB_ScrollArea_BorderLess
-          Case "#PB_ScrollArea_Center"              : Flag = Flag | #PB_ScrollArea_Center
-          Case "#PB_ScrollArea_Flat"                : Flag = Flag | #PB_ScrollArea_Flat
-          Case "#PB_ScrollArea_Raised"              : Flag = Flag | #PB_ScrollArea_Raised
-          Case "#PB_ScrollArea_Single"              : Flag = Flag | #PB_ScrollArea_Single
-            ; trackbar
-          Case "#PB_TrackBar_Ticks"                 : Flag = Flag | #PB_TrackBar_Ticks
-          Case "#PB_TrackBar_Vertical"              : Flag = Flag | #PB_TrackBar_Vertical
-            ; web
-            ; calendar
-          Case "#PB_Calendar_Borderless"            : Flag = Flag | #PB_Calendar_Borderless
-            
-            ; date
-          Case "#PB_Date_CheckBox"                  : Flag = Flag | #PB_Date_CheckBox
-          Case "#PB_Date_UpDown"                    : Flag = Flag | #PB_Date_UpDown
-            
-            ; editor
-          Case "#PB_Editor_ReadOnly"                : Flag = Flag | #PB_Editor_ReadOnly
-          Case "#PB_Editor_WordWrap"                : Flag = Flag | #PB_Editor_WordWrap
-            
-            ; explorerlist
-          Case "#PB_Explorer_BorderLess"            : Flag = Flag | #PB_Explorer_BorderLess          ; Создать гаджет без границ.
-          Case "#PB_Explorer_AlwaysShowSelection"   : Flag = Flag | #PB_Explorer_AlwaysShowSelection ; Выделение отображается даже если гаджет не активирован.
-          Case "#PB_Explorer_MultiSelect"           : Flag = Flag | #PB_Explorer_MultiSelect         ; Разрешить множественное выделение элементов в гаджете.
-          Case "#PB_Explorer_GridLines"             : Flag = Flag | #PB_Explorer_GridLines           ; Отображать разделительные линии между строками и колонками.
-          Case "#PB_Explorer_HeaderDragDrop"        : Flag = Flag | #PB_Explorer_HeaderDragDrop      ; В режиме таблицы заголовки можно перетаскивать (Drag'n'Drop).
-          Case "#PB_Explorer_FullRowSelect"         : Flag = Flag | #PB_Explorer_FullRowSelect       ; Выделение охватывает всю строку, а не первую колонку.
-          Case "#PB_Explorer_NoFiles"               : Flag = Flag | #PB_Explorer_NoFiles             ; Не показывать файлы.
-          Case "#PB_Explorer_NoFolders"             : Flag = Flag | #PB_Explorer_NoFolders           ; Не показывать каталоги.
-          Case "#PB_Explorer_NoParentFolder"        : Flag = Flag | #PB_Explorer_NoParentFolder      ; Не показывать ссылку на родительский каталог [..].
-          Case "#PB_Explorer_NoDirectoryChange"     : Flag = Flag | #PB_Explorer_NoDirectoryChange   ; Пользователь не может сменить директорию.
-          Case "#PB_Explorer_NoDriveRequester"      : Flag = Flag | #PB_Explorer_NoDriveRequester    ; Не показывать запрос 'пожалуйста, вставьте диск X:'.
-          Case "#PB_Explorer_NoSort"                : Flag = Flag | #PB_Explorer_NoSort              ; Пользователь не может сортировать содержимое по клику на заголовке колонки.
-          Case "#PB_Explorer_AutoSort"              : Flag = Flag | #PB_Explorer_AutoSort            ; Содержимое автоматически упорядочивается по имени.
-          Case "#PB_Explorer_HiddenFiles"           : Flag = Flag | #PB_Explorer_HiddenFiles         ; Будет отображать скрытые файлы (поддерживается только в Linux и OS X).
-          Case "#PB_Explorer_NoMyDocuments"         : Flag = Flag | #PB_Explorer_NoMyDocuments       ; Не показывать каталог 'Мои документы' в виде отдельного элемента.
-            
-            ; explorercombo
-          Case "#PB_Explorer_DrivesOnly"            : Flag = Flag | #PB_Explorer_DrivesOnly          ; Гаджет будет отображать только диски, которые вы можете выбрать.
-          Case "#PB_Explorer_Editable"              : Flag = Flag | #PB_Explorer_Editable            ; Гаджет будет доступен для редактирования с функцией автозаполнения.  			      С этим флагом он действует точно так же, как тот что в Windows Explorer.
-            
-            ; explorertree
-          Case "#PB_Explorer_NoLines"               : Flag = Flag | #PB_Explorer_NoLines             ; Скрыть линии, соединяющие узлы дерева.
-          Case "#PB_Explorer_NoButtons"             : Flag = Flag | #PB_Explorer_NoButtons           ; Скрыть кнопки разворачивания узлов в виде символов '+'.
-            
-            ; spin
-          Case "#PB_Explorer_Type"                  : Flag = Flag | #PB_Spin_Numeric
-          Case "#PB_Explorer_Type"                  : Flag = Flag | #PB_Spin_ReadOnly
-            ; tree
-          Case "#PB_Tree_AlwaysShowSelection"       : Flag = Flag | #PB_Tree_AlwaysShowSelection
-          Case "#PB_Tree_CheckBoxes"                : Flag = Flag | #PB_Tree_CheckBoxes
-          Case "#PB_Tree_NoButtons"                 : Flag = Flag | #PB_Tree_NoButtons
-          Case "#PB_Tree_NoLines"                   : Flag = Flag | #PB_Tree_NoLines
-          Case "#PB_Tree_ThreeState"                : Flag = Flag | #PB_Tree_ThreeState
-            ; panel
-            ; splitter
-          Case "#PB_Splitter_Separator"             : Flag = Flag | #PB_Splitter_Separator
-          Case "#PB_Splitter_Vertical"              : Flag = Flag | #PB_Splitter_Vertical
-          Case "#PB_Splitter_FirstFixed"            : Flag = Flag | #PB_Splitter_FirstFixed
-          Case "#PB_Splitter_SecondFixed"           : Flag = Flag | #PB_Splitter_SecondFixed
-            ; mdi
-          Case "#PB_MDI_AutoSize"                   : Flag = Flag | #PB_MDI_AutoSize
-          Case "#PB_MDI_BorderLess"                 : Flag = Flag | #PB_MDI_BorderLess
-          Case "#PB_MDI_NoScrollBars"               : Flag = Flag | #PB_MDI_NoScrollBars
-            ; scintilla
-            ; shortcut
-            ; canvas
-          Case "#PB_Canvas_Border"                  : Flag = Flag | #PB_Canvas_Border
-          Case "#PB_Canvas_ClipMouse"               : Flag = Flag | #PB_Canvas_ClipMouse
-          Case "#PB_Canvas_Container"               : Flag = Flag | #PB_Canvas_Container
-          Case "#PB_Canvas_DrawFocus"               : Flag = Flag | #PB_Canvas_DrawFocus
-          Case "#PB_Canvas_Keyboard"                : Flag = Flag | #PB_Canvas_Keyboard
-        EndSelect
-        
-      Next
+    If Flag_Value
+      
+      Select Flag_Value
+          ; window
+        Case #PB_Window_BorderLess              : Flag = Flag +"|#PB_Window_BorderLess"
+        Case #PB_Window_Invisible               : Flag = Flag +"|#PB_Window_Invisible"
+        Case #PB_Window_Maximize                : Flag = Flag +"|#PB_Window_Maximize"
+        Case #PB_Window_Minimize                : Flag = Flag +"|#PB_Window_Minimize"
+        Case #PB_Window_MaximizeGadget          : Flag = Flag +"|#PB_Window_MaximizeGadget"
+        Case #PB_Window_MinimizeGadget          : Flag = Flag +"|#PB_Window_MinimizeGadget"
+        Case #PB_Window_NoActivate              : Flag = Flag +"|#PB_Window_NoActivate"
+        Case #PB_Window_NoGadgets               : Flag = Flag +"|#PB_Window_NoGadgets"
+        Case #PB_Window_SizeGadget              : Flag = Flag +"|#PB_Window_SizeGadget"
+        Case #PB_Window_SystemMenu              : Flag = Flag +"|#PB_Window_SystemMenu"
+        Case #PB_Window_TitleBar                : Flag = Flag +"|#PB_Window_TitleBar"
+        Case #PB_Window_Tool                    : Flag = Flag +"|#PB_Window_Tool"
+        Case #PB_Window_ScreenCentered          : Flag = Flag +"|#PB_Window_ScreenCentered"
+        Case #PB_Window_WindowCentered          : Flag = Flag +"|#PB_Window_WindowCentered"
+          ; buttonimage 
+        Case #PB_Button_Image                   : Flag = Flag +"|#PB_Button_Image"
+        Case #PB_Button_PressedImage            : Flag = Flag +"|#PB_Button_PressedImage"
+          ; button  
+        Case #PB_Button_Default                 : Flag = Flag +"|#PB_Button_Default"
+        Case #PB_Button_Left                    : Flag = Flag +"|#PB_Button_Left"
+        Case #PB_Button_MultiLine               : Flag = Flag +"|#PB_Button_MultiLine"
+        Case #PB_Button_Right                   : Flag = Flag +"|#PB_Button_Right"
+        Case #PB_Button_Toggle                  : Flag = Flag +"|#PB_Button_Toggle"
+          ; string
+        Case #PB_String_BorderLess              : Flag = Flag +"|#PB_String_BorderLess"
+        Case #PB_String_LowerCase               : Flag = Flag +"|#PB_String_LowerCase"
+        Case #PB_String_MaximumLength           : Flag = Flag +"|#PB_String_MaximumLength"
+        Case #PB_String_Numeric                 : Flag = Flag +"|#PB_String_Numeric"
+        Case #PB_String_Password                : Flag = Flag +"|#PB_String_Password"
+        Case #PB_String_ReadOnly                : Flag = Flag +"|#PB_String_ReadOnly"
+        Case #PB_String_UpperCase               : Flag = Flag +"|#PB_String_UpperCase"
+          ; text
+        Case #PB_Text_Border                    : Flag = Flag +"|#PB_Text_Border"
+        Case #PB_Text_Center                    : Flag = Flag +"|#PB_Text_Center"
+        Case #PB_Text_Right                     : Flag = Flag +"|#PB_Text_Right"
+          ; option
+          ; checkbox
+        Case #PB_CheckBox_Center                : Flag = Flag +"|#PB_CheckBox_Center"
+        Case #PB_CheckBox_Right                 : Flag = Flag +"|#PB_CheckBox_Right"
+        Case #PB_CheckBox_ThreeState            : Flag = Flag +"|#PB_CheckBox_ThreeState"
+          ; listview
+        Case #PB_ListView_ClickSelect           : Flag = Flag +"|#PB_ListView_ClickSelect"
+        Case #PB_ListView_MultiSelect           : Flag = Flag +"|#PB_ListView_MultiSelect"
+          ; frame
+        Case #PB_Frame_Double                   : Flag = Flag +"|#PB_Frame_Double"
+        Case #PB_Frame_Flat                     : Flag = Flag +"|#PB_Frame_Flat"
+        Case #PB_Frame_Single                   : Flag = Flag +"|#PB_Frame_Single"
+          ; combobox
+        Case #PB_ComboBox_Editable              : Flag = Flag +"|#PB_ComboBox_Editable"
+        Case #PB_ComboBox_Image                 : Flag = Flag +"|#PB_ComboBox_Image"
+        Case #PB_ComboBox_LowerCase             : Flag = Flag +"|#PB_ComboBox_LowerCase"
+        Case #PB_ComboBox_UpperCase             : Flag = Flag +"|#PB_ComboBox_UpperCase"
+          ; image 
+        Case #PB_Image_Border                   : Flag = Flag +"|#PB_Image_Border"
+        Case #PB_Image_Raised                   : Flag = Flag +"|#PB_Image_Raised"
+          ; hyperlink 
+        Case #PB_HyperLink_Underline            : Flag = Flag +"|#PB_HyperLink_Underline"
+          ; container 
+        Case #PB_Container_BorderLess           : Flag = Flag +"|#PB_Container_BorderLess"
+        Case #PB_Container_Double               : Flag = Flag +"|#PB_Container_Double"
+        Case #PB_Container_Flat                 : Flag = Flag +"|#PB_Container_Flat"
+        Case #PB_Container_Raised               : Flag = Flag +"|#PB_Container_Raised"
+        Case #PB_Container_Single               : Flag = Flag +"|#PB_Container_Single"
+          ; listicon
+        Case #PB_ListIcon_AlwaysShowSelection   : Flag = Flag +"|#PB_ListIcon_AlwaysShowSelection"
+        Case #PB_ListIcon_CheckBoxes            : Flag = Flag +"|#PB_ListIcon_CheckBoxes"
+        Case #PB_ListIcon_ColumnWidth           : Flag = Flag +"|#PB_ListIcon_ColumnWidth"
+        Case #PB_ListIcon_DisplayMode           : Flag = Flag +"|#PB_ListIcon_DisplayMode"
+        Case #PB_ListIcon_GridLines             : Flag = Flag +"|#PB_ListIcon_GridLines"
+        Case #PB_ListIcon_FullRowSelect         : Flag = Flag +"|#PB_ListIcon_FullRowSelect"
+        Case #PB_ListIcon_HeaderDragDrop        : Flag = Flag +"|#PB_ListIcon_HeaderDragDrop"
+        Case #PB_ListIcon_LargeIcon             : Flag = Flag +"|#PB_ListIcon_LargeIcon"
+        Case #PB_ListIcon_List                  : Flag = Flag +"|#PB_ListIcon_List"
+        Case #PB_ListIcon_MultiSelect           : Flag = Flag +"|#PB_ListIcon_MultiSelect"
+        Case #PB_ListIcon_Report                : Flag = Flag +"|#PB_ListIcon_Report"
+        Case #PB_ListIcon_SmallIcon             : Flag = Flag +"|#PB_ListIcon_SmallIcon"
+        Case #PB_ListIcon_ThreeState            : Flag = Flag +"|#PB_ListIcon_ThreeState"
+          ; ipaddress
+          ; progressbar 
+        Case #PB_ProgressBar_Smooth             : Flag = Flag +"|#PB_ProgressBar_Smooth"
+        Case #PB_ProgressBar_Vertical           : Flag = Flag +"|#PB_ProgressBar_Vertical"
+          ; scrollbar 
+        Case #PB_ScrollBar_Vertical             : Flag = Flag +"|#PB_ScrollBar_Vertical"
+          ; scrollarea 
+        Case #PB_ScrollArea_BorderLess          : Flag = Flag +"|#PB_ScrollArea_BorderLess"
+        Case #PB_ScrollArea_Center              : Flag = Flag +"|#PB_ScrollArea_Center"
+        Case #PB_ScrollArea_Flat                : Flag = Flag +"|#PB_ScrollArea_Flat"
+        Case #PB_ScrollArea_Raised              : Flag = Flag +"|#PB_ScrollArea_Raised"
+        Case #PB_ScrollArea_Single              : Flag = Flag +"|#PB_ScrollArea_Single"
+          ; trackbar
+        Case #PB_TrackBar_Ticks                 : Flag = Flag +"|#PB_TrackBar_Ticks"
+        Case #PB_TrackBar_Vertical              : Flag = Flag +"|#PB_TrackBar_Vertical"
+          ; web
+          ; calendar
+        Case #PB_Calendar_Borderless            : Flag = Flag +"|#PB_Calendar_Borderless"
+          
+          ; date
+        Case #PB_Date_CheckBox                  : Flag = Flag +"|#PB_Date_CheckBox"
+        Case #PB_Date_UpDown                    : Flag = Flag +"|#PB_Date_UpDown"
+          
+          ; editor
+        Case #PB_Editor_ReadOnly                : Flag = Flag +"|#PB_Editor_ReadOnly"
+        Case #PB_Editor_WordWrap                : Flag = Flag +"|#PB_Editor_WordWrap"
+          
+          ; explorerlist
+        Case #PB_Explorer_BorderLess            : Flag = Flag +"|#PB_Explorer_BorderLess"          ; Создать гаджет без границ.
+        Case #PB_Explorer_AlwaysShowSelection   : Flag = Flag +"|#PB_Explorer_AlwaysShowSelection" ; Выделение отображается даже если гаджет не активирован.
+        Case #PB_Explorer_MultiSelect           : Flag = Flag +"|#PB_Explorer_MultiSelect"         ; Разрешить множественное выделение элементов в гаджете.
+        Case #PB_Explorer_GridLines             : Flag = Flag +"|#PB_Explorer_GridLines"           ; Отображать разделительные линии между строками и колонками.
+        Case #PB_Explorer_HeaderDragDrop        : Flag = Flag +"|#PB_Explorer_HeaderDragDrop"      ; В режиме таблицы заголовки можно перетаскивать (Drag'n'Drop).
+        Case #PB_Explorer_FullRowSelect         : Flag = Flag +"|#PB_Explorer_FullRowSelect"       ; Выделение охватывает всю строку, а не первую колонку.
+        Case #PB_Explorer_NoFiles               : Flag = Flag +"|#PB_Explorer_NoFiles"             ; Не показывать файлы.
+        Case #PB_Explorer_NoFolders             : Flag = Flag +"|#PB_Explorer_NoFolders"           ; Не показывать каталоги.
+        Case #PB_Explorer_NoParentFolder        : Flag = Flag +"|#PB_Explorer_NoParentFolder"      ; Не показывать ссылку на родительский каталог [..].
+        Case #PB_Explorer_NoDirectoryChange     : Flag = Flag +"|#PB_Explorer_NoDirectoryChange"   ; Пользователь не может сменить директорию.
+        Case #PB_Explorer_NoDriveRequester      : Flag = Flag +"|#PB_Explorer_NoDriveRequester"    ; Не показывать запрос 'пожалуйста, вставьте диск X:'.
+        Case #PB_Explorer_NoSort                : Flag = Flag +"|#PB_Explorer_NoSort"              ; Пользователь не может сортировать содержимое по клику на заголовке колонки.
+        Case #PB_Explorer_AutoSort              : Flag = Flag +"|#PB_Explorer_AutoSort"            ; Содержимое автоматически упорядочивается по имени.
+        Case #PB_Explorer_HiddenFiles           : Flag = Flag +"|#PB_Explorer_HiddenFiles"         ; Будет отображать скрытые файлы (поддерживается только в Linux и OS X).
+        Case #PB_Explorer_NoMyDocuments         : Flag = Flag +"|#PB_Explorer_NoMyDocuments"       ; Не показывать каталог 'Мои документы' в виде отдельного элемента.
+          
+          ; explorercombo
+        Case #PB_Explorer_DrivesOnly            : Flag = Flag +"|#PB_Explorer_DrivesOnly"          ; Гаджет будет отображать только диски, которые вы можете выбрать.
+        Case #PB_Explorer_Editable              : Flag = Flag +"|#PB_Explorer_Editable"            ; Гаджет будет доступен для редактирования с функцией автозаполнения.  			      С этим флагом он действует точно так же, как тот что в Windows Explorer.
+          
+          ; explorertree
+        Case #PB_Explorer_NoLines               : Flag = Flag +"|#PB_Explorer_NoLines"             ; Скрыть линии, соединяющие узлы дерева.
+        Case #PB_Explorer_NoButtons             : Flag = Flag +"|#PB_Explorer_NoButtons"           ; Скрыть кнопки разворачивания узлов в виде символов '+'.
+          
+          ; spin
+        Case #PB_Spin_Numeric                   : Flag = Flag +"|#PB_Spin_Numeric"
+        Case #PB_Spin_ReadOnly                  : Flag = Flag +"|#PB_Spin_ReadOnly"
+          
+          ; tree
+        Case #PB_Tree_AlwaysShowSelection       : Flag = Flag +"|#PB_Tree_AlwaysShowSelection"
+        Case #PB_Tree_CheckBoxes                : Flag = Flag +"|#PB_Tree_CheckBoxes"
+        Case #PB_Tree_NoButtons                 : Flag = Flag +"|#PB_Tree_NoButtons"
+        Case #PB_Tree_NoLines                   : Flag = Flag +"|#PB_Tree_NoLines"
+        Case #PB_Tree_ThreeState                : Flag = Flag +"|#PB_Tree_ThreeState"
+          ; panel
+          ; splitter
+        Case #PB_Splitter_Separator             : Flag = Flag +"|#PB_Splitter_Separator"
+        Case #PB_Splitter_Vertical              : Flag = Flag +"|#PB_Splitter_Vertical"
+        Case #PB_Splitter_FirstFixed            : Flag = Flag +"|#PB_Splitter_FirstFixed"
+        Case #PB_Splitter_SecondFixed           : Flag = Flag +"|#PB_Splitter_SecondFixed"
+          ; mdi
+        Case #PB_MDI_AutoSize                   : Flag = Flag +"|#PB_MDI_AutoSize"
+        Case #PB_MDI_BorderLess                 : Flag = Flag +"|#PB_MDI_BorderLess"
+        Case #PB_MDI_NoScrollBars               : Flag = Flag +"|#PB_MDI_NoScrollBars"
+          ; scintilla
+          ; shortcut
+          ; canvas
+        Case #PB_Canvas_Border                  : Flag = Flag +"|#PB_Canvas_Border"
+        Case #PB_Canvas_ClipMouse               : Flag = Flag +"|#PB_Canvas_ClipMouse"
+        Case #PB_Canvas_Container               : Flag = Flag +"|#PB_Canvas_Container"
+        Case #PB_Canvas_DrawFocus               : Flag = Flag +"|#PB_Canvas_DrawFocus"
+        Case #PB_Canvas_Keyboard                : Flag = Flag +"|#PB_Canvas_Keyboard"
+      EndSelect
+      
     EndIf
     
     ProcedureReturn Flag
   EndProcedure
   
+EndModule
+
+
+;- >>>> Example demo
+CompilerIf #PB_Compiler_IsMainFile
+  EnableExplicit
+  
+  Procedure Create( Object, Type$, Caption$="",Width=200,Height=100, X=5,Y=5, Param1=0, Param2=1, Param3=1000, Flag=0)
+    Protected a
+    
+    Select Type$
+      Case "OpenWindow"          : OpenWindow          (Object, X,Y,Width,Height, Caption$, Flag) 
+      Case "ButtonGadget"        : ButtonGadget        (Object, X,Y,Width,Height, Caption$, Flag)
+      Case "StringGadget"        : StringGadget        (Object, X,Y,Width,Height, Caption$, Flag)
+      Case "TextGadget"          : TextGadget          (Object, X,Y,Width,Height, Caption$, Flag)
+      Case "CheckBoxGadget"      : CheckBoxGadget      (Object, X,Y,Width,Height, Caption$, Flag)
+      Case "OptionGadget"        : OptionGadget        (Object, X,Y,Width,Height, Caption$)
+      Case "ListViewGadget"      : ListViewGadget      (Object, X,Y,Width,Height, Flag)
+        For a = 1 To 12
+          AddGadgetItem (Object, -1, "Элемент  " + Str(a) + "  Списка") ; Определить содержимое списка.
+        Next
+        SetGadgetState(Object, 9) ; Установить (начиная с 0) десятый элемент как активный.
+        
+      Case "FrameGadget"         : FrameGadget         (Object, X,Y,Width,Height, Caption$, Flag)
+      Case "ComboBoxGadget"      : ComboBoxGadget      (Object, X,Y,Width,Height, Flag)
+      Case "ImageGadget"         : ImageGadget         (Object, X,Y,Width,Height, Param1, Flag)
+      Case "HyperLinkGadget"     : HyperLinkGadget     (Object, X,Y,Width,Height, Caption$, Param1, Flag)
+      Case "ContainerGadget"     : ContainerGadget     (Object, X,Y,Width,Height, Flag) : CloseGadgetList()
+      Case "ListIconGadget"      : ListIconGadget      (Object, X,Y,Width,Height, Caption$, Param1, Flag)
+        AddGadgetColumn(Object, 0, "Name", 100)
+        AddGadgetColumn(Object, 1, "Address", 250)
+        AddGadgetItem(Object, -1, "Harry Rannit"+Chr(10)+"12 Parliament Way, Battle Street, By the Bay")
+        AddGadgetItem(Object, -1, "Ginger Brokeit"+Chr(10)+"130 PureBasic Road, BigTown, CodeCity")
+        
+      Case "IPAddressGadget"     : IPAddressGadget     (Object, X,Y,Width,Height)
+      Case "ProgressBarGadget"   : ProgressBarGadget   (Object, X,Y,Width,Height, Param1, Param2+100, Flag)
+        SetGadgetState   (Object, 50)  
+        
+      Case "ScrollBarGadget"     : ScrollBarGadget     (Object, X,Y,Width,Height, Param1, Param2, Param3, Flag)
+      Case "ScrollAreaGadget"    : ScrollAreaGadget    (Object, X,Y,Width,Height, Param1, Param2, Param3, Flag)  : CloseGadgetList()
+      Case "TrackBarGadget"      : TrackBarGadget      (Object, X,Y,Width,Height, Param1, Param2, Flag)
+        ;       Case "WebGadget"           : WebGadget           (Object, X,Y,Width,Height, Caption$)
+      Case "ButtonImageGadget"   : ButtonImageGadget   (Object, X,Y,Width,Height, Param1, Flag)
+      Case "CalendarGadget"      : CalendarGadget      (Object, X,Y,Width,Height, Param1, Flag)
+      Case "DateGadget"          : DateGadget          (Object, X,Y,Width,Height, Caption$, Param1, Flag)
+      Case "EditorGadget"        : EditorGadget        (Object, X,Y,Width,Height, Flag)
+        For a = 0 To 5
+          AddGadgetItem(Object, a, "Строка "+Str(a))
+        Next
+        
+      Case "ExplorerListGadget"  : ExplorerListGadget  (Object, X,Y,Width,Height, Caption$, Flag)
+      Case "ExplorerTreeGadget"  : ExplorerTreeGadget  (Object, X,Y,Width,Height, Caption$, Flag)
+      Case "ExplorerComboGadget" : ExplorerComboGadget (Object, X,Y,Width,Height, Caption$, Flag)
+      Case "SpinGadget"          : SpinGadget          (Object, X,Y,Width,Height, Param1, Param2, Flag)
+      Case "TreeGadget"          : TreeGadget          (Object, X,Y,Width,Height, Flag)
+      Case "PanelGadget"         : PanelGadget         (Object, X,Y,Width,Height)  : CloseGadgetList()
+      Case "SplitterGadget"      
+        If IsGadget(Param1) And IsGadget(Param2)
+          SplitterGadget      (Object, X,Y,Width,Height, Param1, Param2, Flag)
+        EndIf
+      Case "MDIGadget"          
+        CompilerIf #PB_Compiler_OS = #PB_OS_Windows
+          MDIGadget           (Object, X,Y,Width,Height, Param1, Param2, Flag) 
+        CompilerEndIf
+      Case "ScintillaGadget"     : ScintillaGadget     (Object, X,Y,Width,Height, Param1)
+      Case "ShortcutGadget"      : ShortcutGadget      (Object, X,Y,Width,Height, Param1)
+      Case "CanvasGadget"        : CanvasGadget        (Object, X,Y,Width,Height, Flag)
+    EndSelect
+  EndProcedure  
+  
+  
+  Macro GetPBFlags( _type_= ) : Flag::Gets(_type_) : EndMacro
+  Macro GetPBFlag(_flag_str_) : Flag::Value(_flag_str_) : EndMacro
   
   Macro GetWindowFlag(Window) : Flag::GetWindow(Window) : EndMacro
   Macro SetWindowFlag(Window, Flag) : Flag::SetWindow(Window, Flag) : EndMacro
@@ -1972,7 +2595,7 @@ CompilerIf #PB_Compiler_IsMainFile
   AddGadgetItem( Combo, -1, "Canvas")    ;Ok
   
   SetGadgetState( Combo, 0)
-  Text.S = GetPBFlags(GetGadgetState(Combo))
+  Text.S = GetPBFlags()
   
   Tree = TreeGadget(#PB_Any, 5,45,290,230, #PB_Tree_NoLines|#PB_Tree_NoButtons|#PB_Tree_CheckBoxes) 
   ClearGadgetItems(Tree)
@@ -2040,7 +2663,7 @@ CompilerIf #PB_Compiler_IsMainFile
             
           Case Tree
             Select EventType()
-              Case #PB_EventType_Change
+              Case #PB_EventType_LeftClick 
                 i=GetGadgetState(Tree)
                 Flag.q = GetPBFlag(GetGadgetItemText(Tree, i))
                 
@@ -2064,3 +2687,9 @@ CompilerIf #PB_Compiler_IsMainFile
     EndSelect
   ForEver 
 CompilerEndIf
+
+; IDE Options = PureBasic 5.60 (Linux - x86)
+; CursorPosition = 1398
+; FirstLine = 1388
+; Folding = -----------------------------------------------------------------------------------
+; EnableXP

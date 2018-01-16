@@ -791,7 +791,7 @@ Module Transformation
     Protected *Cursors.DataBuffer = ?CursorsBuffer
     Protected ID.i, I.i, UseGadgetList.i
     
-    If IsGadget(Parent)
+    If IsGadget(Parent) And GadgetType(Parent) <> #PB_GadgetType_MDI
       OpenGadgetList(Parent, Item)
     ElseIf IsWindow(Parent)
       UseGadgetList = UseGadgetList(WindowID(Parent))
@@ -903,7 +903,7 @@ Module Transformation
       EndIf
     EndIf
     
-    If IsGadget(Parent)
+    If IsGadget(Parent) And GadgetType(Parent) <> #PB_GadgetType_MDI
       CloseGadgetList()
     ElseIf IsWindow(Parent)
       UseGadgetList(UseGadgetList)
