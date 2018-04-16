@@ -724,16 +724,16 @@ Structure S_CREATE_ELEMENT Extends S_COORDINATES
   Shortcut.i
   
   *Blink
-  *FixCorrectorPos
-  *CorrectorPos
+  *FixCaretPos
+  *CaretPos
   *CursorLength ; Selected text length ; Выбранная длина текста
   *CursorColor
   *Selected1
   *TextPos
   
   
-  *CorrectorMovePos
-  *CorrectorFixPos
+  *CaretPosMoved
+  *CaretPosFixed
   *IsTextSelected
   ;Text\Selected.S
   
@@ -7148,10 +7148,10 @@ Procedure CreateElement(Type, Element, X,Y,Width,Height,Text$ = "",Param1 =- 1,P
       
       
       \This()\OptionGroup =- 1
-      \This()\CorrectorPos =- 1
+      \This()\CaretPos =- 1
       \This()\CursorLength =- 1
-      \This()\CorrectorFixPos =- 1
-      \This()\CorrectorMovePos =- 1
+      \This()\CaretPosFixed =- 1
+      \This()\CaretPosMoved =- 1
       
       
       \This()\Type   = Type
@@ -8885,13 +8885,13 @@ Procedure DrawContent(List This.S_CREATE_ELEMENT(), X = 0,Y = 0,Width = 0,Height
     If Text$
       \TextPos = Txt_X
       Protected Area = iWidth - (4+2)
-      Protected cptWidth = TextWidth(Left(Text$, \CorrectorPos)) - 2
-      Protected LeftText$ = Left(Text$, \CorrectorMovePos)
-      Protected RightText$ = Mid(Text$, \CorrectorMovePos +1+ Len(\Text\Selected$))
+      Protected cptWidth = TextWidth(Left(Text$, \CaretPos)) - 2
+      Protected LeftText$ = Left(Text$, \CaretPosMoved)
+      Protected RightText$ = Mid(Text$, \CaretPosMoved +1+ Len(\Text\Selected$))
       
       ; Перемещаем корректор
       If ((\Flag & #_Flag_Editable) = #_Flag_Editable) 
-        If \CorrectorPos = 0 : \Text\PosX =- 2 : Else
+        If \CaretPos = 0 : \Text\PosX =- 2 : Else
           If ((Flag & #_Flag_Text_Right) = #_Flag_Text_Right) 
           ElseIf ((Flag & #_Flag_Text_Center) = #_Flag_Text_Center) 
             ;If (cptWidth>Area) And ((cptWidth-Area)>\Text\PosX) : \Text\PosX = (cptWidth-Area) : EndIf
@@ -8903,12 +8903,12 @@ Procedure DrawContent(List This.S_CREATE_ELEMENT(), X = 0,Y = 0,Width = 0,Height
       EndIf
       ;       
       ;FontColor = ContrastColor(HilightColor)
-      ;       If \CorrectorFixPos <> \CorrectorPos
+      ;       If \CaretPosFixed <> \CaretPos
       ;         DrawingMode(#PB_2DDrawing_Outlined) ; 3399FF ; $FFB870
-      ;         Box(Txt_X+(TextWidth(Left(Text$, \CorrectorMovePos))-\Text\PosX), Txt_Y, TextWidth(\Text\Selected$), TextHeight, $FFB870)
+      ;         Box(Txt_X+(TextWidth(Left(Text$, \CaretPosMoved))-\Text\PosX), Txt_Y, TextWidth(\Text\Selected$), TextHeight, $FFB870)
       ;         
       ;         DrawingMode(#PB_2DDrawing_Default) ; 3399FF ; $FFB870
-      ;         Box(Txt_X+(TextWidth(Left(Text$, \CorrectorMovePos))-\Text\PosX)+1, Txt_Y+1, TextWidth(\Text\Selected$)-2, TextHeight-2, $FF9933);) $004589; $114499);)
+      ;         Box(Txt_X+(TextWidth(Left(Text$, \CaretPosMoved))-\Text\PosX)+1, Txt_Y+1, TextWidth(\Text\Selected$)-2, TextHeight-2, $FF9933);) $004589; $114499);)
       ;       EndIf
       
       ; - Здесь происходит разделение текста
@@ -8931,12 +8931,12 @@ Procedure DrawContent(List This.S_CREATE_ELEMENT(), X = 0,Y = 0,Width = 0,Height
           CompilerElse
             HilightColor = $D77800
           CompilerEndIf
-          DrawText(Txt_X + (TextWidth(Left(Text$, \CorrectorMovePos))-\Text\PosX) , Txt_Y, \Text\Selected$, ContrastColor(HilightColor), HilightColor)
+          DrawText(Txt_X + (TextWidth(Left(Text$, \CaretPosMoved))-\Text\PosX) , Txt_Y, \Text\Selected$, ContrastColor(HilightColor), HilightColor)
         EndIf
         
         If RightText$
           DrawingMode(#PB_2DDrawing_Transparent)
-          DrawText(Txt_X + (TextWidth(Left(Text$, \CorrectorMovePos))-\Text\PosX) + TextWidth(\Text\Selected$), Txt_Y, RightText$, FontColor, BackColor)
+          DrawText(Txt_X + (TextWidth(Left(Text$, \CaretPosMoved))-\Text\PosX) + TextWidth(\Text\Selected$), Txt_Y, RightText$, FontColor, BackColor)
         EndIf
         ;         
       EndIf
@@ -8944,12 +8944,12 @@ Procedure DrawContent(List This.S_CREATE_ELEMENT(), X = 0,Y = 0,Width = 0,Height
     EndIf
     
     If ((\Flag & #_Flag_Editable) = #_Flag_Editable) 
-      If \CorrectorPos > =  0 And \Text\Selected$ = "" ; And Property_GadgetTimer( 300 )
+      If \CaretPos > =  0 And \Text\Selected$ = "" ; And Property_GadgetTimer( 300 )
         DrawingMode(#PB_2DDrawing_XOr)                 ; Перерисовка коректора
         If \Text\PosX = (cptWidth-Area)
-          Line((Txt_X-\Text\PosX)+(TextWidth(Left(Text$, \CorrectorPos)))-1, Txt_Y, 1, TextHeight, $FFFFFF)
+          Line((Txt_X-\Text\PosX)+(TextWidth(Left(Text$, \CaretPos)))-1, Txt_Y, 1, TextHeight, $FFFFFF)
         Else
-          Line((Txt_X-\Text\PosX)+(TextWidth(Left(Text$, \CorrectorPos))), Txt_Y, 1, TextHeight, $FFFFFF)
+          Line((Txt_X-\Text\PosX)+(TextWidth(Left(Text$, \CaretPos))), Txt_Y, 1, TextHeight, $FFFFFF)
         EndIf
       EndIf
       
@@ -8957,7 +8957,7 @@ Procedure DrawContent(List This.S_CREATE_ELEMENT(), X = 0,Y = 0,Width = 0,Height
       ; ;       DrawingMode(#PB_2DDrawing_Transparent)
       ; ;       DrawText(Txt_X - \Text\PosX, Txt_Y, Text$, FontColor)
       ; ;       ;DrawingMode(#PB_2DDrawing_AlphaBlend|#PB_2DDrawing_XOr)
-      ; ;       Protected LayoutX,LayoutWidth,Cursor = \CorrectorMovePos, Selection = \CursorLength
+      ; ;       Protected LayoutX,LayoutWidth,Cursor = \CaretPosMoved, Selection = \CursorLength
       ; ;       
       ; ;       If Selection < 0
       ; ;         LayoutX = TextWidth(Left(Text$, Cursor+Selection))-1
@@ -9670,14 +9670,14 @@ Procedure _DrawingElement(List This.S_CREATE_ELEMENT(), X = 0,Y = 0)
 EndProcedure
 
 ;- 
-Procedure GetElementCorrectorPos(Element)
+Procedure GetElementCaretPos(Element)
   Protected Result
   
   With *CreateElement
     PushListPosition(\This())
     ChangeCurrentElement(\This(), ElementID(Element))
     
-    Result = \This()\CorrectorPos ; Получить позицию коpректора
+    Result = \This()\CaretPos ; Получить позицию коpректора
     
     PopListPosition(\This())
   EndWith
@@ -9701,7 +9701,7 @@ Procedure CorrectPos(MouseX, TextPosX, Text$, CorrectPos = 0)
   ProcedureReturn Result
 EndProcedure
 
-Procedure GetCorrectorPos(List This.S_CREATE_ELEMENT())
+Procedure GetCaretPos(List This.S_CREATE_ELEMENT())
   Protected X,Y,Result =- 1, i, CursorX, Distance.f, MinDistance.f = Infinity()
   
   ;   With *CreateElement
@@ -9730,23 +9730,23 @@ Procedure GetCorrectorPos(List This.S_CREATE_ELEMENT())
   ProcedureReturn Result
 EndProcedure
 
-Procedure UpdateCorrector(List This.S_CREATE_ELEMENT())
+Procedure UpdateCaret(List This.S_CREATE_ELEMENT())
   
   With This()
     ; Если выделяем с лева на право
-    If \CorrectorFixPos < \CorrectorPos
-      \CorrectorMovePos = \CorrectorFixPos
-      \CursorLength = \CorrectorPos-\CorrectorFixPos
+    If \CaretPosFixed < \CaretPos
+      \CaretPosMoved = \CaretPosFixed
+      \CursorLength = \CaretPos-\CaretPosFixed
     Else ; Если выделяем с право на лево
-      \CorrectorMovePos = \CorrectorPos
-      \CursorLength = (\CorrectorFixPos-\CorrectorPos)
+      \CaretPosMoved = \CaretPos
+      \CursorLength = (\CaretPosFixed-\CaretPos)
     EndIf
   EndWith
   
 EndProcedure
 
 Procedure StringEditableCallBack(List This.S_CREATE_ELEMENT(), Event, EventElement)
-  Static Text$, DoubleClickCorrectorPos =- 1
+  Static Text$, DoubleClickCaretPos =- 1
   Protected PostEvent, Quit.b, Result, StartDrawing, Update_Text_Selected
   
   If *CreateElement
@@ -9769,11 +9769,11 @@ Procedure StringEditableCallBack(List This.S_CREATE_ELEMENT(), Event, EventEleme
             EndIf
             
             Select Event
-              Case #_Event_LostFocus : \CursorLength =- 1 : \CorrectorPos =- 1 : \CorrectorFixPos =- 1 : \Text\Selected$ = ""
+              Case #_Event_LostFocus : \CursorLength =- 1 : \CaretPos =- 1 : \CaretPosFixed =- 1 : \Text\Selected$ = ""
               Case #_Event_Focus
                 If Not ElementEventButton()
-                  \CorrectorPos = 0 
-                  \CorrectorFixPos = Len(\Text\String$) 
+                  \CaretPos = 0 
+                  \CaretPosFixed = Len(\Text\String$) 
                   Update_Text_Selected = #True
                 EndIf
                 
@@ -9789,16 +9789,16 @@ Procedure StringEditableCallBack(List This.S_CREATE_ELEMENT(), Event, EventEleme
                 
                 If Result
                   If \Text\Selected$
-                    If \CorrectorPos > \CorrectorFixPos : \CorrectorPos = \CorrectorFixPos : EndIf
-                    \Text\String$ = RemoveString(\Text\String$, \Text\Selected$, #PB_String_CaseSensitive, \CorrectorPos, 1)
+                    If \CaretPos > \CaretPosFixed : \CaretPos = \CaretPosFixed : EndIf
+                    \Text\String$ = RemoveString(\Text\String$, \Text\Selected$, #PB_String_CaseSensitive, \CaretPos, 1)
                     \Text\Selected$ = ""
                   EndIf
                   
-                  \CorrectorPos + 1
-                  ;\Text\String$ = Left(\Text\String$, \CorrectorPos-1) + Chr(Result) + Mid(\Text\String$, \CorrectorPos)
-                  \Text\String$ = InsertString(\Text\String$, Chr(Result), \CorrectorPos)
+                  \CaretPos + 1
+                  ;\Text\String$ = Left(\Text\String$, \CaretPos-1) + Chr(Result) + Mid(\Text\String$, \CaretPos)
+                  \Text\String$ = InsertString(\Text\String$, Chr(Result), \CaretPos)
                   
-                  \CorrectorFixPos = \CorrectorPos
+                  \CaretPosFixed = \CaretPos
                 EndIf
                 
                 If ((\Flag & #_Flag_LowerCase) = #_Flag_LowerCase)
@@ -9809,23 +9809,23 @@ Procedure StringEditableCallBack(List This.S_CREATE_ELEMENT(), Event, EventEleme
                 
               Case #_Event_KeyDown
                 Select ElementEventKey()
-                  Case #PB_Shortcut_Home : \CorrectorPos = 0
-                  Case #PB_Shortcut_End : \CorrectorPos = Len(\Text\String$)
-                    Case #PB_Shortcut_Left : \Text\Selected$ = "" : If (\CorrectorPos > 0) : \CorrectorPos - (1) : EndIf
-                    Case #PB_Shortcut_Right : \Text\Selected$ = "" : If (\CorrectorPos < Len(\Text\String$)) : \CorrectorPos + (1) : EndIf
+                  Case #PB_Shortcut_Home : \CaretPos = 0
+                  Case #PB_Shortcut_End : \CaretPos = Len(\Text\String$)
+                    Case #PB_Shortcut_Left : \Text\Selected$ = "" : If (\CaretPos > 0) : \CaretPos - (1) : EndIf
+                    Case #PB_Shortcut_Right : \Text\Selected$ = "" : If (\CaretPos < Len(\Text\String$)) : \CaretPos + (1) : EndIf
                   Case #PB_Shortcut_Back 
                     Protected Blink_Text$
                     
                     If \Text\Selected$
-                      If \CorrectorPos > \CorrectorFixPos : \CorrectorPos = \CorrectorFixPos : EndIf
-                      \Text\String$ = RemoveString(\Text\String$, \Text\Selected$, #PB_String_CaseSensitive, \CorrectorPos, 1)
+                      If \CaretPos > \CaretPosFixed : \CaretPos = \CaretPosFixed : EndIf
+                      \Text\String$ = RemoveString(\Text\String$, \Text\Selected$, #PB_String_CaseSensitive, \CaretPos, 1)
                       Blink_Text$ = \Text\Selected$
                       \Text\Selected$ = ""
                     Else
-                      If \CorrectorPos > 0
-                        Blink_Text$ = Mid(\Text\String$, \CorrectorPos, 1)
-                        \Text\String$ = Left(\Text\String$, \CorrectorPos - 1) + Right(\Text\String$, Len(\Text\String$)-\CorrectorPos)
-                        \CorrectorPos - 1 
+                      If \CaretPos > 0
+                        Blink_Text$ = Mid(\Text\String$, \CaretPos, 1)
+                        \Text\String$ = Left(\Text\String$, \CaretPos - 1) + Right(\Text\String$, Len(\Text\String$)-\CaretPos)
+                        \CaretPos - 1 
                       EndIf
                     EndIf
                     
@@ -9833,7 +9833,7 @@ Procedure StringEditableCallBack(List This.S_CREATE_ELEMENT(), Event, EventEleme
                       \Text\PosX - TextWidth(Blink_Text$) : If \Text\PosX < -2 : \Text\PosX =- 2 : EndIf
                     EndIf
                     
-                    \CorrectorFixPos = \CorrectorPos
+                    \CaretPosFixed = \CaretPos
                     
                   Case #PB_Shortcut_C
                     If (ElementEventModifiersKey() & #PB_Canvas_Control)
@@ -9843,16 +9843,16 @@ Procedure StringEditableCallBack(List This.S_CREATE_ELEMENT(), Event, EventEleme
                   Case #PB_Shortcut_V
                     If (ElementEventModifiersKey() & #PB_Canvas_Control)
                       If \Text\Selected$
-                        If \CorrectorPos > \CorrectorFixPos : \CorrectorPos = \CorrectorFixPos : EndIf
-                        \Text\String$ = RemoveString(\Text\String$, \Text\Selected$, #PB_String_CaseSensitive, \CorrectorPos, 1)
+                        If \CaretPos > \CaretPosFixed : \CaretPos = \CaretPosFixed : EndIf
+                        \Text\String$ = RemoveString(\Text\String$, \Text\Selected$, #PB_String_CaseSensitive, \CaretPos, 1)
                         Blink_Text$ = \Text\Selected$
                         \Text\Selected$ = ""
                       EndIf
                       
                       
-                      \Text\String$ = InsertString(\Text\String$, GetClipboardText(), \CorrectorPos + 1)
-                      \CorrectorPos + Len(GetClipboardText())
-                      \CorrectorFixPos = \CorrectorPos
+                      \Text\String$ = InsertString(\Text\String$, GetClipboardText(), \CaretPos + 1)
+                      \CaretPos + Len(GetClipboardText())
+                      \CaretPosFixed = \CaretPos
                       
                       If StartDrawing And Blink_Text$ And \Text\PosX > -2
                         \Text\PosX - TextWidth(Blink_Text$) : If \Text\PosX < -2 : \Text\PosX =- 2 : EndIf
@@ -9865,40 +9865,40 @@ Procedure StringEditableCallBack(List This.S_CREATE_ELEMENT(), Event, EventEleme
                 
               Case #_Event_LeftButtonDown
                 If \Type = #_Type_String Or \Type = #_Type_Editor Or (\Type = #_Type_ComboBox And \Item\Entered\Element =- 1)
-                  \CorrectorPos = GetCorrectorPos(This())
-                  If \CorrectorPos = DoubleClickCorrectorPos
-                    \CorrectorFixPos = 0
-                    \CorrectorPos = Len(\Text\String$)
+                  \CaretPos = GetCaretPos(This())
+                  If \CaretPos = DoubleClickCaretPos
+                    \CaretPosFixed = 0
+                    \CaretPos = Len(\Text\String$)
                     Update_Text_Selected = #True
                   Else
-                    \CorrectorFixPos = \CorrectorPos
+                    \CaretPosFixed = \CaretPos
                     \Text\Selected$ = ""
                   EndIf 
-                  DoubleClickCorrectorPos =- 1
+                  DoubleClickCaretPos =- 1
                 EndIf
                 
-              Case #_Event_LeftDoubleClick : \CorrectorPos = GetCorrectorPos(This()) 
-                DoubleClickCorrectorPos = \CorrectorPos
+              Case #_Event_LeftDoubleClick : \CaretPos = GetCaretPos(This()) 
+                DoubleClickCaretPos = \CaretPos
                 
-                Protected char = Asc(Mid(\Text\String$, \CorrectorPos + 1, 1))
+                Protected char = Asc(Mid(\Text\String$, \CaretPos + 1, 1))
                 
                 If \Flag & #_Flag_Password
-                  \CorrectorFixPos = 0
-                  \CorrectorPos = Len(\Text\String$)
-                  \CursorLength = \CorrectorFixPos - \CorrectorPos
+                  \CaretPosFixed = 0
+                  \CaretPos = Len(\Text\String$)
+                  \CursorLength = \CaretPosFixed - \CaretPos
                 Else
                   If (char > =  ' ' And char < =  '/') Or 
                      (char > =  ':' And char < =  '@') Or 
                      (char > =  '[' And char < =  96) Or 
                      (char > =  '{' And char < =  '~')
                     
-                    \CorrectorFixPos = \CorrectorPos
-                    \CorrectorPos + 1
-                    \CursorLength = \CorrectorFixPos - \CorrectorPos
+                    \CaretPosFixed = \CaretPos
+                    \CaretPos + 1
+                    \CursorLength = \CaretPosFixed - \CaretPos
                   Else
                     Protected Index
                     
-                    For Index = \CorrectorPos To 0 Step - 1
+                    For Index = \CaretPos To 0 Step - 1
                       char = Asc(Mid(\Text\String$, Index, 1))
                       If (char > =  ' ' And char < =  '/') Or 
                          (char > =  ':' And char < =  '@') Or 
@@ -9908,9 +9908,9 @@ Procedure StringEditableCallBack(List This.S_CREATE_ELEMENT(), Event, EventEleme
                       EndIf
                     Next
                     
-                    If Index =- 1 : \CorrectorFixPos = 0 : Else : \CorrectorFixPos = Index : EndIf
+                    If Index =- 1 : \CaretPosFixed = 0 : Else : \CaretPosFixed = Index : EndIf
                     
-                    For Index = \CorrectorPos + 1 To Len(\Text\String$)
+                    For Index = \CaretPos + 1 To Len(\Text\String$)
                       char = Asc(Mid(\Text\String$, Index, 1))
                       If (char > =  ' ' And char < =  '/') Or 
                          (char > =  ':' And char < =  '@') Or
@@ -9920,9 +9920,9 @@ Procedure StringEditableCallBack(List This.S_CREATE_ELEMENT(), Event, EventEleme
                       EndIf
                     Next
                     
-                    \CorrectorPos = Index - 1
+                    \CaretPos = Index - 1
                     
-                    \CursorLength = \CorrectorFixPos - \CorrectorPos
+                    \CursorLength = \CaretPosFixed - \CaretPos
                     
                     If \CursorLength < 0 : \CursorLength = 0 : EndIf
                   EndIf
@@ -9932,7 +9932,7 @@ Procedure StringEditableCallBack(List This.S_CREATE_ELEMENT(), Event, EventEleme
                 
               Case #_Event_MouseMove
                 If *CreateElement\Buttons = #_Event_LeftButtonDown
-                  \CorrectorPos = GetCorrectorPos(This())
+                  \CaretPos = GetCaretPos(This())
                   Update_Text_Selected = #True
                   Quit = #True 
                 EndIf
@@ -9940,8 +9940,8 @@ Procedure StringEditableCallBack(List This.S_CREATE_ELEMENT(), Event, EventEleme
             EndSelect
             
             If Update_Text_Selected
-              UpdateCorrector(This())
-              \Text\Selected$ = Mid(\Text\String$, \CorrectorMovePos + (1), \CursorLength)
+              UpdateCaret(This())
+              \Text\Selected$ = Mid(\Text\String$, \CaretPosMoved + (1), \CursorLength)
             EndIf
             
             If StartDrawing
@@ -13969,8 +13969,8 @@ CompilerIf #PB_Compiler_IsMainFile
 CompilerEndIf
 
 
-; IDE Options = PureBasic 5.60 (Linux - x86)
-; CursorPosition = 10270
-; FirstLine = 1089
-; Folding = AhgAAAbAAA--------DAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEgMwABAAAAAAAAAAAAAAAAAAAgEASAAQABAAAAA9HO+AAAAAADAwAAAAAAwAMAAAAAAAAAAAAFAEADA9FAAwTAAg+5AAwFA9AAAbbAAAAAAAAAYbbYACBAAAAAAAgxDAgAZJKQCAAA+Aw3GAAUAIAAgAAACEAAAAYDAAAAAAAAA7FBr-RAAA+EAAAUVKtBAAAAAAA5
+; IDE Options = PureBasic 5.62 (Windows - x64)
+; CursorPosition = 9943
+; FirstLine = 3076
+; Folding = 9xpgQg--A3----------------vs------8-----vCEAAQVXX2---------nu74---e2480-f---eb8r+v-+84-Bb0-f-30-v2v7d2--8--fXX44d-844X0-+-4--8--+---v-4--08---f2----tt+X4u4r7e-------+v---8------t+v----0-------------0-6-v--8--0-+---------40--8+--4--2u0-----------------4-----v-----P------8080t0-t-6u83a---5-vVS5
 ; EnableXP
