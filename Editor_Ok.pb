@@ -996,7 +996,7 @@ Procedure CO_Init(Object.i)
         Transformation::Free(GetGadgetAttribute(Object, #PB_Splitter_FirstGadget))
         Transformation::Free(GetGadgetAttribute(Object, #PB_Splitter_SecondGadget))
       EndIf
-      Properties::Change(WE_Properties, Object, \Object\Argument$, \Flag\Argument$)
+;       Properties::Change(WE_Properties, Object, \Object\Argument$, \Flag\Argument$)
     EndWith
   EndIf
   PopListPosition(ParsePBObject())
@@ -1008,7 +1008,7 @@ Procedure CO_Change(Object.i)
   Protected *Adress = *This\get(Str(Object))\Adress
   If *Adress And ChangeCurrentElement(ParsePBObject(), *Adress)
     With ParsePBObject()
-      Properties::Change(WE_Properties,Object, \Object\Argument$, \Flag\Argument$)
+;       Properties::Change(WE_Properties,Object, \Object\Argument$, \Flag\Argument$)
       If EventGadget()=WE_Selecting
         Transformation::Change(wgParent(Object))
       EndIf
@@ -3571,32 +3571,52 @@ Procedure WE_Open(ParentID=0, Flag.i=#PB_Window_SystemMenu)
     EnableGadgetDrop(WE_Objects, #PB_Drop_Text, #PB_Drag_Copy)
     
     AddGadgetItem(WE_Panel_0, -1, "Properties", ImageID(img_edit))
-    UseModule Properties
-  WE_Properties = Gadget( 0,0,315, 261 )
-  
-  Add( WE_Properties, "Main:" )
-  Properties_ID = Add( WE_Properties, "ID:", #Type_String | #Type_CheckBox )
-  Properties_Caption = Add( WE_Properties, "Text:", #Type_String )
-  Add( WE_Properties, "Disable:False|True", #Type_ComboBox )
-  Add( WE_Properties, "Hide:False|True", #Type_ComboBox )
-  
-  Add( WE_Properties, "Layouts:" )
-  Properties_Dock = Add( WE_Properties, "Dock:None|Left|Top|Right|Bottom|Full", #Type_ComboBox )
-  Properties_Align = Add( WE_Properties, "Align:Left|Top|Right|Bottom", #Type_Tree|#Type_Button )
-  Properties_X = Add( WE_Properties, "X:", #Type_Spin )
-  Properties_Y = Add( WE_Properties, "Y:", #Type_Spin )
-  Properties_Width = Add( WE_Properties, "Width:", #Type_Spin )
-  Properties_Height = Add( WE_Properties, "Height:", #Type_Spin )
-  
-  Add( WE_Properties, "Other:" )
-  Properties_Flag = Add( WE_Properties, "Flag:", #Type_Tree|#Type_Button )
-  Add( WE_Properties, "Font:", #Type_String|#Type_Button )
-  Properties_Image = Add( WE_Properties, "Image:", #Type_String|#Type_Button )
-  Add( WE_Properties, "Puth", #Type_String|#Type_Button )
-  Add( WE_Properties, "Color:", #Type_String|#Type_Button )
-  
-  UnuseModule Properties
-  
+    
+    WE_Properties = Properties::Gadget( #PB_Any, 315, 261 )
+    Properties_ID = Properties::AddItem( WE_Properties, "ID:", #PB_GadgetType_String | #PB_GadgetType_CheckBox )
+    Properties_Caption = Properties::AddItem( WE_Properties, "Text:", #PB_GadgetType_String )
+    Properties::AddItem( WE_Properties, "Disable:False|True", #PB_GadgetType_ComboBox )
+    Properties::AddItem( WE_Properties, "Hide:False|True", #PB_GadgetType_ComboBox )
+    
+    Properties::AddItem( WE_Properties, "Layouts:", #False )
+    Properties_X = Properties::AddItem( WE_Properties, "X:", #PB_GadgetType_Spin )
+    Properties_Y = Properties::AddItem( WE_Properties, "Y:", #PB_GadgetType_Spin )
+    Properties_Width = Properties::AddItem( WE_Properties, "Width:", #PB_GadgetType_Spin )
+    Properties_Height = Properties::AddItem( WE_Properties, "Height:", #PB_GadgetType_Spin )
+    
+    Properties::AddItem( WE_Properties, "Other:", #False )
+    Properties_Flag = Properties::AddItem( WE_Properties, "Flag:", #PB_GadgetType_Tree|#PB_GadgetType_Button )
+    Properties::AddItem( WE_Properties, "Font:", #PB_GadgetType_String|#PB_GadgetType_Button )
+    Properties_Image = Properties::AddItem( WE_Properties, "Image:", #PB_GadgetType_String|#PB_GadgetType_Button )
+    Properties::AddItem( WE_Properties, "Puth", #PB_GadgetType_String|#PB_GadgetType_Button )
+    Properties::AddItem( WE_Properties, "Color:", #PB_GadgetType_String|#PB_GadgetType_Button )
+    
+; ;     UseModule Properties
+; ;     WE_Properties = Gadget( 0,0,315, 261 )
+; ;     
+; ;     Add( WE_Properties, "Main:" )
+; ;     Properties_ID = Add( WE_Properties, "ID:", #Type_String | #Type_CheckBox )
+; ;     Properties_Caption = Add( WE_Properties, "Text:", #Type_String )
+; ;     Add( WE_Properties, "Disable:False|True", #Type_ComboBox )
+; ;     Add( WE_Properties, "Hide:False|True", #Type_ComboBox )
+; ;     
+; ;     Add( WE_Properties, "Layouts:" )
+; ;     Properties_Dock = Add( WE_Properties, "Dock:None|Left|Top|Right|Bottom|Full", #Type_ComboBox )
+; ;     Properties_Align = Add( WE_Properties, "Align:Left|Top|Right|Bottom", #Type_Tree|#Type_Button )
+; ;     Properties_X = Add( WE_Properties, "X:", #Type_Spin )
+; ;     Properties_Y = Add( WE_Properties, "Y:", #Type_Spin )
+; ;     Properties_Width = Add( WE_Properties, "Width:", #Type_Spin )
+; ;     Properties_Height = Add( WE_Properties, "Height:", #Type_Spin )
+; ;     
+; ;     Add( WE_Properties, "Other:" )
+; ;     Properties_Flag = Add( WE_Properties, "Flag:", #Type_Tree|#Type_Button )
+; ;     Add( WE_Properties, "Font:", #Type_String|#Type_Button )
+; ;     Properties_Image = Add( WE_Properties, "Image:", #Type_String|#Type_Button )
+; ;     Add( WE_Properties, "Puth", #Type_String|#Type_Button )
+; ;     Add( WE_Properties, "Color:", #Type_String|#Type_Button )
+; ;     
+; ;     UnuseModule Properties
+    
     ; 
     AddGadgetItem(WE_Panel_0, -1, "Events")
     CloseGadgetList()
@@ -3618,11 +3638,13 @@ Procedure WE_Open(ParentID=0, Flag.i=#PB_Window_SystemMenu)
 ;     CompilerEndIf
     
     AddGadgetItem(WE_Panel_1, -1, "Code", ImageID(img_code))
-    CompilerIf #PB_Compiler_Processor = #PB_Processor_x86
-      WE_Scintilla_0 = Scintilla::Gadget(#PB_Any, 0, 0, 420, 600, 0, "x86_scintilla.dll", "x86_SyntaxHilighting.dll")
-    CompilerElseIf #PB_Compiler_Processor = #PB_Processor_x64
-      WE_Scintilla_0 = Scintilla::Gadget(#PB_Any, 0, 0, 420, 600, 0, "x64_scintilla.dll", "x64_SyntaxHilighting.dll")
-    CompilerEndIf
+    ;     CompilerIf #PB_Compiler_Processor = #PB_Processor_x86
+;       WE_Scintilla_0 = Scintilla::Gadget(#PB_Any, 0, 0, 420, 600, 0, "x86_scintilla.dll", "x86_SyntaxHilighting.dll")
+;     CompilerElseIf #PB_Compiler_Processor = #PB_Processor_x64
+;       WE_Scintilla_0 = Scintilla::Gadget(#PB_Any, 0, 0, 420, 600, 0, "x64_scintilla.dll", "x64_SyntaxHilighting.dll")
+;     CompilerEndIf
+    
+    WE_Scintilla_0 = Scintilla::Gadget(#PB_Any, 0, 0, 420, 600)
     CloseGadgetList()
     
     WE_Splitter_1 = SplitterGadget(#PB_Any, 5, 5, 900-10, 600-MenuHeight()-10, WE_Panel_1, WE_Splitter_0, #PB_Splitter_SecondFixed|#PB_Splitter_Vertical)
@@ -3939,8 +3961,8 @@ CompilerIf #PB_Compiler_IsMainFile
   Wend
 CompilerEndIf
 
-; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 701
-; FirstLine = 606
-; Folding = --------------w+-----------------------------------------------------------
+; IDE Options = PureBasic 5.62 (Windows - x64)
+; CursorPosition = 3646
+; FirstLine = 3570
+; Folding = --------------1+-----------------------------------------------------------------
 ; EnableXP

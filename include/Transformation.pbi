@@ -49,6 +49,7 @@ DeclareModule Transformation
   Declare Object()
   Declare Is(Gadget.i)
   Declare DisplayMenu(Object.i)
+  Declare PopupMenu(Object.i)
   Declare Change(Object.i)
   Declare Gadget(Gadget.i)
   Declare Update(Object.i)
@@ -218,6 +219,10 @@ Module Transformation
     EndIf
     
     ProcedureReturn PopupMenu
+  EndProcedure
+  
+  Procedure PopupMenu(Object.i)
+    ProcedureReturn DisplayMenu(Object.i)
   EndProcedure
   
   Procedure Points(Window=-1, Steps=6, BoxColor=0, PlotColor=0)
@@ -1099,3 +1104,9 @@ CompilerIf #PB_Compiler_IsMainFile
     
   ForEver
 CompilerEndIf
+
+; IDE Options = PureBasic 5.62 (Windows - x64)
+; CursorPosition = 223
+; FirstLine = 214
+; Folding = -------------------------
+; EnableXP

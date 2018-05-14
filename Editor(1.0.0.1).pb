@@ -2903,3 +2903,9 @@ CompilerIf #PB_Compiler_IsMainFile
     EndSelect
   Wend
 CompilerEndIf
+
+; IDE Options = PureBasic 5.62 (Windows - x64)
+; CursorPosition = 2792
+; FirstLine = 2788
+; Folding = -----------------------------------------------------------------
+; EnableXP

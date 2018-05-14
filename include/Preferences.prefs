@@ -1,0 +1,16 @@
+﻿
+[Global]
+ShowToolbar = 1
+CurrentLanguage = English
+LanguageFile = Catalogs/Editor.catalog
+; 
+[Editor]
+X = 100
+Y = 100
+Width = 900
+Height = 600
+; 
+[Form]
+Variable = 1
+VariableForming = 1
+VariableCaption = 0

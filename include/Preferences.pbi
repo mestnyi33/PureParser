@@ -398,3 +398,8 @@ CompilerIf #PB_Compiler_IsMainFile
     EndSelect
   Wend
 CompilerEndIf
+; IDE Options = PureBasic 5.62 (Windows - x64)
+; CursorPosition = 57
+; FirstLine = 57
+; Folding = --------
+; EnableXP

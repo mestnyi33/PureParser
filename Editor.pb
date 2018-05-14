@@ -2773,12 +2773,14 @@ Procedure WE_OpenWindow(Flag.i=#PB_Window_SystemMenu, ParentID=0)
                                 ;CloseGadgetList()
     
     AddGadgetItem(WE_Panel_1, -1, "Code")
-    CompilerIf #PB_Compiler_Processor = #PB_Processor_x86
-      WE_Scintilla_0 = Scintilla::Gadget(#PB_Any, 0, 0, 420, 600, 0, "x86_scintilla.dll", "x86_SyntaxHilighting.dll")
-    CompilerElseIf #PB_Compiler_Processor = #PB_Processor_x64
-      WE_Scintilla_0 = Scintilla::Gadget(#PB_Any, 0, 0, 420, 600, 0, "x64_scintilla.dll", "x64_SyntaxHilighting.dll")
-    CompilerEndIf
-    CloseGadgetList()
+    ;     CompilerIf #PB_Compiler_Processor = #PB_Processor_x86
+;       WE_Scintilla_0 = Scintilla::Gadget(#PB_Any, 0, 0, 420, 600, 0, "x86_scintilla.dll", "x86_SyntaxHilighting.dll")
+;     CompilerElseIf #PB_Compiler_Processor = #PB_Processor_x64
+;       WE_Scintilla_0 = Scintilla::Gadget(#PB_Any, 0, 0, 420, 600, 0, "x64_scintilla.dll", "x64_SyntaxHilighting.dll")
+;     CompilerEndIf
+    
+    WE_Scintilla_0 = Scintilla::Gadget(#PB_Any, 0, 0, 420, 600, 0, "scintilla.dll")
+CloseGadgetList()
     
     WE_Splitter_1 = SplitterGadget(#PB_Any, 5, 5, 900-10, 600-MenuHeight()-10, WE_Panel_1, WE_Splitter_0, #PB_Splitter_SecondFixed|#PB_Splitter_Vertical)
     SetGadgetState(WE_Splitter_1, 900-300)
@@ -2981,10 +2983,10 @@ CompilerIf #PB_Compiler_IsMainFile
   Wend
 CompilerEndIf
 
-; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 1649
-; FirstLine = 1642
-; Folding = ----------
+; IDE Options = PureBasic 5.62 (Windows - x64)
+; CursorPosition = 2782
+; FirstLine = 2756
+; Folding = ---------------------------------------------------------------
 ; EnableXP
 ; Executable = ..\..\Programs\PureBasic\PureParser.exe
 ; CompileSourceDirectory

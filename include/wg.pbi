@@ -253,6 +253,8 @@ Module wg
       SetGadgetData(\Parent, *wg)
       SetGadgetData(\Gadget, *wg)
       
+      PostEvent(#PB_Event_Gadget, GetActiveWindow(), \Parent, #PB_EventType_Resize)
+      ;PostEvent(#PB_Event_Gadget, GetActiveWindow(), \Gadget, #PB_EventType_Resize)
       BindGadgetEvent(\Parent, @ParentCallBack())
       BindGadgetEvent(\Gadget, @CallBack());, #PB_EventType_LeftButtonDown)
       
@@ -368,9 +370,12 @@ CompilerIf #PB_Compiler_IsMainFile
     
     WindowGadget(2,30,30,100,100)
     CloseGadgetList()
+    WindowGadget(3,60,60,100,100, "", #PB_Window_SizeGadget|#PB_Window_MinimizeGadget)
+    CloseGadgetList()
     BindGadgetEvent(2, @Resize())
     
     Transformation::Create(wgParent(2), #Window,#Window, 0, 5)
+    Transformation::Create(wgParent(3), #Window,#Window, 0, 5)
     
   EndProcedure
   
@@ -386,8 +391,8 @@ CompilerIf #PB_Compiler_IsMainFile
   ForEver
 CompilerEndIf
 
-; IDE Options = PureBasic 5.60 (Linux - x86)
-; CursorPosition = 116
-; FirstLine = 104
-; Folding = ---------
+; IDE Options = PureBasic 5.62 (Windows - x64)
+; CursorPosition = 377
+; FirstLine = 203
+; Folding = EAA++zBg7
 ; EnableXP
