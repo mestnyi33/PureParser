@@ -996,7 +996,7 @@ Procedure CO_Init(Object.i)
         Transformation::Free(GetGadgetAttribute(Object, #PB_Splitter_FirstGadget))
         Transformation::Free(GetGadgetAttribute(Object, #PB_Splitter_SecondGadget))
       EndIf
-;       Properties::Change(WE_Properties, Object, \Object\Argument$, \Flag\Argument$)
+      Properties::Change(WE_Properties, Object, \Object\Argument$, \Flag\Argument$)
     EndWith
   EndIf
   PopListPosition(ParsePBObject())
@@ -1008,7 +1008,7 @@ Procedure CO_Change(Object.i)
   Protected *Adress = *This\get(Str(Object))\Adress
   If *Adress And ChangeCurrentElement(ParsePBObject(), *Adress)
     With ParsePBObject()
-;       Properties::Change(WE_Properties,Object, \Object\Argument$, \Flag\Argument$)
+      Properties::Change(WE_Properties, Object, \Object\Argument$, \Flag\Argument$)
       If EventGadget()=WE_Selecting
         Transformation::Change(wgParent(Object))
       EndIf
@@ -3962,7 +3962,7 @@ CompilerIf #PB_Compiler_IsMainFile
 CompilerEndIf
 
 ; IDE Options = PureBasic 5.62 (Windows - x64)
-; CursorPosition = 3646
-; FirstLine = 3570
+; CursorPosition = 1010
+; FirstLine = 948
 ; Folding = --------------1+-----------------------------------------------------------------
 ; EnableXP

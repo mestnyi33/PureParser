@@ -48,6 +48,7 @@ DeclareModule Properties
   Declare$ Help(Gadget)
   
   Declare Init( Object, Class$="", Flag$="" )
+  Declare Change(gadget, Object, Class$="", Flag$="")
   
   Declare SetCheckedText(Gadget, Text$)
   Declare$ GetCheckedText(Gadget)
@@ -761,7 +762,7 @@ Module Properties
     
   EndProcedure
   
-  Procedure Change( Object )
+  Procedure Changes( Object )
     
     With Properties()
       If IsGadget( Object ) 
@@ -843,6 +844,10 @@ Module Properties
     
   EndProcedure
   
+  Procedure Change(gadget, Object, Class$="", Flag$="")
+    ProcedureReturn  Init( Object, Class$, Flag$ )
+  EndProcedure
+  
   Procedure CallBack()
     Static Window=-1, Gadget=-1, Click
     
@@ -872,7 +877,7 @@ Module Properties
                 ;   #PB_EventType_LostFocus : The StringGadget lost the focus.
                 Select EventType()
                   Case #PB_EventType_LeftClick
-                    Change( \Object )
+                    Changes( \Object )
                     Update( \Object )
                     
                   Case #PB_EventType_Change
@@ -912,7 +917,7 @@ Module Properties
                       EndIf
                     EndIf
                     
-                    Change( \Object )
+                    Changes( \Object )
                     
                     ;                Case  #PB_EventType_LeftClick ;: PostEvent(#PB_Event_Gadget, EventWindow(), \Gadget, #PB_EventType_Change, \String )
                   Case #PB_EventType_Focus ;: PostEvent(#PB_Event_Gadget, EventWindow(), \Gadget, #PB_EventType_Focus, \String )
@@ -932,11 +937,11 @@ Module Properties
                 ;   #PB_EventType_LostFocus : The edit field lost the keyboard focus (editable ComboBox only).
                 Select EventType()
                   Case #PB_EventType_LeftClick
-                    Change( \Object )
+                    Changes( \Object )
                     Update( \Object )
                     
                   Case #PB_EventType_Change ; : PostEvent(#PB_Event_Gadget, EventWindow(), \Gadget, #PB_EventType_Change, \ComboBox )
-                    Change( \Object )
+                    Changes( \Object )
                     
                     ;               Case #PB_EventType_Focus : PostEvent(#PB_Event_Gadget, EventWindow(), \Gadget, #PB_EventType_Focus, \ComboBox )
                     ;               Case #PB_EventType_LostFocus : PostEvent(#PB_Event_Gadget, EventWindow(), \Gadget, #PB_EventType_LostFocus, \ComboBox )
@@ -949,7 +954,7 @@ Module Properties
                 ;   #PB_EventType_Down   : The 'Down' button was pressed.
                 Select EventType()
                   Case #PB_EventType_Change ; : PostEvent(#PB_Event_Gadget, EventWindow(), \Gadget, #PB_EventType_Change, \Spin )
-                    Change( \Object )
+                    Changes( \Object )
                     
                   Case #PB_EventType_Up ;: PostEvent(#PB_Event_Gadget, EventWindow(), \Gadget, #PB_EventType_Up, \Spin )
                   Case #PB_EventType_Down ;: PostEvent(#PB_Event_Gadget, EventWindow(), \Gadget, #PB_EventType_Down, \Spin )
@@ -972,7 +977,7 @@ Module Properties
                     SetGadgetText(\String, \Flag$)
                     
                   Case #PB_EventType_Change ; : PostEvent(#PB_Event_Gadget, EventWindow(), \Gadget, #PB_EventType_Change, \Tree )
-                    Change( \Object )
+                    Changes( \Object )
                     SetPBFlag(\Object)
                     
                 EndSelect
@@ -1253,7 +1258,7 @@ Module Properties
           If IsFont(\Font) : SetGadgetFont(\Tree, FontID(\Font)) : EndIf
           BindEvent(#PB_Event_DeactivateWindow, @CallBack(), \TreeWindow)
           
-          BindEvent(#PB_Event_Gadget, @CallBack(), GetActiveWindow(), \Tree)
+;           BindEvent(#PB_Event_Gadget, @CallBack(), GetActiveWindow(), \Tree)
           BindGadgetEvent(\Tree, @CallBack(), #PB_EventType_Change)
           
           StickyWindow(\TreeWindow, #True)
@@ -1477,8 +1482,8 @@ CompilerEndIf
 
 
 
-; IDE Options = PureBasic 5.60 (Linux - x86)
-; CursorPosition = 420
-; FirstLine = 401
-; Folding = ------------------------
+; IDE Options = PureBasic 5.62 (Windows - x64)
+; CursorPosition = 847
+; FirstLine = 843
+; Folding = ---------------------------
 ; EnableXP
