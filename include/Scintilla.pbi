@@ -47,46 +47,46 @@ Module Scintilla
   Procedure ScintillaCallback(Gadget, *scinotify.SCNotification)
     Protected LastStyled, Range.TEXTRANGE
     ; This event indicates that new coloring is needed. The #SCI_GETENDSTYLED message and *scinotify\position indicate the range to color
-    If *scinotify\nmhdr\code = #SCN_STYLENEEDED
-      ScintillaGadget = Gadget 
-      
-      ; calculate the range to color
-      ; always start coloring at the line start 
-      LastStyled = ScintillaSendMessage(Gadget, #SCI_GETENDSTYLED)
-      Range\chrg\cpMin = ScintillaSendMessage(Gadget, #SCI_POSITIONFROMLINE,
-                                              ScintillaSendMessage(Gadget, #SCI_LINEFROMPOSITION, LastStyled))
-      Range\chrg\cpMax = *scinotify\position
-      Range\lpstrText = AllocateMemory(Range\chrg\cpMax - Range\chrg\cpMin + 1)
-      
-      If Range\lpstrText
-        ; retrieve the text range
-        ScintillaSendMessage(Gadget, #SCI_GETTEXTRANGE, 0, @Range)   
-        
-        ; start coloring
-        ScintillaSendMessage(Gadget, #SCI_STARTSTYLING, Range\chrg\cpMin, $FF)   
-        
-        ; call the parser function in the dllRange\lpstrText
-        ; the callback above will apply the colors to the returned tokens      
-        SyntaxHighlight(Range\lpstrText, Range\chrg\cpMax - Range\chrg\cpMin, @ColorCallback(), #False)      
-        
-        FreeMemory(Range\lpstrText)
-      EndIf
-      
-    EndIf  
+; ;     If *scinotify\nmhdr\code = #SCN_STYLENEEDED
+; ;       ScintillaGadget = Gadget 
+; ;       
+; ;       ; calculate the range to color
+; ;       ; always start coloring at the line start 
+; ;       LastStyled = ScintillaSendMessage(Gadget, #SCI_GETENDSTYLED)
+; ;       Range\chrg\cpMin = ScintillaSendMessage(Gadget, #SCI_POSITIONFROMLINE,
+; ;                                               ScintillaSendMessage(Gadget, #SCI_LINEFROMPOSITION, LastStyled))
+; ;       Range\chrg\cpMax = *scinotify\position
+; ;       Range\lpstrText = AllocateMemory(Range\chrg\cpMax - Range\chrg\cpMin + 1)
+; ;       
+; ;       If Range\lpstrText
+; ;         ; retrieve the text range
+; ;         ScintillaSendMessage(Gadget, #SCI_GETTEXTRANGE, 0, @Range)   
+; ;         
+; ;         ; start coloring
+; ;         ScintillaSendMessage(Gadget, #SCI_STARTSTYLING, Range\chrg\cpMin, $FF)   
+; ;         
+; ;         ; call the parser function in the dllRange\lpstrText
+; ;         ; the callback above will apply the colors to the returned tokens      
+; ;         SyntaxHighlight(Range\lpstrText, Range\chrg\cpMax - Range\chrg\cpMin, @ColorCallback(), #False)      
+; ;         
+; ;         FreeMemory(Range\lpstrText)
+; ;       EndIf
+; ;       
+; ;     EndIf  
   EndProcedure
   
   Procedure Gadget( Gadget,X,Y,Width,Height, *CallBack=0, Scintilla.S="scintilla.dll", SyntaxHilighting.S=#PB_Compiler_Home+"SDK\Syntax Highlighting\SyntaxHilighting.dll")
     Protected *FontName, Syntax, GadgetID
     
     If InitScintilla(Scintilla) 
-      Syntax = OpenLibrary(#PB_Any, SyntaxHilighting)
-      If Syntax 
-        If Not *CallBack : *CallBack=@ScintillaCallback() : EndIf
+      If Not *CallBack : *CallBack=@ScintillaCallback() : EndIf
         
         ; create window and gadget
         GadgetID=ScintillaGadget(Gadget,X,Y,Width,Height, *CallBack) 
         If Gadget=#PB_Any : Gadget=GadgetID : EndIf
         
+        Syntax = OpenLibrary(#PB_Any, SyntaxHilighting)
+      If Syntax 
         ; get the syntax parser function
         SyntaxHighlight = GetFunction(Syntax, "SyntaxHighlight")
         
@@ -197,3 +197,6 @@ CompilerIf #PB_Compiler_IsMainFile
     Repeat : Until WaitWindowEvent() = #PB_Event_CloseWindow
   EndIf
 CompilerEndIf
+; IDE Options = PureBasic 5.62 (MacOS X - x64)
+; Folding = ---
+; EnableXP

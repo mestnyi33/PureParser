@@ -7677,7 +7677,7 @@ Procedure AddElementItem(Element, Position, Text$, Image =- 1, Flag.q = 0)
             If \This()\FontID
               DrawingFont(\This()\FontID)
             Else
-              DrawingFont(GetGadgetFont(#PB_Default)) ; Шрифт по умолчанию
+             ; DrawingFont(GetGadgetFont(#PB_Default)) ; Шрифт по умолчанию
             EndIf
             
             If Text$ 
@@ -7857,7 +7857,7 @@ Procedure AddElementItem(Element, Position, Text$, Image =- 1, Flag.q = 0)
             If \This()\FontID
               DrawingFont(\This()\FontID)
             Else
-              DrawingFont(GetGadgetFont(#PB_Default)) ; Шрифт по умолчанию
+             ; DrawingFont(GetGadgetFont(#PB_Default)) ; Шрифт по умолчанию
             EndIf
             
             If Text$ 
@@ -10574,7 +10574,7 @@ Procedure ElementDrawCallBack(EventElement, Show.b=#False)
           If \This()\FontID 
             DrawingFont(\This()\FontID) 
           Else 
-            DrawingFont(GetGadgetFont(#PB_Default)) 
+           ; DrawingFont(GetGadgetFont(#PB_Default)) 
           EndIf
           
           DrawingMode(#PB_2DDrawing_Default) 
@@ -13968,9 +13968,6 @@ CompilerIf #PB_Compiler_IsMainFile
   WaitWindowEventClose(w)
 CompilerEndIf
 
-
-; IDE Options = PureBasic 5.62 (Windows - x64)
-; CursorPosition = 9943
-; FirstLine = 3076
-; Folding = 9xpgQg--A3----------------vs------8-----vCEAAQVXX2---------nu74---e2480-f---eb8r+v-+84-Bb0-f-30-v2v7d2--8--fXX44d-844X0-+-4--8--+---v-4--08---f2----tt+X4u4r7e-------+v---8------t+v----0-------------0-6-v--8--0-+---------40--8+--4--2u0-----------------4-----v-----P------8080t0-t-6u83a---5-vVS5
+; IDE Options = PureBasic 5.62 (MacOS X - x64)
+; Folding = 9xpiQg--A3----------------vs------8-----vCEAAQVXX2---------nu74---e2480-f---eb8r+v-+84-Bb0-f--0-v4-7d2--8--fXX44d-844X0------8--+-----4--08---f2----tt+X4u4r7e-------+v---8------0----------------------8-v--8--0-----------40--8+------u0-----------------4-----v-----P-------080t0-t-6+-4----5-vVS5--
 ; EnableXP

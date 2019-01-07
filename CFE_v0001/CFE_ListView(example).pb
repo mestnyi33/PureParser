@@ -199,7 +199,7 @@ Procedure AddListViewElementItem(GadgetElement, GadgetItem, Text$, Image =- 1, F
               If \This()\FontID 
                 DrawingFont(\This()\FontID) 
               Else 
-                DrawingFont(GetGadgetFont(#PB_Default)) 
+              ;  DrawingFont(GetGadgetFont(#PB_Default)) 
               EndIf
               TextHeight = TextHeight("A") 
               
@@ -407,3 +407,7 @@ CompilerIf #PB_Compiler_IsMainFile
   WaitWindowEventClose(w)
 CompilerEndIf
 
+
+; IDE Options = PureBasic 5.62 (MacOS X - x64)
+; Folding = --------
+; EnableXP

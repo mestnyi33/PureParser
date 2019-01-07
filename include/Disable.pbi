@@ -16,7 +16,7 @@ Module Disable
       CompilerSelect #PB_Compiler_OS 
         CompilerCase #PB_OS_Windows : ProcedureReturn Bool(IsWindowEnabled_(Handle)=0)
         CompilerCase#PB_OS_Linux    : ProcedureReturn Bool(gtk_widget_get_sensitive(Handle)=0)
-        CompilerCase #PB_OS_MacOS   : ProcedureReturn Bool(CocoaMessage(0, Handle, "isDisable")=0)
+        ;CompilerCase #PB_OS_MacOS   : ProcedureReturn Bool(CocoaMessage(0, Handle, "isDisable")=0)
       CompilerEndSelect
   EndProcedure
   
@@ -33,3 +33,7 @@ Module Disable
  EndProcedure
 EndModule
 
+
+; IDE Options = PureBasic 5.62 (MacOS X - x64)
+; Folding = --
+; EnableXP

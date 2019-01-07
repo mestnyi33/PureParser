@@ -1223,7 +1223,8 @@ Module Properties
         \LinePos = GadgetWidth(LineGadget)
         \Font = LoadFont(#PB_Any,"MS Shell Dlg",8 ) 
         \ItemHeight = GetGadgetAttribute(\Gadget,#PB_ScrollArea_ScrollStep)
-        
+        \ItemHeight = 20
+          
         SetGadgetAttribute(\Gadget, #PB_ScrollArea_InnerHeight, ListSize(Properties()) * \ItemHeight)
         ResizeGadget(LineGadget,#PB_Ignore,#PB_Ignore,#PB_Ignore, GetGadgetAttribute(\Gadget,#PB_ScrollArea_InnerHeight))
         
@@ -1481,9 +1482,6 @@ EndProcedure
 CompilerEndIf
 
 
-
-; IDE Options = PureBasic 5.62 (Windows - x64)
-; CursorPosition = 847
-; FirstLine = 843
+; IDE Options = PureBasic 5.62 (MacOS X - x64)
 ; Folding = ---------------------------
 ; EnableXP

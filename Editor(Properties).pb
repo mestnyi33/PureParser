@@ -96,7 +96,7 @@ XIncludeFile "include/Disable.pbi"
 XIncludeFile "include/Resize.pbi"
 XIncludeFile "include/Hide.pbi"
 XIncludeFile "include/Flag.pbi"
-XIncludeFile "include/iProperties.pbi"
+XIncludeFile "include/Properties.pbi"
 XIncludeFile "include/Transformation.pbi"
 XIncludeFile "include/wg.pbi"
 
@@ -4697,9 +4697,6 @@ CompilerIf #PB_Compiler_IsMainFile
     EndSelect
   Wend
 CompilerEndIf
-
-; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 701
-; FirstLine = 606
-; Folding = --------------w+-----------------------------------------------------------
+; IDE Options = PureBasic 5.62 (MacOS X - x64)
+; Folding = --------------w+------------------------------------------------------------------------------------
 ; EnableXP

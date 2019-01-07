@@ -2238,8 +2238,8 @@ Procedure AddPBFunction(Arg$, Index)
                   Case "#PB_Editor_WordWrap"        : \Param1\Argument = #PB_Editor_WordWrap
                   Case "#PB_Explorer_ColumnWidth"   : \Param1\Argument = #PB_Explorer_ColumnWidth
                   Case "#PB_ListIcon_ColumnWidth"   : \Param1\Argument = #PB_ListIcon_ColumnWidth 
-                  Case "#PB_MDI_Image"              : \Param1\Argument = #PB_MDI_Image     
-                  Case "#PB_MDI_TileImage"          : \Param1\Argument = #PB_MDI_TileImage
+                  ;Case "#PB_MDI_Image"              : \Param1\Argument = #PB_MDI_Image     
+                  ;Case "#PB_MDI_TileImage"          : \Param1\Argument = #PB_MDI_TileImage
                     ; SetGadgetColor 
                   Case "#PB_Gadget_FrontColor"      : \Param1\Argument = #PB_Gadget_FrontColor      ; Цвет текста гаджета
                   Case "#PB_Gadget_BackColor"       : \Param1\Argument = #PB_Gadget_BackColor       ; Фон гаджета
@@ -2434,8 +2434,8 @@ Procedure$ SetPBFunction(Type$, ID$)
       Case "EventTimer"              : Result$ = Str(EventTimer())
       Case "EventType"               : Result$ = Str(EventType())
       Case "EventWindow"             : Result$ = Str(EventWindow())
-      Case "EventlParam"             : Result$ = Str(EventlParam())
-      Case "EventwParam"             : Result$ = Str(EventwParam())     
+;       Case "EventlParam"             : Result$ = Str(EventlParam())
+;       Case "EventwParam"             : Result$ = Str(EventwParam())     
 
       Case "LoadImage"               : \Object\Argument=LoadImage(#PB_Any, \Param1\Argument$)
       Case "LoadFont"                : \Object\Argument=LoadFont(#PB_Any,\Param1\Argument$,\Param2\Argument,\Param3\Argument)
@@ -2500,7 +2500,7 @@ Procedure$ SetPBFunction(Type$, ID$)
         Case "RemoveWindowTimer"      : RemoveWindowTimer(Object, \Param1\Argument)
         Case "WindowVectorOutput"     : Result$ = Str(WindowVectorOutput(Object, \Param1\Argument))
         Case "SmartWindowRefresh"     : SmartWindowRefresh(Object, \Param1\Argument)
-        Case "SetWindowCallback"      : SetWindowCallback(\Param1\Argument, Object)
+;         Case "SetWindowCallback"      : SetWindowCallback(\Param1\Argument, Object)
         Case "RemoveKeyboardShortcut" : RemoveKeyboardShortcut(Object, \Param1\Argument)
         Case "AddWindowTimer"         : AddWindowTimer(Object, \Param1\Argument, \Param2\Argument)
         Case "AddKeyboardShortcut"    : AddKeyboardShortcut(Object, \Param1\Argument, \Param2\Argument)
@@ -3960,9 +3960,6 @@ CompilerIf #PB_Compiler_IsMainFile
     EndSelect
   Wend
 CompilerEndIf
-
-; IDE Options = PureBasic 5.62 (Windows - x64)
-; CursorPosition = 1010
-; FirstLine = 948
+; IDE Options = PureBasic 5.62 (MacOS X - x64)
 ; Folding = --------------1+-----------------------------------------------------------------
 ; EnableXP

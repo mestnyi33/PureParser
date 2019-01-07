@@ -74,7 +74,7 @@ Procedure AddToolBarElementItem(ToolBarElement, ToolBarItem, Text$, Image=-1, Fl
             If \This()\FontID 
               DrawingFont(\This()\FontID) 
             Else 
-              DrawingFont(GetGadgetFont(#PB_Default)) 
+             ; DrawingFont(GetGadgetFont(#PB_Default)) 
             EndIf
             
             If Text$ 
@@ -515,3 +515,7 @@ CompilerIf #PB_Compiler_IsMainFile
 CompilerEndIf
 
 
+
+; IDE Options = PureBasic 5.62 (MacOS X - x64)
+; Folding = -------------
+; EnableXP

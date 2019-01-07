@@ -917,7 +917,7 @@ Module Flag
               SendMessage_(Handle, #EM_SETREADONLY, 1,0)
             EndIf
             If IsFlag(Flags,#PB_Editor_WordWrap)
-              SetStyle(Handle, (#BS_RIGHT))
+              SendMessage_(Handle, #EM_SETTARGETDEVICE, 0, 0)
             EndIf
             
           Case #PB_GadgetType_ExplorerList
@@ -1391,7 +1391,53 @@ Module Flag
       
       ;- Linux
     CompilerCase #PB_OS_Linux
-      Procedure.q GetWindow( Window ) : EndProcedure
+      ImportC ""
+        gtk_widget_get_window(*widget.GtkWidget)
+      EndImport
+      
+      Procedure.q GetWindow( Window )
+        Protected Flag.q, Flags.i
+        gdk_window_get_decorations_(gtk_widget_get_window(WindowID(Window)), @Flags)
+        
+;         Debug "All     : " + Str(Bool(Flags & #GDK_DECOR_ALL))
+;         Debug "BORDER  : " + Str(Bool(Flags & #GDK_DECOR_BORDER))
+;         Debug "RESIZER : " + Str(Bool(Flags & #GDK_DECOR_RESIZEH))
+;         Debug "TITLE   : " + Str(Bool(Flags & #GDK_DECOR_TITLE))
+;         Debug "MENU    : " + Str(Bool(Flags & #GDK_DECOR_MENU))
+;         Debug "MINIMIZE: " + Str(Bool(Flags & #GDK_DECOR_MINIMIZE))
+;         Debug "MAXIMIZE: " + Str(Bool(Flags & #GDK_DECOR_MAXIMIZE))
+        
+        If IsFlag(Flags,#GDK_DECOR_MAXIMIZE)   ;Ok 
+          Flag | #PB_Window_MaximizeGadget&~#PB_Window_TitleBar&~#PB_Window_SystemMenu 
+        EndIf
+        
+        If IsFlag(Flags,#GDK_DECOR_MINIMIZE)   ;Ok 
+          Flag | #PB_Window_MinimizeGadget&~#PB_Window_TitleBar&~#PB_Window_SystemMenu 
+        EndIf
+        
+        If IsFlag(Flags,#GDK_DECOR_MENU)       ;Ok
+          Flag | #PB_Window_SystemMenu&~#PB_Window_TitleBar
+        EndIf
+        
+        If IsFlag(Flags,#GDK_DECOR_RESIZEH)       ;Ok
+          Flag | #PB_Window_SizeGadget&~#PB_Window_TitleBar 
+        EndIf
+        
+        If IsFlag(Flags,#GDK_DECOR_TITLE)       ;Ok
+          Flag | #PB_Window_TitleBar 
+        EndIf
+        
+        If Not IsFlag(Flags,#GDK_DECOR_BORDER)    ;Ok
+          Flag | #PB_Window_BorderLess 
+        EndIf
+        
+;         If Not IsFlag(Flags,#WS_VISIBLE)   ;Ok
+;           Flag | #PB_Window_Invisible
+;         EndIf
+              
+        ProcedureReturn Flag
+      EndProcedure
+      
       Procedure SetWindow( Window, Flags.q, Value=0 ) : EndProcedure
       Procedure RemoveWindow( Window, Flags.q ) : EndProcedure
       Procedure.q GetGadget( Gadget ) 
@@ -1438,7 +1484,7 @@ Module Flag
             ;             EndIf
             ;             If IsFlag(Flags,#PB_String_UpperCase)       ;? 
             ;             EndIf
-            
+          ;  gtk_text_view_set_wrap_mode_(GadgetID(0), #GTK_WRAP_WORD)
         EndSelect
       EndProcedure
       Procedure RemoveGadget( Gadget, Flags.q ) 
@@ -1467,9 +1513,37 @@ Module Flag
       
       ;- MacOS
     CompilerCase #PB_OS_MacOS
-      Procedure.q GetWindow( Window ) : EndProcedure
-      Procedure SetWindow( Window, Flags.q, Value=0 ) : EndProcedure
-      Procedure RemoveWindow( Window, Flags.q ) : EndProcedure
+      #NSTitledWindowMask             = 1 << 0
+      #NSClosableWindowMask           = 1 << 1
+      #NSMiniaturizableWindowMask     = 1 << 2
+      #NSResizableWindowMask          = 1 << 3
+      #NSTexturedBackgroundWindowMask = 1 << 8
+      
+      Procedure.q GetWindow( Window ) 
+        ProcedureReturn CocoaMessage(0, WindowID(Window), "styleMask")
+      EndProcedure
+      Procedure SetWindow( Window, Flags.q, Value=0 ) 
+        Protected Handle = WindowID(Window)
+        
+        If IsFlag(Flags, #PB_Window_TitleBar)     ;Ok
+          CocoaMessage(0, WindowID(Window), "setStyleMask:", #NSTitledWindowMask)
+        EndIf
+        If IsFlag(Flags, #PB_Window_SizeGadget)     ;Ok
+          CocoaMessage(0, WindowID(Window), "setStyleMask:", #NSResizableWindowMask)
+        EndIf
+        If IsFlag(Flags, #PB_Window_SystemMenu)     ;Ok
+          CocoaMessage(0, WindowID(Window), "setStyleMask:", #NSClosableWindowMask)
+        EndIf
+        If IsFlag(Flags, #PB_Window_MinimizeGadget)     ;Ok
+          CocoaMessage(0, WindowID(Window), "setStyleMask:", #NSMiniaturizableWindowMask)
+        EndIf
+        If IsFlag(Flags, #PB_Window_TitleBar)     ;Ok
+          CocoaMessage(0, WindowID(Window), "setStyleMask:", #NSTexturedBackgroundWindowMask)
+        EndIf
+      EndProcedure
+      Procedure RemoveWindow( Window, Flags.q ) 
+        ProcedureReturn CocoaMessage(0, WindowID(Window), "setStyleMask:", (CocoaMessage(0, WindowID(Window), "styleMask")&~Flags))
+      EndProcedure
       Procedure.q GetGadget( Gadget ) : EndProcedure
       Procedure SetGadget( Gadget, Flags.q, Value=0 )
         Protected i, Handle = GadgetID(Gadget)
@@ -2609,7 +2683,7 @@ CompilerIf #PB_Compiler_IsMainFile
   
   
   OpenWindow( 1, 221, 211, 300, 200, "test to set window centered", #PB_Window_SystemMenu) 
-  OpenWindow( 2, 221, 11, 200, 100, "test set flag", #PB_Window_TitleBar, WindowID(1)) 
+  OpenWindow( 2, 221, 11, 200, 100, "test set flag", #PB_Window_SystemMenu|#PB_Window_SizeGadget, WindowID(1)) 
   
   ButtonGadget(20 ,5,5,WindowWidth(2)-10,WindowHeight(2)-10,"NoFlag")
   
@@ -2687,9 +2761,8 @@ CompilerIf #PB_Compiler_IsMainFile
     EndSelect
   ForEver 
 CompilerEndIf
-
-; IDE Options = PureBasic 5.60 (Linux - x86)
-; CursorPosition = 1398
-; FirstLine = 1388
-; Folding = -----------------------------------------------------------------------------------
+; IDE Options = PureBasic 5.62 (Linux - x64)
+; CursorPosition = 2685
+; FirstLine = 420
+; Folding = 1BEAAAAAYAAACAAAAAAAAAAAAAgBAAAAAAAAGAAAAEAAAAAAAAAAAAAA5-gBIgAAAAAAAAAAAAAAAAgw-9C+
 ; EnableXP
