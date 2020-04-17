@@ -13,10 +13,19 @@ Module Hide
   CompilerEndSelect
   
   Procedure.b Hide(Handle.i) ; Returns TRUE is control hide
+    Protected Result.i
+    
     CompilerSelect #PB_Compiler_OS 
       CompilerCase #PB_OS_Windows : ProcedureReturn Bool(IsWindowVisible_(Handle)=0)
       CompilerCase #PB_OS_Linux   : ProcedureReturn Bool(gtk_widget_get_visible(Handle)=0)
-      ;CompilerCase #PB_OS_MacOS   : ProcedureReturn Bool(CocoaMessage(0, Handle, "isVisible")=0)
+      CompilerCase #PB_OS_MacOS   
+        CocoaMessage(@Result, CocoaMessage(0, handle, "className"), "UTF8String")
+        
+        If PeekS(Result, -1, #PB_UTF8) = "PBWindow"
+          ProcedureReturn Bool(CocoaMessage(0, Handle, "isVisible")=0)
+        Else
+          ProcedureReturn Bool(CocoaMessage(0, Handle, "isHidden"))
+        EndIf
     CompilerEndSelect
   EndProcedure
   
@@ -57,14 +66,12 @@ CompilerIf #PB_Compiler_IsMainFile
     ButtonGadget(4, 10,170, 200, 20, "Toggle Button", #PB_Button_Toggle)
     
     HideGadget(1,1)
-    Debug CocoaMessage (0, WindowID (0), "isVisible")
+    Debug Hide::Window(0) ; CocoaMessage (0, WindowID (0), "isVisible")
     Debug Hide::Gadget(1)
     Debug Hide::Gadget(2)
     Repeat : Until WaitWindowEvent() = #PB_Event_CloseWindow
   EndIf
 CompilerEndIf
-
-
-; IDE Options = PureBasic 5.62 (MacOS X - x64)
+; IDE Options = PureBasic 5.70 LTS (MacOS X - x64)
 ; Folding = --
 ; EnableXP

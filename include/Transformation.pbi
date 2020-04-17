@@ -1104,9 +1104,6 @@ CompilerIf #PB_Compiler_IsMainFile
     
   ForEver
 CompilerEndIf
-
-; IDE Options = PureBasic 5.62 (Windows - x64)
-; CursorPosition = 223
-; FirstLine = 214
-; Folding = -------------------------
+; IDE Options = PureBasic 5.70 LTS (MacOS X - x64)
+; Folding = -0-----------------------
 ; EnableXP

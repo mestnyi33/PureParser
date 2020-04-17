@@ -616,11 +616,11 @@ CompilerIf #PB_Compiler_IsMainFile
   Debug AddListIconElementItem(e, -1, "ListIcon_3", GetButtonIcon(#PB_ToolBarIcon_Cut))
   Debug AddListIconElementItem(e, 0, "ListIcon_0", GetButtonIcon(#PB_ToolBarIcon_Open) )
   
-;   AddListIconElementColumn(e, 1,"Column_2",100)
+   AddListIconElementColumn(e, 1,"Column_2",100)
   
-;   For i=4 To 20
-;     Debug AddGadgetElementItem(e, -1, Chr(10)+"ListIcon_"+Str(i)) 
-;   Next
+  For i=4 To 20
+    Debug AddGadgetElementItem(e, -1, Chr(10)+"ListIcon_"+Str(i)) 
+  Next
     
 ;     Define a=e,b
 ;   ;For a = 0 To 4            ; add columns to each of the first 5 listicons
@@ -653,3 +653,7 @@ CompilerIf #PB_Compiler_IsMainFile
   WaitWindowEventClose(w)
 CompilerEndIf
 
+
+; IDE Options = PureBasic 5.70 LTS (MacOS X - x64)
+; Folding = ----------
+; EnableXP

@@ -13,7 +13,66 @@
 ; =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = 
 
 Global Demo
-
+CompilerIf #PB_Compiler_OS = #PB_OS_MacOS 
+    Global _drawing_mode_
+    
+    Declare.i DrawText_(x.i, y.i, Text.s, FrontColor.i=$ffffff, BackColor.i=0)
+    Declare.i ClipOutput_(x.i, y.i, width.i, height.i)
+    
+    Macro PB(Function)
+      Function
+    EndMacro
+    
+    Macro DrawingMode(_mode_)
+      PB(DrawingMode)(_mode_) : _drawing_mode_ = _mode_
+    EndMacro
+    
+    Macro ClipOutput(x, y, width, height)
+      PB(ClipOutput)(x, y, width, height)
+      ClipOutput_(x, y, width, height)
+    EndMacro
+    
+    Macro DrawText(x, y, Text, FrontColor=$ffffff, BackColor=0)
+      DrawText_(x, y, Text, FrontColor, BackColor)
+    EndMacro
+    
+    Procedure.i DrawText_(x.i, y.i, Text.s, FrontColor.i=$ffffff, BackColor.i=0)
+      Protected.CGFloat r,g,b,a
+      Protected.i NSString, Attributes, Color
+      Protected Size.NSSize, Point.NSPoint
+      
+      CocoaMessage(@Attributes, 0, "NSMutableDictionary dictionaryWithCapacity:", 2)
+      
+      r = Red(FrontColor)/255 : g = Green(FrontColor)/255 : b = Blue(FrontColor)/255 : a = 1
+      Color = CocoaMessage(0, 0, "NSColor colorWithDeviceRed:@", @r, "green:@", @g, "blue:@", @b, "alpha:@", @a)
+      CocoaMessage(0, Attributes, "setValue:", Color, "forKey:$", @"NSColor")
+      
+      r = Red(BackColor)/255 : g = Green(BackColor)/255 : b = Blue(BackColor)/255 : a = Bool(_drawing_mode_<>#PB_2DDrawing_Transparent)
+      Color = CocoaMessage(0, 0, "NSColor colorWithDeviceRed:@", @r, "green:@", @g, "blue:@", @b, "alpha:@", @a)
+      CocoaMessage(0, Attributes, "setValue:", Color, "forKey:$", @"NSBackgroundColor")  
+      
+      NSString = CocoaMessage(0, 0, "NSString stringWithString:$", @Text)
+      CocoaMessage(@Size, NSString, "sizeWithAttributes:", Attributes)
+      
+      Point\x = x : Point\y = OutputHeight()-Size\height-y
+      CocoaMessage(0, NSString, "drawAtPoint:@", @Point, "withAttributes:", Attributes)
+    EndProcedure
+    
+    Procedure.i ClipOutput_(x.i, y.i, width.i, height.i)
+      Protected Rect.NSRect
+      Rect\origin\x = x 
+      Rect\origin\y = OutputHeight()-height-y
+      Rect\size\width = width 
+      Rect\size\height = height
+      
+      ;CocoaMessage(0, CocoaMessage(0, 0, "NSBezierPath bezierPathWithRect:@", @Rect), "setClip")
+      ;CocoaMessage(0, CocoaMessage(0, 0, "NSBezierPath bezierPathWithRect:@", @Rect), "addClip")
+    EndProcedure
+    
+    
+  CompilerEndIf
+ 
+ 
 ; Изменения 06; 01; 2017
 ; Функция 
 ; OS
@@ -13967,7 +14026,8 @@ CompilerIf #PB_Compiler_IsMainFile
   BindEventElement(@ElementsEvents())
   WaitWindowEventClose(w)
 CompilerEndIf
-
-; IDE Options = PureBasic 5.62 (MacOS X - x64)
-; Folding = 9xpiQg--A3----------------vs------8-----vCEAAQVXX2---------nu74---e2480-f---eb8r+v-+84-Bb0-f--0-v4-7d2--8--fXX44d-844X0------8--+-----4--08---f2----tt+X4u4r7e-------+v---8------0----------------------8-v--8--0-----------40--8+------u0-----------------4-----v-----P-------080t0-t-6+-4----5-vVS5--
+; IDE Options = PureBasic 5.62 (Windows - x86)
+; CursorPosition = 1152
+; FirstLine = 400
+; Folding = +6jTFhA--Bs----------------fZ------4-----fFIAAgquuq---------Pd2v---0qv48--+--033X0f-04v-D37--+-8-fv-28q--4---uuuv8+4vvv7------4--0-----v--84----q----bb0vudvX20+------0f---4------8----------------------4-f--4--8-----------v8--40------d8-----------------v-----f-----f+------848b8-b-z0-v----x-frkw--
 ; EnableXP

@@ -5,7 +5,15 @@
       AddGadgetItem (50, -1, "Панель 2")
         PanelGadget (51, 5, 30, 340, 166)
           AddGadgetItem(51, -1, "Под-Панель 1")
-          AddGadgetItem(51, -1, "Под-Панель 2")
+          
+          PanelGadget (151, 5, 30, 340, 166)
+          AddGadgetItem(151, -1, "Под-Панель 1")
+          AddGadgetItem(151, -1, "Под-Панель 2")
+          ButtonGadget(115, 5, 5, 55, 22,"кнопка 15")
+        AddGadgetItem(151, -1, "Под-Панель 3")
+        CloseGadgetList()
+        
+        AddGadgetItem(51, -1, "Под-Панель 2")
           ButtonGadget(15, 5, 5, 55, 22,"кнопка 15")
         AddGadgetItem(51, -1, "Под-Панель 3")
         CloseGadgetList()
@@ -18,8 +26,7 @@
     CloseGadgetList()
     Repeat : Until WaitWindowEvent() = #PB_Event_CloseWindow
   EndIf
-
-; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 5
+; IDE Options = PureBasic 5.70 LTS (MacOS X - x64)
+; Folding = -
 ; EnableXP
 ; CompileSourceDirectory

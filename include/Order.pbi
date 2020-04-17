@@ -238,7 +238,7 @@ CompilerIf #PB_Compiler_IsMainFile
         Frame\top=y1+Y
         Frame\right=x1+w
         Frame\bottom=y1+h
-      CompilerElse
+      CompilerElseIf #PB_Compiler_OS = #PB_OS_Linux
         Protected Frame.GdkRectangle
         Frame\x=x1+X
         Frame\y=y1+Y
@@ -260,7 +260,7 @@ CompilerIf #PB_Compiler_IsMainFile
       CompilerIf #PB_Compiler_OS = #PB_OS_Windows
         InvalidateRect_( WindowID( Window ), #False, #True ) 
         ;UpdateWindow_(WindowID(Window))
-      CompilerElse
+      CompilerElseIf #PB_Compiler_OS = #PB_OS_Linux
         gtk_widget_queue_draw_ ( gtk_widget_get_ancestor_ (WindowID(Window), gtk_window_get_type_ ()))
 ;         gtk_widget_queue_draw_ ( g_list_nth_data_( gtk_container_get_children_( gtk_bin_get_child_( WindowID( Window ))), 0))
         ;gdk_window_invalidate_rect_( WindowID( Window ), *Rect, Inv);
@@ -430,3 +430,7 @@ CompilerIf #PB_Compiler_IsMainFile
     Until Event = #PB_Event_CloseWindow
   CompilerEndIf
   
+
+; IDE Options = PureBasic 5.70 LTS (MacOS X - x64)
+; Folding = --------------
+; EnableXP

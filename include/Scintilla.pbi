@@ -30,6 +30,7 @@ Module Scintilla
   
   Procedure SetText(Gadget, Text.S)
     Static ScintillaText.S
+    
     CompilerIf #PB_Compiler_Unicode
       ScintillaText = Space(StringByteLength(Text, #PB_UTF8))
       PokeS(@ScintillaText, Text, -1, #PB_UTF8)
@@ -37,6 +38,7 @@ Module Scintilla
     CompilerElse
       ScintillaText = Text
     CompilerEndIf
+    
     ScintillaSendMessage(Gadget, #SCI_SETTEXT, 0, @ScintillaText)
   EndProcedure
   
@@ -197,6 +199,6 @@ CompilerIf #PB_Compiler_IsMainFile
     Repeat : Until WaitWindowEvent() = #PB_Event_CloseWindow
   EndIf
 CompilerEndIf
-; IDE Options = PureBasic 5.62 (MacOS X - x64)
+; IDE Options = PureBasic 5.70 LTS (MacOS X - x64)
 ; Folding = ---
 ; EnableXP

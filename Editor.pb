@@ -71,8 +71,8 @@ Declare WE_CloseWindow()
 Declare WE_ResizeWindow()
 Declare WE_ResizePanel_0()
 Declare WE_ResizePanel_1()
-Declare WE_Tree_0_Position(Gadget, Parent)
-Declare WE_Tree_0_Update(Gadget, Position=-1)
+Declare inspector_get_pos(Gadget, Parent)
+Declare inspector_add_pos(Gadget, Position=-1)
 Declare WE_OpenWindow(Flag.i=#PB_Window_SystemMenu, ParentID=0)
 
 Declare$ GetObjectClass(Object)
@@ -118,15 +118,15 @@ Macro is_object(_object_)
 EndMacro
 
 Macro get_object_type(_object_)
-  *This\get(Str(_object_))\Type\Argument$
+  *This\get(Str(_object_))\Type\s.s
 EndMacro
 
 Macro get_object_class(_object_)
-  *This\get(Str(_object_))\Object\Argument$
+  *This\get(Str(_object_))\Object\s.s
 EndMacro
 
 Macro get_object_count(_object_)
-  *This\get(Str(*This\get(Str(_object_))\Parent\Argument)+"_"+*This\get(Str(_object_))\Type\Argument$)\Count
+  *This\get(Str(*This\get(Str(_object_))\Parent\i.i)+"_"+*This\get(Str(_object_))\Type\s.s)\Count
 EndMacro
 
 Macro get_object_adress(_object_)
@@ -134,15 +134,15 @@ Macro get_object_adress(_object_)
 EndMacro
 
 Macro get_object_parent(_object_)
-  *This\get(Str(_object_))\Parent\Argument
+  *This\get(Str(_object_))\Parent\i.i
 EndMacro
 
 Macro get_object_window(_object_)
-  *This\get(Str(_object_))\Window\Argument
+  *This\get(Str(_object_))\Window\i.i
 EndMacro
 
 Macro get_class_id(_class_)
-  *This\get(_class_)\Object\Argument
+  *This\get(_class_)\Object\i.i
 EndMacro
 
 
@@ -152,9 +152,9 @@ EndMacro
 
 ;-
 ;- STRUCTURE
-Structure ArgumentStruct
-  Argument.i 
-  Argument$
+Structure Type_S
+  i.i 
+  s.s
 EndStructure
 
 Structure ContentStruct
@@ -182,22 +182,22 @@ Structure ObjectStruct
   Position.i ; Code.CodeStruct
   Map Code.ContentStruct()
   
-  Type.ArgumentStruct   ; Type\Argument$ = OpenWindow;ButtonGadget;TextGadget
-  Class.ArgumentStruct  ; Class\Argument$ = Window_0;Button_0;Text_0
-  Object.ArgumentStruct ; Object\Argument$ = Window_0;Window_0_Button_0;Window_0_Text_0
-  Parent.ArgumentStruct
-  Window.ArgumentStruct
+  Type.Type_S   ; Type\s.s = OpenWindow;ButtonGadget;TextGadget
+  Class.Type_S  ; Class\s.s = Window_0;Button_0;Text_0
+  Object.Type_S ; Object\s.s = Window_0;Window_0_Button_0;Window_0_Text_0
+  Parent.Type_S
+  Window.Type_S
 EndStructure
 
 Structure FONT
-  Object.ArgumentStruct
+  Object.Type_S
   Name$
   Height.i
   Style.i
 EndStructure
 
 Structure IMG
-  Object.ArgumentStruct
+  Object.Type_S
   Name$
 EndStructure
 
@@ -207,15 +207,15 @@ Structure ParseStruct Extends ObjectStruct
   Container.i
   Content.ContentStruct  
   
-  X.ArgumentStruct 
-  Y.ArgumentStruct
-  Width.ArgumentStruct
-  Height.ArgumentStruct
-  Caption.ArgumentStruct
-  Param1.ArgumentStruct
-  Param2.ArgumentStruct
-  Param3.ArgumentStruct
-  Flag.ArgumentStruct
+  X.Type_S 
+  Y.Type_S
+  Width.Type_S
+  Height.Type_S
+  Caption.Type_S
+  Param1.Type_S
+  Param2.Type_S
+  Param3.Type_S
+  Flag.Type_S
   
   Map Font.FONT()
   Map Img.IMG()
@@ -266,7 +266,7 @@ EndEnumeration
 ;-
 ;- OTHERS
 Runtime Procedure$ GetObjectClass(Object)
-  ProcedureReturn *This\get(Str(Object))\Object\Argument$
+  ProcedureReturn *This\get(Str(Object))\Object\s.s
 EndProcedure
 
 Procedure WE_Code_Show(Text$)
@@ -310,7 +310,7 @@ Procedure$ GetStr1(String$)
           ;           Debug RegularExpressionMatchString(#RegEx_Captions1)
           
           If RegularExpressionGroup(#RegEx_Captions1, 2)
-            ID = (*This\get(RegularExpressionGroup(#RegEx_Captions1, 3))\Object\Argument)
+            ID = (*This\get(RegularExpressionGroup(#RegEx_Captions1, 3))\Object\i.i)
           EndIf
           
           
@@ -409,7 +409,7 @@ Procedure$ GetStr(String$)
           ;           Debug RegularExpressionMatchString(#RegEx_Captions)
           
           If RegularExpressionGroup(#RegEx_Captions, 2)
-            ID = (*This\get(RegularExpressionGroup(#RegEx_Captions, 3))\Object\Argument)
+            ID = (*This\get(RegularExpressionGroup(#RegEx_Captions, 3))\Object\i.i)
           EndIf
           
           
@@ -572,27 +572,27 @@ Procedure CF_Add(*This.ParseStruct, Index)
   Protected Result
   
   With *This
-    Select \Type\Argument$
+    Select \Type\s.s
       Case "HideWindow", "HideGadget", 
            "DisableWindow", "DisableGadget"
         Select Index
-          Case 1 : \Object\Argument$ = \Args$
-          Case 2 : \Param1\Argument$ = \Args$
+          Case 1 : \Object\s.s = \Args$
+          Case 2 : \Param1\s.s = \Args$
         EndSelect
         
-        Select \Param1\Argument$
-          Case "#True" : \Object\Argument = #True
-          Case "#False" : \Param1\Argument = #False
+        Select \Param1\s.s
+          Case "#True" : \Object\i.i = #True
+          Case "#False" : \Param1\i.i = #False
           Default
-            \Param1\Argument = Val(\Param1\Argument$)
+            \Param1\i.i = Val(\Param1\s.s)
         EndSelect
         
       Case "LoadFont"
         Select Index
-          Case 1 : \Object\Argument$ = \Args$
-          Case 2 : \Param1\Argument$ = \Args$
-          Case 3 : \Param2\Argument$ = \Args$
-          Case 4 : \Param3\Argument$ = \Args$
+          Case 1 : \Object\s.s = \Args$
+          Case 2 : \Param1\s.s = \Args$
+          Case 3 : \Param2\s.s = \Args$
+          Case 4 : \Param3\s.s = \Args$
         EndSelect
         
       Case "LoadImage", 
@@ -600,61 +600,61 @@ Procedure CF_Add(*This.ParseStruct, Index)
            "SetGadgetState",
            "SetGadgetText"
         Select Index
-          Case 1 : \Object\Argument$ = \Args$
-          Case 2 : \Param1\Argument$=GetStr(\Args$)
+          Case 1 : \Object\s.s = \Args$
+          Case 2 : \Param1\s.s=GetStr(\Args$)
         EndSelect
         
       Case "ResizeGadget"
         Select Index
-          Case 1 : \Object\Argument$ = \Args$
+          Case 1 : \Object\s.s = \Args$
           Case 2 
             If "#PB_Ignore"=\Args$ 
-              \X\Argument = #PB_Ignore
+              \X\i.i = #PB_Ignore
             Else
-              \X\Argument = Val(\Args$)
+              \X\i.i = Val(\Args$)
             EndIf
             
           Case 3 
             If "#PB_Ignore"=\Args$ 
-              \Y\Argument = #PB_Ignore
+              \Y\i.i = #PB_Ignore
             Else
-              \Y\Argument = Val(\Args$)
+              \Y\i.i = Val(\Args$)
             EndIf
             
           Case 4 
             If "#PB_Ignore"=\Args$ 
-              \Width\Argument = #PB_Ignore
+              \Width\i.i = #PB_Ignore
             Else
-              \Width\Argument = Val(\Args$)
+              \Width\i.i = Val(\Args$)
             EndIf
             
           Case 5 
             If "#PB_Ignore"=\Args$ 
-              \Height\Argument = #PB_Ignore
+              \Height\i.i = #PB_Ignore
             Else
-              \Height\Argument = Val(\Args$)
+              \Height\i.i = Val(\Args$)
             EndIf
             
         EndSelect
         
       Case "SetGadgetColor"
         Select Index
-          Case 1 : \Object\Argument$ = \Args$
+          Case 1 : \Object\s.s = \Args$
           Case 2 
             Select \Args$
-              Case "#PB_Gadget_FrontColor"      : \Param1\Argument = #PB_Gadget_FrontColor      ; Цвет текста гаджета
-              Case "#PB_Gadget_BackColor"       : \Param1\Argument = #PB_Gadget_BackColor       ; Фон гаджета
-              Case "#PB_Gadget_LineColor"       : \Param1\Argument = #PB_Gadget_LineColor       ; Цвет линий сетки
-              Case "#PB_Gadget_TitleFrontColor" : \Param1\Argument = #PB_Gadget_TitleFrontColor ; Цвет текста в заголовке    (для гаджета CalendarGadget())
-              Case "#PB_Gadget_TitleBackColor"  : \Param1\Argument = #PB_Gadget_TitleBackColor  ; Цвет фона в заголовке 	 (для гаджета CalendarGadget())
-              Case "#PB_Gadget_GrayTextColor"   : \Param1\Argument = #PB_Gadget_GrayTextColor   ; Цвет для серого текста     (для гаджета CalendarGadget())
+              Case "#PB_Gadget_FrontColor"      : \Param1\i.i = #PB_Gadget_FrontColor      ; Цвет текста гаджета
+              Case "#PB_Gadget_BackColor"       : \Param1\i.i = #PB_Gadget_BackColor       ; Фон гаджета
+              Case "#PB_Gadget_LineColor"       : \Param1\i.i = #PB_Gadget_LineColor       ; Цвет линий сетки
+              Case "#PB_Gadget_TitleFrontColor" : \Param1\i.i = #PB_Gadget_TitleFrontColor ; Цвет текста в заголовке    (для гаджета CalendarGadget())
+              Case "#PB_Gadget_TitleBackColor"  : \Param1\i.i = #PB_Gadget_TitleBackColor  ; Цвет фона в заголовке 	 (для гаджета CalendarGadget())
+              Case "#PB_Gadget_GrayTextColor"   : \Param1\i.i = #PB_Gadget_GrayTextColor   ; Цвет для серого текста     (для гаджета CalendarGadget())
             EndSelect
             
           Case 3
-            \Param2\Argument = Val(\Args$)
+            \Param2\i.i = Val(\Args$)
             Result = GetVal(\Args$)
             If Result
-              \Param2\Argument = Result
+              \Param2\i.i = Result
             EndIf
         EndSelect
         
@@ -669,9 +669,9 @@ Procedure CF_Set(*ThisParse.ParseStruct)
   Protected Result, I, ID
   
   With *ThisParse ; 
-    ID = *This\get(\Object\Argument$)\Object\Argument
+    ID = *This\get(\Object\s.s)\Object\i.i
     
-    Select \Type\Argument$
+    Select \Type\s.s
       Case "GetActiveWindow"         : Result = GetActiveWindow()
       Case "GetActiveGadget"         : Result = GetActiveGadget()
         
@@ -686,13 +686,13 @@ Procedure CF_Set(*ThisParse.ParseStruct)
       Case "UseTIFFImageDecoder"     : UseTIFFImageDecoder()
         
       Case "LoadFont"
-        AddMapElement(\Font(), \Object\Argument$) 
+        AddMapElement(\Font(), \Object\s.s) 
         
-        \Font()\Name$=\Param1\Argument$
-        \Font()\Height=Val(\Param2\Argument$)
+        \Font()\Name$=\Param1\s.s
+        \Font()\Height=Val(\Param2\s.s)
         
-        For I = 0 To CountString(\Param3\Argument$,"|")
-          Select Trim(StringField(\Param3\Argument$,(I+1),"|"))
+        For I = 0 To CountString(\Param3\s.s,"|")
+          Select Trim(StringField(\Param3\s.s,(I+1),"|"))
             Case "#PB_Font_Bold"        : \Font()\Style|#PB_Font_Bold
             Case "#PB_Font_HighQuality" : \Font()\Style|#PB_Font_HighQuality
             Case "#PB_Font_Italic"      : \Font()\Style|#PB_Font_Italic
@@ -701,45 +701,45 @@ Procedure CF_Set(*ThisParse.ParseStruct)
           EndSelect
         Next
         
-        \Font()\Object\Argument=LoadFont(#PB_Any,\Font()\Name$,\Font()\Height,\Font()\Style)
+        \Font()\Object\i.i=LoadFont(#PB_Any,\Font()\Name$,\Font()\Height,\Font()\Style)
         
       Case "LoadImage"
-        AddMapElement(\Img(), \Object\Argument$) 
-        \Img()\Name$=\Param1\Argument$
-        \Img()\Object\Argument=LoadImage(#PB_Any, \Img()\Name$)
+        AddMapElement(\Img(), \Object\s.s) 
+        \Img()\Name$=\Param1\s.s
+        \Img()\Object\i.i=LoadImage(#PB_Any, \Img()\Name$)
         
     EndSelect
     
     If IsWindow(ID)
-      Select \Type\Argument$
+      Select \Type\s.s
         Case "SetActiveWindow"         : SetActiveWindow(ID)
-        Case "HideWindow"              : HideWindow(ID, \Param1\Argument)
-        Case "DisableWindow"           : DisableWindow(ID, \Param1\Argument)
+        Case "HideWindow"              : HideWindow(ID, \Param1\i.i)
+        Case "DisableWindow"           : DisableWindow(ID, \Param1\i.i)
       EndSelect
     EndIf
     
     If IsGadget(ID)
-      Select \Type\Argument$
+      Select \Type\s.s
         Case "SetActiveGadget"         : SetActiveGadget(ID)
-        Case "HideGadget"              : HideGadget(ID, \Param1\Argument)
-        Case "DisableGadget"           : DisableGadget(ID, \Param1\Argument)
-        Case "SetGadgetText"           : SetGadgetText(ID, \Param1\Argument$)
-        Case "SetGadgetColor"          : SetGadgetColor(ID, \Param1\Argument, \Param2\Argument)
+        Case "HideGadget"              : HideGadget(ID, \Param1\i.i)
+        Case "DisableGadget"           : DisableGadget(ID, \Param1\i.i)
+        Case "SetGadgetText"           : SetGadgetText(ID, \Param1\s.s)
+        Case "SetGadgetColor"          : SetGadgetColor(ID, \Param1\i.i, \Param2\i.i)
           
         Case "SetGadgetFont"
-          Protected Font = \Font(\Param1\Argument$)\Object\Argument
+          Protected Font = \Font(\Param1\s.s)\Object\i.i
           If IsFont(Font)
             SetGadgetFont(ID, FontID(Font))
           EndIf
           
         Case "SetGadgetState"
-          Protected Img = \Img(\Param1\Argument$)\Object\Argument
+          Protected Img = \Img(\Param1\s.s)\Object\i.i
           If IsImage(Img)
             SetGadgetState(ID, ImageID(Img))
           EndIf
           
         Case "ResizeGadget"
-          ResizeGadget(ID, \X\Argument, \Y\Argument, \Width\Argument, \Height\Argument)
+          ResizeGadget(ID, \X\i.i, \Y\i.i, \Width\i.i, \Height\i.i)
           Transformation::Update(ID)
           
       EndSelect
@@ -759,23 +759,23 @@ Procedure CF_Free(Object.i)
                #PB_GadgetType_ScrollArea
             
             ForEach ParsePBObject()
-              If \Parent\Argument = Object 
-                Select GadgetType(\Object\Argument)
+              If \Parent\i.i = Object 
+                Select GadgetType(\Object\i.i)
                   Case #PB_GadgetType_Panel, 
                        #PB_GadgetType_Container, 
                        #PB_GadgetType_ScrollArea
                     
-                    CF_Free(\Object\Argument)
+                    CF_Free(\Object\i.i)
                     
                   Default
                     ReplaceString(*This\Content\Text$, \Content\String$, Space(Len(\Content\String$)), #PB_String_InPlace, \Content\Position, 1)
                     
-                    *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count-1 
-                    If *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count =< 0
-                      DeleteMapElement(*This\get(), Str(\Parent\Argument)+"_"+\Type\Argument$)
+                    *This\get(Str(\Parent\i.i)+"_"+\Type\s.s)\Count-1 
+                    If *This\get(Str(\Parent\i.i)+"_"+\Type\s.s)\Count =< 0
+                      DeleteMapElement(*This\get(), Str(\Parent\i.i)+"_"+\Type\s.s)
                     EndIf
-                    DeleteMapElement(*This\get(), \Object\Argument$)
-                    DeleteMapElement(*This\get(), Str(\Object\Argument))
+                    DeleteMapElement(*This\get(), \Object\s.s)
+                    DeleteMapElement(*This\get(), Str(\Object\i.i))
                     DeleteElement(ParsePBObject())
                     
                 EndSelect
@@ -793,11 +793,11 @@ Procedure CF_Free(Object.i)
         ;         \Content\Length = 0
         ; Debug *This\Content\Text$
         
-        *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count-1 
-        If *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count =< 0
-          DeleteMapElement(*This\get(), Str(\Parent\Argument)+"_"+\Type\Argument$)
+        *This\get(Str(\Parent\i.i)+"_"+\Type\s.s)\Count-1 
+        If *This\get(Str(\Parent\i.i)+"_"+\Type\s.s)\Count =< 0
+          DeleteMapElement(*This\get(), Str(\Parent\i.i)+"_"+\Type\s.s)
         EndIf
-        DeleteMapElement(*This\get(), \Object\Argument$)
+        DeleteMapElement(*This\get(), \Object\s.s)
         DeleteMapElement(*This\get(), Str(Object))
         DeleteElement(ParsePBObject())
         
@@ -1007,11 +1007,11 @@ Procedure CO_Free(Object)
   
   With ParsePBObject()
     ;     ChangeCurrentElement(ParsePBObject(), *This\get(Str(Object))\Adress)
-    ;     *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count-1 
-    ;     If *This\get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count =< 0
-    ;       DeleteMapElement(*This\get(), Str(\Parent\Argument)+"_"+\Type\Argument$)
+    ;     *This\get(Str(\Parent\i.i)+"_"+\Type\s.s)\Count-1 
+    ;     If *This\get(Str(\Parent\i.i)+"_"+\Type\s.s)\Count =< 0
+    ;       DeleteMapElement(*This\get(), Str(\Parent\i.i)+"_"+\Type\s.s)
     ;     EndIf
-    ;     DeleteMapElement(*This\get(), \Object\Argument$)
+    ;     DeleteMapElement(*This\get(), \Object\s.s)
     ;     DeleteMapElement(*This\get(), Str(Object))
     ;     DeleteElement(ParsePBObject())
     CF_Free(Object)
@@ -1040,14 +1040,14 @@ Procedure CO_Events()
       With ParsePBObject()
         ;         PushListPosition(ParsePBObject())
         ;         ForEach ParsePBObject()
-        ;           If Object = \Object\Argument
+        ;           If Object = \Object\i.i
         change_current_object_from_id(Object)
-        Transformation::Create(\Object\Argument, \Parent\Argument, \Window\Argument, \Item, 5)
-        If IsGadget(\Object\Argument) And GadgetType(\Object\Argument) = #PB_GadgetType_Splitter
-          Transformation::Free(GetGadgetAttribute(\Object\Argument, #PB_Splitter_FirstGadget))
-          Transformation::Free(GetGadgetAttribute(\Object\Argument, #PB_Splitter_SecondGadget))
+        Transformation::Create(\Object\i.i, \Parent\i.i, \Window\i.i, \Item, 5)
+        If IsGadget(\Object\i.i) And GadgetType(\Object\i.i) = #PB_GadgetType_Splitter
+          Transformation::Free(GetGadgetAttribute(\Object\i.i, #PB_Splitter_FirstGadget))
+          Transformation::Free(GetGadgetAttribute(\Object\i.i, #PB_Splitter_SecondGadget))
         EndIf
-        Properties::Init(\Object\Argument, \Object\Argument$, \Flag\Argument$)
+        Properties::Init(\Object\i.i, \Object\s.s, \Flag\s.s)
         ;             Break
         ;           EndIf
         ;         Next
@@ -1098,77 +1098,77 @@ Procedure CO_Insert(*ThisParse.ParseStruct, Parent)
     ; 
     Protected Variable$, VariableLength
     
-    If \Type\Argument$ = "OpenWindow"
-      Variable$ = #CRLF$+"Global "+\Object\Argument$+"=-1"
+    If \Type\s.s = "OpenWindow"
+      Variable$ = #CRLF$+"Global "+\Object\s.s+"=-1"
     Else
-      Variable$ = ","+#CRLF$+Space(Len("Global "))+\Object\Argument$+"=-1"
+      Variable$ = ","+#CRLF$+Space(Len("Global "))+\Object\s.s+"=-1"
     EndIf
     VariableLength = Len(Variable$)
     
-    Debug "  Code_Object" + *This\get(*This\Window\Argument$)\Code("Code_Object")\Position
-    *This\Content\Text$ = InsertString(*This\Content\Text$, Variable$, *This\get(*This\Window\Argument$)\Code("Code_Object")\Position) 
-    *This\get(*This\Window\Argument$)\Code("Code_Object")\Position + VariableLength
+    Debug "  Code_Object" + *This\get(*This\Window\s.s)\Code("Code_Object")\Position
+    *This\Content\Text$ = InsertString(*This\Content\Text$, Variable$, *This\get(*This\Window\s.s)\Code("Code_Object")\Position) 
+    *This\get(*This\Window\s.s)\Code("Code_Object")\Position + VariableLength
     
-    Debug "  Code_Function" + *This\get(*This\get(Str(Parent))\Object\Argument$)\Code("Code_Function")\Position
-    \Content\Position = *This\get(*This\get(Str(Parent))\Object\Argument$)\Code("Code_Function")\Position  + VariableLength
+    Debug "  Code_Function" + *This\get(*This\get(Str(Parent))\Object\s.s)\Code("Code_Function")\Position
+    \Content\Position = *This\get(*This\get(Str(Parent))\Object\s.s)\Code("Code_Function")\Position  + VariableLength
     
     If VariableLength
       PushListPosition(ParsePBObject())
       ForEach ParsePBObject()
         If ParsePBObject()\Container 
-          *This\get(ParsePBObject()\Object\Argument$)\Code("Code_Function")\Position + VariableLength
+          *This\get(ParsePBObject()\Object\s.s)\Code("Code_Function")\Position + VariableLength
         EndIf
       Next
       PopListPosition(ParsePBObject())
     EndIf
     
-    If Asc(\Object\Argument$) = '#'
-      ID$ = \Object\Argument$
+    If Asc(\Object\s.s) = '#'
+      ID$ = \Object\s.s
     Else
-      Select Asc(\Object\Argument$)
+      Select Asc(\Object\s.s)
         Case '0' To '9'
-          ID$ = Chr(Asc(\Object\Argument$))
+          ID$ = Chr(Asc(\Object\s.s))
         Default
-          Handle$ = \Object\Argument$+" = "
+          Handle$ = \Object\s.s+" = "
           ID$ = "#PB_Any"
       EndSelect
     EndIf
     
-    Select \Type\Argument$
-        Case "OpenWindow"          : \Content\String$ = Handle$+"OpenWindow("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)                                                : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "ButtonGadget"        : \Content\String$ = Handle$+"ButtonGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)                                                : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "StringGadget"        : \Content\String$ = Handle$+"StringGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)                                                : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "TextGadget"          : \Content\String$ = Handle$+"TextGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)                                                : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "CheckBoxGadget"      : \Content\String$ = Handle$+"CheckBoxGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)                                                : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-      Case "OptionGadget"        : \Content\String$ = Handle$+"OptionGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)
-        Case "ListViewGadget"      : \Content\String$ = Handle$+"ListViewGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$                                                                                : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "FrameGadget"         : \Content\String$ = Handle$+"FrameGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)                                                : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "ComboBoxGadget"      : \Content\String$ = Handle$+"ComboBoxGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$                                                                                : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "ImageGadget"         : \Content\String$ = Handle$+"ImageGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$                                                                 : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "HyperLinkGadget"     : \Content\String$ = Handle$+"HyperLinkGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)+", "+\Param1\Argument$                                  : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "ContainerGadget"     : \Content\String$ = Handle$+"ContainerGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$                                                                                : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "ListIconGadget"      : \Content\String$ = Handle$+"ListIconGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)+", "+\Param1\Argument$                                  : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-      Case "IPAddressGadget"     : \Content\String$ = Handle$+"IPAddressGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$
-        Case "ProgressBarGadget"   : \Content\String$ = Handle$+"ProgressBarGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$+", "+\Param2\Argument$                                                   : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "ScrollBarGadget"     : \Content\String$ = Handle$+"ScrollBarGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$+", "+\Param2\Argument$+", "+\Param3\Argument$                                     : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "ScrollAreaGadget"    : \Content\String$ = Handle$+"ScrollAreaGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$+", "+\Param2\Argument$                        : If \Param3\Argument$ : \Content\String$ +", "+\Param3\Argument$ : EndIf : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf 
-        Case "TrackBarGadget"      : \Content\String$ = Handle$+"TrackBarGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$+", "+\Param2\Argument$                          : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-      Case "WebGadget"           : \Content\String$ = Handle$+"WebGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)
-        Case "ButtonImageGadget"   : \Content\String$ = Handle$+"ButtonImageGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$                                              : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "CalendarGadget"      : \Content\String$ = Handle$+"CalendarGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$                                                                         : If \Param1\Argument$ : \Content\String$ +", "+\Param1\Argument$ : EndIf : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "DateGadget"          : \Content\String$ = Handle$+"DateGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)                                    : If \Param1\Argument$ : \Content\String$ +", "+\Param1\Argument$ : EndIf : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "EditorGadget"        : \Content\String$ = Handle$+"EditorGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$                                                                           : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "ExplorerListGadget"  : \Content\String$ = Handle$+"ExplorerListGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)                            : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "ExplorerTreeGadget"  : \Content\String$ = Handle$+"ExplorerTreeGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)                            : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "ExplorerComboGadget" : \Content\String$ = Handle$+"ExplorerComboGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)                           : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "SpinGadget"          : \Content\String$ = Handle$+"SpinGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$+", "+\Param2\Argument$                              : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "TreeGadget"          : \Content\String$ = Handle$+"TreeGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$                                                                             : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-      Case "PanelGadget"         : \Content\String$ = Handle$+"PanelGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$ 
-        Case "SplitterGadget"      : \Content\String$ = Handle$+"SplitterGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$+", "+\Param2\Argument$                                                   : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "MDIGadget"           : \Content\String$ = Handle$+"MDIGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$+", "+\Param2\Argument$                                                   : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf 
-      Case "ScintillaGadget"     : \Content\String$ = Handle$+"ScintillaGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$
-      Case "ShortcutGadget"      : \Content\String$ = Handle$+"ShortcutGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$
-        Case "CanvasGadget"        : \Content\String$ = Handle$+"CanvasGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$                                                                                : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
+    Select \Type\s.s
+        Case "OpenWindow"          : \Content\String$ = Handle$+"OpenWindow("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)                                                : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "ButtonGadget"        : \Content\String$ = Handle$+"ButtonGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)                                                : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "StringGadget"        : \Content\String$ = Handle$+"StringGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)                                                : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "TextGadget"          : \Content\String$ = Handle$+"TextGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)                                                : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "CheckBoxGadget"      : \Content\String$ = Handle$+"CheckBoxGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)                                                : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+      Case "OptionGadget"        : \Content\String$ = Handle$+"OptionGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)
+        Case "ListViewGadget"      : \Content\String$ = Handle$+"ListViewGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s                                                                                : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "FrameGadget"         : \Content\String$ = Handle$+"FrameGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)                                                : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "ComboBoxGadget"      : \Content\String$ = Handle$+"ComboBoxGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s                                                                                : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "ImageGadget"         : \Content\String$ = Handle$+"ImageGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s                                                                 : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "HyperLinkGadget"     : \Content\String$ = Handle$+"HyperLinkGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)+", "+\Param1\s.s                                  : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "ContainerGadget"     : \Content\String$ = Handle$+"ContainerGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s                                                                                : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "ListIconGadget"      : \Content\String$ = Handle$+"ListIconGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)+", "+\Param1\s.s                                  : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+      Case "IPAddressGadget"     : \Content\String$ = Handle$+"IPAddressGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s
+        Case "ProgressBarGadget"   : \Content\String$ = Handle$+"ProgressBarGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s+", "+\Param2\s.s                                                   : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "ScrollBarGadget"     : \Content\String$ = Handle$+"ScrollBarGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s+", "+\Param2\s.s+", "+\Param3\s.s                                     : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "ScrollAreaGadget"    : \Content\String$ = Handle$+"ScrollAreaGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s+", "+\Param2\s.s                        : If \Param3\s.s : \Content\String$ +", "+\Param3\s.s : EndIf : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf 
+        Case "TrackBarGadget"      : \Content\String$ = Handle$+"TrackBarGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s+", "+\Param2\s.s                          : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+      Case "WebGadget"           : \Content\String$ = Handle$+"WebGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)
+        Case "ButtonImageGadget"   : \Content\String$ = Handle$+"ButtonImageGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s                                              : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "CalendarGadget"      : \Content\String$ = Handle$+"CalendarGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s                                                                         : If \Param1\s.s : \Content\String$ +", "+\Param1\s.s : EndIf : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "DateGadget"          : \Content\String$ = Handle$+"DateGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)                                    : If \Param1\s.s : \Content\String$ +", "+\Param1\s.s : EndIf : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "EditorGadget"        : \Content\String$ = Handle$+"EditorGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s                                                                           : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "ExplorerListGadget"  : \Content\String$ = Handle$+"ExplorerListGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)                            : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "ExplorerTreeGadget"  : \Content\String$ = Handle$+"ExplorerTreeGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)                            : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "ExplorerComboGadget" : \Content\String$ = Handle$+"ExplorerComboGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)                           : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "SpinGadget"          : \Content\String$ = Handle$+"SpinGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s+", "+\Param2\s.s                              : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "TreeGadget"          : \Content\String$ = Handle$+"TreeGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s                                                                             : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+      Case "PanelGadget"         : \Content\String$ = Handle$+"PanelGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s 
+        Case "SplitterGadget"      : \Content\String$ = Handle$+"SplitterGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s+", "+\Param2\s.s                                                   : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "MDIGadget"           : \Content\String$ = Handle$+"MDIGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s+", "+\Param2\s.s                                                   : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf 
+      Case "ScintillaGadget"     : \Content\String$ = Handle$+"ScintillaGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s
+      Case "ShortcutGadget"      : \Content\String$ = Handle$+"ShortcutGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s
+        Case "CanvasGadget"        : \Content\String$ = Handle$+"CanvasGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s                                                                                : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
     EndSelect
     
     \Content\String$+")" 
@@ -1181,22 +1181,22 @@ Procedure CO_Insert(*ThisParse.ParseStruct, Parent)
     
     
     ; У окна меняем последную позицию.
-    *This\get(*This\Window\Argument$)\Code("Code_Function")\Position + (*This\Content\Length + Len(#CRLF$+Space(Indent)))
+    *This\get(*This\Window\s.s)\Code("Code_Function")\Position + (*This\Content\Length + Len(#CRLF$+Space(Indent)))
     
     ; 
     If *This\Container
       ; Сохряняем у объект-а последную позицию.
-      *This\get(\Object\Argument$)\Code("Code_Function")\Position = *This\Content\Position+*This\Content\Length+Len(#CRLF$+Space(Indent))
-      Debug \Object\Argument$ +" "+ *This\get(\Object\Argument$)\Code("Code_Function")\Position 
+      *This\get(\Object\s.s)\Code("Code_Function")\Position = *This\Content\Position+*This\Content\Length+Len(#CRLF$+Space(Indent))
+      Debug \Object\s.s +" "+ *This\get(\Object\s.s)\Code("Code_Function")\Position 
       
-      Select *This\Type\Argument$
+      Select *This\Type\s.s
         Case "PanelGadget", "ContainerGadget", "ScrollAreaGadget", "CanvasGadget"
           ; 
           *This\Content\Text$ = InsertString(*This\Content\Text$, "CloseGadgetList()"+#CRLF$+Space(Indent), *This\Content\Position+*This\Content\Length+Len(#CRLF$+Space(Indent))) 
           *This\Content\Position+Len("CloseGadgetList()"+#CRLF$+Space(Indent))
           
           ; У окна меняем последную позицию.
-          *This\get(*This\Window\Argument$)\Code("Code_Function")\Position + Len("CloseGadgetList()"+#CRLF$+Space(Indent))
+          *This\get(*This\Window\s.s)\Code("Code_Function")\Position + Len("CloseGadgetList()"+#CRLF$+Space(Indent))
           
       EndSelect
       
@@ -1207,9 +1207,9 @@ Procedure CO_Insert(*ThisParse.ParseStruct, Parent)
           Select ParsePBObject()\Container
             Case #PB_GadgetType_Panel, #PB_GadgetType_Container, #PB_GadgetType_ScrollArea, #PB_GadgetType_Canvas
               ; Проверяем позицию родителя в генерируемом коде
-              If *This\get(ParsePBObject()\Object\Argument$)\Code("Code_Function")\Position>*This\Content\Position
+              If *This\get(ParsePBObject()\Object\s.s)\Code("Code_Function")\Position>*This\Content\Position
                 ; У родителя меняем последную позицию.
-                *This\get(ParsePBObject()\Object\Argument$)\Code("Code_Function")\Position + (*This\Content\Length + Len(#CRLF$+Space(Indent)))
+                *This\get(ParsePBObject()\Object\s.s)\Code("Code_Function")\Position + (*This\Content\Length + Len(#CRLF$+Space(Indent)))
               EndIf
           EndSelect
         Next
@@ -1219,7 +1219,7 @@ Procedure CO_Insert(*ThisParse.ParseStruct, Parent)
     EndIf
     
     ; Записываем у родителя позицию конца добавления объекта
-    *This\get(*This\get(Str(Parent))\Object\Argument$)\Code("Code_Function")\Position = *This\Content\Position+*This\Content\Length+Len(#CRLF$+Space(Indent))
+    *This\get(*This\get(Str(Parent))\Object\s.s)\Code("Code_Function")\Position = *This\Content\Position+*This\Content\Length+Len(#CRLF$+Space(Indent))
   EndWith
 EndProcedure
 
@@ -1239,105 +1239,105 @@ Procedure CO_Create(Type$, X, Y, Parent=-1)
     Else ; Создали новое окно
       X=0
       Y=0
-      \Parent\Argument =- 1
+      \Parent\i.i =- 1
     EndIf
     
     Select Type$
-      Case "Window" : \Type\Argument$ = "OpenWindow"
-      Case "Menu", "ToolBar" : \Type\Argument$ = Type$
+      Case "Window" : \Type\s.s = "OpenWindow"
+      Case "Menu", "ToolBar" : \Type\s.s = Type$
       Default 
-        \Type\Argument$=ULCase(Type$) + "Gadget"
+        \Type\s.s=ULCase(Type$) + "Gadget"
         
-        \Type\Argument$ = ReplaceString(\Type\Argument$, "box","Box")
-        \Type\Argument$ = ReplaceString(\Type\Argument$, "link","Link")
-        \Type\Argument$ = ReplaceString(\Type\Argument$, "bar","Bar")
-        \Type\Argument$ = ReplaceString(\Type\Argument$, "area","Area")
-        \Type\Argument$ = ReplaceString(\Type\Argument$, "Ipa","IPA")
+        \Type\s.s = ReplaceString(\Type\s.s, "box","Box")
+        \Type\s.s = ReplaceString(\Type\s.s, "link","Link")
+        \Type\s.s = ReplaceString(\Type\s.s, "bar","Bar")
+        \Type\s.s = ReplaceString(\Type\s.s, "area","Area")
+        \Type\s.s = ReplaceString(\Type\s.s, "Ipa","IPA")
         
-        \Type\Argument$ = ReplaceString(\Type\Argument$, "view","View")
-        \Type\Argument$ = ReplaceString(\Type\Argument$, "icon","Icon")
-        \Type\Argument$ = ReplaceString(\Type\Argument$, "image","Image")
-        \Type\Argument$ = ReplaceString(\Type\Argument$, "combo","Combo")
-        \Type\Argument$ = ReplaceString(\Type\Argument$, "list","List")
-        \Type\Argument$ = ReplaceString(\Type\Argument$, "tree","Tree")
+        \Type\s.s = ReplaceString(\Type\s.s, "view","View")
+        \Type\s.s = ReplaceString(\Type\s.s, "icon","Icon")
+        \Type\s.s = ReplaceString(\Type\s.s, "image","Image")
+        \Type\s.s = ReplaceString(\Type\s.s, "combo","Combo")
+        \Type\s.s = ReplaceString(\Type\s.s, "list","List")
+        \Type\s.s = ReplaceString(\Type\s.s, "tree","Tree")
     EndSelect
     
     Protected *ThisParse.ParseStruct = AddElement(ParsePBObject())
     If  *ThisParse
       Restore Model 
       For i=1 To 1+33 ; gadget count
-        For j=1 To 7  ; argument count
+        For j=1 To 7  ; i.i count
           Read.s Buffer
           
           Select j
             Case 1  
-              If \Type\Argument$=Buffer
+              If \Type\s.s=Buffer
                 BuffType$ = Buffer
               EndIf
           EndSelect
           
-          If BuffType$ = \Type\Argument$
+          If BuffType$ = \Type\s.s
             Select j
               Case 1 
-                ParsePBObject()\Type\Argument$=Buffer
+                ParsePBObject()\Type\s.s=Buffer
                 If Buffer = "OpenWindow"
-                  \Class\Argument$=ReplaceString(Buffer, "Open","")+"_"
+                  \Class\s.s=ReplaceString(Buffer, "Open","")+"_"
                 Else
-                  \Class\Argument$=ReplaceString(Buffer, "Gadget","")+"_"
+                  \Class\s.s=ReplaceString(Buffer, "Gadget","")+"_"
                 EndIf
                 
-              Case 2 : ParsePBObject()\Width\Argument$=Buffer
-              Case 3 : ParsePBObject()\Height\Argument$=Buffer
-              Case 4 : ParsePBObject()\Param1\Argument$=Buffer
-              Case 5 : ParsePBObject()\Param2\Argument$=Buffer
-              Case 6 : ParsePBObject()\Param3\Argument$=Buffer
-              Case 7 : ParsePBObject()\Flag\Argument$=Buffer
+              Case 2 : ParsePBObject()\Width\s.s=Buffer
+              Case 3 : ParsePBObject()\Height\s.s=Buffer
+              Case 4 : ParsePBObject()\Param1\s.s=Buffer
+              Case 5 : ParsePBObject()\Param2\s.s=Buffer
+              Case 6 : ParsePBObject()\Param3\s.s=Buffer
+              Case 7 : ParsePBObject()\Flag\s.s=Buffer
             EndSelect
           EndIf
         Next  
         BuffType$ = ""
       Next  
       
-      \Flag\Argument=Flag(ParsePBObject()\Flag\Argument$)
-      \Class\Argument$+\get(Str(Parent)+"_"+\Type\Argument$)\Count
-      \Caption\Argument$ = \Class\Argument$
+      \Flag\i.i=Flag(ParsePBObject()\Flag\s.s)
+      \Class\s.s+\get(Str(Parent)+"_"+\Type\s.s)\Count
+      \Caption\s.s = \Class\s.s
       
       ; Формируем имя объекта
-      ParsePBObject()\Class\Argument$ = \Class\Argument$
-      If \get(Str(Parent))\Object\Argument$
-        \Object\Argument$ = \get(Str(Parent))\Object\Argument$+"_"+\Class\Argument$
+      ParsePBObject()\Class\s.s = \Class\s.s
+      If \get(Str(Parent))\Object\s.s
+        \Object\s.s = \get(Str(Parent))\Object\s.s+"_"+\Class\s.s
       Else
-        \Object\Argument$ = \Class\Argument$
-        ParsePBObject()\Flag\Argument$="Flag"
+        \Object\s.s = \Class\s.s
+        ParsePBObject()\Flag\s.s="Flag"
       EndIf
       
-      \X\Argument = X
-      \Y\Argument = Y
-      \Width\Argument = Val(ParsePBObject()\Width\Argument$)
-      \Height\Argument = Val(ParsePBObject()\Height\Argument$)
+      \X\i.i = X
+      \Y\i.i = Y
+      \Width\i.i = Val(ParsePBObject()\Width\s.s)
+      \Height\i.i = Val(ParsePBObject()\Height\s.s)
       
-      ParsePBObject()\X\Argument$ = Str(\X\Argument)
-      ParsePBObject()\Y\Argument$ = Str(\Y\Argument)
-      ParsePBObject()\Type\Argument$ = \Type\Argument$
-      ParsePBObject()\Object\Argument$ = \Object\Argument$
-      ParsePBObject()\Caption\Argument$ = \Caption\Argument$
+      ParsePBObject()\X\s.s = Str(\X\i.i)
+      ParsePBObject()\Y\s.s = Str(\Y\i.i)
+      ParsePBObject()\Type\s.s = \Type\s.s
+      ParsePBObject()\Object\s.s = \Object\s.s
+      ParsePBObject()\Caption\s.s = \Caption\s.s
       
       ; Сначала определять кто есть кто.
-      Select \Type\Argument$
+      Select \Type\s.s
         Case "OpenWindow" 
           \Container =- 1 
-          \Window\Argument$ = \Object\Argument$ 
-          \Parent\Argument$ = \Object\Argument$
+          \Window\s.s = \Object\s.s 
+          \Parent\s.s = \Object\s.s
         Case "PanelGadget" : \Container = #PB_GadgetType_Panel
-          \Parent\Argument$ = \Object\Argument$
+          \Parent\s.s = \Object\s.s
         Case "ContainerGadget" : \Container = #PB_GadgetType_Container
-          \Parent\Argument$ = \Object\Argument$
+          \Parent\s.s = \Object\s.s
         Case "ScrollAreaGadget" : \Container = #PB_GadgetType_ScrollArea
-          \Parent\Argument$ = \Object\Argument$
+          \Parent\s.s = \Object\s.s
         Case "CanvasGadget"
-          If ((\Flag\Argument&#PB_Canvas_Container)=#PB_Canvas_Container)
+          If ((\Flag\i.i&#PB_Canvas_Container)=#PB_Canvas_Container)
             \Container = #PB_GadgetType_Canvas
-            \Parent\Argument$ = \Object\Argument$
+            \Parent\s.s = \Object\s.s
           EndIf
         Default
           \Container = #PB_GadgetType_Unknown
@@ -1348,26 +1348,26 @@ Procedure CO_Create(Type$, X, Y, Parent=-1)
         Restore Content
         Read.s Buffer
         \Content\Text$ = Buffer
-        \get(\Window\Argument$)\Code("Code_Object")\Position = 16
-        \get(\get(Str(Parent))\Object\Argument$)\Code("Code_Function")\Position = 249 ; 176+5
+        \get(\Window\s.s)\Code("Code_Object")\Position = 16
+        \get(\get(Str(Parent))\Object\s.s)\Code("Code_Function")\Position = 249 ; 176+5
       EndIf
       
       CO_Insert(*ThisParse, Parent) 
-      \Parent\Argument = Parent
+      \Parent\i.i = Parent
     EndIf
     
-    Position = WE_Tree_0_Position(WE_Tree_0, Parent)
+    Position = inspector_get_pos(WE_Tree_0, Parent)
     
     Object=CallFunctionFast(@CO_Open())
     
     If IsGadget(Object)
-      ;       Select \Type\Argument
+      ;       Select \Type\i.i
       ;         Case #PB_GadgetType_Panel
       ;           ;OpenGadgetList(Object, 0)
-      ;           AddGadgetItem(Object, -1, \Object\Argument$)
+      ;           AddGadgetItem(Object, -1, \Object\s.s)
       ;       EndSelect
       
-      Select \Type\Argument ; GadgetType(Object)
+      Select \Type\i.i ; GadgetType(Object)
         Case #PB_GadgetType_Panel, 
              #PB_GadgetType_Container, 
              #PB_GadgetType_ScrollArea
@@ -1375,7 +1375,7 @@ Procedure CO_Create(Type$, X, Y, Parent=-1)
       EndSelect
     EndIf
     
-    WE_Tree_0_Update(WE_Tree_0, Position)
+    inspector_add_pos(WE_Tree_0, Position)
     
     
     If GadgetList 
@@ -1484,90 +1484,90 @@ Procedure CO_Open() ; Ok
   
   With *This
     ;
-    Select \Type\Argument$
-      Case "FormGadget"          : \Type\Argument =- 1  : \Window\Argument =- 1  : \Object\Argument = CanvasGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, #PB_Canvas_Container) : CloseGadgetList()
-      Case "OpenWindow"          : \Type\Argument =- 1  : \Window\Argument =- 1  
-        \Object\Argument = AddGadgetItem(WE_ScrollArea_0, #PB_Any, \Caption\Argument$, 0, \Flag\Argument)
-        ResizeWindow(\Object\Argument, 20,20,\Width\Argument,\Height\Argument); , \Flag\Argument, \Param1\Argument)
-                                                                              ;Case "OpenWindow"          : \Type\Argument =- 1  : \Window\Argument =- 1  : \Object\Argument = OpenWindow          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument, \Param1\Argument)
-      Case "ButtonGadget"        : \Type\Argument = #PB_GadgetType_Button        : \Object\Argument = ButtonGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
-      Case "StringGadget"        : \Type\Argument = #PB_GadgetType_String        : \Object\Argument = StringGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
-      Case "TextGadget"          : \Type\Argument = #PB_GadgetType_Text          : \Object\Argument = TextGadget          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
-      Case "CheckBoxGadget"      : \Type\Argument = #PB_GadgetType_CheckBox      : \Object\Argument = CheckBoxGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
-      Case "OptionGadget"        : \Type\Argument = #PB_GadgetType_Option        : \Object\Argument = OptionGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$)
-      Case "ListViewGadget"      : \Type\Argument = #PB_GadgetType_ListView      : \Object\Argument = ListViewGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Flag\Argument)
-      Case "FrameGadget"         : \Type\Argument = #PB_GadgetType_Frame         : \Object\Argument = FrameGadget         (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
-      Case "ComboBoxGadget"      : \Type\Argument = #PB_GadgetType_ComboBox      : \Object\Argument = ComboBoxGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Flag\Argument)
-      Case "ImageGadget"         : \Type\Argument = #PB_GadgetType_Image         : \Object\Argument = ImageGadget         (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Flag\Argument)
-      Case "HyperLinkGadget"     : \Type\Argument = #PB_GadgetType_HyperLink     : \Object\Argument = HyperLinkGadget     (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Param1\Argument, \Flag\Argument)
-      Case "ContainerGadget"     : \Type\Argument = #PB_GadgetType_Container     : \Object\Argument = ContainerGadget     (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Flag\Argument)
-      Case "ListIconGadget"      : \Type\Argument = #PB_GadgetType_ListIcon      : \Object\Argument = ListIconGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Param1\Argument, \Flag\Argument)
-      Case "IPAddressGadget"     : \Type\Argument = #PB_GadgetType_IPAddress     : \Object\Argument = IPAddressGadget     (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument)
-      Case "ProgressBarGadget"   : \Type\Argument = #PB_GadgetType_ProgressBar   : \Object\Argument = ProgressBarGadget   (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Flag\Argument)
-      Case "ScrollBarGadget"     : \Type\Argument = #PB_GadgetType_ScrollBar     : \Object\Argument = ScrollBarGadget     (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Param3\Argument, \Flag\Argument)
-      Case "ScrollAreaGadget"    : \Type\Argument = #PB_GadgetType_ScrollArea    : \Object\Argument = ScrollAreaGadget    (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Param3\Argument, \Flag\Argument) 
-      Case "TrackBarGadget"      : \Type\Argument = #PB_GadgetType_TrackBar      : \Object\Argument = TrackBarGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Flag\Argument)
-        ;       Case "WebGadget"           : \Type\Argument = #PB_GadgetType_Web           : \Object\Argument = WebGadget           (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$)
-      Case "ButtonImageGadget"   : \Type\Argument = #PB_GadgetType_ButtonImage   : \Object\Argument = ButtonImageGadget   (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Flag\Argument)
-      Case "CalendarGadget"      : \Type\Argument = #PB_GadgetType_Calendar      : \Object\Argument = CalendarGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Flag\Argument)
-      Case "DateGadget"          : \Type\Argument = #PB_GadgetType_Date          : \Object\Argument = DateGadget          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Param1\Argument, \Flag\Argument)
-      Case "EditorGadget"        : \Type\Argument = #PB_GadgetType_Editor        : \Object\Argument = EditorGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Flag\Argument)
-      Case "ExplorerListGadget"  : \Type\Argument = #PB_GadgetType_ExplorerList  : \Object\Argument = ExplorerListGadget  (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
-      Case "ExplorerTreeGadget"  : \Type\Argument = #PB_GadgetType_ExplorerTree  : \Object\Argument = ExplorerTreeGadget  (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
-      Case "ExplorerComboGadget" : \Type\Argument = #PB_GadgetType_ExplorerCombo : \Object\Argument = ExplorerComboGadget (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Caption\Argument$, \Flag\Argument)
-      Case "SpinGadget"          : \Type\Argument = #PB_GadgetType_Spin          : \Object\Argument = SpinGadget          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Flag\Argument)
-      Case "TreeGadget"          : \Type\Argument = #PB_GadgetType_Tree          : \Object\Argument = TreeGadget          (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Flag\Argument)
-      Case "PanelGadget"         : \Type\Argument = #PB_GadgetType_Panel         : \Object\Argument = PanelGadget         (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument) 
+    Select \Type\s.s
+      Case "FormGadget"          : \Type\i.i =- 1  : \Window\i.i =- 1  : \Object\i.i = CanvasGadget        (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, #PB_Canvas_Container) : CloseGadgetList()
+      Case "OpenWindow"          : \Type\i.i =- 1  : \Window\i.i =- 1  
+        \Object\i.i = AddGadgetItem(WE_ScrollArea_0, #PB_Any, \Caption\s.s, 0, \Flag\i.i)
+        ResizeWindow(\Object\i.i, 20,20,\Width\i.i,\Height\i.i); , \Flag\i.i, \Param1\i.i)
+                                                                              ;Case "OpenWindow"          : \Type\i.i =- 1  : \Window\i.i =- 1  : \Object\i.i = OpenWindow          (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Caption\s.s, \Flag\i.i, \Param1\i.i)
+      Case "ButtonGadget"        : \Type\i.i = #PB_GadgetType_Button        : \Object\i.i = ButtonGadget        (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Caption\s.s, \Flag\i.i)
+      Case "StringGadget"        : \Type\i.i = #PB_GadgetType_String        : \Object\i.i = StringGadget        (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Caption\s.s, \Flag\i.i)
+      Case "TextGadget"          : \Type\i.i = #PB_GadgetType_Text          : \Object\i.i = TextGadget          (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Caption\s.s, \Flag\i.i)
+      Case "CheckBoxGadget"      : \Type\i.i = #PB_GadgetType_CheckBox      : \Object\i.i = CheckBoxGadget      (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Caption\s.s, \Flag\i.i)
+      Case "OptionGadget"        : \Type\i.i = #PB_GadgetType_Option        : \Object\i.i = OptionGadget        (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Caption\s.s)
+      Case "ListViewGadget"      : \Type\i.i = #PB_GadgetType_ListView      : \Object\i.i = ListViewGadget      (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Flag\i.i)
+      Case "FrameGadget"         : \Type\i.i = #PB_GadgetType_Frame         : \Object\i.i = FrameGadget         (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Caption\s.s, \Flag\i.i)
+      Case "ComboBoxGadget"      : \Type\i.i = #PB_GadgetType_ComboBox      : \Object\i.i = ComboBoxGadget      (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Flag\i.i)
+      Case "ImageGadget"         : \Type\i.i = #PB_GadgetType_Image         : \Object\i.i = ImageGadget         (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Param1\i.i, \Flag\i.i)
+      Case "HyperLinkGadget"     : \Type\i.i = #PB_GadgetType_HyperLink     : \Object\i.i = HyperLinkGadget     (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Caption\s.s, \Param1\i.i, \Flag\i.i)
+      Case "ContainerGadget"     : \Type\i.i = #PB_GadgetType_Container     : \Object\i.i = ContainerGadget     (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Flag\i.i)
+      Case "ListIconGadget"      : \Type\i.i = #PB_GadgetType_ListIcon      : \Object\i.i = ListIconGadget      (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Caption\s.s, \Param1\i.i, \Flag\i.i)
+      Case "IPAddressGadget"     : \Type\i.i = #PB_GadgetType_IPAddress     : \Object\i.i = IPAddressGadget     (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i)
+      Case "ProgressBarGadget"   : \Type\i.i = #PB_GadgetType_ProgressBar   : \Object\i.i = ProgressBarGadget   (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Param1\i.i, \Param2\i.i, \Flag\i.i)
+      Case "ScrollBarGadget"     : \Type\i.i = #PB_GadgetType_ScrollBar     : \Object\i.i = ScrollBarGadget     (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Param1\i.i, \Param2\i.i, \Param3\i.i, \Flag\i.i)
+      Case "ScrollAreaGadget"    : \Type\i.i = #PB_GadgetType_ScrollArea    : \Object\i.i = ScrollAreaGadget    (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Param1\i.i, \Param2\i.i, \Param3\i.i, \Flag\i.i) 
+      Case "TrackBarGadget"      : \Type\i.i = #PB_GadgetType_TrackBar      : \Object\i.i = TrackBarGadget      (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Param1\i.i, \Param2\i.i, \Flag\i.i)
+        ;       Case "WebGadget"           : \Type\i.i = #PB_GadgetType_Web           : \Object\i.i = WebGadget           (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Caption\s.s)
+      Case "ButtonImageGadget"   : \Type\i.i = #PB_GadgetType_ButtonImage   : \Object\i.i = ButtonImageGadget   (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Param1\i.i, \Flag\i.i)
+      Case "CalendarGadget"      : \Type\i.i = #PB_GadgetType_Calendar      : \Object\i.i = CalendarGadget      (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Param1\i.i, \Flag\i.i)
+      Case "DateGadget"          : \Type\i.i = #PB_GadgetType_Date          : \Object\i.i = DateGadget          (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Caption\s.s, \Param1\i.i, \Flag\i.i)
+      Case "EditorGadget"        : \Type\i.i = #PB_GadgetType_Editor        : \Object\i.i = EditorGadget        (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Flag\i.i)
+      Case "ExplorerListGadget"  : \Type\i.i = #PB_GadgetType_ExplorerList  : \Object\i.i = ExplorerListGadget  (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Caption\s.s, \Flag\i.i)
+      Case "ExplorerTreeGadget"  : \Type\i.i = #PB_GadgetType_ExplorerTree  : \Object\i.i = ExplorerTreeGadget  (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Caption\s.s, \Flag\i.i)
+      Case "ExplorerComboGadget" : \Type\i.i = #PB_GadgetType_ExplorerCombo : \Object\i.i = ExplorerComboGadget (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Caption\s.s, \Flag\i.i)
+      Case "SpinGadget"          : \Type\i.i = #PB_GadgetType_Spin          : \Object\i.i = SpinGadget          (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Param1\i.i, \Param2\i.i, \Flag\i.i)
+      Case "TreeGadget"          : \Type\i.i = #PB_GadgetType_Tree          : \Object\i.i = TreeGadget          (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Flag\i.i)
+      Case "PanelGadget"         : \Type\i.i = #PB_GadgetType_Panel         : \Object\i.i = PanelGadget         (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i) 
       Case "SplitterGadget"      
-        Debug "Splitter FirstGadget "+\Param1\Argument
-        Debug "Splitter SecondGadget "+\Param2\Argument
-        If IsGadget(\Param1\Argument) And IsGadget(\Param2\Argument)
-          \Type\Argument = #PB_GadgetType_Splitter                               
-          \Object\Argument = SplitterGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Flag\Argument)
+        Debug "Splitter FirstGadget "+\Param1\i.i
+        Debug "Splitter SecondGadget "+\Param2\i.i
+        If IsGadget(\Param1\i.i) And IsGadget(\Param2\i.i)
+          \Type\i.i = #PB_GadgetType_Splitter                               
+          \Object\i.i = SplitterGadget      (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Param1\i.i, \Param2\i.i, \Flag\i.i)
         Else
-          \Type\Argument = #PB_GadgetType_Splitter     
-          \Param1\Argument = TextGadget(#PB_Any, 0,0,0,0, "Splitter")
-          \Param2\Argument = TextGadget(#PB_Any, 0,0,0,0, "")
-          \Object\Argument = SplitterGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Flag\Argument)
+          \Type\i.i = #PB_GadgetType_Splitter     
+          \Param1\i.i = TextGadget(#PB_Any, 0,0,0,0, "Splitter")
+          \Param2\i.i = TextGadget(#PB_Any, 0,0,0,0, "")
+          \Object\i.i = SplitterGadget      (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Param1\i.i, \Param2\i.i, \Flag\i.i)
           
         EndIf
       Case "MDIGadget"          
         CompilerIf #PB_Compiler_OS = #PB_OS_Windows
-          \Type\Argument = #PB_GadgetType_MDI                                    : \Object\Argument = MDIGadget           (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument, \Param2\Argument, \Flag\Argument) 
+          \Type\i.i = #PB_GadgetType_MDI                                    : \Object\i.i = MDIGadget           (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Param1\i.i, \Param2\i.i, \Flag\i.i) 
         CompilerEndIf
-      Case "ScintillaGadget"     : \Type\Argument = #PB_GadgetType_Scintilla     : \Object\Argument = ScintillaGadget     (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument)
-      Case "ShortcutGadget"      : \Type\Argument = #PB_GadgetType_Shortcut      : \Object\Argument = ShortcutGadget      (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Param1\Argument)
-      Case "CanvasGadget"        : \Type\Argument = #PB_GadgetType_Canvas        : \Object\Argument = CanvasGadget        (#PB_Any, \X\Argument,\Y\Argument,\Width\Argument,\Height\Argument, \Flag\Argument)
+      Case "ScintillaGadget"     : \Type\i.i = #PB_GadgetType_Scintilla     : \Object\i.i = ScintillaGadget     (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Param1\i.i)
+      Case "ShortcutGadget"      : \Type\i.i = #PB_GadgetType_Shortcut      : \Object\i.i = ShortcutGadget      (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Param1\i.i)
+      Case "CanvasGadget"        : \Type\i.i = #PB_GadgetType_Canvas        : \Object\i.i = CanvasGadget        (#PB_Any, \X\i.i,\Y\i.i,\Width\i.i,\Height\i.i, \Flag\i.i)
     EndSelect
     
-    If \Object\Argument$=""
-      \Object\Argument$=Str(\Object\Argument)
-      ParsePBObject()\Object\Argument$=\Object\Argument$
+    If \Object\s.s=""
+      \Object\s.s=Str(\Object\i.i)
+      ParsePBObject()\Object\s.s=\Object\s.s
     EndIf
     
     ; Заносим данные объекта в памят
-    If Bool(IsGadget(\Object\Argument) | IsWindow(\Object\Argument))
-      ParsePBObject()\Type\Argument = \Type\Argument
-      ParsePBObject()\Object\Argument = \Object\Argument
+    If Bool(IsGadget(\Object\i.i) | IsWindow(\Object\i.i))
+      ParsePBObject()\Type\i.i = \Type\i.i
+      ParsePBObject()\Object\i.i = \Object\i.i
       
-      If ParsePBObject()\Parent\Argument<>\Parent\Argument
-        If \get(Str(\Parent\Argument))\Object\Argument$
-          \Parent\Argument$ = \get(Str(\Parent\Argument))\Object\Argument$
+      If ParsePBObject()\Parent\i.i<>\Parent\i.i
+        If \get(Str(\Parent\i.i))\Object\s.s
+          \Parent\s.s = \get(Str(\Parent\i.i))\Object\s.s
         EndIf
-        ParsePBObject()\Parent\Argument=\Parent\Argument
-        ParsePBObject()\Parent\Argument$=\Parent\Argument$
+        ParsePBObject()\Parent\i.i=\Parent\i.i
+        ParsePBObject()\Parent\s.s=\Parent\s.s
       EndIf
-      If ParsePBObject()\Window\Argument<>\Window\Argument
-        If \get(Str(\Window\Argument))\Object\Argument$
-          \Window\Argument$ = \get(Str(\Window\Argument))\Object\Argument$
+      If ParsePBObject()\Window\i.i<>\Window\i.i
+        If \get(Str(\Window\i.i))\Object\s.s
+          \Window\s.s = \get(Str(\Window\i.i))\Object\s.s
         EndIf
-        ParsePBObject()\Window\Argument=\Window\Argument
-        ParsePBObject()\Window\Argument$=\Window\Argument$
+        ParsePBObject()\Window\i.i=\Window\i.i
+        ParsePBObject()\Window\s.s=\Window\s.s
       EndIf
       
       ; TODO -----------------------------------------
-      If IsWindow(\Object\Argument)
-        \Parent\Argument =- 1
+      If IsWindow(\Object\i.i)
+        \Parent\i.i =- 1
       EndIf
       
       Macro Init_object_data(_object_, _object_key_)
@@ -1575,103 +1575,103 @@ Procedure CO_Open() ; Ok
           *This\get(_object_key_)\Index=ListIndex(ParsePBObject())
           *This\get(_object_key_)\Adress=@ParsePBObject()
           
-          *This\get(_object_key_)\Object\Argument=_object_ 
-          *This\get(_object_key_)\Object\Argument$=*This\Object\Argument$ 
+          *This\get(_object_key_)\Object\i.i=_object_ 
+          *This\get(_object_key_)\Object\s.s=*This\Object\s.s 
           
-          *This\get(_object_key_)\Type\Argument=*This\Type\Argument 
-          *This\get(_object_key_)\Type\Argument$=*This\Type\Argument$ 
+          *This\get(_object_key_)\Type\i.i=*This\Type\i.i 
+          *This\get(_object_key_)\Type\s.s=*This\Type\s.s 
           
-          *This\get(_object_key_)\Window\Argument=*This\Window\Argument 
-          *This\get(_object_key_)\Parent\Argument=*This\Parent\Argument 
+          *This\get(_object_key_)\Window\i.i=*This\Window\i.i 
+          *This\get(_object_key_)\Parent\i.i=*This\Parent\i.i 
           
-          *This\get(_object_key_)\Window\Argument$=*This\Window\Argument$ 
-          *This\get(_object_key_)\Parent\Argument$=*This\Parent\Argument$ 
+          *This\get(_object_key_)\Window\s.s=*This\Window\s.s 
+          *This\get(_object_key_)\Parent\s.s=*This\Parent\s.s 
         Else
           AddMapElement(*This\get(), _object_key_)
           *This\get()\Index=ListIndex(ParsePBObject())
           *This\get()\Adress=@ParsePBObject()
           
-          *This\get()\Object\Argument=_object_ 
-          *This\get()\Object\Argument$=*This\Object\Argument$ 
+          *This\get()\Object\i.i=_object_ 
+          *This\get()\Object\s.s=*This\Object\s.s 
           
-          *This\get()\Type\Argument=*This\Type\Argument 
-          *This\get()\Type\Argument$=*This\Type\Argument$ 
+          *This\get()\Type\i.i=*This\Type\i.i 
+          *This\get()\Type\s.s=*This\Type\s.s 
           
-          *This\get()\Window\Argument=*This\Window\Argument 
-          *This\get()\Parent\Argument=*This\Parent\Argument 
+          *This\get()\Window\i.i=*This\Window\i.i 
+          *This\get()\Parent\i.i=*This\Parent\i.i 
           
-          *This\get()\Window\Argument$=*This\Window\Argument$ 
-          *This\get()\Parent\Argument$=*This\Parent\Argument$ 
+          *This\get()\Window\s.s=*This\Window\s.s 
+          *This\get()\Parent\s.s=*This\Parent\s.s 
         EndIf
         
       EndMacro
       
       ; Количество однотипных объектов
-      If Not FindMapElement(\get(), Str(\Parent\Argument)+"_"+\Type\Argument$)
-        AddMapElement(\get(), Str(\Parent\Argument)+"_"+\Type\Argument$)
+      If Not FindMapElement(\get(), Str(\Parent\i.i)+"_"+\Type\s.s)
+        AddMapElement(\get(), Str(\Parent\i.i)+"_"+\Type\s.s)
         \get()\Index=ListIndex(ParsePBObject())
         \get()\Adress=@ParsePBObject()
         \get()\Count+1 
       Else
-        \get(Str(\Parent\Argument)+"_"+\Type\Argument$)\Count+1 
+        \get(Str(\Parent\i.i)+"_"+\Type\s.s)\Count+1 
       EndIf
       
       ; Чтобы по идентификатору 
       ; объекта получить все остальное
-      Init_object_data(\Object\Argument, Str(\Object\Argument))
+      Init_object_data(\Object\i.i, Str(\Object\i.i))
       
       ; Чтобы по классу
       ; объекта получить все остальное
-      Init_object_data(\Object\Argument, \Object\Argument$)
+      Init_object_data(\Object\i.i, \Object\s.s)
       
     EndIf
     
     ; 
-    Select \Type\Argument$
-      Case "OpenWindow" : \Window\Argument = \Object\Argument : \Parent\Argument = \Object\Argument : \Container = \Type\Argument : \SubLevel = 1
-      Case "ContainerGadget", "ScrollAreaGadget" : \Parent\Argument = \Object\Argument : \Container = \Type\Argument : \SubLevel + 1
-      Case "PanelGadget" : \Parent\Argument = \Object\Argument : \Container = \Type\Argument : \SubLevel + 1 
-        If IsGadget(\Parent\Argument) 
-          \Item = GetGadgetData(\Parent\Argument) 
+    Select \Type\s.s
+      Case "OpenWindow" : \Window\i.i = \Object\i.i : \Parent\i.i = \Object\i.i : \Container = \Type\i.i : \SubLevel = 1
+      Case "ContainerGadget", "ScrollAreaGadget" : \Parent\i.i = \Object\i.i : \Container = \Type\i.i : \SubLevel + 1
+      Case "PanelGadget" : \Parent\i.i = \Object\i.i : \Container = \Type\i.i : \SubLevel + 1 
+        If IsGadget(\Parent\i.i) 
+          \Item = GetGadgetData(\Parent\i.i) 
         EndIf
         
       Case "CanvasGadget"
-        If ((\Flag\Argument & #PB_Canvas_Container)=#PB_Canvas_Container)
-          \Parent\Argument = \Object\Argument : \SubLevel + 1
-          \Container = \Type\Argument
+        If ((\Flag\i.i & #PB_Canvas_Container)=#PB_Canvas_Container)
+          \Parent\i.i = \Object\i.i : \SubLevel + 1
+          \Container = \Type\i.i
         EndIf
         
       Case "UseGadgetList" 
-        If IsWindow(\Param1\Argument) : \SubLevel = 1
-          \Window\Argument = \Param1\Argument
-          \Parent\Argument = \Window\Argument
-          UseGadgetList( WindowID(\Param1\Argument) )
+        If IsWindow(\Param1\i.i) : \SubLevel = 1
+          \Window\i.i = \Param1\i.i
+          \Parent\i.i = \Window\i.i
+          UseGadgetList( WindowID(\Param1\i.i) )
         EndIf
         
       Case "CloseGadgetList" 
-        If IsGadget(\Parent\Argument) : \SubLevel - 1 : CloseGadgetList() 
-          \Parent\Argument = *This\get(Str(\Parent\Argument))\Parent\Argument 
-          If IsGadget(\Parent\Argument) : \Item = GetGadgetData(\Parent\Argument) : EndIf
+        If IsGadget(\Parent\i.i) : \SubLevel - 1 : CloseGadgetList() 
+          \Parent\i.i = *This\get(Str(\Parent\i.i))\Parent\i.i 
+          If IsGadget(\Parent\i.i) : \Item = GetGadgetData(\Parent\i.i) : EndIf
         EndIf
         
       Case "OpenGadgetList"      
-        \Parent\Argument = \get(\Object\Argument$)\Object\Argument
-        If IsGadget(\Parent\Argument) : OpenGadgetList(\Parent\Argument, \Param1\Argument) : EndIf
+        \Parent\i.i = \get(\Object\s.s)\Object\i.i
+        If IsGadget(\Parent\i.i) : OpenGadgetList(\Parent\i.i, \Param1\i.i) : EndIf
         
       Case "AddGadgetColumn"       
-        Object=\get(\Object\Argument$)\Object\Argument
+        Object=\get(\Object\s.s)\Object\i.i
         If IsGadget(Object)
-          AddGadgetColumn(Object, \Param1\Argument, \Caption\Argument$, \Param2\Argument)
+          AddGadgetColumn(Object, \Param1\i.i, \Caption\s.s, \Param2\i.i)
         Else
-          Debug " add column no_gadget "+\Object\Argument$
+          Debug " add column no_gadget "+\Object\s.s
         EndIf
         
       Case "AddGadgetItem"   
-        Object=\get(\Object\Argument$)\Object\Argument
+        Object=\get(\Object\s.s)\Object\i.i
         If IsGadget(Object) : \Item+1 : SetGadgetData(Object, \Item)
-          AddGadgetItem(Object, \Param1\Argument, \Caption\Argument$, \Param2\Argument, \Flag\Argument)
+          AddGadgetItem(Object, \Param1\i.i, \Caption\s.s, \Param2\i.i, \Flag\i.i)
         Else
-          Debug " add item no_gadget "+\Object\Argument$
+          Debug " add item no_gadget "+\Object\s.s
         EndIf
         
       Default
@@ -1680,20 +1680,20 @@ Procedure CO_Open() ; Ok
     EndSelect
     
     ;
-    If IsGadget(\Parent\Argument)
-      GetParent = \get(Str(\Parent\Argument))\Parent\Argument
-    ElseIf IsWindow(\Parent\Argument)
+    If IsGadget(\Parent\i.i)
+      GetParent = \get(Str(\Parent\i.i))\Parent\i.i
+    ElseIf IsWindow(\Parent\i.i)
       \SubLevel = 1
     EndIf
     
     ;
-    If IsGadget(\Object\Argument)
+    If IsGadget(\Object\i.i)
       ; Если объект контейнер, то есть (Panel;ScrollArea;Container;Canvas)
       If \Container
         ParsePBObject()\Container = \Container
         ParsePBObject()\SubLevel = \SubLevel - 1
-        EnableGadgetDrop(\Object\Argument, #PB_Drop_Text, #PB_Drag_Copy)
-        BindEvent(#PB_Event_GadgetDrop, @CO_Events(), ParsePBObject()\Window\Argument, \Object\Argument)
+        EnableGadgetDrop(\Object\i.i, #PB_Drop_Text, #PB_Drag_Copy)
+        BindEvent(#PB_Event_GadgetDrop, @CO_Events(), ParsePBObject()\Window\i.i, \Object\i.i)
       Else
         ParsePBObject()\SubLevel = \SubLevel
       EndIf
@@ -1702,43 +1702,43 @@ Procedure CO_Open() ; Ok
       If \Item : ParsePBObject()\Item=\Item-1 : EndIf
       
       ; Открываем гаджет лист на том родителе где создан данный объект.
-      If \Object\Argument = \Parent\Argument
+      If \Object\i.i = \Parent\i.i
         If IsWindow(GetParent) : CloseGadgetList() : UseGadgetList(WindowID(GetParent)) : EndIf
         If IsGadget(GetParent) : OpenGadgetList = OpenGadgetList(GetParent, ParsePBObject()\Item) : EndIf
       EndIf
       
-      ;       Transformation::Create(ParsePBObject()\Object\Argument, ParsePBObject()\Window\Argument, ParsePBObject()\Parent\Argument, ParsePBObject()\Item, 5)
-      ;        Transformation::Create(ParsePBObject()\Object\Argument, ParsePBObject()\Parent\Argument, -1, 0, 5)
-      ;       ButtonGadget(-1,0,0,160,20,Str(Random(5))+" "+\Parent\Argument$+"-"+Str(\Parent\Argument))
+      ;       Transformation::Create(ParsePBObject()\Object\i.i, ParsePBObject()\Window\i.i, ParsePBObject()\Parent\i.i, ParsePBObject()\Item, 5)
+      ;        Transformation::Create(ParsePBObject()\Object\i.i, ParsePBObject()\Parent\i.i, -1, 0, 5)
+      ;       ButtonGadget(-1,0,0,160,20,Str(Random(5))+" "+\Parent\s.s+"-"+Str(\Parent\i.i))
       ;       CallFunctionFast(@CO_Events())
       
       ; Посылаем сообщение, что создали гаджет.
       PostEvent(#PB_Event_Create,
-                ParsePBObject()\Window\Argument,
-                ParsePBObject()\Object\Argument, #PB_All,
-                ParsePBObject()\Parent\Argument)
+                ParsePBObject()\Window\i.i,
+                ParsePBObject()\Object\i.i, #PB_All,
+                ParsePBObject()\Parent\i.i)
       
       ; Закрываем ранее открытий гаджет лист.
-      If \Object\Argument = \Parent\Argument
-        If IsWindow(GetParent) : OpenGadgetList(\Parent\Argument) : EndIf
+      If \Object\i.i = \Parent\i.i
+        If IsWindow(GetParent) : OpenGadgetList(\Parent\i.i) : EndIf
         If OpenGadgetList : CloseGadgetList() : EndIf
       EndIf
     EndIf
     
     ;
-    If IsWindow(\Object\Argument)
-      StickyWindow(\Object\Argument, #True)
+    If IsWindow(\Object\i.i)
+      StickyWindow(\Object\i.i, #True)
       ParsePBObject()\Container = \Container
-      ;       Transformation::Create(ParsePBObject()\Object\Argument, ParsePBObject()\Window\Argument, ParsePBObject()\Parent\Argument, ParsePBObject()\Item, 5)
-      PostEvent(#PB_Event_Create, \Object\Argument, #PB_Ignore)
-      EnableWindowDrop(\Object\Argument, #PB_Drop_Text, #PB_Drag_Copy)
+      ;       Transformation::Create(ParsePBObject()\Object\i.i, ParsePBObject()\Window\i.i, ParsePBObject()\Parent\i.i, ParsePBObject()\Item, 5)
+      PostEvent(#PB_Event_Create, \Object\i.i, #PB_Ignore)
+      EnableWindowDrop(\Object\i.i, #PB_Drop_Text, #PB_Drag_Copy)
       
-      BindEvent(#PB_Event_Create, @CO_Events(), \Object\Argument)
-      BindEvent(#PB_Event_Gadget, @CO_Events(), \Object\Argument)
-      BindEvent(#PB_Event_WindowDrop, @CO_Events(), \Object\Argument)
+      BindEvent(#PB_Event_Create, @CO_Events(), \Object\i.i)
+      BindEvent(#PB_Event_Gadget, @CO_Events(), \Object\i.i)
+      BindEvent(#PB_Event_WindowDrop, @CO_Events(), \Object\i.i)
     EndIf
     
-    ProcedureReturn \Object\Argument
+    ProcedureReturn \Object\i.i
   EndWith
 EndProcedure
 
@@ -1757,56 +1757,56 @@ Procedure CO_Save(*ThisParse.ParseStruct) ; Ok
           Case 'A' To 'Z' , 'a' To 'z'
             
             Select i 
-              Case 2 : \X\Argument$ = Result$
-              Case 3 : \Y\Argument$ = Result$
-              Case 4 : \Width\Argument$ = Result$
-              Case 5 : \Height\Argument$ = Result$
+              Case 2 : \X\s.s = Result$
+              Case 3 : \Y\s.s = Result$
+              Case 4 : \Width\s.s = Result$
+              Case 5 : \Height\s.s = Result$
             EndSelect
         EndSelect
       Next
       
-      If Asc(\Object\Argument$) = 35 ; '#'
-        ID$ = \Object\Argument$
+      If Asc(\Object\s.s) = 35 ; '#'
+        ID$ = \Object\s.s
       Else
-        Handle$ = \Object\Argument$+" = "
+        Handle$ = \Object\s.s+" = "
         ID$ = "#PB_Any"
       EndIf
       
-      Select \Type\Argument$
-          Case "OpenWindow"          : \Content\String$ = Handle$+"OpenWindow("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)                                                                                   : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-          Case "ButtonGadget"        : \Content\String$ = Handle$+"ButtonGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)                                                                                 : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-          Case "StringGadget"        : \Content\String$ = Handle$+"StringGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)                                                                                 : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-          Case "TextGadget"          : \Content\String$ = Handle$+"TextGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)                                                                                   : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-          Case "CheckBoxGadget"      : \Content\String$ = Handle$+"CheckBoxGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)                                                                               : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "OptionGadget"        : \Content\String$ = Handle$+"OptionGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)
-          Case "ListViewGadget"      : \Content\String$ = Handle$+"ListViewGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$                                                                                                                        : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-          Case "FrameGadget"         : \Content\String$ = Handle$+"FrameGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)                                                                                  : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-          Case "ComboBoxGadget"      : \Content\String$ = Handle$+"ComboBoxGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$                                                                                                                        : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-          Case "ImageGadget"         : \Content\String$ = Handle$+"ImageGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$                                                                                                   : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-          Case "HyperLinkGadget"     : \Content\String$ = Handle$+"HyperLinkGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)+", "+\Param1\Argument$                                                       : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-          Case "ContainerGadget"     : \Content\String$ = Handle$+"ContainerGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$                                                                                                                       : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-          Case "ListIconGadget"      : \Content\String$ = Handle$+"ListIconGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)+", "+\Param1\Argument$                                                        : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "IPAddressGadget"     : \Content\String$ = Handle$+"IPAddressGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$
-          Case "ProgressBarGadget"   : \Content\String$ = Handle$+"ProgressBarGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$+", "+\Param2\Argument$                                                                      : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-          Case "ScrollBarGadget"     : \Content\String$ = Handle$+"ScrollBarGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$+", "+\Param2\Argument$+", "+\Param3\Argument$                                                 : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-          Case "ScrollAreaGadget"    : \Content\String$ = Handle$+"ScrollAreaGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$+", "+\Param2\Argument$    : If \Param3\Argument$ : \Content\String$ +", "+\Param3\Argument$ : EndIf : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf 
-          Case "TrackBarGadget"      : \Content\String$ = Handle$+"TrackBarGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$+", "+\Param2\Argument$                                                                         : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "WebGadget"           : \Content\String$ = Handle$+"WebGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)
-          Case "ButtonImageGadget"   : \Content\String$ = Handle$+"ButtonImageGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$                                                                                             : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-          Case "CalendarGadget"      : \Content\String$ = Handle$+"CalendarGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$                                                     : If \Param1\Argument$ : \Content\String$ +", "+\Param1\Argument$ : EndIf : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-          Case "DateGadget"          : \Content\String$ = Handle$+"DateGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)                : If \Param1\Argument$ : \Content\String$ +", "+\Param1\Argument$ : EndIf : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-          Case "EditorGadget"        : \Content\String$ = Handle$+"EditorGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$                                                                                                                          : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-          Case "ExplorerListGadget"  : \Content\String$ = Handle$+"ExplorerListGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)                                                                           : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-          Case "ExplorerTreeGadget"  : \Content\String$ = Handle$+"ExplorerTreeGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)                                                                           : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-          Case "ExplorerComboGadget" : \Content\String$ = Handle$+"ExplorerComboGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ Chr(34)+\Caption\Argument$+Chr(34)                                                                          : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-          Case "SpinGadget"          : \Content\String$ = Handle$+"SpinGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$+", "+\Param2\Argument$                                                                             : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-          Case "TreeGadget"          : \Content\String$ = Handle$+"TreeGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$                                                                                                                            : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-        Case "PanelGadget"         : \Content\String$ = Handle$+"PanelGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$ 
-          Case "SplitterGadget"      : \Content\String$ = Handle$+"SplitterGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$+", "+\Param2\Argument$                                                                         : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
-          Case "MDIGadget"           : \Content\String$ = Handle$+"MDIGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$+", "+\Param2\Argument$                                                                              : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf 
-        Case "ScintillaGadget"     : \Content\String$ = Handle$+"ScintillaGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$
-        Case "ShortcutGadget"      : \Content\String$ = Handle$+"ShortcutGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$+", "+ \Param1\Argument$
-          Case "CanvasGadget"        : \Content\String$ = Handle$+"CanvasGadget("+ID$+", "+\X\Argument$+", "+\Y\Argument$+", "+\Width\Argument$+", "+\Height\Argument$                                                                                                                          : If \Flag\Argument$ : \Content\String$ +", "+\Flag\Argument$ : EndIf
+      Select \Type\s.s
+          Case "OpenWindow"          : \Content\String$ = Handle$+"OpenWindow("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)                                                                                   : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+          Case "ButtonGadget"        : \Content\String$ = Handle$+"ButtonGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)                                                                                 : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+          Case "StringGadget"        : \Content\String$ = Handle$+"StringGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)                                                                                 : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+          Case "TextGadget"          : \Content\String$ = Handle$+"TextGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)                                                                                   : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+          Case "CheckBoxGadget"      : \Content\String$ = Handle$+"CheckBoxGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)                                                                               : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "OptionGadget"        : \Content\String$ = Handle$+"OptionGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)
+          Case "ListViewGadget"      : \Content\String$ = Handle$+"ListViewGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s                                                                                                                        : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+          Case "FrameGadget"         : \Content\String$ = Handle$+"FrameGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)                                                                                  : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+          Case "ComboBoxGadget"      : \Content\String$ = Handle$+"ComboBoxGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s                                                                                                                        : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+          Case "ImageGadget"         : \Content\String$ = Handle$+"ImageGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s                                                                                                   : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+          Case "HyperLinkGadget"     : \Content\String$ = Handle$+"HyperLinkGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)+", "+\Param1\s.s                                                       : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+          Case "ContainerGadget"     : \Content\String$ = Handle$+"ContainerGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s                                                                                                                       : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+          Case "ListIconGadget"      : \Content\String$ = Handle$+"ListIconGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)+", "+\Param1\s.s                                                        : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "IPAddressGadget"     : \Content\String$ = Handle$+"IPAddressGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s
+          Case "ProgressBarGadget"   : \Content\String$ = Handle$+"ProgressBarGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s+", "+\Param2\s.s                                                                      : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+          Case "ScrollBarGadget"     : \Content\String$ = Handle$+"ScrollBarGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s+", "+\Param2\s.s+", "+\Param3\s.s                                                 : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+          Case "ScrollAreaGadget"    : \Content\String$ = Handle$+"ScrollAreaGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s+", "+\Param2\s.s    : If \Param3\s.s : \Content\String$ +", "+\Param3\s.s : EndIf : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf 
+          Case "TrackBarGadget"      : \Content\String$ = Handle$+"TrackBarGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s+", "+\Param2\s.s                                                                         : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "WebGadget"           : \Content\String$ = Handle$+"WebGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)
+          Case "ButtonImageGadget"   : \Content\String$ = Handle$+"ButtonImageGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s                                                                                             : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+          Case "CalendarGadget"      : \Content\String$ = Handle$+"CalendarGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s                                                     : If \Param1\s.s : \Content\String$ +", "+\Param1\s.s : EndIf : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+          Case "DateGadget"          : \Content\String$ = Handle$+"DateGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)                : If \Param1\s.s : \Content\String$ +", "+\Param1\s.s : EndIf : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+          Case "EditorGadget"        : \Content\String$ = Handle$+"EditorGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s                                                                                                                          : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+          Case "ExplorerListGadget"  : \Content\String$ = Handle$+"ExplorerListGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)                                                                           : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+          Case "ExplorerTreeGadget"  : \Content\String$ = Handle$+"ExplorerTreeGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)                                                                           : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+          Case "ExplorerComboGadget" : \Content\String$ = Handle$+"ExplorerComboGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ Chr(34)+\Caption\s.s+Chr(34)                                                                          : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+          Case "SpinGadget"          : \Content\String$ = Handle$+"SpinGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s+", "+\Param2\s.s                                                                             : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+          Case "TreeGadget"          : \Content\String$ = Handle$+"TreeGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s                                                                                                                            : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+        Case "PanelGadget"         : \Content\String$ = Handle$+"PanelGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s 
+          Case "SplitterGadget"      : \Content\String$ = Handle$+"SplitterGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s+", "+\Param2\s.s                                                                         : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
+          Case "MDIGadget"           : \Content\String$ = Handle$+"MDIGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s+", "+\Param2\s.s                                                                              : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf 
+        Case "ScintillaGadget"     : \Content\String$ = Handle$+"ScintillaGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s
+        Case "ShortcutGadget"      : \Content\String$ = Handle$+"ShortcutGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s+", "+ \Param1\s.s
+          Case "CanvasGadget"        : \Content\String$ = Handle$+"CanvasGadget("+ID$+", "+\X\s.s+", "+\Y\s.s+", "+\Width\s.s+", "+\Height\s.s                                                                                                                          : If \Flag\s.s : \Content\String$ +", "+\Flag\s.s : EndIf
       EndSelect
       
       \Content\String$+")" 
@@ -1846,25 +1846,25 @@ Procedure ParsePBFile(FileName.s)
             With *This
               
               If RegularExpressionGroup(#RegEx_Function, 1) = "" And RegularExpressionGroup(#RegEx_Function, 9) = ""
-                \Type\Argument$=RegularExpressionGroup(#RegEx_Function, 7)
+                \Type\s.s=RegularExpressionGroup(#RegEx_Function, 7)
                 \Args$=Trim(RegularExpressionGroup(#RegEx_Function, 8))
                 
                 If RegularExpressionGroup(#RegEx_Function, 3)
-                  \Object\Argument$ = RegularExpressionGroup(#RegEx_Function, 3)
+                  \Object\s.s = RegularExpressionGroup(#RegEx_Function, 3)
                 EndIf
                 
                 ; Если идентификатрор сгенерирован с #PB_Any то есть (Ident=PBFunction(#PB_Any))
                 If RegularExpressionGroup(#RegEx_Function, 3)
-                  \Object\Argument$ = RegularExpressionGroup(#RegEx_Function, 3)
+                  \Object\s.s = RegularExpressionGroup(#RegEx_Function, 3)
                   \Content\String$ = RegularExpressionMatchString(#RegEx_Function)
                   \Content\Length = RegularExpressionMatchLength(#RegEx_Function)
                   \Content\Position = RegularExpressionMatchPosition(#RegEx_Function)
                 EndIf
                 
-                If \Type\Argument$
+                If \Type\s.s
                   ; Debug "All - "+RegularExpressionMatchString(#RegEx_Function)
                   
-                  Select \Type\Argument$
+                  Select \Type\s.s
                     Case "OpenWindow", 
                          "ButtonGadget","StringGadget","TextGadget","CheckBoxGadget",
                          "OptionGadget","ListViewGadget","FrameGadget","ComboBoxGadget",
@@ -1876,7 +1876,7 @@ Procedure ParsePBFile(FileName.s)
                          "SplitterGadget","MDIGadget","ScintillaGadget","ShortcutGadget","CanvasGadget"
                       
                       AddElement(ParsePBObject()) 
-                      ParsePBObject()\Type\Argument$ = \Type\Argument$
+                      ParsePBObject()\Type\s.s = \Type\s.s
                       ParsePBObject()\Content\String$ = \Content\String$ + RegularExpressionMatchString(#RegEx_Function)
                       ParsePBObject()\Content\Length = \Content\Length + RegularExpressionMatchLength(#RegEx_Function)
                       If \Content\Position
@@ -1895,7 +1895,7 @@ Procedure ParsePBFile(FileName.s)
                           
                           If Arg$ : Index+1
                             If (Index>5)
-                              Select \Type\Argument$
+                              Select \Type\s.s
                                 Case "OpenGLGadget","EditorGadget","CanvasGadget",
                                      "ComboBoxGadget","ContainerGadget","ListViewGadget","TreeGadget"
                                   If Index=6 : Index+4 : EndIf
@@ -1940,102 +1940,102 @@ Procedure ParsePBFile(FileName.s)
                                   ; Если идентификаторы окон цыфри
                                   Select Asc(Arg$)
                                     Case '0' To '9'
-                                      If \Type\Argument$="OpenWindow"
-                                        \Object\Argument$ = Arg$+"_Window"
+                                      If \Type\s.s="OpenWindow"
+                                        \Object\s.s = Arg$+"_Window"
                                       Else
-                                        \Object\Argument$ = Arg$+"_"+ReplaceString(\Type\Argument$, "Gadget","")
+                                        \Object\s.s = Arg$+"_"+ReplaceString(\Type\s.s, "Gadget","")
                                       EndIf
                                     Default
-                                      \Object\Argument$ = Arg$
+                                      \Object\s.s = Arg$
                                   EndSelect
                                 EndIf
                                 
-                                \Class\Argument$ = \Object\Argument$ 
-                                ParsePBObject()\Class\Argument$ = \Class\Argument$
-                                ParsePBObject()\Object\Argument$ = \Object\Argument$
+                                \Class\s.s = \Object\s.s 
+                                ParsePBObject()\Class\s.s = \Class\s.s
+                                ParsePBObject()\Object\s.s = \Object\s.s
                                 
-                              Case 2 : ParsePBObject()\X\Argument$ = Arg$
-                                MacroCoordinate(\X\Argument, Arg$)
+                              Case 2 : ParsePBObject()\X\s.s = Arg$
+                                MacroCoordinate(\X\i.i, Arg$)
                                 
-                              Case 3 : ParsePBObject()\Y\Argument$ = Arg$
-                                MacroCoordinate(\Y\Argument, Arg$)
+                              Case 3 : ParsePBObject()\Y\s.s = Arg$
+                                MacroCoordinate(\Y\i.i, Arg$)
                                 
-                              Case 4 : ParsePBObject()\Width\Argument$ = Arg$
-                                MacroCoordinate(\Width\Argument, Arg$)
+                              Case 4 : ParsePBObject()\Width\s.s = Arg$
+                                MacroCoordinate(\Width\i.i, Arg$)
                                 
-                              Case 5 : ParsePBObject()\Height\Argument$ = Arg$
-                                MacroCoordinate(\Height\Argument, Arg$)
+                              Case 5 : ParsePBObject()\Height\s.s = Arg$
+                                MacroCoordinate(\Height\i.i, Arg$)
                                 
-                              Case 6 : ParsePBObject()\Caption\Argument$ = Arg$
-                                \Caption\Argument$ = GetStr(Arg$) 
+                              Case 6 : ParsePBObject()\Caption\s.s = Arg$
+                                \Caption\s.s = GetStr(Arg$) 
                                 
-                              Case 7 : ParsePBObject()\Param1\Argument$ = Arg$
-                                Select \Type\Argument$ 
+                              Case 7 : ParsePBObject()\Param1\s.s = Arg$
+                                Select \Type\s.s 
                                   Case "OpenWindow"      
-                                    \Param1\Argument$ = get_argument_string(Arg$)
+                                    \Param1\s.s = get_argument_string(Arg$)
                                     
                                     ; Если идентификаторы окон цыфри
-                                    If Val(\Param1\Argument$)
-                                      \Param1\Argument$+"_Window"
+                                    If Val(\Param1\s.s)
+                                      \Param1\s.s+"_Window"
                                     Else
-                                      \Param1\Argument$ = Arg$
+                                      \Param1\s.s = Arg$
                                     EndIf
                                     
-                                    \Param1\Argument = *This\get(\Param1\Argument$)\Object\Argument
+                                    \Param1\i.i = *This\get(\Param1\s.s)\Object\i.i
                                     
-                                    If \Param1\Argument
-                                      \Param1\Argument = WindowID(\Param1\Argument)
+                                    If \Param1\i.i
+                                      \Param1\i.i = WindowID(\Param1\i.i)
                                     EndIf
                                     
                                   Case "SplitterGadget"      
-                                    \Param1\Argument = *This\get(Arg$)\Object\Argument
+                                    \Param1\i.i = *This\get(Arg$)\Object\i.i
                                     
                                   Case "ImageGadget"      
-                                    Result = \Img(GetStr(Arg$))\Object\Argument 
+                                    Result = \Img(GetStr(Arg$))\Object\i.i 
                                     If IsImage(Result)
-                                      \Param1\Argument = ImageID(Result)
+                                      \Param1\i.i = ImageID(Result)
                                     EndIf
                                     
                                   Default
                                     Select Asc(Arg$)
                                       Case '0' To '9'
-                                        \Param1\Argument = Val(Arg$)
+                                        \Param1\i.i = Val(Arg$)
                                       Default
                                     EndSelect
                                 EndSelect
                                 
-                              Case 8 : ParsePBObject()\Param2\Argument$ = Arg$
-                                Select \Type\Argument$ 
+                              Case 8 : ParsePBObject()\Param2\s.s = Arg$
+                                Select \Type\s.s 
                                   Case "SplitterGadget"      
-                                    \Param2\Argument = *This\get(Arg$)\Object\Argument
+                                    \Param2\i.i = *This\get(Arg$)\Object\i.i
                                     
                                   Default
                                     Select Asc(Arg$)
                                       Case '0' To '9'
-                                        \Param2\Argument = Val(Arg$)
+                                        \Param2\i.i = Val(Arg$)
                                       Default
                                     EndSelect
                                 EndSelect
                                 
-                              Case 9 : ParsePBObject()\Param3\Argument$ = Arg$
-                                \Param3\Argument = Val(Arg$)
+                              Case 9 : ParsePBObject()\Param3\s.s = Arg$
+                                \Param3\i.i = Val(Arg$)
                                 
                               Case 10 
                                 ;                                 Select Asc(Arg$)
                                 ;                                   Case '0' To '9'
-                                ;                                     \Flag\Argument = Val(Arg$)
+                                ;                                     \Flag\i.i = Val(Arg$)
                                 ;                                   Default
-                                ;                                     \Flag\Argument = CO_Flag(Arg$) ; Если строка такого рода "#Flag_0|#Flag_1"
-                                ;                                     If \Flag\Argument = 0
+                                ;                                     \Flag\i.i = CO_Flag(Arg$) ; Если строка такого рода "#Flag_0|#Flag_1"
+                                ;                                     If \Flag\i.i = 0
                                 ;                                       Arg$ = GetVarValue(Arg$)
-                                ;                                       \Flag\Argument = Val(Arg$)
+                                ;                                       \Flag\i.i = Val(Arg$)
                                 ;                                     EndIf
-                                ;                                     If \Flag\Argument = 0
-                                ;                                       \Flag\Argument = CO_Flag(Arg$) ; Если строка такого рода "#Flag_0|#Flag_1"
+                                ;                                     If \Flag\i.i = 0
+                                ;                                       \Flag\i.i = CO_Flag(Arg$) ; Если строка такого рода "#Flag_0|#Flag_1"
                                 ;                                     EndIf
                                 ;                                 EndSelect
-                                \Flag\Argument = Flag(Arg$)
-                                ParsePBObject()\Flag\Argument$ = Arg$
+                                \Flag\i.i = Flag(Arg$)
+                                ParsePBObject()\Flag\s.s = Arg$
                             EndSelect
                             
                           EndIf
@@ -2043,21 +2043,21 @@ Procedure ParsePBFile(FileName.s)
                       EndIf
                       
                       ; Сначала определять кто есть кто.
-                      Select *This\Type\Argument$
+                      Select *This\Type\s.s
                         Case "OpenWindow" 
                           *This\Container =- 1 
-                          *This\Window\Argument$ = *This\Object\Argument$ 
-                          *This\Parent\Argument$ = *This\Object\Argument$
+                          *This\Window\s.s = *This\Object\s.s 
+                          *This\Parent\s.s = *This\Object\s.s
                         Case "PanelGadget" : *This\Container = #PB_GadgetType_Panel
-                          *This\Parent\Argument$ = *This\Object\Argument$
+                          *This\Parent\s.s = *This\Object\s.s
                         Case "ContainerGadget" : *This\Container = #PB_GadgetType_Container
-                          *This\Parent\Argument$ = *This\Object\Argument$
+                          *This\Parent\s.s = *This\Object\s.s
                         Case "ScrollAreaGadget" : *This\Container = #PB_GadgetType_ScrollArea
-                          *This\Parent\Argument$ = *This\Object\Argument$
+                          *This\Parent\s.s = *This\Object\s.s
                         Case "CanvasGadget"
-                          If ((*This\Flag\Argument&#PB_Canvas_Container)=#PB_Canvas_Container)
+                          If ((*This\Flag\i.i&#PB_Canvas_Container)=#PB_Canvas_Container)
                             *This\Container = #PB_GadgetType_Canvas
-                            *This\Parent\Argument$ = *This\Object\Argument$
+                            *This\Parent\s.s = *This\Object\s.s
                           EndIf
                         Default
                           *This\Container = #PB_GadgetType_Unknown
@@ -2071,7 +2071,7 @@ Procedure ParsePBFile(FileName.s)
                       ; ; ;                      ; Получаем позицию идентификаторов в файле
                       ; ;                         If ExamineRegularExpression(RegExID, *This\Content\Text$)
                       ; ;                           While NextRegularExpressionMatch(RegExID)
-                      ; ;                            *This\get(*This\Window\Argument$)\Code("Code_Object")\Position = RegularExpressionMatchPosition(RegExID)-Len(#CRLF$)*2 ;*This\Content\Text$ = ReplaceRegularExpression(RegExID, *This\Content\Text$, Trim(Replace$, "#"))
+                      ; ;                            *This\get(*This\Window\s.s)\Code("Code_Object")\Position = RegularExpressionMatchPosition(RegExID)-Len(#CRLF$)*2 ;*This\Content\Text$ = ReplaceRegularExpression(RegExID, *This\Content\Text$, Trim(Replace$, "#"))
                       ; ;                             Break
                       ; ;                           Wend
                       ; ;                         EndIf
@@ -2081,40 +2081,40 @@ Procedure ParsePBFile(FileName.s)
                       
                       ; Второй вариант
                       ; Ищем идентификатор и затем добавлаем его длину
-                      Protected Identific$ = *This\Object\Argument$+"=-1"
+                      Protected Identific$ = *This\Object\s.s+"=-1"
                       Protected RegExID = CreateRegularExpression(#PB_Any, "(?<![\w\.\\])"+Identific$+"(?=[_]|(?![\w\.\\]|\s*"+~"\"))")
                       
                       If RegExID
                         ;                      ; Получаем позицию идентификаторов в файле
                         If ExamineRegularExpression(RegExID, *This\Content\Text$)
                           While NextRegularExpressionMatch(RegExID)
-                            *This\get(*This\Window\Argument$)\Code("Code_Object")\Position = RegularExpressionMatchPosition(RegExID)+Len(Identific$)
+                            *This\get(*This\Window\s.s)\Code("Code_Object")\Position = RegularExpressionMatchPosition(RegExID)+Len(Identific$)
                             Break
                           Wend
                         EndIf
                         
                         FreeRegularExpression(RegExID)
                       EndIf
-                      Debug *This\get(*This\Window\Argument$)\Code("Code_Object")\Position
+                      Debug *This\get(*This\Window\s.s)\Code("Code_Object")\Position
                       
                       ; Запоминаем последнюю позицию
-                      *This\get(*This\Object\Argument$)\Code("Code_Function")\Position = *This\Content\Position+*This\Content\Length +Len(#CRLF$+Space(Indent))
+                      *This\get(*This\Object\s.s)\Code("Code_Function")\Position = *This\Content\Position+*This\Content\Length +Len(#CRLF$+Space(Indent))
                       If *This\Container
-                        Select *This\Type\Argument$
+                        Select *This\Type\s.s
                           Case "PanelGadget", "ContainerGadget", "ScrollAreaGadget", "CanvasGadget"
-                            *This\get(*This\Window\Argument$)\Code("Code_Function")\Position = *This\Content\Position+*This\Content\Length +Len(#CRLF$+Space(Indent))+Len("CloseGadgetList()"+#CRLF$+Space(Indent))
+                            *This\get(*This\Window\s.s)\Code("Code_Function")\Position = *This\Content\Position+*This\Content\Length +Len(#CRLF$+Space(Indent))+Len("CloseGadgetList()"+#CRLF$+Space(Indent))
                         EndSelect
                       Else
-                        *This\get(*This\Window\Argument$)\Code("Code_Function")\Position = *This\Content\Position+*This\Content\Length +Len(#CRLF$+Space(Indent))
+                        *This\get(*This\Window\s.s)\Code("Code_Function")\Position = *This\Content\Position+*This\Content\Length +Len(#CRLF$+Space(Indent))
                       EndIf
                       
                       ; ; ;                       ; Записываем у родителя позицию конца добавления объекта
-                      ; ; ;                      ; *This\get(*This\get(Str(*This\Parent\Argument))\Object\Argument$)\Code("Code_Function")\Position = *This\Content\Position+*This\Content\Length +Len(#CRLF$+Space(Indent))
-                      ; ; ;                       Debug "Load Code_Object"+ *This\get(Str(*This\Window\Argument))\Object\Argument$ +" "+ *This\get(*This\get(Str(*This\Window\Argument))\Object\Argument$)\Code("Code_Object")\Position
-                      ; ; ;                       Debug "w Code_Function"+ *This\Window\Argument$ +" "+ *This\get(*This\Window\Argument$)\Code("Code_Function")\Position
-                      ; ; ;                       Debug "Load Code_Function"+ *This\get(Str(*This\Parent\Argument))\Object\Argument$ +" "+ *This\get(*This\get(Str(*This\Parent\Argument))\Object\Argument$)\Code("Code_Function")\Position
-                      ; ; ;                       ;     Debug "    Code_Object"+ *This\get(*This\get(Replace$)\Window\Argument$)\Code("Code_Object")\Position
-                      ; ; ;                       ;     Debug "    Code_Function"+ *This\get(*This\get(Replace$)\Parent\Argument$)\Code("Code_Function")\Position
+                      ; ; ;                      ; *This\get(*This\get(Str(*This\Parent\i.i))\Object\s.s)\Code("Code_Function")\Position = *This\Content\Position+*This\Content\Length +Len(#CRLF$+Space(Indent))
+                      ; ; ;                       Debug "Load Code_Object"+ *This\get(Str(*This\Window\i.i))\Object\s.s +" "+ *This\get(*This\get(Str(*This\Window\i.i))\Object\s.s)\Code("Code_Object")\Position
+                      ; ; ;                       Debug "w Code_Function"+ *This\Window\s.s +" "+ *This\get(*This\Window\s.s)\Code("Code_Function")\Position
+                      ; ; ;                       Debug "Load Code_Function"+ *This\get(Str(*This\Parent\i.i))\Object\s.s +" "+ *This\get(*This\get(Str(*This\Parent\i.i))\Object\s.s)\Code("Code_Function")\Position
+                      ; ; ;                       ;     Debug "    Code_Object"+ *This\get(*This\get(Replace$)\Window\s.s)\Code("Code_Object")\Position
+                      ; ; ;                       ;     Debug "    Code_Function"+ *This\get(*This\get(Replace$)\Parent\s.s)\Code("Code_Function")\Position
                       
                       
                       
@@ -2123,42 +2123,42 @@ Procedure ParsePBFile(FileName.s)
                       Protected win = CallFunctionFast(@CO_Open())
                       
                       
-                      \Object\Argument=-1
-                      \Object\Argument$=""
-                      \Param1\Argument = 0
-                      \Param2\Argument = 0
-                      \Param3\Argument = 0
-                      \Caption\Argument$ = ""
-                      \Flag\Argument = 0
+                      \Object\i.i=-1
+                      \Object\s.s=""
+                      \Param1\i.i = 0
+                      \Param2\i.i = 0
+                      \Param3\i.i = 0
+                      \Caption\s.s = ""
+                      \Flag\i.i = 0
                       
                     Case "UseGadgetList"
-                      \Param1\Argument$ = get_argument_string(\Args$)
+                      \Param1\s.s = get_argument_string(\Args$)
                       
                       ; Если идентификаторы окон цыфри
-                      If Val(\Param1\Argument$)
-                        \Param1\Argument$+"_Window"
+                      If Val(\Param1\s.s)
+                        \Param1\s.s+"_Window"
                       Else
-                        \Param1\Argument$ = \Args$
+                        \Param1\s.s = \Args$
                       EndIf
                       
-                      \Param1\Argument = *This\get(\Param1\Argument$)\Object\Argument
+                      \Param1\i.i = *This\get(\Param1\s.s)\Object\i.i
                       
-                      If \Param1\Argument
-                        ;                         *This\get(\Object\Argument$)\Object\Argument = *This\get(Str(\Param1\Argument))\Window\Argument
-                        Protected UseGadgetList = UseGadgetList(WindowID(\Param1\Argument))
+                      If \Param1\i.i
+                        ;                         *This\get(\Object\s.s)\Object\i.i = *This\get(Str(\Param1\i.i))\Window\i.i
+                        Protected UseGadgetList = UseGadgetList(WindowID(\Param1\i.i))
                         PushListPosition(ParsePBObject())
                         ForEach ParsePBObject()
-                          If ParsePBObject()\Type\Argument$ = "OpenWindow"
-                            If IsWindow(ParsePBObject()\Object\Argument) And 
-                               WindowID(ParsePBObject()\Object\Argument) = UseGadgetList
-                              *This\get(\Object\Argument$)\Object\Argument = ParsePBObject()\Object\Argument
+                          If ParsePBObject()\Type\s.s = "OpenWindow"
+                            If IsWindow(ParsePBObject()\Object\i.i) And 
+                               WindowID(ParsePBObject()\Object\i.i) = UseGadgetList
+                              *This\get(\Object\s.s)\Object\i.i = ParsePBObject()\Object\i.i
                             EndIf
                           EndIf
                         Next
                         PopListPosition(ParsePBObject())
                         UseGadgetList(UseGadgetList)
                       Else
-                        \Param1\Argument = *This\get(\Param1\Argument$)\Object\Argument
+                        \Param1\i.i = *This\get(\Param1\s.s)\Object\i.i
                       EndIf
                       
                       CallFunctionFast(@CO_Open())
@@ -2173,47 +2173,47 @@ Procedure ParsePBFile(FileName.s)
                           If Arg$ : Index+1
                             Select Index
                               Case 1 
-                                \Object\Argument$ = Arg$
+                                \Object\s.s = Arg$
                                 If Val(Arg$)
                                   PushListPosition(ParsePBObject())
                                   ForEach ParsePBObject()
-                                    If Val(ParsePBObject()\Object\Argument$) = Val(Arg$)
-                                      \Object\Argument$ = ParsePBObject()\Object\Argument$
+                                    If Val(ParsePBObject()\Object\s.s) = Val(Arg$)
+                                      \Object\s.s = ParsePBObject()\Object\s.s
                                     EndIf
                                   Next
                                   PopListPosition(ParsePBObject())
                                 EndIf
                                 
-                                ;*This\get(Str(\Parent\Argument))\Object\Argument$
-                                ;                                 \Object\Argument$ = *This\get(Str(\Parent\Argument))\Object\Argument$
+                                ;*This\get(Str(\Parent\i.i))\Object\s.s
+                                ;                                 \Object\s.s = *This\get(Str(\Parent\i.i))\Object\s.s
                                 
                                 
-                              Case 2 : \Param1\Argument = Val(Arg$)  
-                              Case 3 : \Caption\Argument$=GetStr(Arg$)
-                              Case 4 : \Param2\Argument = Val(Arg$)
-                              Case 5 : \Flag\Argument$ = Arg$
-                                \Flag\Argument = Flag(Arg$)
+                              Case 2 : \Param1\i.i = Val(Arg$)  
+                              Case 3 : \Caption\s.s=GetStr(Arg$)
+                              Case 4 : \Param2\i.i = Val(Arg$)
+                              Case 5 : \Flag\s.s = Arg$
+                                \Flag\i.i = Flag(Arg$)
                                 
                             EndSelect
                           EndIf
                         Wend
                       EndIf
                       
-                      ;Debug " g "+\Object\Argument$ +" "+ Str(*This\get(\Object\Argument$)\Object\Argument)
+                      ;Debug " g "+\Object\s.s +" "+ Str(*This\get(\Object\s.s)\Object\i.i)
                       CallFunctionFast(@CO_Open())
                       
                       
-                      \Object\Argument =- 1
-                      \Object\Argument$ = ""
-                      \Flag\Argument = 0
-                      \Param1\Argument = 0
-                      \Param2\Argument = 0
-                      \Param3\Argument = 0
-                      \Flag\Argument$ = ""
-                      \Param1\Argument$ = ""
-                      \Param2\Argument$ = ""
-                      \Param3\Argument$ = ""
-                      \Caption\Argument$ = ""
+                      \Object\i.i =- 1
+                      \Object\s.s = ""
+                      \Flag\i.i = 0
+                      \Param1\i.i = 0
+                      \Param2\i.i = 0
+                      \Param3\i.i = 0
+                      \Flag\s.s = ""
+                      \Param1\s.s = ""
+                      \Param2\s.s = ""
+                      \Param3\s.s = ""
+                      \Caption\s.s = ""
                       ;ClearStructure(*This, ParseStruct)
                       ;                         FreeStructure(*This)
                       ;                         *This.ParseStruct = AllocateStructure(ParseStruct)
@@ -2388,7 +2388,7 @@ EndProcedure
 
 ;-
 ;- PI Редактора
-Procedure WE_Tree_0_Position(Gadget, Parent)
+Procedure inspector_get_pos(Gadget, Parent)
   Protected i, Position=-1 ; 
   Position = CountGadgetItems(Gadget)
   
@@ -2414,7 +2414,7 @@ Procedure WE_Tree_0_Position(Gadget, Parent)
   ProcedureReturn Position
 EndProcedure
 
-Procedure WE_Tree_0_Update(Gadget, Position=-1)
+Procedure inspector_add_pos(Gadget, Position=-1)
   Protected i, Img, ImageID 
   img = GetGadgetItemData(WE_Tree_1, GetGadgetState(WE_Tree_1))
   Protected img_form = CatchImage(#PB_Any, ?form_png, ?form_png_end-?form_png)
@@ -2442,14 +2442,14 @@ Procedure WE_Tree_0_Update(Gadget, Position=-1)
     PushListPosition(ParsePBObject())
     ForEach ParsePBObject()
       Position = CountGadgetItems(Gadget)
-      generate_image(ParsePBObject()\Type\Argument$)
-      AddGadgetItem (Gadget, -1, ParsePBObject()\Object\Argument$, ImageID, ParsePBObject()\SubLevel)
-      SetGadgetItemData(Gadget, Position, ParsePBObject()\Object\Argument)
+      generate_image(ParsePBObject()\Type\s.s)
+      AddGadgetItem (Gadget, -1, ParsePBObject()\Object\s.s, ImageID, ParsePBObject()\SubLevel)
+      SetGadgetItemData(Gadget, Position, ParsePBObject()\Object\i.i)
     Next
     PopListPosition(ParsePBObject())
   Else
-    AddGadgetItem(Gadget, Position, ParsePBObject()\Object\Argument$, ImageID, ParsePBObject()\SubLevel)
-    SetGadgetItemData(Gadget, Position, ParsePBObject()\Object\Argument)
+    AddGadgetItem(Gadget, Position, ParsePBObject()\Object\s.s, ImageID, ParsePBObject()\SubLevel)
+    SetGadgetItemData(Gadget, Position, ParsePBObject()\Object\i.i)
   EndIf
   
   ; Раскрываем весь список
@@ -2500,64 +2500,64 @@ Procedure WE_Tree_0_Replace(Gadget)
   If Replace$ And Find$ <> Replace$
     PushListPosition(ParsePBObject())
     ForEach ParsePBObject()
-      If ParsePBObject()\Object\Argument$ = Find$
+      If ParsePBObject()\Object\s.s = Find$
         ; Включаем и имя родителя при формировании имени объекта
-        If *This\get(Str(ParsePBObject()\Parent\Argument))\Object\Argument$ And 
-           Not FindString(Replace$, *This\get(Str(ParsePBObject()\Parent\Argument))\Object\Argument$)
-          Replace$ = *This\get(Str(ParsePBObject()\Parent\Argument))\Object\Argument$+"_"+Replace$
+        If *This\get(Str(ParsePBObject()\Parent\i.i))\Object\s.s And 
+           Not FindString(Replace$, *This\get(Str(ParsePBObject()\Parent\i.i))\Object\s.s)
+          Replace$ = *This\get(Str(ParsePBObject()\Parent\i.i))\Object\s.s+"_"+Replace$
           SetGadgetText(EventGadget(), Replace$)
         EndIf
         
         ;
-        If Find$=*This\get(Find$)\Window\Argument$
-          *This\get(Find$)\Window\Argument$=Replace$
+        If Find$=*This\get(Find$)\Window\s.s
+          *This\get(Find$)\Window\s.s=Replace$
         EndIf
-        If Find$=*This\get(Find$)\Parent\Argument$
-          *This\get(Find$)\Parent\Argument$=Replace$
+        If Find$=*This\get(Find$)\Parent\s.s
+          *This\get(Find$)\Parent\s.s=Replace$
         EndIf
         
-        *This\get(ParsePBObject()\Object\Argument$)\Object\Argument$ = Replace$
-        *This\get(Str(ParsePBObject()\Object\Argument))\Object\Argument$ = Replace$
+        *This\get(ParsePBObject()\Object\s.s)\Object\s.s = Replace$
+        *This\get(Str(ParsePBObject()\Object\i.i))\Object\s.s = Replace$
         
-        ParsePBObject()\Class\Argument$ = ReplaceString(Replace$, *This\get(Str(ParsePBObject()\Parent\Argument))\Object\Argument$+"_", "")
+        ParsePBObject()\Class\s.s = ReplaceString(Replace$, *This\get(Str(ParsePBObject()\Parent\i.i))\Object\s.s+"_", "")
         
         ; Меняем map ключ объекта
-        CopyStructure(*This\get(ParsePBObject()\Object\Argument$), *This\get(Replace$), ObjectStruct)
+        CopyStructure(*This\get(ParsePBObject()\Object\s.s), *This\get(Replace$), ObjectStruct)
         ; И удаляем старый
-        DeleteMapElement(*This\get(), ParsePBObject()\Object\Argument$)
+        DeleteMapElement(*This\get(), ParsePBObject()\Object\s.s)
         
-        ParsePBObject()\Object\Argument$ = Replace$ 
+        ParsePBObject()\Object\s.s = Replace$ 
         
         ; По умалчанию 
         If ParsePBObject()\Container
           If ParsePBObject()\Container =- 1
-            *This\Window\Argument$ = ParsePBObject()\Object\Argument$ 
+            *This\Window\s.s = ParsePBObject()\Object\s.s 
           EndIf
           *This\Container = ParsePBObject()\Container
-          *This\Parent\Argument$ = ParsePBObject()\Object\Argument$
+          *This\Parent\s.s = ParsePBObject()\Object\s.s
         EndIf
-        ParsePBObject()\Window\Argument$ = *This\Window\Argument$
-        ParsePBObject()\Parent\Argument$ = *This\Parent\Argument$
+        ParsePBObject()\Window\s.s = *This\Window\s.s
+        ParsePBObject()\Parent\s.s = *This\Parent\s.s
       Else
         ; Формируем имя объекта снова так как изменили имя родителя
-        If *This\get(Str(ParsePBObject()\Parent\Argument))\Object\Argument$
-          Debug ParsePBObject()\Class\Argument$
-          ParentClass$ = *This\get(Str(ParsePBObject()\Parent\Argument))\Object\Argument$
+        If *This\get(Str(ParsePBObject()\Parent\i.i))\Object\s.s
+          Debug ParsePBObject()\Class\s.s
+          ParentClass$ = *This\get(Str(ParsePBObject()\Parent\i.i))\Object\s.s
           
-          *This\get(ParsePBObject()\Object\Argument$)\Object\Argument$ = ParentClass$+"_"+ParsePBObject()\Class\Argument$
-          *This\get(Str(ParsePBObject()\Object\Argument))\Object\Argument$ = ParentClass$+"_"+ParsePBObject()\Class\Argument$
+          *This\get(ParsePBObject()\Object\s.s)\Object\s.s = ParentClass$+"_"+ParsePBObject()\Class\s.s
+          *This\get(Str(ParsePBObject()\Object\i.i))\Object\s.s = ParentClass$+"_"+ParsePBObject()\Class\s.s
           
           ; Меняем map ключ объекта
-          CopyStructure(*This\get(ParsePBObject()\Object\Argument$), *This\get(ParentClass$+"_"+ParsePBObject()\Class\Argument$), ObjectStruct)
+          CopyStructure(*This\get(ParsePBObject()\Object\s.s), *This\get(ParentClass$+"_"+ParsePBObject()\Class\s.s), ObjectStruct)
           ; И удаляем старый
-          DeleteMapElement(*This\get(), ParsePBObject()\Object\Argument$)
+          DeleteMapElement(*This\get(), ParsePBObject()\Object\s.s)
           
-          ParsePBObject()\Object\Argument$ = ParentClass$+"_"+ParsePBObject()\Class\Argument$ 
+          ParsePBObject()\Object\s.s = ParentClass$+"_"+ParsePBObject()\Class\s.s 
           
           ; Обнавляем инспектор объектов
           For i=0 To CountGadgetItems(WE_Tree_0)-1
-            If ParsePBObject()\Object\Argument=GetGadgetItemData(WE_Tree_0, i) 
-              SetGadgetItemText(WE_Tree_0, i, ParsePBObject()\Object\Argument$)
+            If ParsePBObject()\Object\i.i=GetGadgetItemData(WE_Tree_0, i) 
+              SetGadgetItemText(WE_Tree_0, i, ParsePBObject()\Object\s.s)
               Break
             EndIf
           Next 
@@ -2577,7 +2577,7 @@ Procedure WE_Tree_0_Replace(Gadget)
       ; Делаем разницу столько раз сколько слов заменено
       String$ = Mid(*This\Content\Text$, 1, *This\get(Replace$)\Code("Code_Object")\Position)
       NbFound = len*ExtractRegularExpression(RegExID, String$, Result$())
-      *This\get(*This\Window\Argument$)\Code("Code_Object")\Position + NbFound
+      *This\get(*This\Window\s.s)\Code("Code_Object")\Position + NbFound
       
       ; Делаем разницу столько раз сколько слов заменено
       String$ = Mid(*This\Content\Text$, 1, *This\get(Replace$)\Code("Code_Function")\Position)
@@ -2586,7 +2586,7 @@ Procedure WE_Tree_0_Replace(Gadget)
       PushListPosition(ParsePBObject())
       ForEach ParsePBObject()
         If ParsePBObject()\Container 
-          *This\get(ParsePBObject()\Object\Argument$)\Code("Code_Function")\Position + NbFound
+          *This\get(ParsePBObject()\Object\s.s)\Code("Code_Function")\Position + NbFound
         EndIf
       Next
       PopListPosition(ParsePBObject())
@@ -2602,8 +2602,8 @@ Procedure WE_Tree_0_Replace(Gadget)
       FreeRegularExpression(RegExID)
     EndIf
     
-    ;     Debug "    Code_Object"+ *This\get(*This\get(Replace$)\Window\Argument$)\Code("Code_Object")\Position
-    ;     Debug "    Code_Function"+ *This\get(*This\get(Replace$)\Parent\Argument$)\Code("Code_Function")\Position
+    ;     Debug "    Code_Object"+ *This\get(*This\get(Replace$)\Window\s.s)\Code("Code_Object")\Position
+    ;     Debug "    Code_Function"+ *This\get(*This\get(Replace$)\Parent\s.s)\Code("Code_Function")\Position
     
     SetGadgetText(Gadget, Replace$)
     
@@ -2618,7 +2618,7 @@ Procedure WE_OpenFile(Path$) ; Открытие файла
     ; Начинаем перебырать файл
     If ParsePBFile(Path$)
       
-      WE_Tree_0_Update(WE_Tree_0)
+      inspector_add_pos(WE_Tree_0)
       
       WE_Code_Show(*This\Content\Text$)
       
@@ -2643,21 +2643,21 @@ Procedure WE_SaveFile(Path$) ; Процедура сохранения файл�
     
     PushListPosition(ParsePBObject())
     ForEach ParsePBObject()
-      Object = ParsePBObject()\Object\Argument ; *This\get(ParsePBObject()\Object\Argument$)\Object\Argument
+      Object = ParsePBObject()\Object\i.i ; *This\get(ParsePBObject()\Object\s.s)\Object\i.i
       
       If IsWindow(Object)
-        ParsePBObject()\X\Argument$ = Str(WindowX(Object))
-        ParsePBObject()\Y\Argument$ = Str(WindowY(Object))
-        ParsePBObject()\Width\Argument$ = Str(WindowWidth(Object))
-        ParsePBObject()\Height\Argument$ = Str(WindowHeight(Object))
-        ParsePBObject()\Caption\Argument$ = GetWindowTitle(Object)
+        ParsePBObject()\X\s.s = Str(WindowX(Object))
+        ParsePBObject()\Y\s.s = Str(WindowY(Object))
+        ParsePBObject()\Width\s.s = Str(WindowWidth(Object))
+        ParsePBObject()\Height\s.s = Str(WindowHeight(Object))
+        ParsePBObject()\Caption\s.s = GetWindowTitle(Object)
       EndIf
       If IsGadget(Object)
-        ParsePBObject()\X\Argument$ = Str(GadgetX(Object))
-        ParsePBObject()\Y\Argument$ = Str(GadgetY(Object))
-        ParsePBObject()\Width\Argument$ = Str(GadgetWidth(Object))
-        ParsePBObject()\Height\Argument$ = Str(GadgetHeight(Object))
-        ParsePBObject()\Caption\Argument$ = GetGadgetText(Object)
+        ParsePBObject()\X\s.s = Str(GadgetX(Object))
+        ParsePBObject()\Y\s.s = Str(GadgetY(Object))
+        ParsePBObject()\Width\s.s = Str(GadgetWidth(Object))
+        ParsePBObject()\Height\s.s = Str(GadgetHeight(Object))
+        ParsePBObject()\Caption\s.s = GetGadgetText(Object)
       EndIf
       
     Next
@@ -2688,8 +2688,8 @@ Procedure WE_SaveFile(Path$) ; Процедура сохранения файл�
           \Content\String$ + Space((\Content\Length-Length))
         EndIf
         
-        Debug ""+Str(Position)+" "+Str(Length)+" "+Text$+" "+\Object\Argument$
-        Debug "  "+Str(\Content\Position)+" "+Str(\Content\Length)+" "+\Content\String$+" "+\Object\Argument$
+        Debug ""+Str(Position)+" "+Str(Length)+" "+Text$+" "+\Object\s.s
+        Debug "  "+Str(\Content\Position)+" "+Str(\Content\Length)+" "+\Content\String$+" "+\Object\s.s
         ;*This\Content\Text$=ReplaceString(*This\Content\Text$, Text$, \Content\String$, #PB_String_CaseSensitive, Position, 1)
         ReplaceString(*This\Content\Text$, Text$, \Content\String$, #PB_String_InPlace, Position, 1)
         ;Replace(\Content\String$, Text$, \Content\Position)
@@ -2859,7 +2859,7 @@ Procedure WE_Events()
               Debug ""
               PushListPosition(ParsePBObject())
               ForEach ParsePBObject()
-                Debug ParsePBObject()\Object\Argument$ +" "+ *This\get(ParsePBObject()\Object\Argument$)\Code("Code_Function")\Position 
+                Debug ParsePBObject()\Object\s.s +" "+ *This\get(ParsePBObject()\Object\s.s)\Code("Code_Function")\Position 
                 
               Next
               PopListPosition(ParsePBObject())
@@ -2881,8 +2881,8 @@ Procedure WE_Events()
             Case #PB_EventType_LostFocus   
               PushListPosition(ParsePBObject())
               ForEach ParsePBObject()
-                If ParsePBObject()\Object\Argument$ = GetGadgetText(WE_Tree_0)
-                  ParsePBObject()\Flag\Argument$ = Properties::GetCheckedText(EventGadget()) 
+                If ParsePBObject()\Object\s.s = GetGadgetText(WE_Tree_0)
+                  ParsePBObject()\Flag\s.s = Properties::GetCheckedText(EventGadget()) 
                   Break
                 EndIf
               Next
@@ -2904,9 +2904,9 @@ Procedure WE_Events()
               PushListPosition(ParsePBObject())
               With ParsePBObject()
                 ForEach ParsePBObject()
-                  If GetGadgetText(WE_Tree_0) = \Object\Argument$
-                    Properties::Init(\Object\Argument, \Object\Argument$, \Flag\Argument$)
-                    Transformation::Change(\Object\Argument)
+                  If GetGadgetText(WE_Tree_0) = \Object\s.s
+                    Properties::Init(\Object\i.i, \Object\s.s, \Flag\s.s)
+                    Transformation::Change(\Object\i.i)
                     Break
                   EndIf
                 Next
@@ -2982,11 +2982,8 @@ CompilerIf #PB_Compiler_IsMainFile
     EndSelect
   Wend
 CompilerEndIf
-
-; IDE Options = PureBasic 5.62 (Windows - x64)
-; CursorPosition = 2782
-; FirstLine = 2756
+; IDE Options = PureBasic 5.71 LTS (MacOS X - x64)
 ; Folding = ---------------------------------------------------------------
 ; EnableXP
-; Executable = ..\..\Programs\PureBasic\PureParser.exe
+; Executable = ../../Programs/PureBasic/PureParser.exe
 ; CompileSourceDirectory

@@ -2,12 +2,23 @@
   XIncludeFile "Flag.pbi"
   XIncludeFile "Hide.pbi"
   XIncludeFile "Disable.pbi"
+
+CompilerIf #PB_Compiler_OS = #PB_OS_MacOS 
+  IncludePath "/Users/as/Documents/GitHub/Widget/include"
+  IncludeFile "fixme(mac).pbi"
+CompilerEndIf
+
 CompilerEndIf
 
 ;-
 ;- Module (Properties)
 DeclareModule Properties
   EnableExplicit
+  
+  CompilerIf Defined(fixme, #PB_Module)
+    ;Macro PB(Function) : Function : EndMacro
+    UseModule fixme
+  CompilerEndIf
   
   Structure PropertiesStruct
     Gadget.i
@@ -1221,7 +1232,7 @@ Module Properties
         \GadgetType = GadgetType
         
         \LinePos = GadgetWidth(LineGadget)
-        \Font = LoadFont(#PB_Any,"MS Shell Dlg",8 ) 
+        \Font = LoadFont(#PB_Any,"MS Shell Dlg",8+Bool(#PB_Compiler_OS = #PB_OS_MacOS)*4 ) 
         \ItemHeight = GetGadgetAttribute(\Gadget,#PB_ScrollArea_ScrollStep)
         \ItemHeight = 20
           
@@ -1286,6 +1297,7 @@ Module Properties
           Protected IC 
           \ComboBox = ComboBoxGadget(#PB_Any, \LinePos,Y + 1,Width,\ItemHeight - 1) :Clip(\ComboBox): Result = \ComboBox
           If IsFont(\Font) : SetGadgetFont(\ComboBox, FontID(\Font)) : EndIf
+          
           For IC=0 To CountString(\Text.S,"|")
             If Trim(StringField(\Text.S,IC+1,"|"))
               AddGadgetItem(\ComboBox,-1,Trim(StringField(\Text.S,IC+1,"|")))
@@ -1480,8 +1492,6 @@ EndProcedure
     EndSelect
   Wend
 CompilerEndIf
-
-
-; IDE Options = PureBasic 5.62 (MacOS X - x64)
-; Folding = ---------------------------
+; IDE Options = PureBasic 5.71 LTS (MacOS X - x64)
+; Folding = ----------------------------
 ; EnableXP

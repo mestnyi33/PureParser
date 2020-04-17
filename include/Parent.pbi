@@ -124,32 +124,31 @@ CompilerSelect #PB_Compiler_OS
       Macro gtk_bin(_handle_) : gtk_widget_get_ancestor_ (_handle_, gtk_bin_get_type_ ()) : EndMacro
       Macro gtk_viewport(_handle_) : gtk_widget_get_ancestor_ (_handle_, gtk_viewport_get_type_ ()) : EndMacro
       
-      Procedure pb_parent( GadgetID, Item=#PB_Default )
-        GadgetID = gtk_widget(GadgetID)
+      Procedure pb_parent( GadgetID, Item=-1 )
+        CompilerIf #PB_Compiler_Version <562
+          GadgetID = gtk_widget(GadgetID)
+        CompilerEndIf
         
         If GadgetID              
-          Select PeekS(gtk_widget_get_name_(GadgetID),-1,#PB_UTF8)
+           Select PeekS(gtk_widget_get_name_(GadgetID),-1,#PB_UTF8)
             Case "GtkWindow"
               GadgetID = g_list_nth_data_(gtk_container_get_children_(gtk_bin_get_child_(GadgetID)), 0)
-              
-              CompilerIf #PB_Compiler_Version > 531
+              CompilerIf #PB_Compiler_Version > 531 And #PB_Compiler_Version < 560 ; ?????
                 GadgetID = g_list_nth_data_(gtk_container_get_children_(gtk_bin_get_child_(GadgetID)), 0)
               CompilerEndIf
-              
               ProcedureReturn GadgetID
               
             Case "GtkScrolledWindow"
               ProcedureReturn g_list_nth_data_(gtk_container_get_children_(gtk_bin_get_child_(GadgetID)), 0)
               
             Case "GtkNotebook"
-              If Item=#PB_Default
-                Item=gtk_notebook_get_current_page_( GadgetID )
-              EndIf
+              If Item=-1 : Item=gtk_notebook_get_current_page_( GadgetID ) : EndIf
               ProcedureReturn gtk_notebook_get_nth_page_(GadgetID, Item) 
               
-            Case "GtkFixed"
+            Case "GtkFixed",  "GtkLayout"
               ProcedureReturn GadgetID
-          EndSelect 
+              
+           EndSelect 
         EndIf
       EndProcedure
       
@@ -177,22 +176,24 @@ CompilerSelect #PB_Compiler_OS
         While Handle
           Widget = handle
           Handle = gtk_widget_get_parent_( Handle )
-          Name = gtk_widget_get_name_( Handle )
           
           
-          ;           If IsWindow( ID::Window( Handle )) Or IsGadget( ID::Gadget( Handle ))
-          ;             ProcedureReturn Handle
-          ;           EndIf
+          ;                     If IsWindow( ID::Window( Handle )) Or IsGadget( ID::Gadget( Handle ))
+          ;                       ProcedureReturn Handle
+          ;                     EndIf
           
-          If Name And PeekS( Name, -1, #PB_UTF8 ) = "GtkScrolledWindow" 
-            If gtk_frame(Handle)
-              ProcedureReturn gtk_children(Widget)
+          If Handle
+            Name = gtk_widget_get_name_( Handle )
+            If Name And PeekS( Name, -1, #PB_UTF8 ) = "GtkScrolledWindow" 
+              If gtk_frame(Handle)
+                ProcedureReturn gtk_children(Widget)
+              EndIf
+              ProcedureReturn Handle
+            ElseIf Name And PeekS( Name, -1, #PB_UTF8 ) = "GtkNotebook" 
+              ProcedureReturn Handle
+            ElseIf gtk_vpaned(Handle)
+              ProcedureReturn gtk_vpaned(Widget)
             EndIf
-            ProcedureReturn Handle
-          ElseIf Name And PeekS( Name, -1, #PB_UTF8 ) = "GtkNotebook" 
-            ProcedureReturn Handle
-          ElseIf gtk_vpaned(Handle)
-            ProcedureReturn gtk_vpaned(Widget)
           EndIf
         Wend
         
@@ -237,6 +238,7 @@ CompilerSelect #PB_Compiler_OS
               
               
             Default
+              
               If GtkFixed
                 gtk_widget_reparent_( *GtkWidget\object, GtkFixed ) 
                 ResizeGadget( Gadget, GadgetX, GadgetY, #PB_Ignore, #PB_Ignore )
@@ -365,35 +367,35 @@ CompilerSelect #PB_Compiler_OS
         EndIf
       EndProcedure
     EndModule
-    ;- MacOS ; no tested
+    
+    ;- MacOS ok ; pb 562 ok mojave 10.12
   CompilerCase #PB_OS_MacOS
     Module Parent
-      CompilerIf #PB_Compiler_OS = #PB_OS_MacOS
-        ; PB Interne Struktur Gadget MacOS
-        Structure sdkGadget
-          *gadget
-          *container
-          *vt
-          UserData.i
-          Window.i
-          Type.i
-          Flags.i
-        EndStructure
-      CompilerEndIf
-      
       Procedure.s GetClass(handle.i)
         Protected Result
         
-        Result = CocoaMessage(0, handle, "className")
-        CocoaMessage(@Result, Result, "UTF8String")
-        
-        ;Debug PeekS(CocoaMessage(0, CocoaMessage(0, handle, "className"), "UTF8String"), -1, #PB_UTF8)
+        CocoaMessage(@Result, CocoaMessage(0, handle, "className"), "UTF8String")
         
         If Result
           ProcedureReturn PeekS(Result, -1, #PB_UTF8)
         EndIf
       EndProcedure
       
+      Procedure NSView(GadgetID)
+        Protected handle = GadgetID
+        
+        While handle
+          Select GetClass(handle)
+            Case "NSScrollView", "PB_SpinView", "NSBox"
+              GadgetID = handle
+              Break
+            Default
+              handle = CocoaMessage(0, handle, "superview")
+          EndSelect
+        Wend
+        
+        ProcedureReturn GadgetID
+      EndProcedure
       
       Procedure Window(Gadget) ; Return the handle of the parent window from the gadget handle
         ProcedureReturn ID::Window(CocoaMessage(0, GadgetID(Gadget), "window"))
@@ -406,47 +408,31 @@ CompilerSelect #PB_Compiler_OS
       Procedure Get( Handle ) ; Return the handle of the parent from the handle
         While Handle
           Handle = CocoaMessage(0, Handle, "superview")
-          ; Debug ""+ GetClass(Handle) +" "+ GetClass(CocoaMessage(0, Handle, "opaqueAncestor"))
           
           If IsWindow( ID::Window( Handle )) Or IsGadget( ID::Gadget( Handle ))
             ProcedureReturn Handle
           EndIf
         Wend
-        
       EndProcedure
       
       Procedure Set( Gadget, ParentID, Item=#PB_Default ) ; Set a new parent for the gadget
-        Protected *w.sdkGadget = IsGadget( Gadget )
-       
-        Debug *w\Window
+        Protected GadgetID =  GadgetID (Gadget)
         
-        If IsGadget( Gadget ) ; NSObject
-          
+        If IsGadget( Gadget )
           If ParentID
+            Select GetClass(ParentID)
+              Case "PBTabView", "PB_CanvasView"
+                ParentID = CocoaMessage(0, ParentID, "subviews")
+                ParentID = CocoaMessage(0, ParentID, "objectAtIndex:", CocoaMessage(0, ParentID, "count") - 1)
+              Default
+                ParentID = CocoaMessage(0, ParentID, "contentView")
+            EndSelect
             
-            ;Debug CocoaMessage(0, ParentID, "subviews")
-            ; CocoaMessage(0, ParentID, "nextResponder") ; PBFlippedWindowView
-            ;func tabViewItem(at
-           ; Debug  CocoaMessage(0, CocoaMessage(0, ParentID, "delegate"), "NSTabViewDelegate") ; PBPanelGadgetFunctions
-            ;Debug GetClass(CocoaMessage(0, ParentID, "subviews"));CocoaMessage(0, GadgetID (Gadget), "nextResponder"));CocoaMessage(0, ParentID, "superview")) ; PBTabView >> PBFlippedWindowView
-            
-;             Debug ParentID
-            ; ParentID = CocoaMessage(0, ParentID, "superview")
-;             Debug ParentID
-;             Debug WindowID(10)
-;             Debug WindowID(20)
-           ; ParentID = CocoaMessage(0, ParentID, "opaqueAncestor")
-            
-             If Not CocoaMessage(0, ParentID, "nextResponder") ; GetClass(ParentID) = "PBWindow" ; ParentID = CocoaMessage(0, GadgetID (Gadget), "window")
-             Else
-              ; ParentID = CocoaMessage(0, ParentID, "delegate:", 1)
-;                Protected Columns = CocoaMessage(0, ParentID, "tableColumns")
-;                ParentID = CocoaMessage(0, Columns, "objectAtIndex:", 0)
-               ;ParentID = CocoaMessage(0, GadgetID(100), "superview")
-               CocoaMessage (0, ParentID, "addSubview:", GadgetID (Gadget)) 
-             EndIf
-           EndIf
-           
+            CocoaMessage (0, ParentID, "addSubview:", NSView(GadgetID)) 
+          Else
+            ; to desktop move
+          EndIf
+          
           ProcedureReturn ParentID
         EndIf
       EndProcedure
@@ -455,7 +441,7 @@ CompilerEndSelect
 
 CompilerIf #PB_Compiler_IsMainFile
   UseModule Parent
-  
+ 
   Procedure GadgetIDType(GadgetID)
     If GadgetID
       CompilerSelect #PB_Compiler_OS 
@@ -488,22 +474,41 @@ CompilerIf #PB_Compiler_IsMainFile
   
   
   Define Flags = #PB_Window_Invisible | #PB_Window_SystemMenu | #PB_Window_ScreenCentered 
-  OpenWindow(10, 0, 0, 630, 400, "demo set gadget new parent", Flags )
-  ButtonGadget(-1,30,90,150,30,"move to Window")
-  PanelGadget(1,10,150,200,160) :AddGadgetItem(1,-1,"Panel") :ButtonGadget(100,30,90,150,30,"move to Panel") :AddGadgetItem(1,-1,"Second") :AddGadgetItem(1,-1,"Third") :CloseGadgetList()
-  ContainerGadget(2,215,150,200,160,#PB_Container_Flat) :ButtonGadget(200,30,90,150,30,"move to Container")  :CloseGadgetList() ; ContainerGadget
-  ScrollAreaGadget(3,420,150,200,160,200,160,10,#PB_ScrollArea_Flat) :ButtonGadget(300,30,90,150,30,"move to ScrollArea") :CloseGadgetList()
+  OpenWindow(10, 0, 0, 630+210, 320, "demo set gadget new parent", Flags )
+
+  PanelGadget(1, 10,150,200,160) 
+  AddGadgetItem(1,-1,"Panel") 
+   ButtonGadget(60, 30,90,160,30,"Button >>(Panel (0))") 
+  AddGadgetItem(1,-1,"Second") 
+   ButtonGadget(61, 35,90,160,30,"Button >>(Panel (1))") 
+  AddGadgetItem(1,-1,"Third") 
+   ButtonGadget(62, 40,90,160,30,"Button >>(Panel (2))") 
+  CloseGadgetList()
   
-  ButtonGadget(4,50,320,100,30,"move to Desktop") 
-  ButtonGadget(5,150,320,100,30,"move to Window") 
-  ButtonGadget(6,250,320,100,30,"move to Panel") 
-  ButtonGadget(7,350,320,100,30,"move to Container") 
-  ButtonGadget(8,450,320,100,30,"move to Scroll") 
+  ContainerGadget(2, 215,150,200,160,#PB_Container_Flat) 
+  ButtonGadget(7, 30,90,160,30,"Button >>(Container)") 
+  CloseGadgetList()
   
-  ButtonGadget(9,100,350,400,30,"back") 
+  ScrollAreaGadget(3, 420,150,200,160,200,160,10,#PB_ScrollArea_Flat) 
+  ButtonGadget(8, 30,90,160,30,"Button >>(ScrollArea)") 
+  CloseGadgetList()
+  
+  CanvasGadget(10, 630,150,200,160,#PB_Canvas_Container) 
+  ButtonGadget(11, 30,90,160,30,"Button >>(Canvas)") 
+  CloseGadgetList()
+  
+  ;
+  ButtonGadget(4, (630-160)/2,90-25-35,160,30,"Button >>(Desktop)") 
+  ButtonGadget(600, (630-160)/2,90-25,160,20,"Button >>(Panel (0))") 
+  ButtonGadget(601, (630-160)/2,90,160,20,"Button >>(Panel (1))") 
+  ButtonGadget(602, (630-160)/2,90+25,160,20,"Button >>(Panel (2))") 
+  
+  ButtonGadget(5, 30,90,160,25,"Button >>(Window)")
+  ButtonGadget(9, 30,115,160,25,"Button <<(Back)") 
+ 
   
   Flags = #PB_Window_Invisible | #PB_Window_TitleBar
-  OpenWindow(20, WindowX( 10 )+20+WindowWidth( 10 ), WindowY( 10 ), 200, 400, "old parent", Flags, WindowID(10))
+  OpenWindow(20, WindowX( 10 )-210, WindowY( 10 ), 200, 320, "old parent", Flags, WindowID(10))
   
   ButtonGadget(20,30,10,150,70,"ButtonGadget") 
   
@@ -621,9 +626,12 @@ CompilerIf #PB_Compiler_IsMainFile
           Select EventGadget()
             Case 4 : Set(20, 0)
             Case 5 : Set(20, WindowID(10))
-            Case 6 : Set(20, GadgetID(1))
+            Case 60, 600 : Set(20, GadgetID(1), 0)
+            Case 61, 601 : Set(20, GadgetID(1), 1)
+            Case 62, 602 : Set(20, GadgetID(1), 2)
             Case 7 : Set(20, GadgetID(2))
             Case 8 : Set(20, GadgetID(3))
+            Case 11 : Set(20, GadgetID(10))
             Case 9 : Set(20, WindowID(20))
               
             Case 21
@@ -705,6 +713,6 @@ CompilerIf #PB_Compiler_IsMainFile
   Until Event=#PB_Event_CloseWindow
   
 CompilerEndIf
-; IDE Options = PureBasic 5.62 (MacOS X - x64)
-; Folding = r+-----------v0+
+; IDE Options = PureBasic 5.71 LTS (MacOS X - x64)
+; Folding = 9-6-----8-+-8---
 ; EnableXP

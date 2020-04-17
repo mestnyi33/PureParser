@@ -82,8 +82,8 @@ Declare WE_Events(Event)
 Declare WE_Resize()
 Declare WE_Panel_0_Size()
 Declare WE_Panel_1_Size()
-Declare WE_Position_Selecting(Gadget, Parent)
-Declare WE_Update_Selecting(Gadget, Position=-1)
+Declare inspector_get_pos(Gadget, Parent)
+Declare inspector_add_pos(Gadget, Position=-1)
 Declare WE_Open(ParentID=0, Flag.i=#PB_Window_SystemMenu)
 
 Declare$ GetObjectClass(Object)
@@ -1371,6 +1371,7 @@ Procedure CO_Create(Type$, X, Y, Parent=-1)
     Protected *ThisParse.ParseStruct = AddElement(ParsePBObject())
     If  *ThisParse
       Restore Model 
+      
       For i=1 To 1+33 ; gadget count
         For j=1 To 7  ; argument count
           Read.s Buffer
@@ -1401,6 +1402,7 @@ Procedure CO_Create(Type$, X, Y, Parent=-1)
             EndSelect
           EndIf
         Next  
+        
         BuffType$ = ""
       Next  
       
@@ -1480,7 +1482,7 @@ Procedure CO_Create(Type$, X, Y, Parent=-1)
       \Parent\Argument = Parent
     EndIf
     
-    Position = WE_Position_Selecting(WE_Selecting, Parent)
+    Position = inspector_get_pos(WE_Selecting, Parent)
     
     Object=CallFunctionFast(@CO_Open())
     
@@ -1499,7 +1501,7 @@ Procedure CO_Create(Type$, X, Y, Parent=-1)
       EndSelect
     EndIf
     
-    WE_Update_Selecting(WE_Selecting, Position)
+    inspector_add_pos(WE_Selecting, Position)
     
     
     If GadgetList 
@@ -2522,7 +2524,7 @@ EndProcedure
 
 ;-
 ;- PI Редактора
-Procedure WE_Position_Selecting(Gadget, Parent)
+Procedure inspector_get_pos(Gadget, Parent)
   Protected i, Position=-1 ; 
   
   ; Определяем позицию в списке
@@ -2547,7 +2549,7 @@ Procedure WE_Position_Selecting(Gadget, Parent)
   ProcedureReturn Position
 EndProcedure
 
-Procedure WE_Update_Selecting(Gadget, Position=-1)
+Procedure inspector_add_pos(Gadget, Position=-1)
   Protected i
   
   ; Добавляем объекты к списку
@@ -2703,7 +2705,7 @@ Procedure WE_OpenFile(Path$) ; Открытие файла
     ; Начинаем перебырать файл
     If ParsePBFile(Path$)
       
-      WE_Update_Selecting(WE_Selecting)
+      inspector_add_pos(WE_Selecting)
       
       CodeShow=1
       WE_Code_Show(*This\Content\Text$)
@@ -3113,9 +3115,6 @@ CompilerIf #PB_Compiler_IsMainFile
     EndSelect
   Wend
 CompilerEndIf
-
-; IDE Options = PureBasic 5.62 (Windows - x64)
-; CursorPosition = 2874
-; FirstLine = 2830
-; Folding = --------------8+----------------------------------------------------
+; IDE Options = PureBasic 5.71 LTS (MacOS X - x64)
+; Folding = ---------------+------------------------------------------v---------
 ; EnableXP

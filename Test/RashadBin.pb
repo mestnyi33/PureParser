@@ -691,3 +691,6 @@ If Window_RashadBin()
 EndIf
 ; 
 End
+; IDE Options = PureBasic 5.70 LTS (MacOS X - x64)
+; Folding = ----------
+; EnableXP

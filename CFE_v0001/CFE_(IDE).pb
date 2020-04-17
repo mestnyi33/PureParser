@@ -1060,11 +1060,12 @@ Procedure NewElementEvents(Event.q, EventElement)
               
               If DragElementType
                 DrawingMode(#PB_2DDrawing_Outlined)
-                Box(StartX,StartY,LastX,LastY, \Selector\Color)
               Else
                 DrawingMode(#PB_2DDrawing_Outlined|#PB_2DDrawing_CustomFilter)
-                CustomFilterCallback(@DrawFilterCallback()) : Box(StartX,StartY,LastX,LastY, \Selector\Color)
+                CustomFilterCallback(@DrawFilterCallback()) 
               EndIf
+              
+              Box(StartX,StartY,LastX,LastY, \Selector\Color)
               
               EndDrawing()
             EndIf
@@ -1891,7 +1892,9 @@ CompilerIf #PB_Compiler_IsMainFile
   
 CompilerEndIf
 
-; IDE Options = PureBasic 5.60 (Linux - x86)
-; Folding = ------------------------
+; IDE Options = PureBasic 5.62 (Windows - x64)
+; CursorPosition = 1067
+; FirstLine = 1036
+; Folding = --------------------------------
 ; EnableXP
 ; Executable = CFE(IDE)

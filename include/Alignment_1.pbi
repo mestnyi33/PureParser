@@ -729,20 +729,62 @@ CompilerIf #PB_Compiler_IsMainFile
   Register(15,1,1)
   
   
+  Define direction = 1
+  Define Width, Height
   
   Repeat
+    gEvent= WaitWindowEvent()
     
-    Select WaitWindowEvent() 
+    Select gEvent
       Case #PB_Event_CloseWindow
-        If WindowID(EventWindow()) = UseGadgetList(0)
-          End
-        Else
-          CloseWindow(EventWindow())
-          ;                         RS_Free(EventWindow())
+        gQuit= #True
+        
+      Case #PB_Event_Timer
+        If Width < 512
+          direction = 1
+        ElseIf Width > 650
+          direction =- 1
         EndIf
+        ;         
+        Width + direction
+        Height + direction
+        
+        ResizeWindow(0, #PB_Ignore, #PB_Ignore, Width, Height)
+       
+      Case #PB_Event_Gadget
+        
+        Select EventGadget()
+          Case 4
+            Width = WindowWidth(0)
+            Height = WindowHeight(0)
+            
+            If GetGadgetState(4)
+              AddWindowTimer(0, 1, 100)
+            Else
+              RemoveWindowTimer(0, 1)
+            EndIf
+        EndSelect
+        
     EndSelect
     
-  ForEver
+  Until gQuit
+;   Repeat
+;     
+;     Select WaitWindowEvent() 
+;       Case #PB_Event_CloseWindow
+;         If WindowID(EventWindow()) = UseGadgetList(0)
+;           End
+;         Else
+;           CloseWindow(EventWindow())
+;           ;                         RS_Free(EventWindow())
+;         EndIf
+;     EndSelect
+;     
+;   ForEver
   ;                 UnuseModule RS_gadget
   
 CompilerEndIf
+
+; IDE Options = PureBasic 5.70 LTS (MacOS X - x64)
+; Folding = -----------------
+; EnableXP

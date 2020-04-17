@@ -2933,26 +2933,26 @@ Procedure WE_Open(ParentID=0, Flag.i=#PB_Window_SystemMenu)
     EnableGadgetDrop(WE_Objects, #PB_Drop_Text, #PB_Drag_Copy)
     
     AddGadgetItem(WE_Panel_0, -1, "Properties")
-    UseModule Properties
-    WE_Properties = Gadget( 0,0,315, 261 )
-    Properties_ID = Add( WE_Properties, "ID:", #Type_String | #Type_CheckBox )
-    Properties_Caption = Add( WE_Properties, "Text:", #Type_String )
-    Add( WE_Properties, "Disable:False|True", #Type_ComboBox )
-    Add( WE_Properties, "Hide:False|True", #Type_ComboBox )
-    
-    Add( WE_Properties, "Layouts:", #False )
-    Properties_X = Add( WE_Properties, "X:", #Type_Spin )
-    Properties_Y = Add( WE_Properties, "Y:", #Type_Spin )
-    Properties_Width = Add( WE_Properties, "Width:", #Type_Spin )
-    Properties_Height = Add( WE_Properties, "Height:", #Type_Spin )
-    
-    Add( WE_Properties, "Other:", #False )
-    Properties_Flag = Add( WE_Properties, "Flag:", #Type_Tree|#Type_Button )
-    Add( WE_Properties, "Font:", #Type_String|#Type_Button )
-    Properties_Image = Add( WE_Properties, "Image:", #Type_String|#Type_Button )
-    Add( WE_Properties, "Puth", #Type_String|#Type_Button )
-    Add( WE_Properties, "Color:", #Type_String|#Type_Button )
-    UnuseModule Properties
+;     UseModule Properties
+;     WE_Properties = Gadget( 0,0,315, 261 )
+;     Properties_ID = Add( WE_Properties, "ID:", #Type_String | #Type_CheckBox )
+;     Properties_Caption = Add( WE_Properties, "Text:", #Type_String )
+;     Add( WE_Properties, "Disable:False|True", #Type_ComboBox )
+;     Add( WE_Properties, "Hide:False|True", #Type_ComboBox )
+;     
+;     Add( WE_Properties, "Layouts:", #False )
+;     Properties_X = Add( WE_Properties, "X:", #Type_Spin )
+;     Properties_Y = Add( WE_Properties, "Y:", #Type_Spin )
+;     Properties_Width = Add( WE_Properties, "Width:", #Type_Spin )
+;     Properties_Height = Add( WE_Properties, "Height:", #Type_Spin )
+;     
+;     Add( WE_Properties, "Other:", #False )
+;     Properties_Flag = Add( WE_Properties, "Flag:", #Type_Tree|#Type_Button )
+;     Add( WE_Properties, "Font:", #Type_String|#Type_Button )
+;     Properties_Image = Add( WE_Properties, "Image:", #Type_String|#Type_Button )
+;     Add( WE_Properties, "Puth", #Type_String|#Type_Button )
+;     Add( WE_Properties, "Color:", #Type_String|#Type_Button )
+;     UnuseModule Properties
     ; 
     AddGadgetItem(WE_Panel_0, -1, "Events")
     CloseGadgetList()
@@ -3232,9 +3232,6 @@ CompilerIf #PB_Compiler_IsMainFile
     EndSelect
   Wend
 CompilerEndIf
-
-; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 701
-; FirstLine = 606
-; Folding = --------------w+-----------------------------------------------------------
+; IDE Options = PureBasic 5.70 LTS (MacOS X - x64)
+; Folding = --------------w+-------------------------------------------------------
 ; EnableXP

@@ -225,10 +225,14 @@ CompilerIf #PB_Compiler_IsMainFile
   
   BindGadgetElementEvent(e, @SpinElementEvent(), #_Event_Change|#_Event_Up|#_Event_Down)
   
-  Define e=SpinElement(15, 60,40,80,25+8,0,100, #_Flag_MoveGadget|#_Flag_SizeGadget|#_Flag_Numeric|#_Flag_ReadOnly,#PB_Default,"5")
+  Define e=SpinElement(15, 60,40,80,25+8,0,100, #_Flag_MoveGadget|#_Flag_SizeGadget|#_Flag_Numeric|#_Flag_ReadOnly,#PB_Default,"1.00")
   ;SetElementState(e, 5) : SetElementText(e, "5")
   
   BindGadgetElementEvent(e, @SpinElementEvent(), #_Event_Change|#_Event_Up|#_Event_Down)
   WaitWindowEventClose(Window)
 CompilerEndIf
 
+
+; IDE Options = PureBasic 5.70 LTS (MacOS X - x64)
+; Folding = ------
+; EnableXP

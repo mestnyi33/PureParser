@@ -657,13 +657,13 @@ CompilerIf #PB_Compiler_IsMainFile
   EndProcedure
   
   ;Define e=ButtonElement  (11, 10,10,272+dbs,162+dbs,"Button 1",#_Flag_MoveGadget|#_Flag_SizeGadget)
-  
+  ;#_Flag_AnchorGadget = 33
   If dbs
-    Define.q Flag = #_Flag_AnchorGadget
+    Define.q Flag = #_Flag_AnchorsGadget
   EndIf
   
   Define e=ScrollAreaElement(10,10-dbs/2,10-dbs/2,280+dbs,170+dbs, 280+dbs, Sh, 5, Flag|#PB_ScrollArea_Flat);|#_Flag_MoveGadget)
-  ButtonElement  (11, 10, 10, 230, 130, "Button 1", #_Flag_AnchorGadget)
+  ButtonElement  (11, 10, 10, 230, 130, "Button 1", #_Flag_AnchorsGadget)
   
   CloseElementList()
   
@@ -698,3 +698,9 @@ CompilerEndIf
 
 
 
+
+; IDE Options = PureBasic 5.62 (Windows - x86)
+; CursorPosition = 665
+; FirstLine = 661
+; Folding = --------------
+; EnableXP
