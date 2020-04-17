@@ -497,7 +497,7 @@ CompilerIf #PB_Compiler_IsMainFile
   ButtonGadget(11, 30,90,160,30,"Button >>(Canvas)") 
   CloseGadgetList()
   
-  ;
+  
   ButtonGadget(4, (630-160)/2,90-25-35,160,30,"Button >>(Desktop)") 
   ButtonGadget(600, (630-160)/2,90-25,160,20,"Button >>(Panel (0))") 
   ButtonGadget(601, (630-160)/2,90,160,20,"Button >>(Panel (1))") 
