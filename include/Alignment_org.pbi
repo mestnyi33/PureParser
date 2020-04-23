@@ -11,8 +11,8 @@
 ;   rx / ry = 1: modification of the x / y position
 ;   rx / ry = 2: changing the width / height
 ;   rx / ry = 3: proportional positioning
-;  (Rx / ry = 4: proportional positioning one side)
-;  (Rx / ry = 5: proportional positioning of the other side)
+;  (rx / ry = 4: proportional positioning one side) proportional stretching on the (right&bottom) side
+;  (rx / ry = 5: proportional positioning of the other side) proportional position on the (left&top) side
 ;############################################################################################################################
 
 Structure Struct
@@ -26,23 +26,42 @@ EndStructure
 Global Dim GadgetCont.s(256), GadgetConti
 Global NewMap RS.Struct()
 
-Procedure Resize(c, nx, ny, ndx, ndy, t.s="G")
+Procedure Resize(c, nx, ny, n_w, n_h, t.s="G")
   Protected.w ox1,oy1, ox2,oy2, x1,y1, x2,y2
   Protected gi.Struct, o.Struct,  adx,ady,  r.f,d.w 
   
-  Macro ResizeD(t, v1, V2, oV1, oV2, adV, ndV)
-    d = ndV - adV
-    r = ndV / adV
-    Select t
-      Case 0: v1 = oV1:       V2 = oV2
-      Case 1: v1 = oV1 + d:   V2 = oV2 + d
-      Case 2: v1 = oV1:       V2 = oV2 + d
-      Case 3: v1 = oV1 * r:   V2 = oV2 * r
-      Case 4: v1 = oV1:       V2 = oV2 * r
-      Case 5: v1 = oV1 * r:   V2 = oV2 + d
-    EndSelect
-  EndMacro
+;   Macro ResizeD(t, v1, V2, oV1, oV2, adV, ndV)
+;     d = ndV - adV
+;     r = ndV / adV
+;     Select t
+;       Case 0: v1 = oV1:       V2 = oV2
+;       Case 1: v1 = oV1 + d:   V2 = oV2 + d
+;       Case 2: v1 = oV1:       V2 = oV2 + d
+;       Case 3: v1 = oV1 * r:   V2 = oV2 * r
+;       Case 4: v1 = oV1:       V2 = oV2 * r
+;       Case 5: v1 = oV1 * r:   V2 = oV2 + d
+;     EndSelect
+;   EndMacro
   
+  
+      
+  Macro ResizeD(t, v1, V2, oV1, oV2, adV, ndV)
+      d = ndV - adV
+      r = ndV / adV 
+      Select t
+        Case 0  : v1 = oV1          : V2 = oV2
+        Case 1  : v1 = oV1 + d      : V2 = oV2 + d     ; right & bottom
+        Case 11 : v1 = oV1 + (d/r)  : V2 = oV2 + (d/r) ; proportional
+        Case 2  : v1 = oV1          : V2 = oV2 + d  
+        Case 22 : v1 = oV1          : V2 = oV2 + (d/r) ; proportional
+        Case 3  : v1 = oV1 + d/2    : V2 = oV2 + d/2   ; center (right & bottom)
+          
+        Case 4  : v1 = oV1          : V2 = oV2 * r ; oV1+((oV2-oV1) * r)
+        Case 5  : v1 = oV1 * r      : V2 = oV2 + d
+        Case 6  : v1 = oV1 * r      : V2 = oV2 * r
+      EndSelect
+  EndMacro
+    
   gi=RS(t+Str(c))
   
   ForEach gi\Glist()
@@ -50,11 +69,12 @@ Procedure Resize(c, nx, ny, ndx, ndy, t.s="G")
     If (\rx Or \ry)
       ox1 = \x
       ox2 = ox1 + \dx
+      
       oy1 = \y
       oy2 = oy1 + \dy
       
-      ResizeD (\rx, x1, x2, ox1, ox2, gi\dx, ndx)
-      ResizeD (\ry, y1, y2, oy1, oy2, gi\dy, ndy)
+      ResizeD (\rx, x1, x2, ox1, ox2, gi\dx, n_w)
+      ResizeD (\ry, y1, y2, oy1, oy2, gi\dy, n_h)
       
       Resize (\g, x1, y1, x2 - x1, y2 - y1)
     EndIf
@@ -62,7 +82,7 @@ Procedure Resize(c, nx, ny, ndx, ndy, t.s="G")
 Next
   
   If t="G"
-    ResizeGadget(c,nx, ny, ndx, ndy)
+    ResizeGadget(c,nx, ny, n_w, n_h)
   EndIf
 EndProcedure
 
@@ -75,7 +95,8 @@ Procedure Register(n,rx.b,ry.b)
     \rx=rx
     \ry=ry
     
-    If IsGadget(\g) : tg="G"+Str(\g)
+    If IsGadget(\g) 
+      tg="G"+Str(\g)
       RS(Parent.S)\Glist(tg)=tg
       
       \x = GadgetX(\g)
@@ -90,7 +111,8 @@ Procedure Register(n,rx.b,ry.b)
           Parent.S = tg
       EndSelect
       
-    Else : tg="W"+Str(\g)
+    Else 
+      tg="W"+Str(\g)
       \x = WindowX(\g)
       \y = WindowY(\g)
       \dx = WindowWidth(\g)
@@ -197,3 +219,6 @@ Register(1115,1,1)
 
 
 Repeat : Until WaitWindowEvent() = #PB_Event_CloseWindow
+; IDE Options = PureBasic 5.71 LTS (MacOS X - x64)
+; Folding = --
+; EnableXP

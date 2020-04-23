@@ -422,20 +422,28 @@ Procedure Bind(g,mode.w=#Client)
       EndIf
       
       If ((mode&#Left)=#Left)
-        rx=0 : ry=my
+        rx=0 
+        ry=my
       EndIf
+      
       If ((mode&#Top)=#Top)
-        rx=mx : ry=0
+        rx=mx 
+        ry=0
       EndIf
+      
       If ((mode&#Right)=#Right)
-        rx=1 : ry=mx
+        rx=1 
+        ry=mx
       EndIf
+      
       If ((mode&#Bottom)=#Bottom)
-        rx=my : ry=1
+        rx=my 
+        ry=1
       EndIf
       
       If ((mode&#Client)=#Client)
-        rx=2 : ry=2
+        rx=2 
+        ry=2
       EndIf
     EndIf 
     
@@ -548,13 +556,13 @@ CompilerIf #PB_Compiler_IsMainFile
     If in And in < 4 : CloseGadgetList() : EndIf
     
     ; BindEvent(#PB_Event_SizeWindow, @ScrollAreaEvents(), RS_window)                                                                                                                               ;
-     BindEvent(#PB_Event_Gadget, @ResizeDemos(), RS_window)
+    ; BindEvent(#PB_Event_Gadget, @ResizeDemos(), RS_window)
   EndProcedure   
   
   ; ;Demos(100,0,1,5,5)
       Demos(130,0,0,5,5)
   ; ; ;   ; container
-  Demos(160,1,1,5,5)
+  Demos(160,0,1,5,5)
   ; ;   ;   Demos(190,1,0,5,5)
   ; ;   ;; panel
   ; ;   ;Demos(250,2,1)
@@ -580,6 +588,6 @@ CompilerIf #PB_Compiler_IsMainFile
   ;                 UnuseModule RS_gadget
   
 CompilerEndIf
-; IDE Options = PureBasic 5.70 LTS (MacOS X - x64)
-; Folding = ----------0-
+; IDE Options = PureBasic 5.71 LTS (MacOS X - x64)
+; Folding = ------------
 ; EnableXP

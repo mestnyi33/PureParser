@@ -505,7 +505,31 @@ CompilerIf #PB_Compiler_IsMainFile
   
   ButtonGadget(5, 30,90,160,25,"Button >>(Window)")
   ButtonGadget(9, 30,115,160,25,"Button <<(Back)") 
- 
+  
+  Define ParentID
+  Define ChildID = GadgetID(10)
+  Procedure.s GetClass(handle.i)
+    Protected Result
+    
+    CocoaMessage(@Result, CocoaMessage(0, handle, "className"), "UTF8String")
+    
+    If Result
+      ProcedureReturn PeekS(Result, -1, #PB_UTF8)
+    EndIf
+  EndProcedure
+;   ParentID = CocoaMessage(0, CocoaMessage(0, ChildID, "superview"), "subviews")
+;   Debug GetClass(ParentID)
+;   ParentID = CocoaMessage(0, ParentID, "objectAtIndex:", CocoaMessage(0, ParentID, "count") - 1)
+;   Debug GetClass(ParentID)
+;   If CocoaMessage(0, ChildID, "contentView")
+;     Debug GetClass(CocoaMessage(0, ChildID, "contentView"))
+;   Else
+;     Debug "---"
+;   EndIf
+  Debug GetClass(CocoaMessage(0, ChildID, "superview"))
+  Debug GetClass(CocoaMessage(0, CocoaMessage(0, ChildID, "superview"), "superview"))
+  Debug GetClass(CocoaMessage(0, CocoaMessage(0, CocoaMessage(0, ChildID, "superview"), "superview"), "superview"))
+  Debug GetClass(CocoaMessage(0, ChildID, "window"))
   
   Flags = #PB_Window_Invisible | #PB_Window_TitleBar
   OpenWindow(20, WindowX( 10 )-210, WindowY( 10 ), 200, 320, "old parent", Flags, WindowID(10))
@@ -714,5 +738,5 @@ CompilerIf #PB_Compiler_IsMainFile
   
 CompilerEndIf
 ; IDE Options = PureBasic 5.71 LTS (MacOS X - x64)
-; Folding = 9-6-----8-+-8---
+; Folding = 9-6-----8---80---
 ; EnableXP
