@@ -3,26 +3,8 @@
 ; http://forums.purebasic.com/german/viewtopic.php?f=8&t=29423&sid=c3d8ea4c76dac2b34b9a49b639f06911
 
 CompilerIf Not Defined(Constant, #PB_Module)
-  DeclareModule Constant
-    Enumeration #PB_Event_FirstCustomValue
-      #PB_Event_Create
-      #PB_Event_MouseMove
-      #PB_Event_LeftButtonDown
-      #PB_Event_LeftButtonUp
-      #PB_Event_Destroy
-    EndEnumeration
-    
-    Enumeration #PB_EventType_FirstCustomValue
-      #PB_EventType_Create
-      #PB_EventType_Move
-      #PB_EventType_Size
-      #PB_EventType_Destroy
-    EndEnumeration
-  EndDeclareModule
-  
-  Module Constant 
-  EndModule 
-  
+  XIncludeFile "../include/Constant.pbi"
+ 
   UseModule Constant
 CompilerEndIf
 
@@ -1104,6 +1086,8 @@ CompilerIf #PB_Compiler_IsMainFile
     
   ForEver
 CompilerEndIf
-; IDE Options = PureBasic 5.70 LTS (MacOS X - x64)
-; Folding = -0-----------------------
+; IDE Options = PureBasic 6.04 LTS - C Backend (MacOS X - x64)
+; CursorPosition = 5
+; FirstLine = 1
+; Folding = f------------------------
 ; EnableXP

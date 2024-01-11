@@ -87,57 +87,60 @@ Module Scintilla
         GadgetID=ScintillaGadget(Gadget,X,Y,Width,Height, *CallBack) 
         If Gadget=#PB_Any : Gadget=GadgetID : EndIf
         
-        Syntax = OpenLibrary(#PB_Any, SyntaxHilighting)
-      If Syntax 
-        ; get the syntax parser function
-        SyntaxHighlight = GetFunction(Syntax, "SyntaxHighlight")
-        
-        ; Important: tell the gadget to send the #SCN_STYLENEEDED notification to the callback if coloring is needed
-        ScintillaSendMessage(Gadget, #SCI_SETLEXER, #SCLEX_CONTAINER)
-        
-        ; Enable line numbers
-        ScintillaSendMessage(Gadget, #SCI_SETMARGINTYPEN, #True, #SC_MARGIN_NUMBER)
-        
-        ; Set common style info
-        *FontName = AllocateMemory(StringByteLength("Consolas", #PB_Ascii) + 1)
-        If *FontName
-          PokeS(*FontName, "Consolas", -1, #PB_Ascii)
-          ScintillaSendMessage(Gadget, #SCI_STYLESETFONT, #STYLE_DEFAULT, *FontName)    
-          FreeMemory(*FontName)
-        EndIf  
-        
-        ScintillaSendMessage(Gadget, #SCI_STYLESETSIZE, #STYLE_DEFAULT, 10) 
-        ScintillaSendMessage(Gadget, #SCI_STYLESETBACK, #SCI_STYLESETFORE, 0)
-        ScintillaSendMessage(Gadget, #SCI_STYLESETBACK, #STYLE_DEFAULT, $DFFFFF)
-        ScintillaSendMessage(Gadget, #SCI_STYLECLEARALL)
-        
-        ; Set individual colors
-        ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Text, 0)
-        ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Keyword, $666600)
-        ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Comment, $AAAA00)
-        ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Constant, $724B92)
-        ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_String, $FF8000)
-        ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Function, $666600)
-        ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Asm, $DFFFFF)
-        ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Operator, $8000FF)
-        ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Structure, $0080FF)
-        ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Number, $8080FF)
-        ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Pointer, $FF0080)
-        ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Separator, $FF0000)
-        ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Label, $C864FF)
-        ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Module, $433740)
-        ScintillaSendMessage(Gadget, #SCI_STYLESETBOLD, #SYNTAX_Keyword, #True)
-        
-        ;                     ScintillaSendMessage(Gadget, #SCI_SETMARGINTYPEN, 0, #SC_MARGIN_NUMBER) ; Добавляем поле автонумерации
-        ;                     ScintillaSendMessage(Gadget, #SCI_SETMARGINWIDTHN, 0, 60 )     ; AntoNumWidth Ширина поля автонумерации
-        ;                     ScintillaSendMessage(Gadget, #SCI_STYLESETFORE,#STYLE_LINENUMBER,$6D8E91) ; ColorFontNumber Цвет цифр автонумерации
-        ;                     ScintillaSendMessage(Gadget, #SCI_STYLESETBACK,#STYLE_LINENUMBER,$CFDADB) ; ColorBackNumber Цвет фона области автонумерации
-        
-      Else
-        MessageRequester("Ошибка", SyntaxHilighting+#CRLF$+"чтении SyntaxHilighting.dll")
-      EndIf
-    Else
-      MessageRequester("Ошибка", Scintilla+#CRLF$+"инициализации scintilla")
+        CompilerIf #PB_Compiler_OS = #PB_OS_Windows
+           Syntax = OpenLibrary(#PB_Any, SyntaxHilighting)
+           If Syntax 
+              ; get the syntax parser function
+              SyntaxHighlight = GetFunction(Syntax, "SyntaxHighlight")
+              
+              ; Important: tell the gadget to send the #SCN_STYLENEEDED notification to the callback if coloring is needed
+              ScintillaSendMessage(Gadget, #SCI_SETLEXER, #SCLEX_CONTAINER)
+              
+              ; Enable line numbers
+              ScintillaSendMessage(Gadget, #SCI_SETMARGINTYPEN, #True, #SC_MARGIN_NUMBER)
+              
+              ; Set common style info
+              *FontName = AllocateMemory(StringByteLength("Consolas", #PB_Ascii) + 1)
+              If *FontName
+                 PokeS(*FontName, "Consolas", -1, #PB_Ascii)
+                 ScintillaSendMessage(Gadget, #SCI_STYLESETFONT, #STYLE_DEFAULT, *FontName)    
+                 FreeMemory(*FontName)
+              EndIf  
+              
+              ScintillaSendMessage(Gadget, #SCI_STYLESETSIZE, #STYLE_DEFAULT, 10) 
+              ScintillaSendMessage(Gadget, #SCI_STYLESETBACK, #SCI_STYLESETFORE, 0)
+              ScintillaSendMessage(Gadget, #SCI_STYLESETBACK, #STYLE_DEFAULT, $DFFFFF)
+              ScintillaSendMessage(Gadget, #SCI_STYLECLEARALL)
+              
+              ; Set individual colors
+              ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Text, 0)
+              ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Keyword, $666600)
+              ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Comment, $AAAA00)
+              ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Constant, $724B92)
+              ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_String, $FF8000)
+              ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Function, $666600)
+              ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Asm, $DFFFFF)
+              ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Operator, $8000FF)
+              ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Structure, $0080FF)
+              ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Number, $8080FF)
+              ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Pointer, $FF0080)
+              ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Separator, $FF0000)
+              ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Label, $C864FF)
+              ScintillaSendMessage(Gadget, #SCI_STYLESETFORE, #SYNTAX_Module, $433740)
+              ScintillaSendMessage(Gadget, #SCI_STYLESETBOLD, #SYNTAX_Keyword, #True)
+              
+              ;                     ScintillaSendMessage(Gadget, #SCI_SETMARGINTYPEN, 0, #SC_MARGIN_NUMBER) ; Добавляем поле автонумерации
+              ;                     ScintillaSendMessage(Gadget, #SCI_SETMARGINWIDTHN, 0, 60 )     ; AntoNumWidth Ширина поля автонумерации
+              ;                     ScintillaSendMessage(Gadget, #SCI_STYLESETFORE,#STYLE_LINENUMBER,$6D8E91) ; ColorFontNumber Цвет цифр автонумерации
+              ;                     ScintillaSendMessage(Gadget, #SCI_STYLESETBACK,#STYLE_LINENUMBER,$CFDADB) ; ColorBackNumber Цвет фона области автонумерации
+              
+           Else
+              MessageRequester("Ошибка", SyntaxHilighting+#CRLF$+"чтении SyntaxHilighting.dll")
+           EndIf
+           
+        CompilerEndIf
+     Else
+        MessageRequester("Ошибка", Scintilla+#CRLF$+"инициализации scintilla")
     EndIf
     
     ProcedureReturn GadgetID
@@ -199,6 +202,8 @@ CompilerIf #PB_Compiler_IsMainFile
     Repeat : Until WaitWindowEvent() = #PB_Event_CloseWindow
   EndIf
 CompilerEndIf
-; IDE Options = PureBasic 5.70 LTS (MacOS X - x64)
+; IDE Options = PureBasic 6.04 LTS - C Backend (MacOS X - x64)
+; CursorPosition = 90
+; FirstLine = 83
 ; Folding = ---
 ; EnableXP

@@ -2664,8 +2664,8 @@ Procedure$ SetPBFunction(Type$, ID$)
       Case "EventTimer"              : Result$ = Str(EventTimer())
       Case "EventType"               : Result$ = Str(EventType())
       Case "EventWindow"             : Result$ = Str(EventWindow())
-      Case "EventlParam"             : Result$ = Str(EventlParam())
-      Case "EventwParam"             : Result$ = Str(EventwParam())     
+;       Case "EventlParam"             : Result$ = Str(EventlParam())
+;       Case "EventwParam"             : Result$ = Str(EventwParam())     
         
       Case "LoadImage"               : \Object\Argument=LoadImage(#PB_Any, \Param1\Argument$)
       Case "LoadFont"                : \Object\Argument=LoadFont(#PB_Any,\Param1\Argument$,\Param2\Argument,\Param3\Argument)
@@ -2730,7 +2730,7 @@ Procedure$ SetPBFunction(Type$, ID$)
         Case "RemoveWindowTimer"      : RemoveWindowTimer(Object, \Param1\Argument)
         Case "WindowVectorOutput"     : Result$ = Str(WindowVectorOutput(Object, \Param1\Argument))
         Case "SmartWindowRefresh"     : SmartWindowRefresh(Object, \Param1\Argument)
-        Case "SetWindowCallback"      : SetWindowCallback(\Param1\Argument, Object)
+;         Case "SetWindowCallback"      : SetWindowCallback(\Param1\Argument, Object)
         Case "RemoveKeyboardShortcut" : RemoveKeyboardShortcut(Object, \Param1\Argument)
         Case "AddWindowTimer"         : AddWindowTimer(Object, \Param1\Argument, \Param2\Argument)
         Case "AddKeyboardShortcut"    : AddKeyboardShortcut(Object, \Param1\Argument, \Param2\Argument)
@@ -4436,9 +4436,28 @@ Procedure WE_Toolbar_Show()
     If Not IsToolBar(WE_ToolBar_0)
       WE_ToolBar_0 = CreateToolBar(#PB_Any, WindowID(WE))
       If WE_ToolBar_0
-        ToolBarStandardButton(WE_MenuItem_New, #PB_ToolBarIcon_New)
-        ToolBarStandardButton(WE_MenuItem_Open, #PB_ToolBarIcon_Open)
-        ToolBarStandardButton(WE_MenuItem_Save, #PB_ToolBarIcon_Save)
+         CreateImage(0,16,16)
+         StartDrawing(ImageOutput(0))
+         Box(0,0,16,16,RGB(255,255,255))
+         Box(4,4,8,8,RGB(255,0,0))
+         StopDrawing()
+         CreateImage(1,16,16)
+         StartDrawing(ImageOutput(1))
+         Box(0,0,16,16,RGB(255,0,0))
+         Box(4,4,8,8,RGB(255,255,255))
+         StopDrawing()
+         CreateImage(2,16,16)
+         StartDrawing(ImageOutput(1))
+         Box(0,0,16,16,RGB(255,0,0))
+         Box(4,4,8,8,RGB(255,255,255))
+         StopDrawing()
+     
+        ToolBarImageButton(WE_MenuItem_New, ImageID(0))
+        ToolBarImageButton(WE_MenuItem_Open, ImageID(1))
+        ToolBarImageButton(WE_MenuItem_Save, ImageID(2))
+;         ToolBarStandardButton(WE_MenuItem_New, #PB_ToolBarIcon_New)
+;         ToolBarStandardButton(WE_MenuItem_Open, #PB_ToolBarIcon_Open)
+;         ToolBarStandardButton(WE_MenuItem_Save, #PB_ToolBarIcon_Save)
       EndIf
     EndIf
   Else
@@ -4942,9 +4961,8 @@ CompilerIf #PB_Compiler_IsMainFile
     EndSelect
   Wend
 CompilerEndIf
-
-; IDE Options = PureBasic 5.62 (Windows - x64)
-; CursorPosition = 4550
-; FirstLine = 4441
-; Folding = --------------5+-------------------------------------------------------------------------------------
+; IDE Options = PureBasic 6.04 LTS - C Backend (MacOS X - x64)
+; CursorPosition = 4448
+; FirstLine = 3666
+; Folding = ----+-v--v-8t-5+48----vv0r---------------------------------------------------------------------------
 ; EnableXP

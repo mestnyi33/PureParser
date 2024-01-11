@@ -4910,7 +4910,7 @@ EndProcedure
 
 ; Получить состояние 
 Procedure.f GetElementState(Element)
-  Protected.f Result =- 1
+  Protected.i Result =- 1
   
   With *CreateElement
     If IsElement(Element)
@@ -4922,7 +4922,8 @@ Procedure.f GetElementState(Element)
           If \This()\Inbetween : Result =- 1 : Else : Result = \This()\Checked : EndIf
           
         Case #_Type_Image, #_Type_ButtonImage
-          Result = \This()\Img\Image
+          Protected Result1 = \This()\Img\Image
+          Result = Result1
           
         Case #_Type_TrackBar
           If \This()\IsVertical
@@ -13046,6 +13047,23 @@ EndProcedure
 ;}
 
 
+Enumeration 
+#PB_ToolBarIcon_Delete 
+#PB_ToolBarIcon_Help 
+#PB_ToolBarIcon_Print
+  #PB_ToolBarIcon_Cut
+                  #PB_ToolBarIcon_Properties
+                  #PB_ToolBarIcon_PrintPreview
+                  #PB_ToolBarIcon_Replace
+                  #PB_ToolBarIcon_Save
+                  #PB_ToolBarIcon_Paste
+                  #PB_ToolBarIcon_Undo
+                  #PB_ToolBarIcon_Redo
+                  #PB_ToolBarIcon_Find
+                  #PB_ToolBarIcon_Open
+                  #PB_ToolBarIcon_Copy
+                  #PB_ToolBarIcon_New
+               EndEnumeration
 
 ;-
 Procedure GetButtonIcon(ButtonIcon) 
@@ -13139,7 +13157,7 @@ Procedure GetButtonIcon(ButtonIcon)
                     Break
                   EndIf
                   
-                Case #PB_ToolBarIcon_Replace
+               Case #PB_ToolBarIcon_Replace
                   If FindString(LCase(PackEntryName.S), "refresh") And FindString(LCase(PackEntryName.S), "_") = 0
                     ImageSize = PackEntrySize(ZipFile)
                     *Image = AllocateMemory(ImageSize)
@@ -13179,7 +13197,7 @@ Procedure GetButtonIcon(ButtonIcon)
                     Break
                   EndIf
                   
-                Case #PB_ToolBarIcon_Paste
+               Case #PB_ToolBarIcon_Paste
                   If FindString(LCase(PackEntryName.S), "paste")
                     ImageSize = PackEntrySize(ZipFile)
                     *Image = AllocateMemory(ImageSize)
@@ -14026,8 +14044,8 @@ CompilerIf #PB_Compiler_IsMainFile
   BindEventElement(@ElementsEvents())
   WaitWindowEventClose(w)
 CompilerEndIf
-; IDE Options = PureBasic 5.62 (Windows - x86)
-; CursorPosition = 1152
-; FirstLine = 400
-; Folding = +6jTFhA--Bs----------------fZ------4-----fFIAAgquuq---------Pd2v---0qv48--+--033X0f-04v-D37--+-8-fv-28q--4---uuuv8+4vvv7------4--0-----v--84----q----bb0vudvX20+------0f---4------8----------------------4-f--4--8-----------v8--40------d8-----------------v-----f-----f+------848b8-b-z0-v----x-frkw--
+; IDE Options = PureBasic 6.04 LTS - C Backend (MacOS X - x64)
+; CursorPosition = 13065
+; FirstLine = 10382
+; Folding = +6jTFhA--Bs----------------fZ------4-----fFIAAgquuq---------Pd2v---0qv48--+--033X0f-04v-D37--+-8-fv-28q--4---vuuv8+4vvv7------4--0-----v--84----q----bb0vudvX20+------0f---4------8----------------------4-f--4--8-----------v8--40------d8-----------------v-----f-----f+------848b8-b-z0-v----x-frkw--
 ; EnableXP
