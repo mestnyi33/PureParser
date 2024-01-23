@@ -13,7 +13,7 @@
       #PB_EventType_Move
       #PB_EventType_Size
       #PB_EventType_Destroy
-    ;  #PB_EventType_Repaint
+      #PB_EventType_Repaint
     EndEnumeration
   EndDeclareModule
   
@@ -22,6 +22,6 @@
   
   UseModule Constant
 CompilerEndIf
-; IDE Options = PureBasic 5.70 LTS (MacOS X - x64)
+; IDE Options = PureBasic 5.72 (Windows - x64)
 ; Folding = -
 ; EnableXP

@@ -33,3 +33,7 @@ Macro SetCaretPos(_gadget_, _position_)
   Caret::SetPos(_gadget_, _position_)
 EndMacro
 
+
+; IDE Options = PureBasic 5.72 (Windows - x64)
+; Folding = -
+; EnableXP

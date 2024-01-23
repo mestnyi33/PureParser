@@ -32,22 +32,22 @@ EnableExplicit
 CompilerIf #PB_Compiler_OS = #PB_OS_MacOS 
   XIncludeFile "/Users/as/Documents/GitHub/Widget/gadget/gadgets.pbi"
 CompilerElse
-  XIncludeFile "Z:/Documents/GitHub/Widget/gadget/gadgets.pbi"
+  ;XIncludeFile "F:/Documents/GitHub/Widget/gadget/gadgets.pbi"
 CompilerEndIf
 
 ;UseModule Gadget
-UseModule constants
+;UseModule constants
 
 ;-
 ;- INCLUDE
 XIncludeFile "Include/Memory.pbi"
 XIncludeFile "include/Img.pbi"
 XIncludeFile "include/SetIcon.pbi"
-;XIncludeFile "include/Constant.pbi"
+XIncludeFile "include/Constant.pbi"
 XIncludeFile "include/Alignment.pbi"
 XIncludeFile "include/Caret.pbi"
 XIncludeFile "include/Disable.pbi"
-;XIncludeFile "include/Resize.pbi"
+XIncludeFile "include/Resize.pbi"
 XIncludeFile "include/Hide.pbi"
 XIncludeFile "include/Flag.pbi"
 XIncludeFile "include/Properties.pbi"
@@ -4011,6 +4011,6 @@ CompilerIf #PB_Compiler_IsMainFile
     EndSelect
   Wend
 CompilerEndIf
-; IDE Options = PureBasic 5.71 LTS (MacOS X - x64)
+; IDE Options = PureBasic 5.72 (Windows - x64)
 ; Folding = ----------------+----------4------------------------------------------------------
 ; EnableXP
