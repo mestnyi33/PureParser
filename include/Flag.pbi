@@ -2683,7 +2683,7 @@ CompilerIf #PB_Compiler_IsMainFile
   
   
   OpenWindow( 1, 221, 211, 300, 200, "test to set window centered", #PB_Window_SystemMenu) 
-  OpenWindow( 2, 221, 11, 200, 100, "test set flag", #PB_Window_SystemMenu|#PB_Window_SizeGadget, WindowID(1)) 
+  OpenWindow( 2, 221, 11, 200, 100, "test set flag", #PB_Window_BorderLess, WindowID(1)) 
   
   ButtonGadget(20 ,5,5,WindowWidth(2)-10,WindowHeight(2)-10,"NoFlag")
   
@@ -2761,8 +2761,6 @@ CompilerIf #PB_Compiler_IsMainFile
     EndSelect
   ForEver 
 CompilerEndIf
-; IDE Options = PureBasic 5.62 (Linux - x64)
-; CursorPosition = 2685
-; FirstLine = 420
-; Folding = 1BEAAAAAYAAACAAAAAAAAAAAAAgBAAAAAAAAGAAAAEAAAAAAAAAAAAAA5-gBIgAAAAAAAAAAAAAAAAgw-9C+
+; IDE Options = PureBasic 5.72 (Windows - x64)
+; Folding = 1HEAAIIAYAAACAAAAAAAAAAAAAgBAAAAAAAAGAAAAEAAAAAAAAAAAAAA5-gBIgAAAAAAAAAAAAAAAAgw-9C+
 ; EnableXP
