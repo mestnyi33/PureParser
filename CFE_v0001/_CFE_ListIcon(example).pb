@@ -8,7 +8,7 @@ CompilerEndIf
 
 ;{ - ListIcon element functions
 ;-
-Procedure DrawListIconElementContent(List This.S_CREATE_ELEMENT(), X,Y)
+Procedure _DrawListIconElementContent(List This.S_CREATE_ELEMENT(), X,Y)
   Protected FontColor, Width, Height, Result.b
   
   Protected ScrollWidth = 6
@@ -163,7 +163,7 @@ Procedure DrawListIconElementContent(List This.S_CREATE_ELEMENT(), X,Y)
 EndProcedure
 
 
-Procedure AddListIconElementItem(GadgetElement, GadgetItem, Text$, Image =- 1, Flag.q = 0)
+Procedure _AddListIconElementItem(GadgetElement, GadgetItem, Text$, Image =- 1, Flag.q = 0)
   Protected ImageWidth, ImageHeight, TextWidth, TextHeight
   
   With *CreateElement
@@ -269,7 +269,7 @@ Procedure AddListIconElementItem(GadgetElement, GadgetItem, Text$, Image =- 1, F
 EndProcedure
 
 
-Procedure AddListIconElementColumn(GadgetElement, GadgetItem, Text$, Width=0, Image =- 1, Flag.q = 0)
+Procedure _AddListIconElementColumn(GadgetElement, GadgetItem, Text$, Width=0, Image =- 1, Flag.q = 0)
   Protected ImageWidth, ImageHeight, TextWidth, TextHeight
   
   With *CreateElement
@@ -356,7 +356,7 @@ Procedure AddListIconElementColumn(GadgetElement, GadgetItem, Text$, Width=0, Im
 EndProcedure
 
 
-Procedure ListIconScrollBarEvent(Event.q, EventElement)
+Procedure _ListIconScrollBarEvent(Event.q, EventElement)
   
   Select Event
     Case #_Event_Up, #_Event_Down
@@ -383,7 +383,7 @@ Procedure ListIconScrollBarEvent(Event.q, EventElement)
 EndProcedure
 
 
-Procedure ListIconElement( Element, X,Y,Width,Height, FirstColumnTitle$, FirstColumnWidth, Flag.q = 0, Parent =- 1 )
+Procedure _ListIconElement( Element, X,Y,Width,Height, FirstColumnTitle$, FirstColumnWidth, Flag.q = 0, Parent =- 1 )
   Protected PrevParent =- 1 : If IsElement(Parent) : PrevParent = OpenElementList(Parent) : EndIf
   
   Element = CreateElement( #_Type_ListIcon, Element, X,Y,Width,Height,"", #PB_Default,#PB_Default,#PB_Default, Flag);|#_Flag_AlignText_Top )
@@ -518,3 +518,9 @@ CompilerIf #PB_Compiler_IsMainFile
   WaitWindowEventClose(w)
 CompilerEndIf
 
+
+; IDE Options = PureBasic 6.12 LTS (Windows - x64)
+; CursorPosition = 490
+; FirstLine = 477
+; Folding = ----------
+; EnableXP

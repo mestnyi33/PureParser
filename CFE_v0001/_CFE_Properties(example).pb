@@ -22,7 +22,7 @@ CompilerEndIf
 Global dbs = 0
 
 ;{ Window element functions
-Procedure DrawPropertiesElementItemsContent(List This.S_CREATE_ELEMENT())
+Procedure _DrawPropertiesElementItemsContent(List This.S_CREATE_ELEMENT())
   Protected X,Y,Width,Height
   
   With *CreateElement\This()
@@ -75,7 +75,7 @@ Procedure DrawPropertiesElementItemsContent(List This.S_CREATE_ELEMENT())
   EndWith
 EndProcedure
 
-Procedure.q SetPropertiesElementFlag(Flag.q)
+Procedure.q _SetPropertiesElementFlag(Flag.q)
   Protected Result.q = Flag
   ; 1  - #PB_ScrollArea_Flat                ; Flat frame.
   ; 2  - #PB_ScrollArea_Raised              ; Raised frame (Default).
@@ -105,7 +105,7 @@ Procedure.q SetPropertiesElementFlag(Flag.q)
   ProcedureReturn Result
 EndProcedure
 
-Procedure.q GetPropertiesElementFlag(Flag.q)
+Procedure.q _GetPropertiesElementFlag(Flag.q)
   Protected Result.q = Flag
   
   If ((Flag & #_Flag_BorderLess) = #_Flag_BorderLess)
@@ -125,7 +125,7 @@ EndProcedure
 
 
 ;- PRIVATE
-Procedure PropertiesScrollEvent(Event.q, EventElement)
+Procedure _PropertiesScrollEvent(Event.q, EventElement)
   Protected IsVertical, Bs, Vb,Hb,X,Y,Width, Height, ElementWidth, ElementHeight
   
   Select ElementEvent()
@@ -211,7 +211,7 @@ EndProcedure
 
 
 ;- PUBLIC
-Procedure GetPropertiesElementAttribute(List This.S_CREATE_ELEMENT(), Attribute)
+Procedure _GetPropertiesElementAttribute(List This.S_CREATE_ELEMENT(), Attribute)
   Protected Result
   
   With This()
@@ -227,7 +227,7 @@ Procedure GetPropertiesElementAttribute(List This.S_CREATE_ELEMENT(), Attribute)
   ProcedureReturn Result
 EndProcedure
 
-Procedure SetPropertiesElementAttribute(List This.S_CREATE_ELEMENT(), Attribute, Value)
+Procedure _SetPropertiesElementAttribute(List This.S_CREATE_ELEMENT(), Attribute, Value)
   Protected iX,iY,iWidth,iHeight
   Protected Update, X=#PB_Ignore,Y=#PB_Ignore,Width=#PB_Ignore,Height=#PB_Ignore 
   Debug 666666666
@@ -336,7 +336,7 @@ Procedure SetPropertiesElementAttribute(List This.S_CREATE_ELEMENT(), Attribute,
   
 EndProcedure
 
-Procedure SetPropertiesComboBoxText(Element, Text$)
+Procedure _SetPropertiesComboBoxText(Element, Text$)
   Protected II, Includes.S=Text$, Include.S
   
   ClearElementItems(Element)
@@ -350,7 +350,7 @@ Procedure SetPropertiesComboBoxText(Element, Text$)
   
 EndProcedure
 
-Procedure AddPropertiesElementItem(GadgetElement, GadgetItem, Text$, Image =- 1, Flag = 0)
+Procedure _AddPropertiesElementItem(GadgetElement, GadgetItem, Text$, Image =- 1, Flag = 0)
   Static Count 
   Protected ScrollAreaElement, OpenElementList, X, Y, Width, Height, Title$, Text1$
   Protected iX=70, iWidth, iHeight=19, z=1, iY=z
@@ -430,7 +430,7 @@ Procedure AddPropertiesElementItem(GadgetElement, GadgetItem, Text$, Image =- 1,
   ProcedureReturn GadgetItem
 EndProcedure
 
-Procedure PropertiesElement( Element, X,Y,Width,Height, Flag.q = #_Flag_Double, Parent =- 1 )
+Procedure _PropertiesElement( Element, X,Y,Width,Height, Flag.q = #_Flag_Double, Parent =- 1 )
   Protected ScrollBarSize = 17 , Type, iWidth = Width-ScrollBarSize, iHeight = Height 
   Protected ScrollAreaElement, ScrollHeightElement, ScrollWidthElement
   Protected PrevParent =- 1 : If IsElement(Parent) : PrevParent = OpenElementList(Parent) : EndIf
@@ -510,7 +510,7 @@ CompilerIf #PB_Compiler_IsMainFile
   Define Window = OpenWindowElement(#PB_Any, 0,0, 432,284+4*65);, "Demo WindowElement()") 
   Define  Time = ElapsedMilliseconds()
   
-  Define  h = GetElementAttribute(Window, #_Element_CaptionHeight)
+  Define  h = 30;GetElementAttribute(Window, #_Element_CaptionHeight)
   
   OpenWindowElement(1, 20,10,400+8,490+8, "BorderLess", #_Flag_SizeGadget|#_Flag_MoveGadget|#_Flag_BorderLess) ; |#PB_Window_MoveGadget
                                                                                                                ;SetWindowElementColor(1, $8C9C65)
@@ -566,8 +566,8 @@ CompilerIf #PB_Compiler_IsMainFile
   AddPropertiesElementItem(e, -1, "Button Puch:C:\as\Img\Image.png")
   AddPropertiesElementItem(e, -1, "ComboBox Disable:True|False")
   AddPropertiesElementItem(e, -1, "ComboBox Flag:#_Event_Close|#_Event_Size|#_Event_Move")
-  
-  ButtonElement  (315, 180, 30, 130, 10,"Button 3"+Str(i))
+  ;Define i
+ ; ButtonElement  (315, 180, 30, 130, 10,"Button 3"+Str(i))
   ;   CloseElementList()
   ;   CloseElementList()
   
@@ -589,3 +589,9 @@ CompilerEndIf
 
 
 
+
+; IDE Options = PureBasic 6.12 LTS (Windows - x64)
+; CursorPosition = 568
+; FirstLine = 560
+; Folding = -----------
+; EnableXP
