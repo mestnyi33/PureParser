@@ -575,7 +575,7 @@ EndProcedure
 
 ;-
 Procedure WindowUpdate(Gadget)
-  Protected x,y, Steps=4
+  Protected X,Y, Steps=4
   Protected w=GadgetWidth(Gadget)
   Protected h=GadgetHeight(Gadget)
   Protected CaptionGadget = GetGadgetData(Gadget)
@@ -604,12 +604,12 @@ Procedure WindowUpdate(Gadget)
 ;     Box(1, 1, w-2, h-2, $E6E6E6)
     Box(0, 0, w, h, $E6E6E6)
     
-    For x = 0 To OutputWidth()-1
-      For y = 0 To OutputHeight()-1
-        Plot(x,y,$000000)
-        y+Steps
+    For X = 0 To OutputWidth()-1
+      For Y = 0 To OutputHeight()-1
+        Plot(X,Y,$000000)
+        Y+Steps
       Next
-      x+Steps
+      X+Steps
     Next
     
     StopDrawing()
@@ -635,7 +635,7 @@ Procedure WindowCallBack()
 EndProcedure
 
 Procedure ContainerCallBack()
-  Protected x,y,Steps=4,w,h,Gadget = EventGadget()
+  Protected X,Y,Steps=4,w,h,Gadget = EventGadget()
   Protected CaptionGadget = GetGadgetData(Gadget)
   w=GadgetWidth(Gadget)
  h=GadgetHeight(Gadget)
@@ -661,7 +661,7 @@ Procedure ContainerCallBack()
 EndProcedure
 
 Procedure WindowGadget(Gadget, X,Y,Width,Height, Text$="", Flag=0)
-  Protected CaptionGadget = CanvasGadget(#PB_Any, x-1,y-1-25,Width+2 ,Height+25+2) 
+  Protected CaptionGadget = CanvasGadget(#PB_Any, X-1,Y-1-25,Width+2 ,Height+25+2) 
   
   Protected GadgetID = CanvasGadget(#PB_Any, X,Y,Width,Height, #PB_Canvas_Container) 
   If Gadget =- 1 : Gadget = GadgetID : EndIf
@@ -1040,9 +1040,9 @@ Procedure CO_Events()
     Case #PB_Event_Gadget
       
       Select EventType()
-        Case #PB_EventType_CloseItem ; Delete
-          CO_Free(Object)
-          
+;         Case #PB_EventType_CloseItem ; Delete
+;           CO_Free(Object)
+;           
         Case #PB_EventType_Size
 ;           Debug GadgetWidth(EventGadget())
 ;           Debug GadgetHeight(EventGadget())
@@ -2973,3 +2973,10 @@ CompilerIf #PB_Compiler_IsMainFile
     EndSelect
   Wend
 CompilerEndIf
+
+; IDE Options = PureBasic 6.12 LTS (Windows - x64)
+; CursorPosition = 1044
+; FirstLine = 1038
+; Folding = ------------------------------------------------------------------
+; EnableXP
+; DPIAware

@@ -1066,6 +1066,7 @@ Procedure CO_Update(Object, Gadget)
   PopListPosition(ParsePBObject())
 EndProcedure
 
+#PB_EventType_CloseItem = -55
 Procedure CO_Events()
   Protected I.i, Parent=-1, Object =- 1
   
@@ -3660,23 +3661,23 @@ Procedure WE_Open(ParentID=0, Flag.i=#PB_Window_SystemMenu)
     
     AddGadgetItem(WE_Panel_0, -1, "Properties", ImageID(img_edit))
     WE_Properties = Properties::Gadget( 0,0,315, 261 )
-    Properties_ID = Properties::Add( WE_Properties, "ID:", #PB_GadgetType_String | #PB_GadgetType_CheckBox )
-    Properties_Caption = Properties::Add( WE_Properties, "Text:", #PB_GadgetType_String )
-    Properties::Add( WE_Properties, "Disable:False|True", #PB_GadgetType_ComboBox )
-    Properties::Add( WE_Properties, "Hide:False|True", #PB_GadgetType_ComboBox )
+    Properties_ID = Properties::AddItem( WE_Properties, "ID:", #PB_GadgetType_String | #PB_GadgetType_CheckBox )
+    Properties_Caption = Properties::AddItem( WE_Properties, "Text:", #PB_GadgetType_String )
+    Properties::AddItem( WE_Properties, "Disable:False|True", #PB_GadgetType_ComboBox )
+    Properties::AddItem( WE_Properties, "Hide:False|True", #PB_GadgetType_ComboBox )
     
-    Properties::Add( WE_Properties, "Layouts:", #False )
-    Properties_X = Properties::Add( WE_Properties, "X:", #PB_GadgetType_Spin )
-    Properties_Y = Properties::Add( WE_Properties, "Y:", #PB_GadgetType_Spin )
-    Properties_Width = Properties::Add( WE_Properties, "Width:", #PB_GadgetType_Spin )
-    Properties_Height = Properties::Add( WE_Properties, "Height:", #PB_GadgetType_Spin )
+    Properties::AddItem( WE_Properties, "Layouts:", #False )
+    Properties_X = Properties::AddItem( WE_Properties, "X:", #PB_GadgetType_Spin )
+    Properties_Y = Properties::AddItem( WE_Properties, "Y:", #PB_GadgetType_Spin )
+    Properties_Width = Properties::AddItem( WE_Properties, "Width:", #PB_GadgetType_Spin )
+    Properties_Height = Properties::AddItem( WE_Properties, "Height:", #PB_GadgetType_Spin )
     
-    Properties::Add( WE_Properties, "Other:", #False )
-    Properties_Flag = Properties::Add( WE_Properties, "Flag:", #PB_GadgetType_Tree|#PB_GadgetType_Button )
-    Properties::Add( WE_Properties, "Font:", #PB_GadgetType_String|#PB_GadgetType_Button )
-    Properties_Image = Properties::Add( WE_Properties, "Image:", #PB_GadgetType_String|#PB_GadgetType_Button )
-    Properties::Add( WE_Properties, "Puth", #PB_GadgetType_String|#PB_GadgetType_Button )
-    Properties::Add( WE_Properties, "Color:", #PB_GadgetType_String|#PB_GadgetType_Button )
+    Properties::AddItem( WE_Properties, "Other:", #False )
+    Properties_Flag = Properties::AddItem( WE_Properties, "Flag:", #PB_GadgetType_Tree|#PB_GadgetType_Button )
+    Properties::AddItem( WE_Properties, "Font:", #PB_GadgetType_String|#PB_GadgetType_Button )
+    Properties_Image = Properties::AddItem( WE_Properties, "Image:", #PB_GadgetType_String|#PB_GadgetType_Button )
+    Properties::AddItem( WE_Properties, "Puth", #PB_GadgetType_String|#PB_GadgetType_Button )
+    Properties::AddItem( WE_Properties, "Color:", #PB_GadgetType_String|#PB_GadgetType_Button )
     
     ; 
     AddGadgetItem(WE_Panel_0, -1, "Events")
@@ -3734,7 +3735,7 @@ Procedure WE_Panel_0_Size()
   Protected GadgetHeight = GetGadgetAttribute(WE_Panel_0, #PB_Panel_ItemHeight)
   
   Select GetGadgetItemText(WE_Panel_0, GetGadgetState(WE_Panel_0))
-    Case "Properties" : Properties::Size(WE_Properties, GadgetWidth, GadgetHeight)
+    Case "Properties" : ResizeGadget(WE_Properties, #PB_Ignore, #PB_Ignore, GadgetWidth, GadgetHeight)
     Case "Objects"  : ResizeGadget(WE_Objects, #PB_Ignore, #PB_Ignore, GadgetWidth, GadgetHeight)
   EndSelect
 EndProcedure
@@ -3961,8 +3962,8 @@ CompilerIf #PB_Compiler_IsMainFile
   Wend
 CompilerEndIf
 
-; IDE Options = PureBasic 5.62 (Windows - x64)
-; CursorPosition = 3708
-; FirstLine = 3667
+; IDE Options = PureBasic 6.12 LTS (Windows - x64)
+; CursorPosition = 3737
+; FirstLine = 3715
 ; Folding = --------------9+-------------------------------------------------------------------
 ; EnableXP

@@ -121,3 +121,9 @@ CompilerIf #PB_Compiler_IsMainFile
   WaitWindowEventClose(Window)
 CompilerEndIf
 
+
+; IDE Options = PureBasic 6.12 LTS (Windows - x64)
+; CursorPosition = 3
+; FirstLine = 84
+; Folding = ---
+; EnableXP

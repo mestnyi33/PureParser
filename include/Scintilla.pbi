@@ -80,7 +80,7 @@ Module Scintilla
   Procedure Gadget( Gadget,X,Y,Width,Height, *CallBack=0, Scintilla.S="scintilla.dll", SyntaxHilighting.S=#PB_Compiler_Home+"SDK\Syntax Highlighting\SyntaxHilighting.dll")
     Protected *FontName, Syntax, GadgetID
     
-    If InitScintilla(Scintilla) 
+;     If InitScintilla(Scintilla) 
       If Not *CallBack : *CallBack=@ScintillaCallback() : EndIf
         
         ; create window and gadget
@@ -92,7 +92,7 @@ Module Scintilla
            If Syntax 
               ; get the syntax parser function
               SyntaxHighlight = GetFunction(Syntax, "SyntaxHighlight")
-              
+              #SCI_SETLEXER = 9
               ; Important: tell the gadget to send the #SCN_STYLENEEDED notification to the callback if coloring is needed
               ScintillaSendMessage(Gadget, #SCI_SETLEXER, #SCLEX_CONTAINER)
               
@@ -139,9 +139,9 @@ Module Scintilla
            EndIf
            
         CompilerEndIf
-     Else
-        MessageRequester("Ошибка", Scintilla+#CRLF$+"инициализации scintilla")
-    EndIf
+;      Else
+;         MessageRequester("Ошибка", Scintilla+#CRLF$+"инициализации scintilla")
+;     EndIf
     
     ProcedureReturn GadgetID
   EndProcedure
@@ -202,8 +202,8 @@ CompilerIf #PB_Compiler_IsMainFile
     Repeat : Until WaitWindowEvent() = #PB_Event_CloseWindow
   EndIf
 CompilerEndIf
-; IDE Options = PureBasic 6.04 LTS - C Backend (MacOS X - x64)
-; CursorPosition = 90
-; FirstLine = 83
-; Folding = ---
+; IDE Options = PureBasic 6.12 LTS (Windows - x64)
+; CursorPosition = 82
+; FirstLine = 78
+; Folding = -4-
 ; EnableXP

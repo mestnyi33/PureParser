@@ -16,8 +16,8 @@ Global Demo
 CompilerIf #PB_Compiler_OS = #PB_OS_MacOS 
     Global _drawing_mode_
     
-    Declare.i DrawText_(x.i, y.i, Text.s, FrontColor.i=$ffffff, BackColor.i=0)
-    Declare.i ClipOutput_(x.i, y.i, width.i, height.i)
+    Declare.i DrawText_(X.i, Y.i, Text.s, FrontColor.i=$ffffff, BackColor.i=0)
+    Declare.i ClipOutput_(X.i, Y.i, Width.i, Height.i)
     
     Macro PB(Function)
       Function
@@ -27,16 +27,16 @@ CompilerIf #PB_Compiler_OS = #PB_OS_MacOS
       PB(DrawingMode)(_mode_) : _drawing_mode_ = _mode_
     EndMacro
     
-    Macro ClipOutput(x, y, width, height)
-      PB(ClipOutput)(x, y, width, height)
-      ClipOutput_(x, y, width, height)
+    Macro ClipOutput(X, Y, Width, Height)
+      PB(ClipOutput)(X, Y, Width, Height)
+      ClipOutput_(X, Y, Width, Height)
     EndMacro
     
-    Macro DrawText(x, y, Text, FrontColor=$ffffff, BackColor=0)
-      DrawText_(x, y, Text, FrontColor, BackColor)
+    Macro DrawText(X, Y, Text, FrontColor=$ffffff, BackColor=0)
+      DrawText_(X, Y, Text, FrontColor, BackColor)
     EndMacro
     
-    Procedure.i DrawText_(x.i, y.i, Text.s, FrontColor.i=$ffffff, BackColor.i=0)
+    Procedure.i DrawText_(X.i, Y.i, Text.s, FrontColor.i=$ffffff, BackColor.i=0)
       Protected.CGFloat r,g,b,a
       Protected.i NSString, Attributes, Color
       Protected Size.NSSize, Point.NSPoint
@@ -54,16 +54,16 @@ CompilerIf #PB_Compiler_OS = #PB_OS_MacOS
       NSString = CocoaMessage(0, 0, "NSString stringWithString:$", @Text)
       CocoaMessage(@Size, NSString, "sizeWithAttributes:", Attributes)
       
-      Point\x = x : Point\y = OutputHeight()-Size\height-y
+      Point\x = X : Point\y = OutputHeight()-Size\height-Y
       CocoaMessage(0, NSString, "drawAtPoint:@", @Point, "withAttributes:", Attributes)
     EndProcedure
     
-    Procedure.i ClipOutput_(x.i, y.i, width.i, height.i)
+    Procedure.i ClipOutput_(X.i, Y.i, Width.i, Height.i)
       Protected Rect.NSRect
-      Rect\origin\x = x 
-      Rect\origin\y = OutputHeight()-height-y
-      Rect\size\width = width 
-      Rect\size\height = height
+      Rect\origin\x = X 
+      Rect\origin\y = OutputHeight()-Height-Y
+      Rect\size\width = Width 
+      Rect\size\height = Height
       
       ;CocoaMessage(0, CocoaMessage(0, 0, "NSBezierPath bezierPathWithRect:@", @Rect), "setClip")
       ;CocoaMessage(0, CocoaMessage(0, 0, "NSBezierPath bezierPathWithRect:@", @Rect), "addClip")
@@ -957,7 +957,7 @@ Structure S_GLOBAL
   Flag.q
   Selector.S_SELECTOR 
   MultiSelect.b
-  Redraw.S_COORDINATES
+  ReDraw.S_COORDINATES
   
   *Desktop
   *LinePosition
@@ -13047,24 +13047,26 @@ EndProcedure
 ;}
 
 
-Enumeration 
-#PB_ToolBarIcon_Delete 
-#PB_ToolBarIcon_Help 
-#PB_ToolBarIcon_Print
-  #PB_ToolBarIcon_Cut
-                  #PB_ToolBarIcon_Properties
-                  #PB_ToolBarIcon_PrintPreview
-                  #PB_ToolBarIcon_Replace
-                  #PB_ToolBarIcon_Save
-                  #PB_ToolBarIcon_Paste
-                  #PB_ToolBarIcon_Undo
-                  #PB_ToolBarIcon_Redo
-                  #PB_ToolBarIcon_Find
-                  #PB_ToolBarIcon_Open
-                  #PB_ToolBarIcon_Copy
-                  #PB_ToolBarIcon_New
-               EndEnumeration
-
+CompilerIf #PB_Compiler_Version > 600
+   Enumeration 
+      #PB_ToolBarIcon_Delete 
+      #PB_ToolBarIcon_Help 
+      #PB_ToolBarIcon_Print
+      #PB_ToolBarIcon_Cut
+      #PB_ToolBarIcon_Properties
+      #PB_ToolBarIcon_PrintPreview
+      #PB_ToolBarIcon_Replace
+      #PB_ToolBarIcon_Save
+      #PB_ToolBarIcon_Paste
+      #PB_ToolBarIcon_Undo
+      #PB_ToolBarIcon_Redo
+      #PB_ToolBarIcon_Find
+      #PB_ToolBarIcon_Open
+      #PB_ToolBarIcon_Copy
+      #PB_ToolBarIcon_New
+   EndEnumeration
+CompilerEndIf
+      
 ;-
 Procedure GetButtonIcon(ButtonIcon) 
   Protected ButtonID =- 1
@@ -14044,8 +14046,8 @@ CompilerIf #PB_Compiler_IsMainFile
   BindEventElement(@ElementsEvents())
   WaitWindowEventClose(w)
 CompilerEndIf
-; IDE Options = PureBasic 6.04 LTS - C Backend (MacOS X - x64)
-; CursorPosition = 13065
-; FirstLine = 10382
-; Folding = +6jTFhA--Bs----------------fZ------4-----fFIAAgquuq---------Pd2v---0qv48--+--033X0f-04v-D37--+-8-fv-28q--4---vuuv8+4vvv7------4--0-----v--84----q----bb0vudvX20+------0f---4------8----------------------4-f--4--8-----------v8--40------d8-----------------v-----f-----f+------848b8-b-z0-v----x-frkw--
+; IDE Options = PureBasic 6.12 LTS (Windows - x64)
+; CursorPosition = 13063
+; FirstLine = 10395
+; Folding = +6jTFhA--Bs----------------fZ------4-----fFIAAgquuq---------Pd2v---0qv48--+--033X0f-04v-D37--+-8-fv-28q--4---vuuv8+4vvv7------4--0-----v--84----q----bb0vudvX20+------0f---4------8----------------------4-f--4--8-----------v8--40------d8-----------------v-----f-----f+------848b8-b-z0-v----j--WJh--
 ; EnableXP

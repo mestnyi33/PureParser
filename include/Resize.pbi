@@ -3,6 +3,7 @@
 CompilerEndIf
 
 DeclareModule Resize
+   #PB_EventType_Repaint = 99999
   Declare Gadget( Gadget )
 EndDeclareModule
 
@@ -169,8 +170,7 @@ CompilerIf #PB_Compiler_IsMainFile
 CompilerEndIf
 
 
-; IDE Options = PureBasic 5.60 (Linux - x86)
-; CursorPosition = 68
-; FirstLine = 44
+; IDE Options = PureBasic 6.12 LTS (Windows - x64)
+; CursorPosition = 6
 ; Folding = ----
 ; EnableXP

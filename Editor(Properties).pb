@@ -38,7 +38,7 @@
 ; Найти Enumeration 
 ; https://regex101.com/r/u60Wqt/1
 EnableExplicit
-
+#PB_EventType_CloseItem =- 55
 ;-
 ;- GLOBAL
 Global Version = 001
@@ -1222,8 +1222,8 @@ Procedure CO_Init(Object.i)
         Transformation::Free(GetGadgetAttribute(Object, #PB_Splitter_FirstGadget))
         Transformation::Free(GetGadgetAttribute(Object, #PB_Splitter_SecondGadget))
       EndIf
-      Debug "init "+\Object\Argument$
-      Properties::Init(WE_Properties, Object, \Object\Argument$, \Flag\Argument$)
+      Debug "init "+\Object\Argument$ ; WE_Properties, 
+      Properties::Init(Object, \Object\Argument$, \Flag\Argument$)
     EndWith
   EndIf
   PopListPosition(ParsePBObject())
@@ -1244,7 +1244,7 @@ Procedure CO_Change(Object.i)
   *Adress = *This\get(Str(Object))\Adress
   If *Adress And ChangeCurrentElement(ParsePBObject(), *Adress)
     With ParsePBObject()
-      Properties::Init(WE_Properties, Object, \Object\Argument$, \Flag\Argument$)
+      Properties::Init(Object, \Object\Argument$, \Flag\Argument$) ; WE_Properties, 
     EndWith
   EndIf
   
@@ -4697,6 +4697,8 @@ CompilerIf #PB_Compiler_IsMainFile
     EndSelect
   Wend
 CompilerEndIf
-; IDE Options = PureBasic 5.62 (MacOS X - x64)
+; IDE Options = PureBasic 6.12 LTS (Windows - x64)
+; CursorPosition = 89
+; FirstLine = 81
 ; Folding = --------------w+------------------------------------------------------------------------------------
 ; EnableXP

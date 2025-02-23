@@ -66,7 +66,7 @@ XIncludeFile "include/Preferences.pbi" ; Окно настроек
 
 
 Global WE_Code=-1, CodeShow.b
-
+#PB_EventType_CloseItem = 88888
 
 ;-
 ;- GLOBAL
@@ -3154,7 +3154,7 @@ Procedure WE_Events(Event)
           
         Case WE_Menu_Save ;- Event(_WE_Menu_Save_) 
           If Not WE_SaveFile(*This\Content\File$)
-            If Not WE_SaveFile(SaveFileRequester("Сохранить файл как ..", *This\Content\File$, "PureBasic (*.pb)|*.pb;*.pbi;*.pbf|All files (*.*)|*.*", 0))
+            If Not WE_SaveFile( SaveFileRequester( "Сохранить файл как ..", *This\Content\File$, "PureBasic (*.pb)|*.pb;*.pbi;*.pbf|All files (*.*)|*.*", 0))
               MessageRequester("Ошибка","Не удалось сохранить файл.", #PB_MessageRequester_Error)
             EndIf
           EndIf
@@ -3232,6 +3232,8 @@ CompilerIf #PB_Compiler_IsMainFile
     EndSelect
   Wend
 CompilerEndIf
-; IDE Options = PureBasic 5.70 LTS (MacOS X - x64)
-; Folding = --------------w+-------------------------------------------------------
+; IDE Options = PureBasic 6.12 LTS (Windows - x64)
+; CursorPosition = 3146
+; FirstLine = 2954
+; Folding = --------------w+-----------------------------------------------8-------
 ; EnableXP

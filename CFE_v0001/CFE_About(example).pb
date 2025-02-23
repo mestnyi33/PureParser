@@ -31,7 +31,7 @@ Procedure AboutElementCallBack(Event.q, EventElement)
       Case #_Event_Create
         If IsElement(EventElement) 
           PushListPosition(\This())
-          SelectElement(\This(), Element(EventElement)) : \This()\Show = #True
+          SelectElement(\This(), ElementID(EventElement)) : \This()\Show = #True
           PopListPosition(\This())
         EndIf
         
@@ -47,7 +47,7 @@ Procedure AboutElement(Window=-1, Title.S="About...")
   Protected OpenElementList = OpenElementList(0)
   
   With *CreateElement
-    Define  CaptionHeight = GetElementAttribute(Window, #_Element_CaptionHeight)
+    Define  CaptionHeight = 20;GetElementAttribute(Window, #_Element_CaptionHeight)
     
     Element = OpenWindowElement(#PB_Any, (ElementWidth(Window)-300)/2,(ElementHeight(Window)-250+CaptionHeight)/2,300,250, Title, 0)
     StickyWindowElement(Element, #True)
@@ -84,7 +84,7 @@ CompilerIf #PB_Compiler_IsMainFile
   EndProcedure
   
   Define Window = OpenWindowElement(#PB_Any, 0,0, 432,284, "Demo AboutElement()") 
-  Define  h = GetElementAttribute(Window, #_Element_CaptionHeight)
+  Define  h = 20;GetElementAttribute(Window, #_Element_CaptionHeight)
   
   If CreateMenuElement(#PB_Any)
     MenuElementTitle("Menu")
@@ -100,3 +100,9 @@ CompilerIf #PB_Compiler_IsMainFile
   WaitWindowEventClose(Window)
 CompilerEndIf
 
+
+; IDE Options = PureBasic 6.12 LTS (Windows - x64)
+; CursorPosition = 65
+; FirstLine = 60
+; Folding = ---
+; EnableXP

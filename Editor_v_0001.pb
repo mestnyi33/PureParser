@@ -34,6 +34,7 @@
 ; ; ~"(?:(\\b[^:\\n\\s]+)\\s*=\\s*)?(?:\".*\"|(\\w+)\\s*\\(((?>(?R)|[^)(])*)\\))"
 #RegEx_Pattern_FindFunction = ~"(?P<Comments>;).*|(?:(?P<Handle>\\b[^:\\n\\s]+)\\s*=\\s*)?(?:\".*\"|(?P<Function>\\w+)\\s*\\((?P<Arguments>(?>(?R)|[^)(])*)\\))" ; "(;).*|\b(?:.*(=)\s*\w*\(.*\)|([A-Za-z0-9_.]*)\b[^:\n\(]*\s*\((?>[^)(]|(?R))*\))"
 
+#PB_EventType_CloseItem = - 55
 
 ; Найти Enumeration 
 ; https://regex101.com/r/u60Wqt/1
@@ -4961,8 +4962,8 @@ CompilerIf #PB_Compiler_IsMainFile
     EndSelect
   Wend
 CompilerEndIf
-; IDE Options = PureBasic 6.04 LTS - C Backend (MacOS X - x64)
-; CursorPosition = 4448
-; FirstLine = 3666
+; IDE Options = PureBasic 6.12 LTS (Windows - x64)
+; CursorPosition = 37
+; FirstLine = 30
 ; Folding = ----+-v--v-8t-5+48----vv0r---------------------------------------------------------------------------
 ; EnableXP

@@ -84,3 +84,7 @@ CompilerIf #PB_Compiler_IsMainFile
   WaitWindowEventClose(Window)
 CompilerEndIf
 
+
+; IDE Options = PureBasic 6.12 LTS (Windows - x64)
+; Folding = --
+; EnableXP

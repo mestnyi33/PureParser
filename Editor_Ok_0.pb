@@ -1083,9 +1083,9 @@ Procedure CO_Events()
           
           CO_Init(Object)
           
-        Case #PB_EventType_CloseItem
-          
-          CO_Free(Object)
+;         Case #PB_EventType_CloseItem
+;           
+;           CO_Free(Object)
           
         Case #PB_EventType_Move, #PB_EventType_Size
           ;           Debug GadgetWidth(EventGadget())
@@ -3904,8 +3904,8 @@ CompilerIf #PB_Compiler_IsMainFile
   Wend
 CompilerEndIf
 
-; IDE Options = PureBasic 5.62 (Windows - x64)
-; CursorPosition = 3651
-; FirstLine = 3614
+; IDE Options = PureBasic 6.12 LTS (Windows - x64)
+; CursorPosition = 1087
+; FirstLine = 1066
 ; Folding = --------------9+----------------------------------------------------------------
 ; EnableXP

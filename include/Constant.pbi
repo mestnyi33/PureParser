@@ -18,8 +18,8 @@
     ;  #PB_EventType_Repaint
    EndEnumeration
    
-   #PB_MDI_Image = 555
-   #PB_MDI_TileImage = 666
+   ;#PB_MDI_Image = 555
+   ;#PB_MDI_TileImage = 666
   EndDeclareModule
   
   Module Constant
@@ -27,7 +27,7 @@
   
   UseModule Constant
 CompilerEndIf
-; IDE Options = PureBasic 5.73 LTS (MacOS X - x64)
-; CursorPosition = 11
+; IDE Options = PureBasic 6.12 LTS (Windows - x64)
+; CursorPosition = 21
 ; Folding = -
 ; EnableXP

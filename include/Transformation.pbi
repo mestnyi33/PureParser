@@ -11,6 +11,8 @@ CompilerEndIf
 DeclareModule Transformation
   EnableExplicit
   
+    #PB_EventType_CloseItem = 88888
+ 
   #Alles = 9
   #Arrows = 9
   
@@ -209,7 +211,7 @@ Module Transformation
   
   Procedure Points(Window=-1, Steps=6, BoxColor=0, PlotColor=0)
     Static ID
-    Protected hDC, x,y
+    Protected hDC, X,Y
     
     If Not ID
       Steps-1
@@ -223,12 +225,12 @@ Module Transformation
       If StartDrawing(CanvasOutput(ID))
         Box(0, 0, OutputWidth(), OutputHeight(), BoxColor)
         
-        For x = 0 To OutputWidth()-1
-          For y = 0 To OutputHeight()-1
-            Plot(x,y,PlotColor)
-            y+Steps
+        For X = 0 To OutputWidth()-1
+          For Y = 0 To OutputHeight()-1
+            Plot(X,Y,PlotColor)
+            Y+Steps
           Next
-          x+Steps
+          X+Steps
         Next
         StopDrawing()
       EndIf
@@ -771,7 +773,8 @@ Module Transformation
   EndProcedure
   
   Procedure Create(Object.i, Parent.i, Window.i=-1, Item.i=0, Grid.i=1, Flags.i=#Anchor_All)
-    Static ParentGrid=1
+    ; ProcedureReturn 
+     Static ParentGrid=1
     If Grid<1 : Grid=1 : EndIf
     Protected *This.Transformation
     Protected *Flags.DataBuffer = ?FlagsBuffer
@@ -856,7 +859,8 @@ Module Transformation
               If (I=#Arrows)
                 ID = CanvasGadget(#PB_Any, 0,0, \Size*2, \Size, #PB_Canvas_Keyboard) : HideGadget(ID, #True)
               Else
-                ID = CanvasGadget(#PB_Any, 0,0, \Size, \Size) : HideGadget(ID, #True)
+                 ; UseGadgetList(UseGadgetList(0))
+                 ID = CanvasGadget(#PB_Any, 0,0, \Size, \Size) : HideGadget(ID, #True)
               EndIf
               
               \ID[I] = ID
@@ -1086,8 +1090,8 @@ CompilerIf #PB_Compiler_IsMainFile
     
   ForEver
 CompilerEndIf
-; IDE Options = PureBasic 6.04 LTS - C Backend (MacOS X - x64)
-; CursorPosition = 5
-; FirstLine = 1
+; IDE Options = PureBasic 6.12 LTS (Windows - x64)
+; CursorPosition = 775
+; FirstLine = 717
 ; Folding = f------------------------
 ; EnableXP
