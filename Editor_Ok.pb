@@ -1669,8 +1669,8 @@ Procedure CO_Open() ; Ok
          Case "TextGadget"          : \type = #PB_GadgetType_Text          : \Object = TextGadget          (#PB_Any, \x,\y,\width,\height, \Caption$, \flag)
          Case "CheckBoxGadget"      : \type = #PB_GadgetType_CheckBox      : \Object = CheckBoxGadget      (#PB_Any, \x,\y,\width,\height, \Caption$, \flag)
          Case "OptionGadget"        : \type = #PB_GadgetType_Option        : \Object = OptionGadget        (#PB_Any, \x,\y,\width,\height, \Caption$)
-         Case "ListViewGadget"      : \type = #PB_GadgetType_ListView      : \Object = ListViewGadget      (#PB_Any, \x,\y,\width,\height, \flag)
          Case "FrameGadget"         : \type = #PB_GadgetType_Frame         : \Object = FrameGadget         (#PB_Any, \x,\y,\width,\height, \Caption$, \flag)
+         Case "ListViewGadget"      : \type = #PB_GadgetType_ListView      : \Object = ListViewGadget      (#PB_Any, \x,\y,\width,\height, \flag)
          Case "ComboBoxGadget"      : \type = #PB_GadgetType_ComboBox      : \Object = ComboBoxGadget      (#PB_Any, \x,\y,\width,\height, \flag)
          Case "ImageGadget"         : \type = #PB_GadgetType_Image         : \Object = ImageGadget         (#PB_Any, \x,\y,\width,\height, \Param1, \flag)
          Case "HyperLinkGadget"     : \type = #PB_GadgetType_HyperLink     : \Object = HyperLinkGadget     (#PB_Any, \x,\y,\width,\height, \Caption$, \Param1, \flag)
@@ -3894,7 +3894,7 @@ CompilerIf #PB_Compiler_IsMainFile
    Wend
 CompilerEndIf
 ; IDE Options = PureBasic 6.12 LTS (Windows - x64)
-; CursorPosition = 2440
-; FirstLine = 2307
+; CursorPosition = 569
+; FirstLine = 593
 ; Folding = ---------------------------------------------4---f4v8-------------------------
 ; EnableXP
